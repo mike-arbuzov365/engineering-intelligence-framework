@@ -1,0 +1,12 @@
+schema_version: 1
+framework:
+  version: 0.1.0-dev
+  source: "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+  ref: "main"
+project:
+  name: fixture-project
+localization:
+  documentation_locale: en
+integrations:
+  structural_graph:
+    enabled: false

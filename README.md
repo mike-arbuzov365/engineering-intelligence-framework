@@ -87,12 +87,13 @@ that isn't runnable is worse than not having the row. -->
 | Capability | Status | Notes |
 |---|---|---|
 | Ontology (authority, types, confidence, lifecycle) | **Available** | [`core/ontology/`](core/ontology/) |
-| Machine-readable schemas | **Available** | [`core/schemas/`](core/schemas/) - not yet wired into a full validator CLI |
+| Machine-readable schemas + real validator | **Available** | [`core/schemas/`](core/schemas/) validated with `jsonschema`'s `Draft202012Validator` + format checking via [`scripts/eif_validate_frontmatter.py`](scripts/eif_validate_frontmatter.py); 13 positive/negative fixtures, all passing. Not wrapped in a bootstrap CLI (`eifctl validate`) yet - invoke the script directly. |
 | Governance docs (LICENSE, CONTRIBUTING, SECURITY, ...) | **Available** | repo root |
-| Privacy scan / frontmatter validation / link check scripts | **Available** | [`scripts/`](scripts/), run in CI |
+| Privacy scan / frontmatter+config validation / link check / Knowledge Delta check | **Available** | [`scripts/`](scripts/), each with its own test suite, run in CI on every PR |
 | Decision ledger | **Available** | [`core/policies/decisions.md`](core/policies/decisions.md) |
-| `.eif/config.yaml` schema | **Draft** | example + JSON Schema exist, no loader/validator CLI |
+| `.eif/config.yaml` schema | **Available (schema + validator)**, no bootstrap CLI | validated the same way as frontmatter - see above; nothing generates or migrates a config yet |
 | Vertical-slice plan | **Draft** | [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) - designed, not built |
+| Controlled merge entrypoint | **Available**, not wired into repo settings or a hook guard | [`scripts/eif_merge_pr.py`](scripts/eif_merge_pr.py) - dry-run tested against this repo's real PR #1 |
 | Bootstrap CLI (`eifctl init`/`doctor`/`validate`) | **Not built** | design referenced in the vertical-slice guide |
 | Playbooks, templates, skills | **Not built** | ported incrementally, see each directory's README |
 | Agent adapters | **Not built** | see [`adapters/README.md`](adapters/README.md) for evidence-based priority |

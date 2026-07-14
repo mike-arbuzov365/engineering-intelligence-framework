@@ -1,0 +1,9 @@
+# Pinned dependencies for scripts/*.py. Update deliberately, not on drift -
+# see scripts/README.md#dependency-update-ownership for the process.
+#
+# jsonschema[format] pulls in the optional format-validation extras
+# (rfc3339-validator for date/date-time, rfc3987 for uri) so
+# format_checker=... in eif_validate_frontmatter.py actually enforces
+# those formats instead of silently no-op'ing.
+PyYAML==6.0.2
+jsonschema[format]==4.23.0

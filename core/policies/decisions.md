@@ -1,6 +1,6 @@
 ---
-type: decision
-status: draft
+type: decision_register
+status: validated
 scope: framework
 created: 2026-07-15
 review_after: 2026-10-15
@@ -11,6 +11,22 @@ review_after: 2026-10-15
 <!-- Knowledge source: owner decisions, private instance, 2026-07-14/15.
 Sanitized for public release - no private repository names, machine paths,
 or audit specifics that would identify the private instance. -->
+
+<!-- Revised 2026-07-16 (review round 3, NEW-CORRECTION - not inherited
+from the private instance, which uses a flat findings-ledger without this
+distinction): `type: decision` + `status: draft` was internally
+contradictory - this document isn't one decision, it's a register of many,
+each with its own status (Ratified/Provisional/Open below), and the
+register document itself is accurate and maintained (`status: validated`),
+not a draft. Introduced `type: decision_register` for exactly this shape -
+see knowledge-types.md#decision_register. This is a new taxonomy addition,
+not a private-EI capability being ported; it exists to fix a defect found
+in this document, not because the private instance has an equivalent. -->
+
+**This register's own `status: validated` means the document accurately
+reflects current decision statuses as of `created`/`review_after` below -
+it does NOT mean every decision listed is ratified.** Each entry states
+its own status explicitly.
 
 Public, sanitized record of decisions behind this framework's naming,
 licensing, and structure. **A decision is only marked `ratified` here if it
@@ -104,9 +120,10 @@ undecided.
 
 ## How to ratify a decision
 
-Update this file: move the entry from `Open`/`Provisional` to `Ratified`,
-record the evidence, and set `status: validated` in this file's own
-frontmatter once at least one decision below moves. Do not silently change
-a decision already marked `ratified` here - add a new entry noting
-supersession, with rationale, per
+Move the entry from `Open`/`Provisional` to `Ratified` and record the
+evidence. This file's own frontmatter `status: validated` describes
+whether the register accurately reflects reality, not any individual
+decision's status - it does not change when an entry moves. Do not
+silently change a decision already marked `ratified` here - add a new
+entry noting supersession, with rationale, per
 [`core/ontology/status-lifecycle.md`](../ontology/status-lifecycle.md#superseded).

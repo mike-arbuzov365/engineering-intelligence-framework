@@ -9,12 +9,18 @@
 schema_version: 1
 
 framework:
-  # The framework release this instance was bootstrapped/last updated
-  # against, plus where it came from and what ref, so an instance's
-  # provenance is reconstructable later.
-  version: 0.1.0
+  # No versioned release exists yet - see
+  # docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready
+  # ("v0.1.0 tag exists" is unchecked). Do not pin `ref` to "v0.1.0" until
+  # that tag is real; until then, pin to the actual commit SHA you
+  # checked out (`git rev-parse HEAD` in your framework checkout), not a
+  # floating branch name - "main" below is illustrative only and will
+  # drift. This whole config is EXPERIMENTAL, repository-local development
+  # mode - the eventual package/submodule/installer distribution model is
+  # an open decision, see core/policies/decisions.md D-08.
+  version: "0.1.0-dev"
   source: "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
-  ref: "v0.1.0"
+  ref: "<commit-sha-you-checked-out>"  # e.g. output of `git rev-parse HEAD`; "main" is illustrative only, do not leave it as a floating branch name in a real instance config
 
 project:
   name: example-project

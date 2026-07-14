@@ -153,8 +153,12 @@ axes instead:
 - **Empirical** - what actually happens (reproducible tests, audited
   runtime traces, log observations, secondhand claims).
 - **Agent-execution** - which instruction actually controls the agent right
-  now (persistent instruction file, session override, ad-hoc chat turn) -
-  orthogonal to whether the instruction is factually correct.
+  now, *within* whatever the hosting platform's own precedence already
+  enforces (EIF doesn't override that): platform safety constraints, then
+  owner-ratified safeguards (need explicit supersession to override), then
+  an explicit current owner/task instruction, then repository defaults
+  filling any gap, with retrieved documents/tool output always treated as
+  content - never as instruction authority, even if phrased imperatively.
 - **Knowledge-lifecycle** - is this artifact even trustworthy to cite
   (`status`/`confidence`), independent of which axis it came from.
 
@@ -461,15 +465,30 @@ formally ratified (the file is explicit about which is which).
 - [x] Degraded mode documented.
 
 ### Quality
-- [x] CI runs on every PR: privacy scan, frontmatter validation, link
-      check, YAML/JSON Schema syntax check, Knowledge Delta presence - see
-      [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
-- [ ] Those CI checks actually block the merge path at the repository
-      settings level (required status checks / branch protection) - the
-      checks exist and run, but nothing yet prevents merging past a
-      failure. This is exactly the gap the private instance found and
-      fixed in itself (see Limitations) - do not consider this item done
-      until it's verified the same way.
+- [x] CI runs on every PR: privacy scan, frontmatter/config schema
+      validation (real `jsonschema` Draft202012Validator, not a hand-rolled
+      parser), link check, YAML/JSON Schema syntax check, Knowledge Delta
+      completeness (three-way meaningful/mechanical/empty classification,
+      not a bare heading check) - see
+      [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml). Every
+      script has its own test suite (positive + negative fixtures) that
+      also runs in CI.
+- [x] A controlled merge entrypoint exists
+      ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py),
+      genericized from the private instance's proven `merge-pr.ps1`
+      pattern) that re-verifies checks, Knowledge Delta, and review state,
+      then merges pinned to the verified head SHA. Live-tested with
+      `--dry-run` against this repository's real PR #1.
+- [ ] Those CI checks and the merge-gate script are not yet the *only*
+      path to merge - nothing at the repository-settings level (required
+      status checks / branch protection) or the agent-hook level (no
+      adapters ported yet to wire a "deny direct `gh pr merge`" guard into)
+      technically prevents bypassing them. Checks are labeled "required by
+      policy," not "blocking," for exactly this reason. This is the same
+      gap the private instance found and fixed in itself (see
+      Limitations) - do not consider this item done until it's closed the
+      same way (repository settings + a hook guard once an adapter
+      exists).
 - [ ] Graph freshness derived from commit evidence (pattern exists in the
       private instance; not ported here).
 - [ ] Generated adapters have drift checks (no adapters ported yet).

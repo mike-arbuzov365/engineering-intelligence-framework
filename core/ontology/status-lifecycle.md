@@ -8,15 +8,27 @@ review_after: 2026-10-15
 
 # Status lifecycle for knowledge artifacts
 
+<!-- Revised 2026-07-15 (review round 2): the diagram below used to chain
+validated -> superseded -> deprecated as if deprecation only happens after
+superseding. The transition-rules table already showed both as independent
+transitions from validated; the diagram now matches the table. -->
+
 ## States
 
 ```text
 draft
   |
-  +--> validated --> superseded --> deprecated
+  +--> validated ---+--> superseded
+  |                  |
+  |                  +--> deprecated
   |
-  +--> rejected (hypotheses only)
+  +--> rejected   (type: hypothesis only - see "rejected" below)
 ```
+
+`validated -> superseded` and `validated -> deprecated` are independent
+transitions - an artifact can be superseded without ever being formally
+deprecated, and vice versa. Do not treat one as a prerequisite for the
+other.
 
 ### `draft`
 - Just created, not yet confirmed.
@@ -24,9 +36,18 @@ draft
 - Typical sources: a session's Knowledge Delta, an unreviewed retro item.
 
 ### `validated`
-- Confirmed by a test, vendor doc, or stakeholder confirmation.
+- Confirmed by a test, a runtime trace, an official specification, or a
+  stakeholder/owner confirmation - see
+  [`knowledge-types.md#source`](knowledge-types.md#knowledge-artifact-metadata)
+  for the channel and
+  [`authority-model.md`](authority-model.md) for which axis that channel
+  sits on.
 - Can be used as an authoritative source.
-- Must carry evidence (what specifically confirms it).
+- Must carry `evidence` (see
+  [`confidence-levels.md`](confidence-levels.md)) for artifact types where
+  evidence applies - see
+  [`knowledge-types.md#evidence-is-not-always-one-label-per-artifact`](knowledge-types.md#evidence-is-not-always-one-label-per-artifact)
+  for the types where it doesn't (`analysis_digest`, provenance types).
 
 ### `superseded`
 - Replaced by a newer artifact.
@@ -49,11 +70,17 @@ record:
 - `replaced_by`, if there is a replacement artifact.
 
 Do not use `rejected` for guidance that was already accepted or validated.
-`rejected` is reserved for candidates/hypotheses that never became validated
-knowledge.
+`rejected` is reserved for `type: hypothesis` candidates that never became
+validated knowledge - see below.
 
-### `rejected` (hypotheses only)
+### `rejected` (`type: hypothesis` only)
 - A hypothesis disproven by evidence or testing.
+- **Only valid when the artifact's `type` is `hypothesis`.** Every other
+  type transitions through `deprecated` if it needs to be retracted, not
+  `rejected` - a rejected `fact` or `rule` never existed as validated
+  knowledge in the first place, so there's nothing to "reject"; if a
+  `validated` artifact turns out to be wrong, that's a `deprecated`
+  correction with a `deprecated_reason`, not a `rejected` one.
 - Kept in the record as a "rejected hypothesis" - valuable so future
   sessions don't re-attempt the same disproven path.
 
@@ -64,7 +91,7 @@ knowledge.
 | draft -> validated | Planner / owner | Evidence or a test |
 | validated -> superseded | Planner | A new decision record or fact |
 | validated -> deprecated | Planner | Justification, date, evidence/reference |
-| draft -> rejected | Planner | Counter-evidence |
+| draft -> rejected (`type: hypothesis` only) | Planner | Counter-evidence |
 
 ## Example frontmatter
 
@@ -74,16 +101,21 @@ type: rule
 status: validated
 confidence: high
 evidence: OBSERVED
-source: vendor_docs
+source: official_specification
 created: 2026-05-16
 related:
-  - path/to/the/vendor/doc/reference.md
+  - path/to/the/specification/reference.md
 ---
 ```
 
 See [`knowledge-types.md#knowledge-artifact-metadata`](knowledge-types.md#knowledge-artifact-metadata)
 for the full field list, including `environment`/`source_version`/
-`applies_to` for scoping empirical claims.
+`applies_to` for scoping empirical claims - `status`, `confidence`,
+`evidence`, and applicability/freshness (`review_after`,
+`environment`/`source_version`/`applies_to`) are four distinct concepts
+that frequently get conflated; see
+[`knowledge-types.md#status-confidence-evidence-and-applicability-are-not-the-same-thing`](knowledge-types.md#knowledge-artifact-metadata)
+if you're tempted to merge any two of them.
 
 ## Checking staleness
 

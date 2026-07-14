@@ -2,9 +2,17 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/knowledge-frontmatter.schema.json",
   "title": "EIF knowledge-artifact frontmatter",
-  "description": "Machine-validatable schema for the YAML frontmatter of any knowledge artifact (fact, rule, decision, etc). Mirrors core/ontology/knowledge-types.md#knowledge-artifact-metadata - keep both in sync; this file is the enforceable source, the Markdown is the explained source.",
+  "description": "Machine-validatable schema for the YAML frontmatter of any knowledge artifact (fact, rule, decision, etc). Mirrors core/ontology/knowledge-types.md#knowledge-artifact-metadata - this file is the enforced source, the Markdown is the explained source; keep both in sync. Validated with jsonschema's Draft202012Validator - see scripts/eif_validate_frontmatter.py.",
   "type": "object",
   "required": ["type", "status", "scope", "created"],
+  "$defs": {
+    "single_claim_type": {
+      "enum": [
+        "fact", "rule", "decision", "risk", "edge_case",
+        "failure_pattern", "incident", "assumption", "hypothesis"
+      ]
+    }
+  },
   "properties": {
     "type": {
       "type": "string",
@@ -17,38 +25,42 @@
         "failure_pattern",
         "incident",
         "assumption",
+        "hypothesis",
         "playbook",
         "knowledge_operation",
         "source_manifest",
         "extraction_manifest",
         "analysis_digest",
         "open_question",
-        "ontology"
+        "ontology",
+        "decision_register"
       ],
-      "description": "ontology is reserved for framework-core vocabulary documents (core/ontology/*), not project knowledge artifacts."
+      "description": "ontology is reserved for framework-core vocabulary documents (core/ontology/*), not project knowledge artifacts. See knowledge-types.md for the single-claim vs. procedural/provenance/meta distinction that drives the evidence requirement below."
     },
     "status": {
       "type": "string",
       "enum": ["draft", "validated", "superseded", "deprecated", "rejected"],
-      "description": "rejected is valid only when type implies a hypothesis-shaped claim (typically assumption); see status-lifecycle.md."
+      "description": "rejected is valid only when type is hypothesis - enforced below. See status-lifecycle.md."
     },
     "evidence": {
       "type": "string",
       "enum": ["OBSERVED", "INFERRED", "ASSUMED"],
-      "description": "Epistemic label - required once status is not draft. See authority-model.md."
+      "description": "Epistemic label. Required once status is not draft, for single-claim types only - see the conditional rule below and knowledge-types.md#evidence-is-not-always-one-label-per-artifact."
     },
     "source": {
       "type": "string",
       "enum": [
         "chat",
-        "code_review",
-        "test_failure",
-        "deployment",
+        "code",
+        "test",
+        "runtime_trace",
+        "official_specification",
+        "owner_decision",
+        "ci_evidence",
         "customer_feedback",
-        "vendor_docs",
         "retro"
       ],
-      "description": "Channel this artifact came from - distinct from `evidence`, which is the epistemic label."
+      "description": "Evidence channel - distinct from `evidence`, which is the epistemic label. See knowledge-types.md's channel-to-axis mapping table."
     },
     "confidence": {
       "type": "string",
@@ -104,6 +116,22 @@
     {
       "if": { "properties": { "status": { "const": "deprecated" } } },
       "then": { "required": ["deprecated_reason"] }
+    },
+    {
+      "$comment": "rejected requires type: hypothesis - status-lifecycle.md's 'rejected (type: hypothesis only)' rule, made machine-checkable.",
+      "if": { "properties": { "status": { "const": "rejected" } } },
+      "then": { "properties": { "type": { "const": "hypothesis" } } }
+    },
+    {
+      "$comment": "evidence is required once status is not draft, but only for single-claim types - see knowledge-types.md#evidence-is-not-always-one-label-per-artifact for why analysis_digest/source_manifest/extraction_manifest/playbook/knowledge_operation/open_question/ontology are excluded.",
+      "if": {
+        "properties": {
+          "status": { "not": { "const": "draft" } },
+          "type": { "$ref": "#/$defs/single_claim_type" }
+        },
+        "required": ["status", "type"]
+      },
+      "then": { "required": ["evidence"] }
     }
   ],
   "additionalProperties": true

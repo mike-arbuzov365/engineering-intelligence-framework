@@ -1,0 +1,138 @@
+name: ci
+
+# Job display names say "(required by policy)", not "(blocking)" - these
+# checks run and report pass/fail, but nothing at the GitHub repository-
+# settings level currently prevents merging past a failure (required
+# status checks / branch protection are not configured). See
+# core/policies/decisions.md and docs/architecture/HOW-EIF-WORKS.md#quality
+# for why that distinction is stated explicitly rather than implied.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  privacy-scan:
+    name: Privacy scan (required by policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Run privacy scan
+        run: python scripts/eif_privacy_scan.py --repo .
+
+  frontmatter-and-config-validation:
+    name: Frontmatter and config schema validation (required by policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        # scripts/requirements.txt pins exact versions (==), which is what
+        # keeps this from floating on latest - hash-pinning
+        # (--require-hashes) is a possible future hardening step, not
+        # implemented yet, see scripts/README.md#dependency-update-ownership.
+        run: pip install -r scripts/requirements.txt
+      - name: Validate ontology, policy, and guide frontmatter
+        run: python scripts/eif_validate_frontmatter.py --framework-root . --instance-root . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md"
+      - name: Validate .eif/config.yaml.example against the config schema
+        run: python scripts/eif_validate_frontmatter.py --framework-root . --config .eif/config.yaml.example
+      - name: Run validator fixture tests (positive + negative)
+        run: python scripts/tests/test_validate.py
+
+  link-check:
+    name: Relative link check (required by policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Check relative Markdown links
+        run: python scripts/eif_check_links.py --repo .
+
+  yaml-and-json-schema-syntax:
+    name: YAML and JSON Schema syntax check (required by policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        # scripts/requirements.txt pins exact versions (==), which is what
+        # keeps this from floating on latest - hash-pinning
+        # (--require-hashes) is a possible future hardening step, not
+        # implemented yet, see scripts/README.md#dependency-update-ownership.
+        run: pip install -r scripts/requirements.txt
+      - name: Validate YAML files parse and JSON Schemas are well-formed + self-consistent
+        run: |
+          python - <<'PYEOF'
+          import sys, os, json
+          import yaml
+          from jsonschema import Draft202012Validator
+          from jsonschema.exceptions import SchemaError
+
+          # os.walk (not glob) so dot-directories like .eif/ are included -
+          # glob's ** silently skips them by default, which would leave
+          # .eif/config.yaml.example unchecked.
+          yaml_suffixes = (".yaml", ".yml", ".yaml.example", ".yml.example")
+          yaml_files = []
+          for root, dirs, filenames in os.walk("."):
+              dirs[:] = [d for d in dirs if d != ".git"]
+              for fn in filenames:
+                  if fn.endswith(yaml_suffixes):
+                      yaml_files.append(os.path.join(root, fn))
+
+          failed = []
+          for f in yaml_files:
+              try:
+                  with open(f, encoding="utf-8") as fh:
+                      yaml.safe_load(fh)
+              except Exception as e:
+                  failed.append((f, str(e)))
+
+          schema_files = []
+          for root, dirs, filenames in os.walk("core/schemas"):
+              for fn in filenames:
+                  if fn.endswith(".json"):
+                      schema_files.append(os.path.join(root, fn))
+          for f in schema_files:
+              try:
+                  with open(f, encoding="utf-8") as fh:
+                      schema = json.load(fh)
+                  Draft202012Validator.check_schema(schema)
+              except (json.JSONDecodeError, SchemaError) as e:
+                  failed.append((f, str(e)))
+
+          for f, e in failed:
+              print(f"FAIL {f}: {e}")
+          if failed:
+              sys.exit(1)
+          print(f"ok: {len(yaml_files)} yaml file(s), {len(schema_files)} schema file(s) - all valid and self-consistent")
+          PYEOF
+        shell: bash
+
+  knowledge-delta-check:
+    name: Knowledge Delta completeness (required by policy)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Run Knowledge Delta classifier tests
+        run: python scripts/tests/test_knowledge_delta.py
+      - name: Classify this PR's Knowledge Delta
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: echo "$PR_BODY" | python scripts/eif_check_knowledge_delta.py --body-stdin

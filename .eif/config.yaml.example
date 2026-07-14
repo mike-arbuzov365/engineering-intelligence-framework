@@ -1,25 +1,42 @@
 # Example EIF project-instance configuration.
-# Copy to .eif/config.yaml in your own project and adjust. This file is a
-# spec preview - the loader/validator (`eifctl validate`) does not exist yet;
-# see docs/architecture/HOW-EIF-WORKS.md for the v0.1 roadmap.
+# Copy to .eif/config.yaml in your own project and adjust. This is a spec
+# preview - the loader/validator (`eifctl validate`) does not exist yet.
+# Machine-readable schema: ../core/schemas/eif-config.schema.json
+# See docs/architecture/HOW-EIF-WORKS.md for what's built vs. planned.
 
-version: 1
+# This config file's OWN schema version - bump only when the config shape
+# changes in a breaking way. Independent of the framework release below.
+schema_version: 1
 
 framework:
-  # Pin the framework version this instance was bootstrapped/updated against.
-  version: 0.1.0
+  # No versioned release exists yet - see
+  # docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready
+  # ("v0.1.0 tag exists" is unchecked). Do not pin `ref` to "v0.1.0" until
+  # that tag is real; until then, pin to the actual commit SHA you
+  # checked out (`git rev-parse HEAD` in your framework checkout), not a
+  # floating branch name - "main" below is illustrative only and will
+  # drift. This whole config is EXPERIMENTAL, repository-local development
+  # mode - the eventual package/submodule/installer distribution model is
+  # an open decision, see core/policies/decisions.md D-08.
+  version: "0.1.0-dev"
+  source: "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+  ref: "<commit-sha-you-checked-out>"  # e.g. output of `git rev-parse HEAD`; "main" is illustrative only, do not leave it as a floating branch name in a real instance config
 
 project:
   name: example-project
 
 localization:
+  # BCP-47 language tags (en, uk, en-US, ...).
   # Locale for generated project documentation (ADRs, Knowledge Delta,
-  # session context, playbook output, agent prose responses).
+  # session context, playbook output).
   documentation_locale: en
+  # Locale the agent writes prose responses in - falls back to
+  # documentation_locale if unset.
   agent_response_locale: en
   fallback_locale: en
-  # Keep framework identifiers, schema keys, code, and command examples in
-  # English even when documentation_locale is not English.
+  # Framework identifiers, schema keys, code, and command examples stay
+  # English regardless of documentation_locale - this flag documents that
+  # intent, it does not (yet) enforce it.
   preserve_technical_terms: true
   code_comments_locale: en
   commit_messages_locale: en
@@ -27,13 +44,46 @@ localization:
 governance:
   knowledge_delta_required: true
   evidence_labels_required: true
+  # Explicit acknowledgment that any integration below may be absent or
+  # unreachable. If false, a configured-but-unreachable integration should
+  # hard-fail instead of silently degrading - see each integration's
+  # failure_policy for the actual per-integration behavior.
+  degraded_mode_allowed: true
 
-# Optional integrations - all default to disabled/absent. EIF works without
-# any of them; see integrations/README.md for degraded-mode behavior.
+privacy:
+  # Never read, index, or export paths matching these globs, regardless of
+  # what any integration or skill would otherwise do.
+  deny_paths:
+    - "**/.env*"
+    - "**/*.secret"
+    - "**/secrets/**"
+  # Path to instance-specific deny patterns (private repo names, customer
+  # names, machine paths, etc). This file is real, local, and MUST be
+  # gitignored - never commit the actual file, only this pointer to it.
+  # See scripts/README.md for the privacy scanner that reads it.
+  local_denylist_file: ".eif/local-denylist.txt"
+
+# Optional integrations - each defaults to disabled. EIF's core governance
+# model works without any of them; see integrations/README.md for the
+# degraded-mode behavior when disabled or unreachable.
 integrations:
   structural_graph:
     enabled: false
+    provider: null          # e.g. "graphify" - not validated against a real provider list yet
+    processing: local       # local | external
+    data_boundary: local-only   # local-only | external-api - must match the provider's actual behavior, not a wish
+    cost_cap_usd: 0
+    failure_policy: degrade # degrade | fail-closed
   shell_output_compression:
     enabled: false
+    provider: null          # e.g. "rtk"
+    processing: local
+    data_boundary: local-only
+    failure_policy: degrade
   vendor_docs:
     enabled: false
+    provider: null          # e.g. "context7"
+    processing: external    # queries leave the local machine
+    data_boundary: external-api
+    cost_cap_usd: 0
+    failure_policy: degrade

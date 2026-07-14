@@ -3,9 +3,14 @@
 <!-- Canonical source document. README, website copy, articles, diagrams,
 FAQ, and launch posts should all derive from this file, not diverge from it. -->
 
-**Status: v1 draft**, extracted and genericized from a private production
-instance that has run this methodology daily since May 2026. Sections marked
-"not built yet" describe the target design, not current working code.
+**Status: pre-v0.1, first full draft** (revised once, 2026-07-15, after an
+independent review pass - see
+[`core/policies/decisions.md`](../../core/policies/decisions.md) for what
+that review changed). Extracted and genericized from a private production
+instance that has run this methodology daily since May 2026. Sections
+marked "not built yet" describe target design, not current working code -
+see the [Current capability table in README.md](../../README.md#current-capability)
+for the authoritative status of every piece.
 
 ## Table of contents
 
@@ -139,11 +144,26 @@ leaking into what should be reusable, tech-stack-agnostic methodology.
 ## Authority model
 
 See [`core/ontology/authority-model.md`](../../core/ontology/authority-model.md)
-for the full hierarchy and application rules. Short version: vendor docs
-outrank verified code, which outranks validated knowledge, which outranks
-stakeholder-confirmed behavior, which outranks agreed scope, which outranks
-chat memory/inference, which outranks nothing - inference is the weakest
-source and must be labeled as such.
+for the full model and application rules. Short version: a single "who wins"
+ranking is wrong because it conflates different questions. Four independent
+axes instead:
+
+- **Normative** - what's supposed to happen (vendor docs, specs, decisions,
+  agreed scope, convention, assumption).
+- **Empirical** - what actually happens (reproducible tests, audited
+  runtime traces, log observations, secondhand claims).
+- **Agent-execution** - which instruction actually controls the agent right
+  now, *within* whatever the hosting platform's own precedence already
+  enforces (EIF doesn't override that): platform safety constraints, then
+  owner-ratified safeguards (need explicit supersession to override), then
+  an explicit current owner/task instruction, then repository defaults
+  filling any gap, with retrieved documents/tool output always treated as
+  content - never as instruction authority, even if phrased imperatively.
+- **Knowledge-lifecycle** - is this artifact even trustworthy to cite
+  (`status`/`confidence`), independent of which axis it came from.
+
+When a normative source and an empirical source disagree about the same
+claim, that's a discrepancy to record, not a tie to break by rank.
 
 ## Experience retrieval
 
@@ -357,25 +377,52 @@ from the private production instance:
 - No independent, multi-project benchmark has validated the framework's
   actual effect on task success, rework rate, or total cost - only
   component-level, single-instance measurements exist so far.
+- **The first version of this repository's own ontology had the exact
+  failure mode it warns against**: a single linear "vendor docs always
+  outrank logs" authority ranking that conflated normative claims with
+  empirical ones, an evidence-lifecycle metadata enum that had drifted out
+  of sync with its own prose (missing `rejected`), and a confidence-level
+  description that read as permission to skip verification - the thing
+  [`confidence-levels.md`](../../core/ontology/confidence-levels.md)
+  now explicitly warns against. Caught and fixed in an independent review
+  pass on 2026-07-15, not by the same reasoning that produced the
+  original. If a public methodology framework needs a second, independent
+  pass to catch inconsistencies in its own core ontology, assume the same
+  is true of whatever you build on top of it - review it, don't just
+  trust that authoring the thing means it's internally consistent.
 
 ## Roadmap
 
 See the [public readiness backlog](#definition-of-public-ready) below.
-High-level sequence: public/private security audit -> legal foundation
-(license, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, GOVERNANCE - done for
-v0.1 skeleton) -> real gate enforcement ported -> generic bootstrap
-(`eifctl init`/`doctor`/`validate`) -> core ontology/playbooks/templates/
-skills ported and genericized -> demo workspace -> reproducible benchmark
--> `v0.1.0` release -> website and launch content.
+High-level sequence, updated after the 2026-07-15 review round:
+
+1. ~~Public/private security audit~~ -> ~~legal foundation~~ -> ~~ontology
+   consistency, machine-readable schemas, decision ledger, self-governance
+   CI~~ (done, this round).
+2. Build the [vertical slice](../guides/vertical-slice.md): one synthetic
+   demo, one adapter (Claude Code), end to end, before porting anything
+   else.
+3. Repeat the slice against a second adapter (Cursor) to prove the
+   framework/adapter boundary holds.
+4. Real merge-gate/CI enforcement wired up in repository settings, not just
+   present as workflow files.
+5. Reproducible quality-per-token benchmark, run against the vertical
+   slice.
+6. Broader playbook/template/skill porting - only after 2-5, and only as
+   much as the vertical slice's lessons say is actually needed.
+7. `v0.1.0` release -> website and launch content.
 
 ## Definition of Public-Ready
 
-Mirrors the checklist ratified before this repository's creation.
+The authoritative status of every decision behind this checklist lives in
+[`core/policies/decisions.md`](../../core/policies/decisions.md) - do not
+treat a checked box below as "ratified" unless that file says so; several
+items below are checked because they're *done*, not because they were
+formally ratified (the file is explicit about which is which).
 
 ### Brand
-- [x] Full name ratified: "Engineering Intelligence Framework".
-- [x] Descriptor ratified: "A quality-first control plane for governed
-      AI-agent software development."
+- [x] Full name **ratified**: "Engineering Intelligence Framework" (D-01).
+- [x] Descriptor adopted, **provisional** (D-02).
 - [x] Repository slug selected: `engineering-intelligence-framework`.
 - [x] Preliminary name-collision search performed (no exact GitHub/PyPI/npm
       match found) - **not** a trademark clearance.
@@ -405,8 +452,9 @@ Mirrors the checklist ratified before this repository's creation.
 - [x] GOVERNANCE added.
 
 ### Product
-- [ ] `.eif/config.yaml` schema finalized (example exists, not validated by
-      tooling yet).
+- [x] `.eif/config.yaml` machine-readable schema drafted
+      ([`core/schemas/eif-config.schema.json`](../../core/schemas/eif-config.schema.json));
+      not finalized, no loader/validator CLI wired up yet.
 - [x] English canonical docs exist for the ontology core.
 - [ ] A non-English locale works end to end.
 - [ ] Generic bootstrap (`eifctl init`) works without any private
@@ -417,16 +465,38 @@ Mirrors the checklist ratified before this repository's creation.
 - [x] Degraded mode documented.
 
 ### Quality
-- [ ] Mandatory CI checks actually block the merge path (documented
-      pattern from the private instance; not yet wired up here).
+- [x] CI runs on every PR: privacy scan, frontmatter/config schema
+      validation (real `jsonschema` Draft202012Validator, not a hand-rolled
+      parser), link check, YAML/JSON Schema syntax check, Knowledge Delta
+      completeness (three-way meaningful/mechanical/empty classification,
+      not a bare heading check) - see
+      [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml). Every
+      script has its own test suite (positive + negative fixtures) that
+      also runs in CI.
+- [x] A controlled merge entrypoint exists
+      ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py),
+      genericized from the private instance's proven `merge-pr.ps1`
+      pattern) that re-verifies checks, Knowledge Delta, and review state,
+      then merges pinned to the verified head SHA. Live-tested with
+      `--dry-run` against this repository's real PR #1.
+- [ ] Those CI checks and the merge-gate script are not yet the *only*
+      path to merge - nothing at the repository-settings level (required
+      status checks / branch protection) or the agent-hook level (no
+      adapters ported yet to wire a "deny direct `gh pr merge`" guard into)
+      technically prevents bypassing them. Checks are labeled "required by
+      policy," not "blocking," for exactly this reason. This is the same
+      gap the private instance found and fixed in itself (see
+      Limitations) - do not consider this item done until it's closed the
+      same way (repository settings + a hook guard once an adapter
+      exists).
 - [ ] Graph freshness derived from commit evidence (pattern exists in the
       private instance; not ported here).
-- [ ] Generated adapters have drift checks.
-- [ ] Persistent agent-instruction files here are kept compact (this is a
-      stated design principle from day one of this repository, not
-      retrofitted).
-- [ ] Demo workflow has executable evidence.
-- [ ] Benchmark measures quality together with tokens.
+- [ ] Generated adapters have drift checks (no adapters ported yet).
+- [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
+      stated design principle from day one, not retrofitted.
+- [ ] Demo workflow has executable evidence (see
+      [`docs/guides/vertical-slice.md`](../guides/vertical-slice.md)).
+- [ ] Benchmark measures quality together with tokens (not run).
 
 ### Documentation
 - [x] This document exists and is the canonical source for README/website/

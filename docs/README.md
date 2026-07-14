@@ -7,8 +7,11 @@
 - `concepts/` - focused explanations of individual concepts (not populated
   yet; content currently lives inside HOW-EIF-WORKS.md until it grows large
   enough to split).
-- `guides/` - task-oriented how-tos (bootstrap, CI setup, adapter setup).
-  Not populated yet.
+- `guides/` - task-oriented how-tos. So far:
+  [`vertical-slice.md`](guides/vertical-slice.md) - the target minimum
+  functional workflow and its sequencing, the next real implementation
+  milestone after this review round. Bootstrap/CI/adapter-setup guides are
+  not written yet.
 - `reference/` - schema and configuration reference. Not populated yet.
 - `benchmarks/` - quality-per-token benchmark methodology and results, see
   [`benchmarks/README.md`](benchmarks/README.md).

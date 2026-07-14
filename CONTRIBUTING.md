@@ -20,9 +20,15 @@ requests**. Issues and discussion are welcome once the repository is public.
 - Documentation follows the locale declared for that directory - framework
   identifiers, schemas, code, and command examples stay in English
   regardless of prose locale (see `locales/README.md`).
-- PRs must pass the CI gates described in `docs/guides/` before merge; a
-  failed mandatory check must technically block the merge path, not just be
-  documented as a rule.
+- PRs must pass the CI checks in
+  [`.github/workflows/ci.yml`](.github/workflows/ci.yml) - privacy scan,
+  frontmatter/config schema validation, link check, YAML/JSON Schema
+  syntax, Knowledge Delta completeness. These are labeled "required by
+  policy," not "blocking": nothing at the repository-settings level
+  (required status checks / branch protection) currently prevents merging
+  past a failure - see
+  [`docs/architecture/HOW-EIF-WORKS.md#quality`](docs/architecture/HOW-EIF-WORKS.md)
+  for why that distinction matters and what it will take to close it.
 - Scope discipline: one PR, one logical change. Do not mix refactors with
   new features.
 

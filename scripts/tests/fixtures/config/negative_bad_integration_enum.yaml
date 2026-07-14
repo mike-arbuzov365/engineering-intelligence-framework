@@ -1,0 +1,11 @@
+schema_version: 1
+framework:
+  version: 0.1.0-dev
+project:
+  name: fixture-project
+localization:
+  documentation_locale: en
+integrations:
+  structural_graph:
+    enabled: true
+    data_boundary: "somewhere-else"

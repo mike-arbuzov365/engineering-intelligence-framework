@@ -54,9 +54,12 @@ User intent
 
 ## Core differentiators
 
-1. **Authority before inference.** Vendor docs, verified code, and validated
-   knowledge have an explicit hierarchy - the agent knows what to trust when
-   sources disagree.
+1. **Authority is multi-axis, not one ranked list.** Normative claims
+   ("what should happen"), empirical claims ("what actually happens"),
+   which instruction controls the agent, and whether an artifact is even
+   trustworthy to cite are four different questions with four different
+   answers - conflating them produces wrong defaults. See
+   [Authority model](core/ontology/authority-model.md).
 2. **Experience retrieval before implementation.** Knowledge isn't just
    stored, it's actively pulled into context before new work starts.
 3. **Ephemeral and durable context are separated.** Session-scoped state is
@@ -72,37 +75,53 @@ User intent
 8. **Multilingual project documentation.** Framework documentation is
    English-first; project instances can declare their own documentation
    locale without duplicating the whole methodology.
-9. **Dogfooded governance.** This framework's own gates have found real
-   defects in its own private production instance - see
-   [Benchmarks](docs/benchmarks/).
+9. **Dogfooded governance.** This repository's own review process found and
+   fixed real inconsistencies in its own ontology and honesty about what's
+   built - see [Limitations](docs/architecture/HOW-EIF-WORKS.md#limitations).
 
-## Five-minute quickstart
+## Current capability
 
-```bash
-git clone https://github.com/mike-arbuzov365/engineering-intelligence-framework.git
-cd engineering-intelligence-framework
-# quickstart tooling (eifctl init / doctor / validate) is not built yet - see
-# docs/architecture/HOW-EIF-WORKS.md and the v0.1 roadmap below.
-```
+<!-- Keep this table honest - see AGENTS.md. A row claiming "Available"
+that isn't runnable is worse than not having the row. -->
 
-A working `eifctl init` bootstrap and a synthetic demo workspace are tracked
-in the [v0.1 scope](#v01-scope) below and are not available yet.
+| Capability | Status | Notes |
+|---|---|---|
+| Ontology (authority, types, confidence, lifecycle) | **Available** | [`core/ontology/`](core/ontology/) |
+| Machine-readable schemas + real validator | **Available** | [`core/schemas/`](core/schemas/) validated with `jsonschema`'s `Draft202012Validator` + format checking via [`scripts/eif_validate_frontmatter.py`](scripts/eif_validate_frontmatter.py); 13 positive/negative fixtures, all passing. Not wrapped in a bootstrap CLI (`eifctl validate`) yet - invoke the script directly. |
+| Governance docs (LICENSE, CONTRIBUTING, SECURITY, ...) | **Available** | repo root |
+| Privacy scan / frontmatter+config validation / link check / Knowledge Delta check | **Available** | [`scripts/`](scripts/), each with its own test suite, run in CI on every PR |
+| Decision ledger | **Available** | [`core/policies/decisions.md`](core/policies/decisions.md) |
+| `.eif/config.yaml` schema | **Available (schema + validator)**, no bootstrap CLI | validated the same way as frontmatter - see above; nothing generates or migrates a config yet |
+| Vertical-slice plan | **Draft** | [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) - designed, not built |
+| Controlled merge entrypoint | **Available**, not wired into repo settings or a hook guard | [`scripts/eif_merge_pr.py`](scripts/eif_merge_pr.py) - dry-run tested against this repo's real PR #1 |
+| Bootstrap CLI (`eifctl init`/`doctor`/`validate`) | **Not built** | design referenced in the vertical-slice guide |
+| Playbooks, templates, skills | **Not built** | ported incrementally, see each directory's README |
+| Agent adapters | **Not built** | see [`adapters/README.md`](adapters/README.md) for evidence-based priority |
+| Structural-graph / shell-compression / vendor-docs integrations | **Not built** | optional either way, see [`integrations/README.md`](integrations/README.md) |
+| Demo workspace | **Not built** | planned target: `examples/demo-workspace/` |
+| Benchmark | **Not run** | see [`docs/benchmarks/README.md`](docs/benchmarks/README.md) |
+
+**There is no working quickstart yet.** Cloning this repository today gets
+you the ontology, schemas, governance docs, and CI - not a runnable
+bootstrap. See [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md)
+for what "runnable" will mean and how it's sequenced.
 
 ## Core concepts
 
 | Concept | What it does | Where |
 |---|---|---|
-| Authority model | Resolves conflicts between sources of truth | [`core/ontology/authority-model.md`](core/ontology/authority-model.md) |
+| Authority model | Distinguishes normative, empirical, agent-execution, and knowledge-lifecycle authority instead of one ranked list | [`core/ontology/authority-model.md`](core/ontology/authority-model.md) |
 | Knowledge taxonomy | Classifies knowledge artifacts (fact, rule, decision, risk, ...) | [`core/ontology/knowledge-types.md`](core/ontology/knowledge-types.md) |
-| Confidence levels | Marks how trustworthy a claim is | [`core/ontology/confidence-levels.md`](core/ontology/confidence-levels.md) |
-| Status lifecycle | draft -> validated -> superseded -> deprecated | [`core/ontology/status-lifecycle.md`](core/ontology/status-lifecycle.md) |
+| Confidence levels | Marks how trustworthy a claim was when validated - not a license to skip applicability checks | [`core/ontology/confidence-levels.md`](core/ontology/confidence-levels.md) |
+| Status lifecycle | draft -> validated -> superseded -> deprecated (+ rejected for hypotheses) | [`core/ontology/status-lifecycle.md`](core/ontology/status-lifecycle.md) |
+| Decision ledger | Which brand/license/structure decisions are ratified vs. provisional vs. open | [`core/policies/decisions.md`](core/policies/decisions.md) |
 | Full architecture | End-to-end explanation of how it all fits together | [`docs/architecture/HOW-EIF-WORKS.md`](docs/architecture/HOW-EIF-WORKS.md) |
 
-## Supported agents
+## Planned agent adapters
 
-Adapter directories exist for Claude Code, Codex, Cursor, and Hermes
-(`adapters/`); each is being ported and verified incrementally. See
-[`adapters/README.md`](adapters/README.md) for current status per agent.
+No adapter is ported yet. See
+[`adapters/README.md`](adapters/README.md#recommended-v01-priority) for an
+evidence-based (not yet ratified) priority order.
 
 ## Optional integrations
 
@@ -126,15 +145,21 @@ the first non-English target (`locales/uk/`). See
 
 ## Quality and safety model
 
-- Source authority is explicit and hierarchical - vendor docs and verified
-  code outrank inference and assumption.
-- `OBSERVED` / `INFERRED` / `ASSUMED` evidence labels are never silently
-  collapsed into unqualified claims.
+- Source authority is explicit and multi-axis - normative and empirical
+  claims are never silently collapsed into a single ranking; disagreements
+  are recorded, not discarded. See
+  [Authority model](core/ontology/authority-model.md).
+- `OBSERVED` / `INFERRED` / `ASSUMED` evidence labels are first-class
+  frontmatter fields (`evidence:`), not just a prose convention - see
+  [`core/schemas/knowledge-frontmatter.schema.json`](core/schemas/knowledge-frontmatter.schema.json).
 - Compression (structural navigation, shell-output filtering) is required
   to preserve correctness before it is allowed to save tokens - see
   [`docs/benchmarks/`](docs/benchmarks/).
 - CI gates are designed to actually block a non-compliant merge path, not
-  just document a policy - see `scripts/` and `docs/guides/`.
+  just document a policy - see [`scripts/`](scripts/) and
+  [`.github/workflows/ci.yml`](.github/workflows/ci.yml). This repository
+  runs its own privacy scan, frontmatter validation, and link check on
+  every PR - see [`AGENTS.md`](AGENTS.md).
 
 ## Benchmarks
 

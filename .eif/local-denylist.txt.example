@@ -1,0 +1,13 @@
+# Copy to .eif/local-denylist.txt (NOT this .example file) and fill in your
+# own instance-specific sensitive strings: private repo names, customer
+# names, internal hostnames, real usernames, machine paths, anything that
+# would leak if it ended up in a public artifact.
+#
+# .eif/local-denylist.txt is gitignored by default (see .gitignore) and is
+# read by scripts/eif_privacy_scan.py in addition to its built-in checks.
+# One pattern per line, plain substring match (not a regex) unless noted.
+#
+# Example entries (replace with your own):
+# my-private-repo-name
+# Real Person Name
+# internal-hostname.example.corp

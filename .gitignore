@@ -1,0 +1,24 @@
+# OS cruft
+Thumbs.db
+Desktop.ini
+.DS_Store
+*~
+*.tmp
+*.bak
+*.swp
+
+# IDE
+.vscode/
+.idea/
+
+# Local tool state (never a real config)
+.claude/settings.local.json
+
+# Secrets
+.env
+.env.local
+*.secret
+
+# Generated/raw outputs
+graphify-out/
+__pycache__/

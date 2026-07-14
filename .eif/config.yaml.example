@@ -1,0 +1,39 @@
+# Example EIF project-instance configuration.
+# Copy to .eif/config.yaml in your own project and adjust. This file is a
+# spec preview - the loader/validator (`eifctl validate`) does not exist yet;
+# see docs/architecture/HOW-EIF-WORKS.md for the v0.1 roadmap.
+
+version: 1
+
+framework:
+  # Pin the framework version this instance was bootstrapped/updated against.
+  version: 0.1.0
+
+project:
+  name: example-project
+
+localization:
+  # Locale for generated project documentation (ADRs, Knowledge Delta,
+  # session context, playbook output, agent prose responses).
+  documentation_locale: en
+  agent_response_locale: en
+  fallback_locale: en
+  # Keep framework identifiers, schema keys, code, and command examples in
+  # English even when documentation_locale is not English.
+  preserve_technical_terms: true
+  code_comments_locale: en
+  commit_messages_locale: en
+
+governance:
+  knowledge_delta_required: true
+  evidence_labels_required: true
+
+# Optional integrations - all default to disabled/absent. EIF works without
+# any of them; see integrations/README.md for degraded-mode behavior.
+integrations:
+  structural_graph:
+    enabled: false
+  shell_output_compression:
+    enabled: false
+  vendor_docs:
+    enabled: false

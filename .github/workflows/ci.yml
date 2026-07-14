@@ -1,0 +1,129 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  privacy-scan:
+    name: Privacy scan (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run privacy scan
+        run: python scripts/eif_privacy_scan.py --repo .
+
+  frontmatter-validation:
+    name: Frontmatter validation (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate ontology, policy, and guide frontmatter
+        run: python scripts/eif_validate_frontmatter.py --repo . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md"
+
+  link-check:
+    name: Relative link check (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check relative Markdown links
+        run: python scripts/eif_check_links.py --repo .
+
+  yaml-validation:
+    name: YAML syntax check (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyYAML
+        run: pip install --quiet pyyaml
+      - name: Validate YAML files parse
+        run: |
+          python - <<'PYEOF'
+          import sys, os
+          import yaml
+          # os.walk (not glob) so dot-directories like .eif/ are included -
+          # glob's ** silently skips them by default, which would leave
+          # .eif/config.yaml.example unchecked.
+          suffixes = (".yaml", ".yml", ".yaml.example", ".yml.example")
+          files = []
+          for root, dirs, filenames in os.walk("."):
+              dirs[:] = [d for d in dirs if d != ".git"]
+              for fn in filenames:
+                  if fn.endswith(suffixes):
+                      files.append(os.path.join(root, fn))
+          failed = []
+          for f in files:
+              try:
+                  with open(f, encoding="utf-8") as fh:
+                      yaml.safe_load(fh)
+              except Exception as e:
+                  failed.append((f, str(e)))
+          for f, e in failed:
+              print(f"FAIL {f}: {e}")
+          if failed:
+              sys.exit(1)
+          print(f"ok: {len(files)} yaml file(s) parsed")
+          PYEOF
+        shell: bash
+
+  json-schema-validation:
+    name: JSON Schema syntax check (blocking)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate JSON Schema files are valid JSON
+        run: |
+          python - <<'PYEOF'
+          import json, glob, sys
+          files = glob.glob("core/schemas/**/*.json", recursive=True)
+          failed = []
+          for f in files:
+              try:
+                  with open(f, encoding="utf-8") as fh:
+                      json.load(fh)
+              except Exception as e:
+                  failed.append((f, str(e)))
+          for f, e in failed:
+              print(f"FAIL {f}: {e}")
+          if failed:
+              sys.exit(1)
+          print(f"ok: {len(files)} json schema file(s) parsed")
+          PYEOF
+        shell: bash
+
+  knowledge-delta-presence:
+    name: Knowledge Delta presence (blocking)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Check PR body for Knowledge Delta
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if echo "$PR_BODY" | grep -qE "## Knowledge Delta|<!-- no-knowledge-delta: mechanical task -->"; then
+            echo "Knowledge Delta present"
+          else
+            echo "PR body must contain a '## Knowledge Delta' section or an explicit"
+            echo "'<!-- no-knowledge-delta: mechanical task -->' marker for purely"
+            echo "mechanical changes. See CONTRIBUTING.md."
+            exit 1
+          fi

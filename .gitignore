@@ -19,6 +19,12 @@ Desktop.ini
 .env.local
 *.secret
 
+# Instance-specific privacy denylist - real content is local-only, never
+# committed. See .eif/local-denylist.txt.example for the template. (A
+# project instance's own .eif/config.yaml is normally fine to commit - it
+# is not a secret by default - so it is not ignored here.)
+.eif/local-denylist.txt
+
 # Generated/raw outputs
 graphify-out/
 __pycache__/

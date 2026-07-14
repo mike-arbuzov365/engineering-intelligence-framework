@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/eif-config.schema.json",
+  "title": "EIF project-instance configuration (.eif/config.yaml)",
+  "description": "Mirrors .eif/config.yaml.example - keep both in sync. No validator wired up yet (see scripts/README.md); this schema is the enforceable target.",
+  "type": "object",
+  "required": ["schema_version", "framework", "project", "localization"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "This config file's own schema version, independent of framework.version."
+    },
+    "framework": {
+      "type": "object",
+      "required": ["version"],
+      "properties": {
+        "version": { "type": "string" },
+        "source": { "type": "string", "format": "uri" },
+        "ref": { "type": "string" }
+      }
+    },
+    "project": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "required": ["documentation_locale"],
+      "properties": {
+        "documentation_locale": { "type": "string" },
+        "agent_response_locale": { "type": "string" },
+        "fallback_locale": { "type": "string" },
+        "preserve_technical_terms": { "type": "boolean" },
+        "code_comments_locale": { "type": "string" },
+        "commit_messages_locale": { "type": "string" }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "knowledge_delta_required": { "type": "boolean" },
+        "evidence_labels_required": { "type": "boolean" },
+        "degraded_mode_allowed": { "type": "boolean" }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "deny_paths": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "local_denylist_file": { "type": "string" }
+      }
+    },
+    "integrations": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["enabled"],
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "provider": { "type": ["string", "null"] },
+          "processing": { "type": "string", "enum": ["local", "external"] },
+          "data_boundary": {
+            "type": "string",
+            "enum": ["local-only", "external-api"]
+          },
+          "cost_cap_usd": { "type": "number", "minimum": 0 },
+          "failure_policy": {
+            "type": "string",
+            "enum": ["degrade", "fail-closed"]
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -2,6 +2,8 @@
 type: ontology
 status: validated
 scope: framework
+created: 2026-07-15
+review_after: 2026-10-15
 ---
 
 # Status lifecycle for knowledge artifacts
@@ -71,11 +73,17 @@ knowledge.
 type: rule
 status: validated
 confidence: high
+evidence: OBSERVED
 source: vendor_docs
 created: 2026-05-16
-evidence: "Vendor doc section 3.2.1 confirms this behavior"
+related:
+  - path/to/the/vendor/doc/reference.md
 ---
 ```
+
+See [`knowledge-types.md#knowledge-artifact-metadata`](knowledge-types.md#knowledge-artifact-metadata)
+for the full field list, including `environment`/`source_version`/
+`applies_to` for scoping empirical claims.
 
 ## Checking staleness
 

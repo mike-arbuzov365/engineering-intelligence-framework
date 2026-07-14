@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/knowledge-frontmatter.schema.json",
+  "title": "EIF knowledge-artifact frontmatter",
+  "description": "Machine-validatable schema for the YAML frontmatter of any knowledge artifact (fact, rule, decision, etc). Mirrors core/ontology/knowledge-types.md#knowledge-artifact-metadata - keep both in sync; this file is the enforceable source, the Markdown is the explained source.",
+  "type": "object",
+  "required": ["type", "status", "scope", "created"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": [
+        "fact",
+        "rule",
+        "decision",
+        "risk",
+        "edge_case",
+        "failure_pattern",
+        "incident",
+        "assumption",
+        "playbook",
+        "knowledge_operation",
+        "source_manifest",
+        "extraction_manifest",
+        "analysis_digest",
+        "open_question",
+        "ontology"
+      ],
+      "description": "ontology is reserved for framework-core vocabulary documents (core/ontology/*), not project knowledge artifacts."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "validated", "superseded", "deprecated", "rejected"],
+      "description": "rejected is valid only when type implies a hypothesis-shaped claim (typically assumption); see status-lifecycle.md."
+    },
+    "evidence": {
+      "type": "string",
+      "enum": ["OBSERVED", "INFERRED", "ASSUMED"],
+      "description": "Epistemic label - required once status is not draft. See authority-model.md."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "chat",
+        "code_review",
+        "test_failure",
+        "deployment",
+        "customer_feedback",
+        "vendor_docs",
+        "retro"
+      ],
+      "description": "Channel this artifact came from - distinct from `evidence`, which is the epistemic label."
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "See confidence-levels.md. Not a verification bypass - check environment/source_version/applies_to before relying on a high-confidence claim in a new context."
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["framework", "project"]
+    },
+    "created": {
+      "type": "string",
+      "format": "date"
+    },
+    "review_after": {
+      "type": "string",
+      "format": "date"
+    },
+    "environment": {
+      "type": "string",
+      "description": "e.g. staging, prod-eu, local-dev. Optional; recommended for empirical (axis B) artifacts."
+    },
+    "source_version": {
+      "type": "string",
+      "description": "Version of the system/library/API this claim was observed against."
+    },
+    "applies_to": {
+      "type": "string",
+      "description": "Free-text scope narrowing, e.g. 'Windows only', 'API v2 only'."
+    },
+    "superseded_by": {
+      "type": "string",
+      "description": "Required when status is superseded."
+    },
+    "deprecated_reason": {
+      "type": "string",
+      "description": "Required when status is deprecated."
+    },
+    "replaced_by": {
+      "type": "string",
+      "description": "Optional, used with deprecated."
+    },
+    "related": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "superseded" } } },
+      "then": { "required": ["superseded_by"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "deprecated" } } },
+      "then": { "required": ["deprecated_reason"] }
+    }
+  ],
+  "additionalProperties": true
+}

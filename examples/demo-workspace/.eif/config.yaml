@@ -1,0 +1,20 @@
+schema_version: 1
+
+framework:
+  version: 0.1.0-dev
+  ref: "<commit-sha-you-checked-out>"
+
+project:
+  name: demo-workspace
+
+localization:
+  documentation_locale: uk
+  agent_response_locale: uk
+  fallback_locale: en
+  preserve_technical_terms: true
+  code_comments_locale: en
+  commit_messages_locale: en
+
+governance:
+  knowledge_delta_required: true
+  evidence_labels_required: true

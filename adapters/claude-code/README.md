@@ -1,0 +1,101 @@
+# Claude Code adapter
+
+<!-- Knowledge source: GENERALIZE of the private EI's
+30-templates/claude-code-hooks/README.md (dated 2026-06-16) + live
+re-verification during this vertical slice, 2026-07-15. The private
+source's RTK-specific PreToolUse wrapper script is intentionally NOT
+ported here - RTK is an optional integration out of scope for this slice
+(see adapters/README.md and this PR's boundaries). What's kept is the
+*mechanism description*: where Claude Code looks for instructions and
+skills, how hooks are layered, and - most load-bearing for EIF's own
+design - the verified evidence that hooks are local-machine state CI
+cannot see, which is exactly why EIF's core must not depend on them. -->
+
+Status: evidence-only. No hook scripts are shipped by this adapter yet -
+see "What this adapter does not include" below.
+
+## Verified evidence
+
+| Field | Value |
+|---|---|
+| Product/version tested | Claude Code CLI `2.1.169` |
+| Date tested | 2026-07-15 |
+| Verification command | `claude --version` |
+
+## Persistent instruction discovery
+
+OBSERVED directly in this session: Claude Code auto-loads a project-root
+`CLAUDE.md` (and a user-level `~/.claude/CLAUDE.md`, if present) into the
+agent's context at session start, without any explicit instruction to do
+so. This is the mechanism `templates/agent-instructions.md` in this
+framework is designed to be copied/generated into (as `AGENTS.md` or
+`CLAUDE.md`, depending on project convention - both this repository's own
+`AGENTS.md` and `CLAUDE.md`-shaped files are read by different agents; see
+each adapter's own discovery rule).
+
+## Skill discovery
+
+OBSERVED directly in this session: Claude Code discovers skills as
+`.claude/skills/<name>/SKILL.md` (YAML frontmatter with `name`/
+`description`), invocable as `/<name>`. This matches the private
+instance's own skill layout exactly (`.claude/skills/knowledge-search/SKILL.md`,
+etc.) - no adaptation needed for this part of the mechanism, it already
+generalizes as-is.
+
+## Hook support
+
+Not independently re-verified end-to-end in this session (would require
+installing a hook and triggering it, which is out of scope for this
+slice). Carried over from the private instance's dated evidence
+(`claude-code-hooks/README.md`, 2026-06-16), stated here with its original
+confidence level, not upgraded:
+
+- Claude Code reads hooks from layered `settings.json` files: user-level
+  (`~/.claude/settings.json`), project-level (`.claude/settings.json`,
+  committed), and project-local (`.claude/settings.local.json`, not
+  committed).
+- `PreToolUse` hooks can rewrite a tool call's input (`updatedInput`) or
+  block it outright. The private instance's evidence: this rewrite path
+  was "verified end-to-end and applied reliably across dozens of test
+  cases" while building its own tooling - a real, if single-instance,
+  reliability data point, not a vendor claim.
+- `Stop` hooks fire at the end of a turn/session and can act as a
+  non-blocking reminder (the private instance uses this for a
+  session-context cleanup nudge).
+
+## Fallback behavior (the load-bearing finding)
+
+OBSERVED in the private instance and structurally true regardless of hook
+reliability: **hooks are local, per-machine configuration.** A
+project-level `.claude/settings.json` can be committed, but a
+user-level `~/.claude/settings.json` cannot be, and GitHub Actions CI has
+no access to either at merge time. This means:
+
+- CI can verify the *artifacts* a hook would enforce (this repository's
+  own `scripts/` + CI jobs do exactly that - schema validation, privacy
+  scanning, Knowledge Delta completeness), but it cannot verify that a
+  hook actually ran during the session that produced a given PR.
+- This is exactly why this framework's own agent-execution authority
+  model (`core/ontology/authority-model.md#axis-c`) puts hook-based
+  enforcement below the persistent instruction file as the "fallback of
+  record," not treated as a separate, more-authoritative tier - a hook is
+  a best-effort assist, not something the core workflow can require.
+
+## What this adapter does not include
+
+- No hook scripts (`settings.json`, `PreToolUse`/`Stop` wrapper scripts).
+  The private instance's hook scripts are tightly coupled to its RTK
+  integration, which is out of scope for this slice per this PR's
+  boundaries. Porting a generic (non-RTK) hook example is a reasonable
+  follow-up, not done here.
+- No claim that this vertical slice's own workflow depends on hooks in
+  any way - every step in `examples/demo-workspace/README.md` is a plain
+  command, runnable with or without Claude Code hooks configured.
+
+## Re-verification
+
+If the Claude Code CLI version changes materially, re-run
+`claude --version` and update the table above; re-verify hook behavior
+end-to-end (install a minimal `PreToolUse` hook, trigger it, confirm
+`updatedInput` is applied) before relying on the carried-over 2026-06-16
+evidence for anything load-bearing.

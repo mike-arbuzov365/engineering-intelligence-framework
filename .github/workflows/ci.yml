@@ -13,6 +13,12 @@ on:
   push:
     branches: [main]
 
+# Least-privilege default: none of these jobs push, comment, or otherwise
+# write back to the repository - they only read the checkout and report
+# pass/fail. Override per-job if a future job genuinely needs more.
+permissions:
+  contents: read
+
 jobs:
   privacy-scan:
     name: Privacy scan (required by policy)
@@ -41,12 +47,40 @@ jobs:
         # (--require-hashes) is a possible future hardening step, not
         # implemented yet, see scripts/README.md#dependency-update-ownership.
         run: pip install -r scripts/requirements.txt
-      - name: Validate ontology, policy, and guide frontmatter
-        run: python scripts/eif_validate_frontmatter.py --framework-root . --instance-root . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md"
+      - name: Validate ontology, policy, guide, and product-claims frontmatter
+        run: python scripts/eif_validate_frontmatter.py --framework-root . --instance-root . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md" "docs/product/*.md"
       - name: Validate .eif/config.yaml.example against the config schema
         run: python scripts/eif_validate_frontmatter.py --framework-root . --config .eif/config.yaml.example
       - name: Run validator fixture tests (positive + negative)
         run: python scripts/tests/test_validate.py
+
+  vertical-slice:
+    name: Vertical slice - init, index, search, locale, demo test (required by policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        run: pip install -r scripts/requirements.txt
+      - name: Run eif_init.py / eif_generate_index.py / eif_search_knowledge.py / eif_locale.py unit tests
+        run: |
+          python scripts/tests/test_init.py
+          python scripts/tests/test_generate_index.py
+          python scripts/tests/test_search_knowledge.py
+          python scripts/tests/test_locale.py
+      - name: Validate the demo project instance's knowledge artifacts and config
+        # framework-root stays the framework checkout; instance-root points
+        # at the demo, which is not vendoring the framework - this is the
+        # same separation PR #1 introduced, exercised against a real
+        # second "instance" instead of only self-validating the framework
+        # repository against itself.
+        run: |
+          python scripts/eif_validate_frontmatter.py --framework-root . --instance-root examples/demo-workspace "knowledge/**/*.md"
+          python scripts/eif_validate_frontmatter.py --framework-root . --config examples/demo-workspace/.eif/config.yaml
+      - name: Run the demo's behavioral test (stdlib unittest, no extra dependency)
+        run: python examples/demo-workspace/tests/test_calendar_utils.py -v
 
   link-check:
     name: Relative link check (required by policy)

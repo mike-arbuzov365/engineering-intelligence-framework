@@ -5,7 +5,7 @@ and what its hook mechanism (if any) can and cannot do.
 
 | Adapter | Status | Notes |
 |---|---|---|
-| `claude-code/` | not ported | CLAUDE.md loading, Skill tool, PreToolUse hooks |
+| `claude-code/` | evidence documented, no hook scripts | [`claude-code/README.md`](claude-code/README.md) - CLI `2.1.169` re-verified 2026-07-15; instructions/skill discovery OBSERVED live; hook behavior carried over from 2026-06-16 private evidence, not re-verified end-to-end this round |
 | `codex/` | not ported | AGENTS.md loading, `hooks.json` PreToolUse hooks - hook `updatedInput` rewrite support varies by version, verify before relying on it |
 | `cursor/` | not ported | `hooks.json` preToolUse + `updated_input` |
 | `hermes/` | not ported | skill mirrors; terminal-tool guard hooks support block-only, not rewrite |

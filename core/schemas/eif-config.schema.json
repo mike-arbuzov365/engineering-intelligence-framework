@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/eif-config.schema.json",
   "title": "EIF project-instance configuration (.eif/config.yaml)",
-  "description": "Mirrors .eif/config.yaml.example - keep both in sync. No validator wired up yet (see scripts/README.md); this schema is the enforceable target.",
+  "description": "Mirrors .eif/config.yaml.example - keep both in sync. Validated by scripts/eif_validate_frontmatter.py --config (see scripts/README.md); this schema is the enforceable target.",
   "type": "object",
   "required": ["schema_version", "framework", "project", "localization"],
   "properties": {

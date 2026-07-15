@@ -526,20 +526,26 @@ formally ratified (the file is explicit about which is which).
       command.
 - [x] Existing-repository adoption does not silently override pre-existing
       project governance: an adoption preflight detects it and stops
-      before any write without an explicit coexistence decision, keyed off
-      the resolved/persisted adoption basis so a prior decision survives a
-      later flagless run; a `coexist` mode generates a block that defers
-      to existing rules instead of claiming sole authority; knowledge
-      paths are user-configured and validated against path escape
-      (absolute, drive/UNC, `..` traversal, outside-instance); an existing
-      knowledge-index file without EIF's own ownership marker is never
-      overwritten; privacy-scan suppressions identify one exact finding
-      (rule + path + content fingerprint), never a whole rule+file; an
-      existing but broken `.eif/config.yaml` stops before any write rather
-      than being treated as absent. Tested against a realistic sanitized
-      fixture (`scripts/tests/test_adoption.py`, 67 checks), not yet
-      re-validated against the original pilot repository after this
-      round's changes (tracked separately, private planning packet).
+      before any write when there is no adoption decision on record,
+      keyed off the resolved/persisted adoption basis (a persisted
+      `coexist` decision authorizes safe continuation on a later flagless
+      run rather than STOPping); a `coexist` mode generates a block that
+      defers to existing rules instead of claiming sole authority;
+      knowledge paths are user-configured and validated against path
+      escape (absolute, drive/UNC, `..` traversal, outside-instance) and
+      shell metacharacters, with generated commands quoting the
+      configured path; the historical `migration_status` is derived so it
+      cannot contradict `adoption.mode`; an existing knowledge-index file
+      without EIF's own ownership marker is never overwritten;
+      privacy-scan suppressions identify one exact finding (rule + path +
+      content fingerprint), never a whole rule+file; an existing but
+      broken `.eif/config.yaml` stops before any write rather than being
+      treated as absent. Tested against a realistic sanitized fixture
+      (`scripts/tests/test_adoption.py`, 67 checks) AND re-validated by
+      rerunning the full pilot against fresh disposable copies of the real
+      target (`wm-freelance-ops`) each round (private planning packet); the
+      live repository is never opened for writing, and this is still only
+      one real target - a second, different one is not yet exercised.
 - [ ] At least two agent adapters tested against this repository.
 - [x] Structural-graph and shell-compression integrations documented as
       optional.
@@ -581,7 +587,7 @@ formally ratified (the file is explicit about which is which).
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
 - [x] Demo workflow has executable evidence:
-      `scripts/tests/test_journey.py` (95 checks) drives a real subprocess
+      `scripts/tests/test_journey.py` (153 checks) drives a real subprocess
       journey against a fresh instance, and
       [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
       has real captured command output, both reproducible from a clean

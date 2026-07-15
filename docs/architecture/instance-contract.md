@@ -82,25 +82,75 @@ the bundle ever goes live.
 
 ## Transactional init/upgrade
 
-The bundle is never replaced in place. `eif_init`:
+Nothing is replaced in place. `eif_init`:
 
 1. resolves and validates provenance (dirty-check, mandatory-source check);
 2. renders config and lock **in memory** and validates both against their
    schemas *before writing anything*;
-3. stages the new bundle into `.eif/runtime.next`;
-4. re-hashes every staged file against the manifest computed from the
-   source, catching corruption;
-5. atomically swaps `.eif/runtime.next` into `.eif/runtime` (the previous
-   runtime is renamed aside first and only deleted once the swap succeeds -
-   if the swap itself fails, the previous runtime is restored, never left
-   half-written or missing);
-6. only then writes `.eif/framework.lock.yaml`;
-7. updates the `CLAUDE.md` managed block and the `.gitignore` managed block.
+3. **stages** every managed artifact to a `.next` path - config
+   (`.eif/config.yaml.next`), the runtime bundle (`.eif/runtime.next`, then
+   re-hashed against the manifest to catch corruption), the lock, the
+   `CLAUDE.md` and `.gitignore` managed blocks, and (when
+   `knowledge.managed`) the knowledge index;
+4. **commits** them as one ordered sequence of atomic renames - each stage
+   moves its prior live file aside to `.previous`, renames its `.next` into
+   place, and on any failure rolls back every already-committed stage to its
+   exact prior bytes.
 
-`scripts/tests/test_journey.py` exercises this against a deliberately broken
-framework copy (a mandatory bundle file removed mid-sequence) and confirms
-the instance's prior, working runtime survives the failed upgrade untouched
-and remains fully functional - not just "no crash," but "still works."
+Both failure windows are handled and separately tested (steps 16-33 of
+`scripts/tests/test_journey.py`, with `EIF_INIT_TEST_FAIL_AFTER`/
+`EIF_INIT_TEST_FAIL_BEFORE` fault injection at each stage):
+
+- **After a commit** - `commit_transaction` rolls back every committed
+  stage and removes its own uncommitted `.next` files.
+- **Before the commit** (a fault while staging) - the whole staging phase
+  is wrapped so every `.next` is removed and the tree returns to its exact
+  prior state, nothing already live is touched.
+
+In both windows the outcome is byte-for-byte tree equality: no `.next`/
+`.previous` files, no orphaned new directories (a first-ever init removes
+its own freshly-created `.eif/` if the run fails), and no leftover config
+backup (see below). The instance's prior, working runtime survives a failed
+upgrade untouched and remains fully functional - not just "no crash," but
+"still works."
+
+### Config-backup policy
+
+A `--force` reconfigure backs up the existing `.eif/config.yaml` to
+`.eif/config.yaml.bak-<timestamp>` before overwriting it. The backup is a
+transient artifact until the reconfigure commits:
+
+- **Failed reconfigure** -> the backup is deleted, so the tree returns
+  byte-for-byte to its prior state (the "no orphaned files / exact prior
+  tree" guarantee above holds without exception).
+- **Successful reconfigure** -> the backup is kept, as the recovery copy of
+  the config that was just replaced.
+
+### Migration provenance
+
+`.eif/config.yaml`'s `adoption.mode` (the *current* coexistence behavior)
+and `.eif/framework.lock.yaml`'s `instance.migration_status` (the
+*historical* origin) answer different questions but must not contradict the
+evidence. `migration_status` is **derived**, not defaulted:
+
+- adoption preflight detected pre-existing project state, or
+  `adoption.mode: coexist` -> `migration_status: adopted`;
+- a greenfield **authority** override on a repo that already had project
+  state still records `adopted` (an override changes who the block claims
+  authority for; it does not rewrite how the repository came to be);
+- a genuinely empty new repo -> `greenfield`;
+- an explicit `--adoption-mode coexist --migration-status greenfield`, or an
+  explicit greenfield migration status over detected pre-existing state,
+  STOPs before any write;
+- a routine upgrade preserves the persisted status; a reconfigure honors an
+  explicit `--migration-status` and otherwise preserves it, and refuses to
+  switch to `coexist` over a recorded `greenfield` without an explicit
+  `--migration-status adopted` (never silently rewriting history).
+
+`eif_verify_runtime.py` FAILs on the one impossible pairing (`coexist` +
+`greenfield`) with a concrete `--force` repair instruction, and never on a
+greenfield authority mode over an adopted history (that is the documented
+override case).
 
 ## Compatibility
 

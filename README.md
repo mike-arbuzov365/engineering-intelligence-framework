@@ -87,24 +87,30 @@ that isn't runnable is worse than not having the row. -->
 | Capability | Status | Notes |
 |---|---|---|
 | Ontology (authority, types, confidence, lifecycle) | **Available** | [`core/ontology/`](core/ontology/) |
-| Machine-readable schemas + real validator | **Available** | [`core/schemas/`](core/schemas/) validated with `jsonschema`'s `Draft202012Validator` + format checking via [`scripts/eif_validate_frontmatter.py`](scripts/eif_validate_frontmatter.py); 13 positive/negative fixtures, all passing. Not wrapped in a bootstrap CLI (`eifctl validate`) yet - invoke the script directly. |
+| Machine-readable schemas + real validator | **Available** | [`core/schemas/`](core/schemas/) validated with `jsonschema`'s `Draft202012Validator` + format checking via [`scripts/eif_validate_frontmatter.py`](scripts/eif_validate_frontmatter.py); 15 positive/negative fixtures, all passing. Not wrapped in a bootstrap CLI (`eifctl validate`) yet - invoke the script directly, or via `scripts/eif_init.py` for a new instance's config. |
 | Governance docs (LICENSE, CONTRIBUTING, SECURITY, ...) | **Available** | repo root |
 | Privacy scan / frontmatter+config validation / link check / Knowledge Delta check | **Available** | [`scripts/`](scripts/), each with its own test suite, run in CI on every PR |
 | Decision ledger | **Available** | [`core/policies/decisions.md`](core/policies/decisions.md) |
 | `.eif/config.yaml` schema | **Available (schema + validator)**, no bootstrap CLI | validated the same way as frontmatter - see above; nothing generates or migrates a config yet |
-| Vertical-slice plan | **Draft** | [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) - designed, not built |
+| Vertical-slice plan | **Built (experimental)** | [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) (design) + [`examples/demo-workspace/`](examples/demo-workspace/) (the actual, reproduced slice - see its README) |
 | Controlled merge entrypoint | **Available**, not wired into repo settings or a hook guard | [`scripts/eif_merge_pr.py`](scripts/eif_merge_pr.py) - dry-run tested against this repo's real PR #1 |
-| Bootstrap CLI (`eifctl init`/`doctor`/`validate`) | **Not built** | design referenced in the vertical-slice guide |
-| Playbooks, templates, skills | **Not built** | ported incrementally, see each directory's README |
-| Agent adapters | **Not built** | see [`adapters/README.md`](adapters/README.md) for evidence-based priority |
+| Bootstrap script (`eif_init.py`) | **Experimental** | [`scripts/eif_init.py`](scripts/eif_init.py) - init + config + instructions + index, in one script; does not ratify a final CLI name or packaging strategy (D-05/D-08 in [`core/policies/decisions.md`](core/policies/decisions.md) remain open) |
+| Knowledge index / offline retrieval | **Available (experimental)** | [`scripts/eif_generate_index.py`](scripts/eif_generate_index.py), [`scripts/eif_search_knowledge.py`](scripts/eif_search_knowledge.py) - keyword-based, no embeddings; demonstrated against a real, small seeded knowledge base, not tested at scale |
+| Locale layer (Ukrainian project docs) | **Available (experimental)**, 3 output surfaces | [`locales/`](locales/), [`scripts/eif_locale.py`](scripts/eif_locale.py) - status messages, Knowledge Delta headings, closeout headings; not full agent-response localization; D-06/D-07 remain open |
+| Playbooks, templates, skills | **Partial** | 4 templates built ([`templates/`](templates/)) - task-scope, Knowledge Delta, session closeout, agent instructions. No playbooks or skills ported yet |
+| Agent adapters | **1 of N, evidence-only** | [`adapters/claude-code/README.md`](adapters/claude-code/README.md) - CLI version and instruction/skill discovery re-verified live; no hook scripts shipped. See [`adapters/README.md`](adapters/README.md) for priority order |
 | Structural-graph / shell-compression / vendor-docs integrations | **Not built** | optional either way, see [`integrations/README.md`](integrations/README.md) |
-| Demo workspace | **Not built** | planned target: `examples/demo-workspace/` |
+| Demo workspace | **Built** | [`examples/demo-workspace/`](examples/demo-workspace/) - reproduced from a clean checkout, see its own README for captured command output |
 | Benchmark | **Not run** | see [`docs/benchmarks/README.md`](docs/benchmarks/README.md) |
+| Public claims evidence ledger | **Available** | [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md) - what's OBSERVED vs. UNVERIFIED vs. NOT TESTED, and the allowed/forbidden wording for each |
 
-**There is no working quickstart yet.** Cloning this repository today gets
-you the ontology, schemas, governance docs, and CI - not a runnable
-bootstrap. See [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md)
-for what "runnable" will mean and how it's sequenced.
+**Experimental quickstart.** Cloning this repository gets you the ontology,
+schemas, governance docs, CI, and one reproduced vertical slice - not a
+stable CLI or a representative sample of real engineering tasks. Follow
+[`examples/demo-workspace/README.md`](examples/demo-workspace/README.md)
+for the exact commands, real captured output, and known limitations. See
+[`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) for how
+this slice was scoped and what's deliberately excluded from it.
 
 ## Core concepts
 
@@ -139,8 +145,12 @@ them, with explicit tradeoffs documented in
 ## Language configuration
 
 Framework documentation is English-first. Project instances declare their
-own documentation locale in `.eif/config.yaml`; a Ukrainian locale pack is
-the first non-English target (`locales/uk/`). See
+own documentation locale in `.eif/config.yaml`; Ukrainian is the first
+non-English locale pack built (`locales/uk/`) - status messages, Knowledge
+Delta headings, and closeout headings are generated in Ukrainian for a
+`uk` instance, verified end to end in
+[`examples/demo-workspace/`](examples/demo-workspace/). Not yet covered:
+full agent-response localization and `terminology.yaml`. See
 [`locales/README.md`](locales/README.md).
 
 ## Quality and safety model
@@ -169,8 +179,14 @@ methodology and current status.
 
 ## Demo
 
-A synthetic `examples/demo-workspace/` is planned and not yet built - see
-[v0.1 scope](#v01-scope).
+A synthetic `examples/demo-workspace/` walks through the full v0.1 slice -
+initialize an instance, seed and search real knowledge, scope and
+implement one real change informed by that retrieval, verify it with a
+real failing-before/passing-after test, and close out truthfully in
+Ukrainian. See [`examples/demo-workspace/README.md`](examples/demo-workspace/README.md)
+for the exact commands and captured output, and
+[`docs/product/claims-evidence.md`](docs/product/claims-evidence.md) for
+what this demo does and does not prove.
 
 ## v0.1 scope
 

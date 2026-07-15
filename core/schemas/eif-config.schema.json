@@ -53,6 +53,33 @@
         "degraded_mode_allowed": { "type": "boolean" }
       }
     },
+    "knowledge": {
+      "type": "object",
+      "description": "Where this project's knowledge artifacts live. Greenfield default is root knowledge/ + knowledge/index.md - an existing-repository adoption can point these at wherever knowledge already lives (e.g. docs/knowledge/) instead of migrating content to match EIF's default. Generated instructions, eif_generate_index.py, and eif_search_knowledge.py invocations all read these values from config - they must not hardcode 'knowledge' independently of it.",
+      "properties": {
+        "root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instance-relative path to the directory eif_generate_index.py scans and eif_search_knowledge.py searches. Default on a new instance: 'knowledge'."
+        },
+        "index_path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instance-relative path to the generated index file. Default on a new instance: '<root>/index.md'."
+        }
+      }
+    },
+    "adoption": {
+      "type": "object",
+      "description": "User-owned adoption/coexistence policy - deliberately NOT part of framework.lock.yaml (which is EIF-managed provenance): whether EIF coexists with pre-existing project governance is a project decision, not something EIF should infer or silently overwrite. migration_status in the lock records history (was this project greenfield or already-existing when first adopted); this section controls current behavior (how the generated block presents itself).",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["greenfield", "coexist"],
+          "description": "greenfield: EIF-managed block may present itself as this project's baseline authority (default when eif_init finds no pre-existing entrypoint content). coexist: the generated block must not declare itself sole/primary authority, must not override pre-existing governance, and must state that project-owned instructions outside the markers stay canonical. Required to be set explicitly (via --adoption-mode) when eif_init's adoption preflight detects pre-existing entrypoint content - see scripts/eif_preflight.py."
+        }
+      }
+    },
     "privacy": {
       "type": "object",
       "properties": {
@@ -60,7 +87,40 @@
           "type": "array",
           "items": { "type": "string" }
         },
-        "local_denylist_file": { "type": "string" }
+        "local_denylist_file": { "type": "string" },
+        "suppressions": {
+          "type": "array",
+          "description": "Controlled, auditable exceptions to scripts/eif_privacy_scan.py findings. Never weakens a detection pattern globally - each entry narrowly suppresses one rule at one path/glob, with a required rationale and review date. A suppression that no longer matches any real finding, or whose expires date has passed, is itself reported as a finding by the scanner (suppression hygiene) - it does not just silently keep working.",
+          "items": {
+            "type": "object",
+            "required": ["rule", "path", "rationale", "reviewed"],
+            "properties": {
+              "rule": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Stable finding category, e.g. 'absolute_path_leak', 'secret_shaped:password_assignment', 'secret_shaped:bearer_token'."
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Exact repo-relative file path, or a narrow glob (fnmatch syntax). Deliberately not a directory-wide wildcard by convention - keep it as narrow as the actual reviewed case."
+              },
+              "rationale": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Why this specific finding is not a real issue - human-authored, reviewed text, never the matched secret value itself."
+              },
+              "reviewed": {
+                "type": "string",
+                "description": "ISO date this suppression was last reviewed by a human."
+              },
+              "expires": {
+                "type": "string",
+                "description": "Optional ISO date after which this suppression no longer applies (the finding reactivates and a suppression-hygiene finding fires). Omit for no automatic expiry."
+              }
+            }
+          }
+        }
       }
     },
     "integrations": {

@@ -78,17 +78,22 @@ DEFAULT_SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "graphify-o
 # its own test suite necessarily constructs fake-secret/fake-path fixture
 # strings to verify detection - both would otherwise self-trigger the
 # patterns they define/test. Skip pattern matching against exactly these
-# two files, nothing broader (the fixture *data* files under
+# files, nothing broader (the fixture *data* files under
 # scripts/tests/fixtures/ are still scanned normally - they don't contain
 # secret-shaped content by design). This is the ONLY path-based exclusion
 # in this script - the real, gitignored denylist file is never returned by
 # `git ls-files` in the first place, and its committed `.example` template
 # is scanned like any other file (a regression fixed 2026-07-16 - it used
 # to be excluded by an over-broad startswith() check that also matched the
-# .example suffix).
+# .example suffix). test_adoption.py added the same round its own
+# secret/keychain-shaped fixture content was written (self-caught in CI,
+# not by inspection - a live demonstration of exactly the false-positive
+# class the adoption-hardening suppression mechanism exists to handle,
+# just on the framework's own repo instead of an adopted one).
 SELF_EXCLUDE_FILES = {
     "scripts/eif_privacy_scan.py",
     "scripts/tests/test_privacy_scan.py",
+    "scripts/tests/test_adoption.py",
 }
 
 

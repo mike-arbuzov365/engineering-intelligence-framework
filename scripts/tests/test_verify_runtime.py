@@ -33,7 +33,7 @@ def _init_real_instance(inst: Path) -> None:
     manifest = eif_init.build_manifest(sources)
     digest = eif_init.combined_digest(manifest)
 
-    config_data = eif_init.render_config_data("verify-test", "claude-code", "en", "0.1.0-dev")
+    config_data = eif_init.render_config_data("verify-test", "claude-code", "en", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield")
     (inst / ".eif").mkdir(parents=True)
     (inst / ".eif" / "config.yaml").write_text(eif_init._dump_yaml(eif_init.CONFIG_HEADER, config_data), encoding="utf-8")
 
@@ -47,7 +47,7 @@ def _init_real_instance(inst: Path) -> None:
     runtime = inst / ".eif" / "runtime"
     staging.rename(runtime)
 
-    block = eif_init._managed_block(FRAMEWORK_ROOT)
+    block = eif_init._managed_block(FRAMEWORK_ROOT, "knowledge", "knowledge/index.md", "greenfield")
     (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
     (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
 

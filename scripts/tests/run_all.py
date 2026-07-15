@@ -27,6 +27,7 @@ SUITES = [
     "test_verify_runtime.py",
     "test_init.py",
     "test_journey.py",
+    "test_adoption.py",
 ]
 
 

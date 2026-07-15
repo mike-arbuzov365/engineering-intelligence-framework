@@ -144,6 +144,91 @@ def main() -> int:
             check(f"redaction ({label}): denylist token value not printed", DENYLIST_TOKEN not in combined)
             check(f"redaction ({label}): user path fragment not printed", LEAK_PATH_FRAGMENT not in combined)
 
+    # --- 8b. Suppressions: exact match suppresses, exit 0, reported separately ---
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "keytar.d.ts").write_text("setPassword(service: string, account: string, password: string): Promise<void>;\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text(
+            "privacy:\n  suppressions:\n"
+            "    - rule: \"secret_shaped:password_assignment\"\n"
+            "      path: \"keytar.d.ts\"\n"
+            "      rationale: \"TS interface signature, not a real value.\"\n"
+            "      reviewed: \"2026-07-15\"\n",
+            encoding="utf-8",
+        )
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        result = json.loads(proc.stdout)
+        check("suppression: exact match -> exit 0", proc.returncode == 0)
+        check("suppression: finding removed from active top-level keys", "password_assignment" not in result.get("secret_shaped", {}))
+        check("suppression: finding present under suppressed instead", "password_assignment" in result.get("suppressed", {}).get("secret_shaped", {}))
+        check("suppression: no hygiene issues for a suppression that matched", result.get("suppression_issues") == [])
+
+    # --- 8c. Suppressions: wrong rule/path does not suppress; unsuppressed finding still fails ---
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "keytar.d.ts").write_text("setPassword(service: string, account: string, password: string): Promise<void>;\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text(
+            "privacy:\n  suppressions:\n"
+            "    - rule: \"secret_shaped:password_assignment\"\n"
+            "      path: \"some/other/file.ts\"\n"
+            "      rationale: \"Does not apply to keytar.d.ts.\"\n"
+            "      reviewed: \"2026-07-15\"\n",
+            encoding="utf-8",
+        )
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        result = json.loads(proc.stdout)
+        check("suppression: wrong path -> finding stays active", "password_assignment" in result.get("secret_shaped", {}))
+        check("suppression: wrong path -> exit 1 (unsuppressed finding + hygiene issue both fail closed)", proc.returncode == 1)
+        check("suppression: wrong path -> reported as a hygiene issue (never matched anything)",
+             any(h["issue"] == "no longer matches any finding" for h in result.get("suppression_issues", [])))
+
+    # --- 8d. Suppressions: expired -> finding reactivates, hygiene issue fires ---
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "keytar.d.ts").write_text("setPassword(service: string, account: string, password: string): Promise<void>;\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text(
+            "privacy:\n  suppressions:\n"
+            "    - rule: \"secret_shaped:password_assignment\"\n"
+            "      path: \"keytar.d.ts\"\n"
+            "      rationale: \"Reviewed, but the review window closed.\"\n"
+            "      reviewed: \"2020-01-01\"\n"
+            "      expires: \"2020-06-01\"\n",
+            encoding="utf-8",
+        )
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        result = json.loads(proc.stdout)
+        check("suppression: expired -> finding reactivates (back in active findings)", "password_assignment" in result.get("secret_shaped", {}))
+        check("suppression: expired -> exit 1", proc.returncode == 1)
+        check("suppression: expired -> hygiene issue says 'expired'",
+             any(h["issue"] == "expired" for h in result.get("suppression_issues", [])))
+
+    # --- 8e. Suppression rationale/path values are never treated as the matched secret - redaction still holds ---
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "combo.md").write_text(f"api_key: {SECRET_VALUE}\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text(
+            "privacy:\n  suppressions:\n"
+            "    - rule: \"secret_shaped:api_key_assignment\"\n"
+            "      path: \"unrelated.md\"\n"
+            "      rationale: \"Unrelated suppression, present to prove redaction still holds.\"\n"
+            "      reviewed: \"2026-07-15\"\n",
+            encoding="utf-8",
+        )
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        check("suppression config present: secret value still never printed", SECRET_VALUE not in proc.stdout)
+
     # --- 8. .example files are not specially excluded (only the scanner's own source is) ---
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)

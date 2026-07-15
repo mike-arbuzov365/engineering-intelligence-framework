@@ -37,7 +37,8 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
 
 def _args(**overrides):
     base = dict(project_name=None, locale=None, adapter=None, migration_status=None,
-                framework_version=None, force=False)
+                framework_version=None, force=False, knowledge_root=None,
+                knowledge_index_path=None, adoption_mode=None)
     base.update(overrides)
     return SimpleNamespace(**base)
 
@@ -86,46 +87,60 @@ def main() -> int:
     except ValueError:
         results.append(check("init without --project-name raises", True))
 
-    mode, proj, loc, adapt, mig, fver, ignored = eif_init._resolve_mode_and_values(
+    r1 = eif_init._resolve_mode_and_values(
         _args(project_name="p", locale="uk", adapter="claude-code", migration_status="adopted"), None, None,
     )
-    results.append(check("init: mode is 'init'", mode == "init"))
-    results.append(check("init: values come from CLI args", (proj, loc, adapt, mig) == ("p", "uk", "claude-code", "adopted")))
+    results.append(check("init: mode is 'init'", r1.mode == "init"))
+    results.append(check("init: values come from CLI args", (r1.project_name, r1.locale, r1.adapter, r1.migration_status) == ("p", "uk", "claude-code", "adopted")))
 
-    mode2, proj2, loc2, adapt2, mig2, fver2, ignored2 = eif_init._resolve_mode_and_values(_args(project_name="p"), None, None)
-    results.append(check("init: unset flags fall back to sane defaults", (loc2, adapt2, mig2) == ("en", eif_init.DEFAULT_ADAPTER, "greenfield")))
+    r2 = eif_init._resolve_mode_and_values(_args(project_name="p"), None, None)
+    results.append(check("init: unset flags fall back to sane defaults", (r2.locale, r2.adapter, r2.migration_status) == ("en", eif_init.DEFAULT_ADAPTER, "greenfield")))
+    results.append(check("init: knowledge root/index default", (r2.knowledge_root, r2.knowledge_index_path) == ("knowledge", "knowledge/index.md")))
+    results.append(check("init: adoption mode defaults to greenfield", r2.adoption_mode == "greenfield"))
+
+    r2b = eif_init._resolve_mode_and_values(_args(project_name="p", knowledge_root="docs/knowledge", adoption_mode="coexist"), None, None)
+    results.append(check("init: explicit knowledge-root honored, index derived from it", r2b.knowledge_index_path == "docs/knowledge/index.md"))
+    results.append(check("init: explicit adoption-mode honored", r2b.adoption_mode == "coexist"))
 
     # upgrade: existing config present, no --force -> config/lock are the
     # sole source of truth; any CLI values passed anyway are reported as ignored.
     existing_config = {"project": {"name": "existing-proj"}, "adapter": {"name": "claude-code"},
-                       "localization": {"documentation_locale": "uk"}, "framework": {"version": "0.1.0-dev"}}
+                       "localization": {"documentation_locale": "uk"}, "framework": {"version": "0.1.0-dev"},
+                       "knowledge": {"root": "docs/knowledge", "index_path": "docs/knowledge/index.md"},
+                       "adoption": {"mode": "coexist"}}
     existing_lock = {"instance": {"migration_status": "adopted"}}
-    mode3, proj3, loc3, adapt3, mig3, fver3, ignored3 = eif_init._resolve_mode_and_values(_args(), existing_config, existing_lock)
-    results.append(check("upgrade: mode is 'upgrade'", mode3 == "upgrade"))
+    r3 = eif_init._resolve_mode_and_values(_args(), existing_config, existing_lock)
+    results.append(check("upgrade: mode is 'upgrade'", r3.mode == "upgrade"))
     results.append(check("upgrade: values derived from existing config/lock, not CLI defaults",
-                         (proj3, loc3, adapt3, mig3) == ("existing-proj", "uk", "claude-code", "adopted")))
-    results.append(check("upgrade: ignored list is empty when no conflicting flags were passed", ignored3 == []))
+                         (r3.project_name, r3.locale, r3.adapter, r3.migration_status) == ("existing-proj", "uk", "claude-code", "adopted")))
+    results.append(check("upgrade: knowledge root/adoption mode derived from existing config",
+                         (r3.knowledge_root, r3.knowledge_index_path, r3.adoption_mode) == ("docs/knowledge", "docs/knowledge/index.md", "coexist")))
+    results.append(check("upgrade: ignored list is empty when no conflicting flags were passed", r3.ignored == []))
 
-    mode4, proj4, loc4, adapt4, mig4, fver4, ignored4 = eif_init._resolve_mode_and_values(
-        _args(project_name="ignored-name", locale="en"), existing_config, existing_lock,
+    r4 = eif_init._resolve_mode_and_values(
+        _args(project_name="ignored-name", locale="en", knowledge_root="ignored-root", adoption_mode="greenfield"), existing_config, existing_lock,
     )
     results.append(check("upgrade: passing --project-name/--locale anyway does NOT change the derived values",
-                         (proj4, loc4) == ("existing-proj", "uk")))
+                         (r4.project_name, r4.locale) == ("existing-proj", "uk")))
+    results.append(check("upgrade: passing --knowledge-root/--adoption-mode anyway does NOT change derived values",
+                         (r4.knowledge_root, r4.adoption_mode) == ("docs/knowledge", "coexist")))
     results.append(check("upgrade: passed-but-ignored flags are reported for the caller to warn about",
-                         set(ignored4) == {"--project-name", "--locale"}, str(ignored4)))
+                         set(r4.ignored) == {"--project-name", "--locale", "--knowledge-root", "--adoption-mode"}, str(r4.ignored)))
 
     # reconfigure: --force -> only explicitly-passed values change; everything else keeps its prior value.
-    mode5, proj5, loc5, adapt5, mig5, fver5, ignored5 = eif_init._resolve_mode_and_values(
+    r5 = eif_init._resolve_mode_and_values(
         _args(force=True, locale="en"), existing_config, existing_lock,
     )
-    results.append(check("reconfigure: mode is 'reconfigure'", mode5 == "reconfigure"))
-    results.append(check("reconfigure: explicitly-passed --locale changes", loc5 == "en"))
+    results.append(check("reconfigure: mode is 'reconfigure'", r5.mode == "reconfigure"))
+    results.append(check("reconfigure: explicitly-passed --locale changes", r5.locale == "en"))
     results.append(check("reconfigure: un-passed project_name/adapter/migration_status keep their prior values",
-                         (proj5, adapt5, mig5) == ("existing-proj", "claude-code", "adopted")))
+                         (r5.project_name, r5.adapter, r5.migration_status) == ("existing-proj", "claude-code", "adopted")))
+    results.append(check("reconfigure: un-passed knowledge root/adoption mode keep their prior values",
+                         (r5.knowledge_root, r5.adoption_mode) == ("docs/knowledge", "coexist")))
 
     # --- Config/lock rendering + schema validation, safe YAML for special characters ---
     tricky_name = "weird: name, with \"quotes\" and a # hash"
-    data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev")
+    data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield")
     errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "eif-config.schema.json", data)
     results.append(check("config with YAML-special characters validates", errors == [], str(errors)))
     content = eif_init._dump_yaml(eif_init.CONFIG_HEADER, data)

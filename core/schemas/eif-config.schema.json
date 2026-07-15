@@ -65,7 +65,11 @@
         "index_path": {
           "type": "string",
           "minLength": 1,
-          "description": "Instance-relative path to the generated index file. Default on a new instance: '<root>/index.md'."
+          "description": "Instance-relative path to the generated index file. Default on a new instance: '<root>/index.md'. Must resolve inside knowledge.root - enforced at runtime by scripts/eif_paths.py, not just this schema (a schema pattern cannot check a resolved-path escape)."
+        },
+        "managed": {
+          "type": "boolean",
+          "description": "Whether eif_init.py is allowed to generate/regenerate the knowledge index file at all. Greenfield default: true (implicit, backward-compatible). Coexist default: false - EIF must not create or overwrite a knowledge index in an adopted repository without this being explicitly turned on (--manage-knowledge-index), since the project may already have its own way of organizing knowledge that EIF should not start managing unasked. When true and an index file already exists at knowledge.index_path without EIF's ownership marker, eif_init.py still refuses to overwrite it (STOP) - this flag opts into EIF managing the index going forward, it does not itself authorize taking over an existing non-EIF file."
         }
       }
     },
@@ -90,20 +94,26 @@
         "local_denylist_file": { "type": "string" },
         "suppressions": {
           "type": "array",
-          "description": "Controlled, auditable exceptions to scripts/eif_privacy_scan.py findings. Never weakens a detection pattern globally - each entry narrowly suppresses one rule at one path/glob, with a required rationale and review date. A suppression that no longer matches any real finding, or whose expires date has passed, is itself reported as a finding by the scanner (suppression hygiene) - it does not just silently keep working.",
+          "description": "Controlled, auditable exceptions to scripts/eif_privacy_scan.py findings - independent-review redesign: FINDING-specific, not rule+path-wide. A suppression identifies one exact finding (rule + exact repo-relative path + a content fingerprint), never a whole file or a glob - a second, real finding of the same rule in the same file is NOT covered by a suppression for a different finding there, even if both happen to be on the same path. If the fingerprinted line's content changes, or the finding no longer appears at that rule+path at all, the suppression stops matching (the finding reactivates) and the scanner reports the now-dead suppression as its own 'suppression hygiene' finding - it does not just silently keep working. Never weakens a detection pattern for anyone else; see scripts/eif_privacy_scan.py for the fingerprint algorithm and the (deliberately small, hand-maintained) list of valid rule IDs - an unrecognized rule is a config error, not a silently-ignored entry.",
           "items": {
             "type": "object",
-            "required": ["rule", "path", "rationale", "reviewed"],
+            "required": ["rule", "path", "fingerprint", "rationale", "reviewed"],
             "properties": {
               "rule": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Stable finding category, e.g. 'absolute_path_leak', 'secret_shaped:password_assignment', 'secret_shaped:bearer_token'."
+                "description": "Stable finding category - must be one of the rule IDs scripts/eif_privacy_scan.py actually emits (e.g. 'absolute_path_leak', 'secret_shaped:password_assignment', 'secret_shaped:bearer_token', or 'denylisted_token:<N>'). An unrecognized rule ID is a hard config error, not silently ignored."
               },
               "path": {
                 "type": "string",
                 "minLength": 1,
-                "description": "Exact repo-relative file path, or a narrow glob (fnmatch syntax). Deliberately not a directory-wide wildcard by convention - keep it as narrow as the actual reviewed case."
+                "pattern": "^[^*?\\[\\]]+$",
+                "description": "Exact repo-relative file path - glob/wildcard characters are rejected outright (broad globs are exactly what turns a reviewed one-off exception into a standing blind spot for future real findings)."
+              },
+              "fingerprint": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{16}$",
+                "description": "16 hex characters: the first 16 hex digits of sha256(rule + NUL + path + NUL + normalized_finding_line). Identifies the specific finding this suppression covers, not just its rule+path - a second, different finding of the same rule at the same path has a different fingerprint and is NOT suppressed by this entry. Never derived from or containing the matched secret value itself - it is a one-way hash, and the scanner's own output shows the fingerprint to copy for a finding you are reviewing, never the underlying text. Robust to the line moving within the file (line NUMBER is not part of the hash) but not to its content changing."
               },
               "rationale": {
                 "type": "string",
@@ -112,11 +122,13 @@
               },
               "reviewed": {
                 "type": "string",
-                "description": "ISO date this suppression was last reviewed by a human."
+                "format": "date",
+                "description": "ISO 8601 date (YYYY-MM-DD) this suppression was last reviewed by a human. Strictly validated - an unparseable date is a config error."
               },
               "expires": {
                 "type": "string",
-                "description": "Optional ISO date after which this suppression no longer applies (the finding reactivates and a suppression-hygiene finding fires). Omit for no automatic expiry."
+                "format": "date",
+                "description": "Optional ISO 8601 date (YYYY-MM-DD) after which this suppression no longer applies (the finding reactivates and a suppression-hygiene finding fires). Omit for no automatic expiry. Strictly validated the same as reviewed."
               }
             }
           }

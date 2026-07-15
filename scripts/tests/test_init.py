@@ -38,7 +38,7 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
 def _args(**overrides):
     base = dict(project_name=None, locale=None, adapter=None, migration_status=None,
                 framework_version=None, force=False, knowledge_root=None,
-                knowledge_index_path=None, adoption_mode=None)
+                knowledge_index_path=None, adoption_mode=None, manage_knowledge_index=None)
     base.update(overrides)
     return SimpleNamespace(**base)
 
@@ -140,7 +140,7 @@ def main() -> int:
 
     # --- Config/lock rendering + schema validation, safe YAML for special characters ---
     tricky_name = "weird: name, with \"quotes\" and a # hash"
-    data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield")
+    data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield", True)
     errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "eif-config.schema.json", data)
     results.append(check("config with YAML-special characters validates", errors == [], str(errors)))
     content = eif_init._dump_yaml(eif_init.CONFIG_HEADER, data)

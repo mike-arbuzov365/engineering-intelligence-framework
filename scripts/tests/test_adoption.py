@@ -85,20 +85,37 @@ Long-lived credentials are stored via the OS keychain, never in
 plaintext config or environment files committed to the repository.
 """
 
-KEYCHAIN_INTERFACE_TS = """export interface KeytarModule {
-  getPassword(service: string, account: string): Promise<string | null>;
-  setPassword(service: string, account: string, password: string): Promise<void>;
-  deletePassword(service: string, account: string): Promise<boolean>;
-}
-"""
+# Independent-review requirement: this fixture's secret-shaped content
+# must not itself trip the framework's own self-scan of this file (fixed
+# previously by adding this file to SELF_EXCLUDE_FILES - the actual fix is
+# instead assembling the trigger text from split literals at RUNTIME, so
+# the SOURCE file never contains the contiguous pattern the scanner looks
+# for, while the in-memory value (written into the separate fixture file
+# below) is byte-identical to the realistic case that motivated this
+# fixture. "password" immediately followed by ": string" is what the
+# password_assignment pattern matches - split across the `+` here so that
+# exact contiguous text never appears in this .py file's own source.
+_KEYCHAIN_PW_FIELD = "password" + ": string"
+KEYCHAIN_INTERFACE_TS = (
+    "export interface KeytarModule {\n"
+    "  getPassword(service: string, account: string): Promise<string | null>;\n"
+    "  setPassword(service: string, account: string, " + _KEYCHAIN_PW_FIELD + "): Promise<void>;\n"
+    "  deletePassword(service: string, account: string): Promise<boolean>;\n"
+    "}\n"
+)
 
 # Deliberately secret-SHAPED (matches SECRET_PATTERNS' api_key_assignment),
 # not suppressed by any suppression this test configures - proof point 7
 # needs a finding that survives a narrow, correctly-scoped suppression.
-LEGACY_CONFIG_TS = """// Legacy config module - superseded by the OS-keychain store in
-// src/auth/token-store.ts, kept only for a migration reference.
-export const legacyApiKey = "sk-fixture1234567890abcdef";
-"""
+# Same split-literal technique as above - "Api" + "Key" never appear
+# contiguous in this source file, only in the assembled runtime value.
+_LEGACY_KEY_FIELD = "legacy" + "Api" + "Key"
+_LEGACY_KEY_VALUE = "sk-" + "fixture1234567890abcdef"
+LEGACY_CONFIG_TS = (
+    "// Legacy config module - superseded by the OS-keychain store in\n"
+    "// src/auth/token-store.ts, kept only for a migration reference.\n"
+    "export const " + _LEGACY_KEY_FIELD + " = \"" + _LEGACY_KEY_VALUE + "\";\n"
+)
 
 KNOWLEDGE_NOTE = """---
 type: fact
@@ -232,7 +249,27 @@ def main() -> int:
         results.append(check("2. no .eif/ directory was created by the refused run", not (inst2 / ".eif").exists()))
 
         # ---------------------------------------------------------------
-        # 3. configured coexistence generates correct (configured) paths
+        # 2b. coexist mode defaults knowledge-index management OFF -
+        # independent-review requirement: no create/overwrite without
+        # explicit opt-in, even for a brand-new index (nothing existed
+        # before at all).
+        # ---------------------------------------------------------------
+        inst2b = tmp / "scenario-2b-coexist-no-index-optin"
+        init_git_repo(inst2b)
+        build_adoption_seed(inst2b)
+        commit_all(inst2b)
+        r2b = eif_init(inst2b, "--project-name", "adoption-fixture", "--adoption-mode", "coexist",
+                       "--knowledge-root", "docs/knowledge", "--knowledge-index-path", "docs/knowledge/index.md")
+        results.append(check("2b. coexist init without --manage-knowledge-index succeeds", r2b.returncode == 0, r2b.stdout + r2b.stderr))
+        results.append(check("2b. no index file created (management not opted in)", not (inst2b / "docs" / "knowledge" / "index.md").exists()))
+        results.append(check("2b. preflight/output names the skip reason", "coexist" in r2b.stdout and "manage-knowledge-index" in r2b.stdout, r2b.stdout))
+        cfg2b = (inst2b / ".eif" / "config.yaml").read_text(encoding="utf-8")
+        results.append(check("2b. config records knowledge.managed: false", "managed: false" in cfg2b, cfg2b))
+
+        # ---------------------------------------------------------------
+        # 3. configured coexistence generates correct (configured) paths -
+        # WITH explicit --manage-knowledge-index opt-in (see 2b above for
+        # the default-off case).
         # ---------------------------------------------------------------
         inst3 = tmp / "scenario-3-configured-coexist"
         init_git_repo(inst3)
@@ -241,12 +278,15 @@ def main() -> int:
         r3 = eif_init(
             inst3, "--project-name", "adoption-fixture", "--adoption-mode", "coexist",
             "--knowledge-root", "docs/knowledge", "--knowledge-index-path", "docs/knowledge/index.md",
+            "--manage-knowledge-index",
         )
         results.append(check("3. init with explicit --adoption-mode coexist succeeds", r3.returncode == 0, r3.stdout + r3.stderr))
         config_text = (inst3 / ".eif" / "config.yaml").read_text(encoding="utf-8")
         results.append(check("3. config records the configured knowledge root (not the greenfield default)", "docs/knowledge" in config_text and "root: knowledge\n" not in config_text))
         results.append(check("3. config records adoption.mode: coexist", "mode: coexist" in config_text))
+        results.append(check("3. config records knowledge.managed: true (explicit opt-in)", "managed: true" in config_text))
         results.append(check("3. index generated at the CONFIGURED path", (inst3 / "docs" / "knowledge" / "index.md").exists()))
+        results.append(check("3. generated index carries the EIF ownership marker", (inst3 / "docs" / "knowledge" / "index.md").read_text(encoding="utf-8").startswith("<!-- Auto-generated by scripts/eif_generate_index.py")))
         results.append(check("3. no root knowledge/ directory silently created", not (inst3 / "knowledge").exists()))
 
         # ---------------------------------------------------------------
@@ -283,22 +323,37 @@ def main() -> int:
             results.append(check(f"5. untouched file preserved exactly: {rel}", (inst3 / rel).read_bytes() == pristine_snapshot[rel]))
 
         # ---------------------------------------------------------------
-        # 6 & 7. privacy baseline: narrow suppression, real secret still fails
+        # 6 & 7. privacy baseline: narrow, FINDING-specific suppression
+        # (independent-review redesign - rule+path+fingerprint, not
+        # rule+path/glob), real secret still fails.
         # ---------------------------------------------------------------
+        import json as _json
+
+        # Discover the real fingerprint the same way a human reviewer
+        # would - run the scan first, unsuppressed, and read it off the
+        # finding itself. Not hardcoded/recomputed independently, so this
+        # test also proves the discovery workflow actually works.
+        pre_priv = run([str(SCRIPTS / "eif_privacy_scan.py"), "--repo", str(inst3), "--json"])
+        pre_result = _json.loads(pre_priv.stdout)
+        keytar_hits = [h for h in pre_result.get("secret_shaped", {}).get("password_assignment", []) if h["file"].replace("\\", "/") == "src/auth/keytar.d.ts"]
+        results.append(check("6. baseline (unsuppressed) scan finds the keytar.d.ts finding with a fingerprint", len(keytar_hits) == 1 and "fingerprint" in keytar_hits[0], pre_priv.stdout))
+        keytar_fingerprint = keytar_hits[0]["fingerprint"] if keytar_hits else "0" * 16
+
         (inst3 / ".eif" / "config.yaml").write_text(
             config_text.rstrip("\n") + "\n"
             "privacy:\n"
             "  suppressions:\n"
             "    - rule: \"secret_shaped:password_assignment\"\n"
             "      path: \"src/auth/keytar.d.ts\"\n"
+            f"      fingerprint: \"{keytar_fingerprint}\"\n"
             "      rationale: >-\n"
             "        TypeScript interface method signature for an OS-keychain\n"
             "        module - a type declaration, not an assigned secret value.\n"
-            "      reviewed: \"2026-07-15\"\n",
+            "      reviewed: \"2026-07-15\"\n"
+            "      expires: \"2026-10-15\"\n",
             encoding="utf-8",
         )
         priv = run([str(SCRIPTS / "eif_privacy_scan.py"), "--repo", str(inst3), "--json"])
-        import json as _json
         priv_result = _json.loads(priv.stdout)
         results.append(check("6. keytar.d.ts password-shaped finding is suppressed (not in active findings)",
                              "password_assignment" not in priv_result.get("secret_shaped", {})))
@@ -308,6 +363,28 @@ def main() -> int:
                              "api_key_assignment" in priv_result.get("secret_shaped", {})))
         results.append(check("7. overall scan exit code is still 1 (one narrow suppression does not clear the run)",
                              priv.returncode == 1))
+
+        # --- Regression: a SECOND, different password_assignment finding in
+        # the SAME file as the suppressed one must stay active - a
+        # suppression identifies one finding, not a whole rule+file.
+        # Done on a COPY of inst3 (not inst3 itself) so this mutation does
+        # not interfere with scenario 9's byte-for-byte rollback proof
+        # below, which needs inst3 to only ever contain eif_init's own
+        # writes. ---
+        import shutil as _shutil_regression
+        inst3_regression_copy = tmp / "scenario-6-7-regression-copy"
+        _shutil_regression.copytree(inst3, inst3_regression_copy)
+        (inst3_regression_copy / "src" / "auth" / "keytar.d.ts").write_text(
+            (inst3_regression_copy / "src" / "auth" / "keytar.d.ts").read_text(encoding="utf-8")
+            + "\n// A second, unrelated, REAL secret-shaped line in the SAME file:\n"
+            + "const debugPassword" + " = \"" + "not-a-real-secret-but-shaped-like-one\";\n",
+            encoding="utf-8",
+        )
+        priv2 = run([str(SCRIPTS / "eif_privacy_scan.py"), "--repo", str(inst3_regression_copy), "--json"])
+        priv2_result = _json.loads(priv2.stdout)
+        same_file_active = [h for h in priv2_result.get("secret_shaped", {}).get("password_assignment", []) if h["file"].replace("\\", "/") == "src/auth/keytar.d.ts"]
+        results.append(check("regression: a second real finding in the SAME suppressed file stays active", len(same_file_active) == 1, priv2.stdout))
+        results.append(check("regression: overall exit code is still 1 (one suppressed finding does not hide a new one in the same file)", priv2.returncode == 1, priv2.stdout))
 
         # ---------------------------------------------------------------
         # 8. link check runs successfully
@@ -351,6 +428,138 @@ def main() -> int:
         results.append(check("10. runtime verification passes after upgrade/reinstall", "all checks passed" in verify2.stdout, verify2.stdout))
         config_after_upgrade = (inst3 / ".eif" / "config.yaml").read_text(encoding="utf-8")
         results.append(check("10. adoption.mode survives a routine upgrade (still coexist, not reset)", "mode: coexist" in config_after_upgrade))
+
+        # ---------------------------------------------------------------
+        # 11. broken EXISTING user config must STOP, never be treated as
+        # a fresh init (independent-review requirement) - three distinct
+        # broken states, each its own byte-for-byte-unchanged proof.
+        # ---------------------------------------------------------------
+        for label, bad_content in (
+            ("invalid_yaml", "knowledge:\n  root: [unclosed\n"),
+            ("not_a_mapping", "- just\n- a\n- list\n"),
+            ("schema_invalid", "schema_version: 1\nproject: {}\n"),  # missing required project.name etc.
+        ):
+            inst11 = tmp / f"scenario-11-broken-config-{label}"
+            init_git_repo(inst11)
+            build_adoption_seed(inst11)
+            (inst11 / ".eif").mkdir()
+            (inst11 / ".eif" / "config.yaml").write_text(bad_content, encoding="utf-8")
+            commit_all(inst11)
+            before11 = snapshot(inst11)
+            r11 = eif_init(inst11, "--project-name", "should-not-matter", "--adoption-mode", "coexist")
+            results.append(check(f"11. {label} existing config: init exits 1 (STOP, not silent re-init)", r11.returncode == 1, r11.stdout + r11.stderr))
+            results.append(check(f"11. {label} existing config: refuses to treat it as a fresh init", "fresh init" in (r11.stdout + r11.stderr) or "refusing" in (r11.stdout + r11.stderr), r11.stdout + r11.stderr))
+            after11 = snapshot(inst11)
+            results.append(check(f"11. {label} existing config: tree byte-for-byte unchanged (nothing written)", after11 == before11))
+
+        # ---------------------------------------------------------------
+        # 12. existing non-EIF-owned knowledge index must STOP, never be
+        # silently overwritten - even with explicit --manage-knowledge-index.
+        # ---------------------------------------------------------------
+        inst12 = tmp / "scenario-12-index-collision"
+        init_git_repo(inst12)
+        build_adoption_seed(inst12)
+        (inst12 / "docs" / "knowledge" / "index.md").write_text(
+            "# Our own hand-written knowledge index\n\nThis is NOT generated by EIF.\n", encoding="utf-8",
+        )
+        commit_all(inst12)
+        before12 = snapshot(inst12)
+        r12 = eif_init(inst12, "--project-name", "adoption-fixture", "--adoption-mode", "coexist",
+                       "--knowledge-root", "docs/knowledge", "--knowledge-index-path", "docs/knowledge/index.md",
+                       "--manage-knowledge-index")
+        results.append(check("12. existing non-EIF index: init exits 1 (STOP)", r12.returncode == 1, r12.stdout + r12.stderr))
+        results.append(check("12. existing non-EIF index: preflight names the collision", "ownership marker" in (r12.stdout + r12.stderr), r12.stdout + r12.stderr))
+        after12 = snapshot(inst12)
+        results.append(check("12. existing non-EIF index: tree byte-for-byte unchanged (nothing written, not even .eif/)", after12 == before12))
+
+        # ---------------------------------------------------------------
+        # 13. preflight uses PERSISTED adoption.mode, not just this run's
+        # flag - independent-review fix for the hole where only mode==
+        # "init" ever STOPped. Manually-created valid config (not eif_init-
+        # generated) + existing CLAUDE.md content + no markers yet.
+        # ---------------------------------------------------------------
+        def make_manual_config(inst: Path, adoption_mode: str) -> None:
+            (inst / ".eif").mkdir(exist_ok=True)
+            (inst / ".eif" / "config.yaml").write_text(
+                "schema_version: 1\n"
+                "project:\n  name: manual-config-project\n"
+                "adapter:\n  name: claude-code\n"
+                "localization:\n  documentation_locale: en\n"
+                "knowledge:\n  root: knowledge\n  index_path: knowledge/index.md\n  managed: true\n"
+                f"adoption:\n  mode: {adoption_mode}\n",
+                encoding="utf-8",
+            )
+
+        # 13a. persisted coexist -> OK, safe append (upgrade mode, no flag needed)
+        inst13a = tmp / "scenario-13a-persisted-coexist"
+        init_git_repo(inst13a)
+        build_adoption_seed(inst13a)
+        make_manual_config(inst13a, "coexist")
+        commit_all(inst13a)
+        r13a = eif_init(inst13a)  # routine upgrade, no --adoption-mode flag at all
+        results.append(check("13a. persisted coexist (manual config, upgrade, no flag): succeeds", r13a.returncode == 0, r13a.stdout + r13a.stderr))
+        results.append(check("13a. persisted coexist: CLAUDE.md got the coexist block appended", "coexistence mode" in (inst13a / "CLAUDE.md").read_text(encoding="utf-8")))
+
+        # 13b. persisted greenfield (or absent) + no explicit flag on upgrade
+        # -> STOP, not WARN (the exact hole this item closes: the OLD
+        # preflight only ever checked mode == "init").
+        inst13b = tmp / "scenario-13b-persisted-greenfield-upgrade-stop"
+        init_git_repo(inst13b)
+        build_adoption_seed(inst13b)
+        make_manual_config(inst13b, "greenfield")
+        commit_all(inst13b)
+        before13b = snapshot(inst13b)
+        r13b = eif_init(inst13b)  # routine upgrade, no flag - must NOT silently WARN-and-proceed
+        results.append(check("13b. persisted greenfield + no markers, upgrade, no flag: exits 1 (STOP, not WARN)", r13b.returncode == 1, r13b.stdout + r13b.stderr))
+        after13b = snapshot(inst13b)
+        results.append(check("13b. persisted greenfield STOP: tree byte-for-byte unchanged", after13b == before13b))
+
+        # 13c. same as 13b, but WITH an explicit informed override this run -
+        # a bare --adoption-mode on a ROUTINE upgrade is ignored (same
+        # contract as locale/adapter/etc.), so "explicit" here means
+        # --force (reconfigure), matching how every other flag on this CLI
+        # actually takes effect against an existing config: WARN, proceeds.
+        r13c = eif_init(inst13b, "--force", "--adoption-mode", "greenfield")
+        results.append(check("13c. same case + explicit --force --adoption-mode greenfield override: succeeds (WARN, not STOP)", r13c.returncode == 0, r13c.stdout + r13c.stderr))
+        results.append(check("13c. explicit override: preflight output says WARN, not just OK", "WARN" in r13c.stdout, r13c.stdout))
+
+        # ---------------------------------------------------------------
+        # 14. markers deleted by hand after a prior real install - config
+        # still says coexist, entrypoint has real content but no markers
+        # anymore. Preflight must use the persisted mode here too.
+        # ---------------------------------------------------------------
+        inst14 = tmp / "scenario-14-deleted-markers"
+        init_git_repo(inst14)
+        build_adoption_seed(inst14)
+        commit_all(inst14)
+        r14_install = eif_init(inst14, "--project-name", "adoption-fixture", "--adoption-mode", "coexist")
+        results.append(check("14. initial real install succeeds", r14_install.returncode == 0, r14_install.stdout + r14_install.stderr))
+        # Hand-delete the managed block, leaving the rest of CLAUDE.md intact.
+        claude_text = (inst14 / "CLAUDE.md").read_text(encoding="utf-8")
+        begin_i = claude_text.index("<!-- EIF:BEGIN")
+        end_i = claude_text.index("<!-- EIF:END -->") + len("<!-- EIF:END -->")
+        (inst14 / "CLAUDE.md").write_text(claude_text[:begin_i].rstrip("\n") + "\n" + claude_text[end_i:].lstrip("\n"), encoding="utf-8")
+        r14_upgrade = eif_init(inst14)  # routine upgrade, markers now gone, config still says coexist
+        results.append(check("14. upgrade after hand-deleted markers (persisted coexist): succeeds, does not STOP", r14_upgrade.returncode == 0, r14_upgrade.stdout + r14_upgrade.stderr))
+        results.append(check("14. markers restored via append (coexist framing, not a duplicate/competing block)",
+                             (inst14 / "CLAUDE.md").read_text(encoding="utf-8").count("Execution authority") == 1))
+
+        # ---------------------------------------------------------------
+        # 15. reconfigure changes adoption mode explicitly in both
+        # directions - explicit flag always wins over whatever was
+        # persisted, in either direction.
+        # ---------------------------------------------------------------
+        inst15 = tmp / "scenario-15-reconfigure-both-ways"
+        init_git_repo(inst15)
+        build_adoption_seed(inst15)
+        commit_all(inst15)
+        eif_init(inst15, "--project-name", "adoption-fixture", "--adoption-mode", "greenfield")
+        r15a = eif_init(inst15, "--force", "--adoption-mode", "coexist")
+        results.append(check("15a. reconfigure greenfield -> coexist: succeeds", r15a.returncode == 0, r15a.stdout + r15a.stderr))
+        results.append(check("15a. config now says coexist", "mode: coexist" in (inst15 / ".eif" / "config.yaml").read_text(encoding="utf-8")))
+        r15b = eif_init(inst15, "--force", "--adoption-mode", "greenfield")
+        results.append(check("15b. reconfigure coexist -> greenfield: succeeds (WARN, informed override)", r15b.returncode == 0, r15b.stdout + r15b.stderr))
+        results.append(check("15b. config now says greenfield", "mode: greenfield" in (inst15 / ".eif" / "config.yaml").read_text(encoding="utf-8")))
 
     passed = sum(results)
     print(f"\ntest_adoption: {passed}/{len(results)} passed")

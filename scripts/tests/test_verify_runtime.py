@@ -10,6 +10,9 @@ Usage:
 """
 from __future__ import annotations
 
+import contextlib
+import hashlib
+import io
 import sys
 import tempfile
 from pathlib import Path
@@ -33,7 +36,7 @@ def _init_real_instance(inst: Path) -> None:
     manifest = eif_init.build_manifest(sources)
     digest = eif_init.combined_digest(manifest)
 
-    config_data = eif_init.render_config_data("verify-test", "claude-code", "en", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield")
+    config_data = eif_init.render_config_data("verify-test", "claude-code", "en", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield", True)
     (inst / ".eif").mkdir(parents=True)
     (inst / ".eif" / "config.yaml").write_text(eif_init._dump_yaml(eif_init.CONFIG_HEADER, config_data), encoding="utf-8")
 
@@ -48,6 +51,47 @@ def _init_real_instance(inst: Path) -> None:
     staging.rename(runtime)
 
     block = eif_init._managed_block(FRAMEWORK_ROOT, "knowledge", "knowledge/index.md", "greenfield")
+    (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
+    (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
+
+
+def _init_real_instance_variant(
+    inst: Path,
+    *,
+    adoption_mode: str = "greenfield",
+    knowledge_root: str = "knowledge",
+    knowledge_index_path: str = "knowledge/index.md",
+    knowledge_index_lock: dict | None = None,
+) -> None:
+    """Like _init_real_instance, but parameterized for the independent-review
+    drift-detection tests (Item 6): adoption mode, knowledge paths, and an
+    optional lock.knowledge_index entry (present only when eif_init.py
+    actually created/regenerated a managed index that run)."""
+    ref, ref_short, _ = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
+    sources = eif_init.collect_bundle_sources(FRAMEWORK_ROOT)
+    manifest = eif_init.build_manifest(sources)
+    digest = eif_init.combined_digest(manifest)
+
+    config_data = eif_init.render_config_data(
+        "verify-test", "claude-code", "en", "0.1.0-dev",
+        knowledge_root, knowledge_index_path, adoption_mode, True,
+    )
+    (inst / ".eif").mkdir(parents=True)
+    (inst / ".eif" / "config.yaml").write_text(eif_init._dump_yaml(eif_init.CONFIG_HEADER, config_data), encoding="utf-8")
+
+    migration_status = "adopted" if adoption_mode == "coexist" else "greenfield"
+    lock_data = eif_init.render_lock_data(
+        ref or "a" * 40, ref_short or "aaaaaaa", False, "git-verified", "claude-code", "CLAUDE.md",
+        ".eif/runtime", manifest, digest, migration_status, "0.1.0", "2026-07-15T00:00:00+00:00",
+        knowledge_index=knowledge_index_lock,
+    )
+    (inst / ".eif" / "framework.lock.yaml").write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, lock_data), encoding="utf-8")
+
+    staging = eif_init.stage_bundle(inst, sources)
+    runtime = inst / ".eif" / "runtime"
+    staging.rename(runtime)
+
+    block = eif_init._managed_block(FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode)
     (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
     (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
 
@@ -146,6 +190,139 @@ def main() -> int:
         )
         problems = verify.check_markers(inst, "CLAUDE.md")
         results.append(check("reversed markers in CLAUDE.md are caught by verify_runtime", len(problems) > 0, str(problems)))
+
+    # --- Independent-review Item 6: config/generated-block drift, clean cases ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "drift-clean-greenfield"
+        _init_real_instance_variant(inst, adoption_mode="greenfield")
+        config = verify._load_yaml(inst / ".eif" / "config.yaml")
+        results.append(check("clean greenfield instance: no config/block drift",
+                             verify.check_config_block_drift(config, inst, "CLAUDE.md") == []))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "drift-clean-coexist"
+        _init_real_instance_variant(inst, adoption_mode="coexist")
+        config = verify._load_yaml(inst / ".eif" / "config.yaml")
+        results.append(check("clean coexist instance: no config/block drift",
+                             verify.check_config_block_drift(config, inst, "CLAUDE.md") == []))
+
+    # --- adoption.mode hand-edited in config.yaml without re-running eif_init.py ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "drift-mode-edited-to-coexist"
+        _init_real_instance_variant(inst, adoption_mode="greenfield")  # CLAUDE.md generated as greenfield
+        config = verify._load_yaml(inst / ".eif" / "config.yaml")
+        config["adoption"]["mode"] = "coexist"  # simulated hand-edit, no regeneration
+        problems = verify.check_config_block_drift(config, inst, "CLAUDE.md")
+        results.append(check("hand-edited adoption.mode -> coexist without regeneration is caught",
+                             len(problems) > 0 and "eif_init.py again" in problems[0], str(problems)))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "drift-mode-edited-to-greenfield"
+        _init_real_instance_variant(inst, adoption_mode="coexist")  # CLAUDE.md generated as coexist
+        config = verify._load_yaml(inst / ".eif" / "config.yaml")
+        config["adoption"]["mode"] = "greenfield"  # simulated hand-edit, no regeneration
+        problems = verify.check_config_block_drift(config, inst, "CLAUDE.md")
+        results.append(check("hand-edited adoption.mode -> greenfield without regeneration is caught",
+                             len(problems) > 0 and "eif_init.py again" in problems[0], str(problems)))
+
+    # --- knowledge.root / knowledge.index_path hand-edited without regeneration ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "drift-knowledge-root-edited"
+        _init_real_instance_variant(inst, knowledge_root="knowledge", knowledge_index_path="knowledge/index.md")
+        config = verify._load_yaml(inst / ".eif" / "config.yaml")
+        config["knowledge"]["root"] = "docs/knowledge"  # CLAUDE.md's search command still says --knowledge-root knowledge
+        problems = verify.check_config_block_drift(config, inst, "CLAUDE.md")
+        results.append(check("hand-edited knowledge.root without regeneration is caught", len(problems) > 0, str(problems)))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "drift-knowledge-index-path-edited"
+        _init_real_instance_variant(inst, knowledge_root="knowledge", knowledge_index_path="knowledge/index.md")
+        config = verify._load_yaml(inst / ".eif" / "config.yaml")
+        config["knowledge"]["index_path"] = "knowledge/INDEX.md"  # CLAUDE.md's read instruction still says index.md
+        problems = verify.check_config_block_drift(config, inst, "CLAUDE.md")
+        results.append(check("hand-edited knowledge.index_path without regeneration is caught", len(problems) > 0, str(problems)))
+
+    # --- Independent-review Item 6: knowledge index drift (ownership marker, hash) ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "index-drift-missing"
+        content = verify.MANAGED_INDEX_MARKER + "\n\n# Knowledge Index\n\n(no entries)\n"
+        content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        _init_real_instance_variant(inst, knowledge_index_lock={"path": "knowledge/index.md", "sha256": content_hash})
+        lock = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
+        # deliberately never written to disk -> "missing"
+        problems = verify.check_knowledge_index_drift(inst, lock)
+        results.append(check("knowledge index drift: missing managed index file is caught", len(problems) > 0, str(problems)))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "index-drift-no-marker"
+        content = verify.MANAGED_INDEX_MARKER + "\n\n# Knowledge Index\n\n(no entries)\n"
+        content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        _init_real_instance_variant(inst, knowledge_index_lock={"path": "knowledge/index.md", "sha256": content_hash})
+        lock = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
+        (inst / "knowledge").mkdir(parents=True, exist_ok=True)
+        (inst / "knowledge" / "index.md").write_bytes(b"# Hand-edited index, ownership marker removed\n")
+        problems = verify.check_knowledge_index_drift(inst, lock)
+        results.append(check("knowledge index drift: stripped ownership marker is caught",
+                             len(problems) > 0 and "ownership marker" in problems[0], str(problems)))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "index-drift-hash-mismatch"
+        content = verify.MANAGED_INDEX_MARKER + "\n\n# Knowledge Index\n\n(no entries)\n"
+        content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        _init_real_instance_variant(inst, knowledge_index_lock={"path": "knowledge/index.md", "sha256": content_hash})
+        lock = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
+        (inst / "knowledge").mkdir(parents=True, exist_ok=True)
+        mutated = verify.MANAGED_INDEX_MARKER + "\n\n# Knowledge Index (HAND EDITED)\n\n(no entries)\n"
+        (inst / "knowledge" / "index.md").write_bytes(mutated.encode("utf-8"))
+        problems = verify.check_knowledge_index_drift(inst, lock)
+        results.append(check("knowledge index drift: hash mismatch after hand-edit is caught",
+                             len(problems) > 0 and "hash" in problems[0], str(problems)))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "index-drift-clean"
+        content = verify.MANAGED_INDEX_MARKER + "\n\n# Knowledge Index\n\n(no entries)\n"
+        content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        _init_real_instance_variant(inst, knowledge_index_lock={"path": "knowledge/index.md", "sha256": content_hash})
+        lock = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
+        (inst / "knowledge").mkdir(parents=True, exist_ok=True)
+        (inst / "knowledge" / "index.md").write_bytes(content.encode("utf-8"))
+        results.append(check("knowledge index drift: matching managed index has no drift",
+                             verify.check_knowledge_index_drift(inst, lock) == []))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "index-drift-unmanaged"
+        _init_real_instance_variant(inst, knowledge_index_lock=None)  # not EIF-managed this run
+        lock = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
+        results.append(check("knowledge index drift: no lock entry means no check (not a false positive)",
+                             verify.check_knowledge_index_drift(inst, lock) == []))
+
+    # --- End-to-end: the actual doctor command (main()) on a hand-edited
+    # config with no regeneration must FAIL with a specific fix instruction,
+    # never silently report "all checks passed" (independent review's exact
+    # wording of the Item 6 requirement). ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "e2e-hand-edited-config"
+        _init_real_instance_variant(inst, adoption_mode="greenfield")
+        cfg_path = inst / ".eif" / "config.yaml"
+        config = verify._load_yaml(cfg_path)
+        config["adoption"]["mode"] = "coexist"  # hand-edited value, CLAUDE.md never regenerated
+        cfg_path.write_text(eif_init._dump_yaml(eif_init.CONFIG_HEADER, config), encoding="utf-8")
+
+        buf = io.StringIO()
+        old_argv = sys.argv
+        sys.argv = ["eif_verify_runtime.py", "--framework-root", str(FRAMEWORK_ROOT), "--instance-path", str(inst)]
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc = verify.main()
+        finally:
+            sys.argv = old_argv
+        output = buf.getvalue()
+        results.append(check("doctor: hand-edited config without regeneration exits non-zero", rc == 1))
+        results.append(check(
+            "doctor: hand-edited config gives a specific fix instruction, not a silent pass",
+            "run eif_init.py again" in output and "all checks passed" not in output,
+            output[-800:],
+        ))
 
     passed = sum(results)
     print(f"\ntest_verify_runtime: {passed}/{len(results)} passed")

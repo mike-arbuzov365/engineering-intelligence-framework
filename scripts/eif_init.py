@@ -85,7 +85,8 @@ from eif_validate_frontmatter import (  # noqa: E402
     validate_config_mode, validate_lock_mode, load_schema, validate_one,
 )
 from eif_generate_index import build_index, render as render_index  # noqa: E402
-from eif_preflight import run_preflight  # noqa: E402
+from eif_preflight import run_preflight, determine_index_action, MANAGED_INDEX_MARKER  # noqa: E402
+from eif_paths import validate_instance_relative_path, validate_index_inside_root, PathPolicyError  # noqa: E402
 
 try:
     import yaml
@@ -147,11 +148,12 @@ BUNDLE_SCRIPTS = [
 ]
 # NOT bundled, deliberately: eif_init.py itself (you always run the
 # framework's own copy to init/upgrade an instance, never a copy from
-# inside the instance), eif_preflight.py (eif_init.py's own adoption-
-# preflight helper - exclusively framework-side, same reasoning as
-# eif_init.py itself), eif_check_knowledge_delta.py and eif_merge_pr.py
-# (framework-repo PR/merge-gate tooling, not applicable to a generic
-# project instance). See docs/architecture/instance-contract.md#validation-surface.
+# inside the instance), eif_preflight.py and eif_paths.py (eif_init.py's
+# own adoption-preflight and path-policy helpers - exclusively
+# framework-side, same reasoning as eif_init.py itself),
+# eif_check_knowledge_delta.py and eif_merge_pr.py (framework-repo
+# PR/merge-gate tooling, not applicable to a generic project instance).
+# See docs/architecture/instance-contract.md#validation-surface.
 BUNDLE_TREES = [
     "core/schemas",
     "core/ontology",
@@ -353,7 +355,8 @@ def commit_transaction(stages: list[_Stage]) -> None:
 
 def render_config_data(project_name: str, adapter_name: str, locale: str,
                        framework_version: str | None, knowledge_root: str,
-                       knowledge_index_path: str, adoption_mode: str) -> dict:
+                       knowledge_index_path: str, adoption_mode: str,
+                       knowledge_managed: bool) -> dict:
     data = {
         "schema_version": 1,
         "project": {"name": project_name},
@@ -373,6 +376,7 @@ def render_config_data(project_name: str, adapter_name: str, locale: str,
         "knowledge": {
             "root": knowledge_root,
             "index_path": knowledge_index_path,
+            "managed": knowledge_managed,
         },
         "adoption": {
             "mode": adoption_mode,
@@ -386,8 +390,9 @@ def render_config_data(project_name: str, adapter_name: str, locale: str,
 def render_lock_data(ref: str, ref_short: str, dirty: bool, ref_verification: str,
                      adapter_name: str, entrypoint: str, bundle_path: str,
                      manifest: list[dict], digest: str, migration_status: str,
-                     instance_version: str, generated_at: str) -> dict:
-    return {
+                     instance_version: str, generated_at: str,
+                     knowledge_index: dict | None = None) -> dict:
+    data = {
         "lock_schema_version": 1,
         "framework": {
             "ref": ref, "ref_short": ref_short, "dirty": dirty,
@@ -398,6 +403,11 @@ def render_lock_data(ref: str, ref_short: str, dirty: bool, ref_verification: st
         "bundle": {"path": bundle_path, "manifest": manifest, "digest": digest},
         "generated_at": generated_at,
     }
+    if knowledge_index is not None:
+        # Present only when an index was actually created/regenerated this
+        # run - absent means "not EIF-managed this run", not "empty index".
+        data["knowledge_index"] = knowledge_index
+    return data
 
 
 def _dump_yaml(header: str, data: dict) -> str:
@@ -416,13 +426,43 @@ def _backup(path: Path) -> Path:
     return dest
 
 
-def _load_existing_yaml(path: Path) -> dict | None:
+@dataclass
+class LoadedYaml:
+    """State-classified load of a user- or EIF-managed YAML file -
+    independent-review finding: the previous version conflated "file does
+    not exist" with "file exists but is broken" into a single None return,
+    which meant a malformed existing .eif/config.yaml was silently treated
+    as no-config-at-all and re-initialized instead of refused."""
+    state: str  # "absent" | "invalid_yaml" | "not_a_mapping" | "schema_invalid" | "valid"
+    data: dict | None
+    detail: str | None = None
+
+    @property
+    def broken(self) -> bool:
+        return self.state in ("invalid_yaml", "not_a_mapping", "schema_invalid")
+
+
+def load_existing_yaml_state(path: Path, framework_root: Path | None, schema_rel: str | None) -> LoadedYaml:
+    """schema_rel/framework_root: pass both to also classify schema-
+    invalid (parses fine, violates the schema) as its own distinct state;
+    pass framework_root=None to skip schema checking (state can then only
+    be absent/invalid_yaml/not_a_mapping/valid - used where the caller
+    checks the schema separately, e.g. via validate_in_memory)."""
     if not path.exists():
-        return None
+        return LoadedYaml("absent", None)
     try:
-        return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    except yaml.YAMLError:
-        return None
+        raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as e:
+        return LoadedYaml("invalid_yaml", None, str(e))
+    if raw is None:
+        return LoadedYaml("invalid_yaml", None, "file is empty")
+    if not isinstance(raw, dict):
+        return LoadedYaml("not_a_mapping", None, f"top-level YAML is a {type(raw).__name__}, not a mapping")
+    if framework_root is not None and schema_rel is not None:
+        errors = validate_in_memory(framework_root, schema_rel, raw)
+        if errors:
+            return LoadedYaml("schema_invalid", raw, "; ".join(errors))
+    return LoadedYaml("valid", raw)
 
 
 # --------------------------------------------------------------------------
@@ -468,21 +508,17 @@ def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_pa
     )
 
 
-def generate_index(instance_path: Path, knowledge_root_rel: str, knowledge_index_path_rel: str,
-                   dry_run: bool) -> tuple[Path, int]:
-    knowledge_root = instance_path / knowledge_root_rel
-    index_path = instance_path / knowledge_index_path_rel
-    if not knowledge_root.is_dir():
-        # Deliberately does not create knowledge_root itself - an adoption
-        # target with no knowledge directory at the configured path stays
-        # inert here, not silently given a new parallel knowledge system.
-        return index_path, 0
-    bundle_root = instance_path / ".eif" / "runtime"
-    rows, malformed, schema_invalid = build_index(knowledge_root, bundle_root if bundle_root.is_dir() else None)
-    if not dry_run:
-        index_path.parent.mkdir(parents=True, exist_ok=True)
-        index_path.write_text(render_index(rows, malformed, schema_invalid, knowledge_root), encoding="utf-8")
-    return index_path, len(rows)
+def build_index_content(knowledge_root_path: Path, framework_root: Path) -> tuple[str, int]:
+    """Renders the index content WITHOUT writing anything - the caller
+    stages it into the same managed-state transaction as everything else
+    (independent-review fix: the previous version wrote this file
+    directly, outside the transaction, invisible to --dry-run, with no
+    rollback if a later stage failed). `framework_root`, not the
+    (possibly not-yet-committed) instance bundle, is used for schema
+    checking - the schemas are identical either way and framework_root is
+    always available before the transaction starts."""
+    rows, malformed, schema_invalid = build_index(knowledge_root_path, framework_root)
+    return render_index(rows, malformed, schema_invalid, knowledge_root_path), len(rows)
 
 
 # --------------------------------------------------------------------------
@@ -498,6 +534,8 @@ class ResolvedInit:
     knowledge_root: str
     knowledge_index_path: str
     adoption_mode: str
+    knowledge_managed: bool
+    adoption_basis: str
     ignored: list[str]
 
 
@@ -508,20 +546,35 @@ def _default_index_path(knowledge_root: str) -> str:
 def _resolve_mode_and_values(args, existing_config: dict | None, existing_lock: dict | None) -> ResolvedInit:
     """Finding A: decide init / upgrade / reconfigure, and derive every
     value from the right source - extended (adoption-hardening round) to
-    also resolve knowledge.root / knowledge.index_path / adoption.mode
-    through the exact same three-mode contract as locale/adapter/
-    migration_status: CLI on init, existing config on upgrade (CLI values
-    passed anyway are ignored-with-note), explicit-only override on
-    --force reconfigure."""
+    also resolve knowledge.root / knowledge.index_path / adoption.mode /
+    knowledge.managed through the exact same three-mode contract as
+    locale/adapter/migration_status: CLI on init, existing config on
+    upgrade (CLI values passed anyway are ignored-with-note), explicit-
+    only override on --force reconfigure.
+
+    Also computes `adoption_basis` - independent-review fix for the
+    preflight hole where only mode=="init" ever STOPped: this is a single,
+    mode-aware signal (explicit_coexist / explicit_greenfield_override /
+    persisted_coexist / undecided) that eif_preflight.py uses uniformly
+    across init/upgrade/reconfigure, instead of preflight re-deriving it
+    (and getting it wrong for upgrade/reconfigure) from raw args."""
     if existing_config is None:
         if not args.project_name:
             raise ValueError("--project-name is required to initialize a new instance")
         knowledge_root = args.knowledge_root or "knowledge"
+        adoption_mode = args.adoption_mode or "greenfield"
+        if args.adoption_mode == "coexist":
+            adoption_basis = "explicit_coexist"
+        elif args.adoption_mode == "greenfield":
+            adoption_basis = "explicit_greenfield_override"
+        else:
+            adoption_basis = "undecided"
+        knowledge_managed = args.manage_knowledge_index if args.manage_knowledge_index is not None else (adoption_mode == "greenfield")
         return ResolvedInit(
             "init", args.project_name, args.locale or "en", args.adapter or DEFAULT_ADAPTER,
             args.migration_status or "greenfield", args.framework_version or "0.1.0-dev",
             knowledge_root, args.knowledge_index_path or _default_index_path(knowledge_root),
-            args.adoption_mode or "greenfield", [],
+            adoption_mode, knowledge_managed, adoption_basis, [],
         )
 
     cfg_project = (existing_config.get("project") or {}).get("name")
@@ -533,8 +586,21 @@ def _resolve_mode_and_values(args, existing_config: dict | None, existing_lock: 
     cfg_knowledge_root = cfg_knowledge.get("root") or "knowledge"
     cfg_knowledge_index_path = cfg_knowledge.get("index_path") or _default_index_path(cfg_knowledge_root)
     cfg_adoption_mode = (existing_config.get("adoption") or {}).get("mode") or "greenfield"
+    cfg_knowledge_managed = cfg_knowledge.get("managed")
+    if cfg_knowledge_managed is None:
+        cfg_knowledge_managed = True  # backward-compat default for configs written before this field existed
 
     if args.force:
+        resolved_adoption_mode = args.adoption_mode if args.adoption_mode is not None else cfg_adoption_mode
+        if args.adoption_mode == "coexist":
+            adoption_basis = "explicit_coexist"
+        elif args.adoption_mode == "greenfield":
+            adoption_basis = "explicit_greenfield_override"
+        elif cfg_adoption_mode == "coexist":
+            adoption_basis = "persisted_coexist"
+        else:
+            adoption_basis = "undecided"
+        resolved_knowledge_managed = args.manage_knowledge_index if args.manage_knowledge_index is not None else cfg_knowledge_managed
         return ResolvedInit(
             "reconfigure",
             args.project_name if args.project_name is not None else cfg_project,
@@ -544,9 +610,14 @@ def _resolve_mode_and_values(args, existing_config: dict | None, existing_lock: 
             args.framework_version if args.framework_version is not None else cfg_framework_version,
             args.knowledge_root if args.knowledge_root is not None else cfg_knowledge_root,
             args.knowledge_index_path if args.knowledge_index_path is not None else cfg_knowledge_index_path,
-            args.adoption_mode if args.adoption_mode is not None else cfg_adoption_mode,
-            [],
+            resolved_adoption_mode, resolved_knowledge_managed, adoption_basis, [],
         )
+
+    # Routine upgrade: only persisted config matters for adoption_basis - a
+    # flag passed anyway is ignored for the RESOLVED value (same contract
+    # as locale/adapter), so it must not count as consent for preflight
+    # either, even if passed redundantly (see docstring).
+    adoption_basis = "persisted_coexist" if cfg_adoption_mode == "coexist" else "undecided"
 
     ignored = [
         flag for flag, val in [
@@ -554,12 +625,13 @@ def _resolve_mode_and_values(args, existing_config: dict | None, existing_lock: 
             ("--adapter", args.adapter), ("--migration-status", args.migration_status),
             ("--framework-version", args.framework_version),
             ("--knowledge-root", args.knowledge_root), ("--knowledge-index-path", args.knowledge_index_path),
-            ("--adoption-mode", args.adoption_mode),
+            ("--adoption-mode", args.adoption_mode), ("--manage-knowledge-index", args.manage_knowledge_index),
         ] if val is not None
     ]
     return ResolvedInit(
         "upgrade", cfg_project, cfg_locale, cfg_adapter, cfg_migration_status, cfg_framework_version,
-        cfg_knowledge_root, cfg_knowledge_index_path, cfg_adoption_mode, ignored,
+        cfg_knowledge_root, cfg_knowledge_index_path, cfg_adoption_mode, cfg_knowledge_managed,
+        adoption_basis, ignored,
     )
 
 
@@ -574,9 +646,10 @@ def main() -> int:
     ap.add_argument("--framework-ref", default=None, help="Assert the framework commit explicitly (for a non-git --framework-root). Marks ref_verification: asserted; does NOT clear a real detected dirty state.")
     ap.add_argument("--allow-dirty", action="store_true", help="Proceed even if --framework-root has uncommitted changes (recorded as dirty: true)")
     ap.add_argument("--migration-status", default=None, choices=["greenfield", "adopted"], help="Ignored on a routine upgrade (preserved from the prior lock); honored on init/reconfigure.")
-    ap.add_argument("--knowledge-root", default=None, help="Instance-relative path where knowledge artifacts live. Default 'knowledge' for a new instance. Ignored on a routine upgrade; honored on init/--force reconfigure.")
-    ap.add_argument("--knowledge-index-path", default=None, help="Instance-relative path to the generated index file. Default '<knowledge-root>/index.md'. Ignored on a routine upgrade; honored on init/--force reconfigure.")
+    ap.add_argument("--knowledge-root", default=None, help="Instance-relative path where knowledge artifacts live. Default 'knowledge' for a new instance. Ignored on a routine upgrade; honored on init/--force reconfigure. Rejected if absolute, a Windows drive/UNC path, contains '..', or resolves outside the instance.")
+    ap.add_argument("--knowledge-index-path", default=None, help="Instance-relative path to the generated index file, must resolve inside --knowledge-root. Default '<knowledge-root>/index.md'. Ignored on a routine upgrade; honored on init/--force reconfigure. Same path-policy restrictions as --knowledge-root.")
     ap.add_argument("--adoption-mode", default=None, choices=["greenfield", "coexist"], help="Ignored on a routine upgrade (preserved from existing config); honored on init/reconfigure. Required (either value) when the adoption preflight detects pre-existing entrypoint content on init - see scripts/eif_preflight.py.")
+    ap.add_argument("--manage-knowledge-index", action=argparse.BooleanOptionalAction, default=None, help="Whether eif_init.py may generate/regenerate the knowledge index file. Default: on for greenfield, off for coexist (explicit opt-in required there - a coexisting project may already manage its own knowledge). Ignored on a routine upgrade (preserved from existing config); honored on init/--force reconfigure.")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force", action="store_true", help="Explicit reconfiguration: only flags you actually pass override the existing config; nothing resets to a CLI default. Backs up the existing config first.")
     args = ap.parse_args()
@@ -608,11 +681,53 @@ def main() -> int:
         )
         return 1
 
-    # --- Init vs upgrade vs reconfigure (Finding A) ---
+    # --- Config/lock state (independent-review fix): a malformed EXISTING
+    # user-owned config must STOP before any write, never be silently
+    # treated as "no config -> fresh init" just because a naive loader
+    # returned None for both cases alike. Schema-invalid is checked here
+    # too (not just YAML-parseable), using the real schema. ---
     config_path = instance_path / ".eif" / "config.yaml"
     lock_path = instance_path / ".eif" / "framework.lock.yaml"
-    existing_config = _load_existing_yaml(config_path)
-    existing_lock = _load_existing_yaml(lock_path)
+    loaded_config = load_existing_yaml_state(config_path, framework_root, "eif-config.schema.json")
+    if loaded_config.broken:
+        print(
+            f"eif-init: existing .eif/config.yaml is {loaded_config.state} "
+            f"({loaded_config.detail}) - refusing to treat this as a fresh "
+            f"init or write anything. This is your user-owned config; fix "
+            f"or remove it by hand, then re-run.",
+            file=sys.stderr,
+        )
+        return 1
+    existing_config = loaded_config.data  # None only when truly absent
+
+    # Lock fail-closed policy (documented in docs/architecture/instance-
+    # contract.md#config-and-lock-failure-states): the lock is EIF-managed,
+    # not user-owned, but an existing VALID config paired with a BROKEN
+    # lock is an inconsistent state this tool must not paper over - upgrade
+    # resolution reads migration_status (and, now, knowledge.managed) from
+    # the lock/config, and a corrupt lock must never silently resolve to
+    # "greenfield" defaults just because it couldn't be parsed. Only
+    # checked when it would actually be read (existing_config is not None,
+    # i.e. this would be an upgrade/reconfigure) - a stray corrupt lock
+    # next to a genuinely absent config is inert (a fresh init never reads
+    # the lock at all) and is silently replaced on the first real init.
+    existing_lock: dict | None = None
+    if existing_config is not None:
+        loaded_lock = load_existing_yaml_state(lock_path, framework_root, "framework-lock.schema.json")
+        if loaded_lock.broken:
+            print(
+                f"eif-init: .eif/config.yaml is valid but .eif/framework.lock.yaml "
+                f"is {loaded_lock.state} ({loaded_lock.detail}) - refusing to guess "
+                f"migration_status or other lock-derived values from a broken lock. "
+                f"Fail-closed policy: remove the corrupt lock by hand (it is fully "
+                f"regenerated on the next successful run, so deleting it is safe) "
+                f"or restore it from version control, then re-run.",
+                file=sys.stderr,
+            )
+            return 1
+        existing_lock = loaded_lock.data
+
+    # --- Init vs upgrade vs reconfigure (Finding A) ---
     try:
         r = _resolve_mode_and_values(args, existing_config, existing_lock)
     except ValueError as e:
@@ -621,8 +736,8 @@ def main() -> int:
     mode, project_name, locale, adapter, migration_status, framework_version = (
         r.mode, r.project_name, r.locale, r.adapter, r.migration_status, r.framework_version,
     )
-    knowledge_root, knowledge_index_path, adoption_mode, ignored = (
-        r.knowledge_root, r.knowledge_index_path, r.adoption_mode, r.ignored,
+    knowledge_root, knowledge_index_path, adoption_mode, knowledge_managed, adoption_basis, ignored = (
+        r.knowledge_root, r.knowledge_index_path, r.adoption_mode, r.knowledge_managed, r.adoption_basis, r.ignored,
     )
     if adapter not in ADAPTERS:
         print(f"eif-init: adapter {adapter!r} (from existing config) is not a registered adapter: {sorted(ADAPTERS)}", file=sys.stderr)
@@ -636,6 +751,17 @@ def main() -> int:
             file=sys.stderr,
         )
 
+    # --- Path policy (independent-review fix): a JSON Schema pattern
+    # cannot catch a resolved-path escape - this is the runtime check that
+    # actually matters, run before anything else touches these paths. ---
+    try:
+        knowledge_root_path = validate_instance_relative_path(knowledge_root, instance_path, "knowledge.root")
+        knowledge_index_path_abs = validate_instance_relative_path(knowledge_index_path, instance_path, "knowledge.index_path")
+        validate_index_inside_root(knowledge_index_path, knowledge_root)
+    except PathPolicyError as e:
+        print(f"eif-init: {e} - refusing to write anything.", file=sys.stderr)
+        return 1
+
     print(msg(framework_root, locale, "init_start", path=instance_path))
 
     # --- Adoption preflight (adoption-hardening round): read-only detection
@@ -643,7 +769,9 @@ def main() -> int:
     # the managed block itself - a STOP here must block everything below,
     # not just the specific write it names. Same function for --dry-run
     # (report only) and a real run (report AND enforce), so dry-run's
-    # printed plan cannot drift from what a real run actually refuses. ---
+    # printed plan cannot drift from what a real run actually refuses.
+    # Also covers the knowledge-index action now (independent-review fix -
+    # index handling used to be entirely invisible to --dry-run). ---
     entry_path = instance_path / entrypoint
     existing_entry_text = entry_path.read_text(encoding="utf-8") if entry_path.exists() else None
     gi_path = instance_path / ".gitignore"
@@ -654,9 +782,12 @@ def main() -> int:
         entrypoint_name=entrypoint,
         existing_entry_text=existing_entry_text,
         existing_gitignore_text=existing_gi_text,
-        knowledge_root_path=instance_path / knowledge_root,
+        knowledge_root_path=knowledge_root_path,
         knowledge_root_configured=knowledge_root,
-        adoption_mode_explicit=args.adoption_mode,
+        knowledge_index_path=knowledge_index_path_abs,
+        knowledge_index_path_configured=knowledge_index_path,
+        knowledge_managed=knowledge_managed,
+        adoption_basis=adoption_basis,
         begin_marker=EIF_BEGIN, end_marker=EIF_END,
         gitignore_begin=GITIGNORE_MARKER, gitignore_end=GITIGNORE_END,
     )
@@ -667,10 +798,22 @@ def main() -> int:
         print(
             f"{prefix}refusing to write anything - resolve the STOP item(s) above "
             f"(commonly: pass --adoption-mode coexist or --adoption-mode greenfield "
-            f"explicitly) and re-run.",
+            f"explicitly; for a knowledge-index STOP, move/rename the conflicting "
+            f"file first) and re-run.",
             file=sys.stderr,
         )
         return 1
+
+    # Real action for staging purposes - same function as the preflight
+    # report above, called again (cheap, read-only) rather than threading
+    # extra return values through the report object.
+    index_action, index_message = determine_index_action(
+        knowledge_root_path=knowledge_root_path,
+        knowledge_index_path=knowledge_index_path_abs,
+        knowledge_root_configured=knowledge_root,
+        knowledge_index_path_configured=knowledge_index_path,
+        knowledge_managed=knowledge_managed,
+    )
 
     # --- Mandatory bundle sources exist, before any write ---
     try:
@@ -684,7 +827,7 @@ def main() -> int:
     # --- Render config + lock, validate BOTH in memory before any write ---
     config_data = render_config_data(
         project_name, adapter, locale, framework_version,
-        knowledge_root, knowledge_index_path, adoption_mode,
+        knowledge_root, knowledge_index_path, adoption_mode, knowledge_managed,
     )
     config_errors = validate_in_memory(framework_root, "eif-config.schema.json", config_data)
     if config_errors:
@@ -693,19 +836,6 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
     config_content = _dump_yaml(CONFIG_HEADER, config_data)
-
-    lock_data = render_lock_data(
-        ref, ref_short, dirty, ref_verification, adapter, entrypoint, ".eif/runtime",
-        manifest, digest, migration_status, "0.1.0",
-        datetime.datetime.now(datetime.timezone.utc).isoformat(),
-    )
-    lock_errors = validate_in_memory(framework_root, "framework-lock.schema.json", lock_data)
-    if lock_errors:
-        print("eif-init: rendered lock failed in-memory validation, not writing anything:", file=sys.stderr)
-        for e in lock_errors:
-            print(f"  - {e}", file=sys.stderr)
-        return 1
-    lock_content = _dump_yaml(LOCK_HEADER, lock_data)
 
     # --- Entrypoint + .gitignore merge content (Finding G: marker-safe) ---
     try:
@@ -724,6 +854,38 @@ def main() -> int:
         print(f"eif-init: .gitignore has malformed EIF markers, refusing to write anything: {e}", file=sys.stderr)
         return 1
 
+    # --- Knowledge index content, built (not written) here so a dry-run
+    # can report on it and a real run can stage it into the SAME
+    # transaction as everything else (independent-review fix - the index
+    # used to be written after the transaction committed, unprotected).
+    # Built BEFORE the lock, so its hash can be recorded in the SAME lock
+    # eif_verify_runtime.py later checks for drift against. ---
+    index_content: str | None = None
+    index_row_count = 0
+    if index_action in ("create", "update"):
+        index_content, index_row_count = build_index_content(knowledge_root_path, framework_root)
+
+    lock_knowledge_index = None
+    if index_content is not None:
+        lock_knowledge_index = {
+            "path": knowledge_index_path,
+            "sha256": hashlib.sha256(index_content.encode("utf-8")).hexdigest(),
+        }
+
+    lock_data = render_lock_data(
+        ref, ref_short, dirty, ref_verification, adapter, entrypoint, ".eif/runtime",
+        manifest, digest, migration_status, "0.1.0",
+        datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        knowledge_index=lock_knowledge_index,
+    )
+    lock_errors = validate_in_memory(framework_root, "framework-lock.schema.json", lock_data)
+    if lock_errors:
+        print("eif-init: rendered lock failed in-memory validation, not writing anything:", file=sys.stderr)
+        for e in lock_errors:
+            print(f"  - {e}", file=sys.stderr)
+        return 1
+    lock_content = _dump_yaml(LOCK_HEADER, lock_data)
+
     config_action = "create" if mode == "init" else ("overwrite" if mode == "reconfigure" else "keep")
 
     if args.dry_run:
@@ -732,6 +894,7 @@ def main() -> int:
         print(f"{prefix}write .eif/framework.lock.yaml (migration_status: {migration_status})")
         print(f"{prefix}{entry_action} {entrypoint} (EIF-managed block)")
         print(f"{prefix}{gi_action if gi_action != 'update-block' else 'update'} .gitignore (EIF-managed block)")
+        print(f"{prefix}{index_action} knowledge index ({index_message})")
         print(msg(framework_root, locale, "init_complete", path=instance_path))
         print("[dry-run] no files were written.")
         return 0
@@ -773,6 +936,23 @@ def main() -> int:
     gi_next.write_text(gi_new_text, encoding="utf-8")
     stages.append(_Stage("gitignore", gi_next, gi_path, is_dir=False))
 
+    # Knowledge index - independent-review fix: now staged into the SAME
+    # transaction as everything else (last stage, so a fault-injection
+    # test after it proves the full chain, index included, rolls back to
+    # exact prior bytes). Only staged when there is something to write -
+    # "skip" (management off, or no knowledge root yet) adds no stage at
+    # all, so nothing new is created for that case either.
+    if index_content is not None:
+        index_next = knowledge_index_path_abs.with_name(knowledge_index_path_abs.name + ".next")
+        # write_bytes, not write_text: write_text's platform-default
+        # newline translation (LF -> CRLF on Windows) would make the
+        # on-disk bytes NOT match lock_knowledge_index['sha256'] above,
+        # which was computed straight from index_content's in-memory LF
+        # bytes - eif_verify_runtime.py's drift check needs these to be
+        # exactly the same bytes, not "the same text modulo line endings".
+        index_next.write_bytes(index_content.encode("utf-8"))
+        stages.append(_Stage("knowledge_index", index_next, knowledge_index_path_abs, is_dir=False))
+
     try:
         commit_transaction(stages)
     except Exception as e:
@@ -797,9 +977,11 @@ def main() -> int:
     print(msg(framework_root, locale, "instructions_generated", path=entry_path))
     print(f"{gi_action} .gitignore (EIF-managed block)")
 
-    generated_index_path, count = generate_index(instance_path, knowledge_root, knowledge_index_path, dry_run=False)
-    if (instance_path / knowledge_root).is_dir():
-        print(msg(framework_root, locale, "index_generated", count=count))
+    if index_content is not None:
+        print(f"{index_action} knowledge index at {knowledge_index_path} ({index_row_count} row(s))")
+        print(msg(framework_root, locale, "index_generated", count=index_row_count))
+    else:
+        print(f"skip knowledge index ({index_message})")
 
     print(msg(framework_root, locale, "init_complete", path=instance_path))
     return 0

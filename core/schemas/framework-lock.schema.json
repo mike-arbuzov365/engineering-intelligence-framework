@@ -76,6 +76,15 @@
     "generated_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "knowledge_index": {
+      "type": "object",
+      "description": "Provenance of the EIF-managed knowledge index, present only when eif_init.py actually created or regenerated one this run (knowledge.managed: true and a knowledge root exists) - absent entirely when the index was skipped. Lets eif_verify_runtime.py detect drift: a hand-edited index file (hash mismatch) or one that has silently lost its ownership marker.",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
     }
   },
   "additionalProperties": false

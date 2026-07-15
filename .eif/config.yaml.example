@@ -66,6 +66,15 @@ knowledge:
   # not hardcode "knowledge" independently of this config.
   root: knowledge
   index_path: knowledge/index.md
+  # Whether eif_init.py may generate/regenerate the index file at all.
+  # Greenfield default: true. Coexist default: false (explicit opt-in via
+  # --manage-knowledge-index required - a coexisting project may already
+  # manage its own knowledge, and EIF must not start doing it unasked).
+  # Even when true, an existing file at index_path WITHOUT EIF's own
+  # generated-file marker is never overwritten (a hard refusal, not a
+  # silent skip) - this only opts into EIF managing the index going
+  # forward, it does not authorize taking over an existing project file.
+  managed: true
 
 adoption:
   # greenfield (default): the generated block may present itself as this
@@ -90,14 +99,19 @@ privacy:
   # gitignored - never commit the actual file, only this pointer to it.
   # See scripts/README.md for the privacy scanner that reads it.
   local_denylist_file: ".eif/local-denylist.txt"
-  # Controlled exceptions to eif_privacy_scan.py findings - narrow (one
-  # rule, one path/glob), with a required rationale and review date. Never
-  # a way to weaken a detection pattern for everyone; a suppression that
-  # stops matching any real finding, or whose expires date has passed, is
-  # itself reported as a finding (suppression hygiene). Example:
+  # Controlled exceptions to eif_privacy_scan.py findings - FINDING-
+  # specific (rule + exact path + a content fingerprint), never a whole
+  # rule+file. Never a way to weaken a detection pattern for everyone; a
+  # suppression that stops matching (its fingerprinted line changed or is
+  # gone), or whose expires date has passed, is itself reported as a
+  # finding (suppression hygiene). Get the exact fingerprint from the
+  # scanner's own output for the finding you are reviewing
+  # (`python scripts/eif_privacy_scan.py --json`) - never guess it by
+  # hand. Example:
   # suppressions:
   #   - rule: "secret_shaped:password_assignment"
   #     path: "src/types/keytar.d.ts"
+  #     fingerprint: "a1b2c3d4e5f60718"
   #     rationale: >-
   #       TypeScript interface method signature for the keytar OS-keychain
   #       module (setPassword(...): Promise<void>) - a type declaration,

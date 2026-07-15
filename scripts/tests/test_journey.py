@@ -398,6 +398,83 @@ def main() -> int:
             results.append(check(f"16/28. [{fail_stage}] the instance's bundle is still functional after the rollback",
                                  still_works.returncode == 0, still_works.stdout + still_works.stderr))
 
+    # --- 29. Injected failure AFTER the knowledge_index stage - separate
+    # from the loop above because the index stage only exists in the
+    # transaction when there is something to index (independent-review
+    # addition: the index used to be written outside the transaction
+    # entirely, so this stage - and this test - did not exist before). ---
+    with tempfile.TemporaryDirectory() as tmp3:
+        fake_fw = Path(tmp3) / "framework-copy"
+        fake_fw.mkdir()
+        shutil.copytree(SCRIPTS, fake_fw / "scripts")
+        shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw / "core")
+        shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw / "locales")
+        shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw / "templates")
+
+        inst4 = Path(tmp3) / "instance-4"
+        inst4.mkdir()
+        fake_ref = "b" * 40
+
+        first = run([str(fake_fw / "scripts" / "eif_init.py"), "--framework-root", str(fake_fw),
+                     "--instance-path", str(inst4), "--project-name", "rollback-index-test",
+                     "--locale", "en", "--framework-ref", fake_ref])
+        results.append(check("29. [knowledge_index] baseline init against the framework copy succeeds",
+                             first.returncode == 0, first.stdout + first.stderr))
+
+        # Seed real knowledge content AFTER the baseline init, so the
+        # SECOND run (the one that gets the injected failure) has
+        # something to index - action must be "create" for the stage to
+        # exist in the transaction at all.
+        (inst4 / "knowledge" / "facts").mkdir(parents=True)
+        (inst4 / "knowledge" / "facts" / "FACT-0001.md").write_text(FACT_ARTIFACT, encoding="utf-8")
+
+        verify_before = run([str(inst4 / ".eif" / "runtime" / "eif_verify_runtime.py"),
+                              "--framework-root", str(inst4 / ".eif" / "runtime"), "--instance-path", str(inst4)])
+        results.append(check("29. [knowledge_index] baseline instance passes eif_verify_runtime before the injected failure",
+                             verify_before.returncode == 0, verify_before.stdout))
+        results.append(check("29. [knowledge_index] no index file exists yet (seeded knowledge, but no run has indexed it)",
+                             not (inst4 / "knowledge" / "index.md").exists()))
+
+        original_lock = (inst4 / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8")
+        original_claude = (inst4 / "CLAUDE.md").read_text(encoding="utf-8")
+        original_gitignore = (inst4 / ".gitignore").read_text(encoding="utf-8")
+
+        second = run(
+            [str(fake_fw / "scripts" / "eif_init.py"), "--framework-root", str(fake_fw),
+             "--instance-path", str(inst4), "--allow-dirty", "--framework-ref", fake_ref],
+            env={"EIF_INIT_TEST_FAIL_AFTER": "knowledge_index"},
+        )
+        results.append(check("29. [knowledge_index] injected failure after that stage commits makes the run fail",
+                             second.returncode != 0, second.stdout + second.stderr))
+
+        no_orphans = not any(inst4.rglob("*.next")) and not any(inst4.rglob("*.previous"))
+        results.append(check("29. [knowledge_index] no orphaned .next/.previous files anywhere in the instance", no_orphans))
+        results.append(check("29. [knowledge_index] no NEW empty directories left behind (knowledge/ contains only the seeded fact)",
+                             sorted(p.name for p in (inst4 / "knowledge").iterdir()) == ["facts"]))
+        results.append(check("29. [knowledge_index] index.md itself does not exist after rollback (its own stage rolled back too)",
+                             not (inst4 / "knowledge" / "index.md").exists()))
+        results.append(check("29. [knowledge_index] lock restored to its exact pre-failure content",
+                             (inst4 / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8") == original_lock))
+        results.append(check("29. [knowledge_index] CLAUDE.md restored to its exact pre-failure content",
+                             (inst4 / "CLAUDE.md").read_text(encoding="utf-8") == original_claude))
+        results.append(check("29. [knowledge_index] .gitignore restored to its exact pre-failure content",
+                             (inst4 / ".gitignore").read_text(encoding="utf-8") == original_gitignore))
+
+        verify_after = run([str(inst4 / ".eif" / "runtime" / "eif_verify_runtime.py"),
+                             "--framework-root", str(inst4 / ".eif" / "runtime"), "--instance-path", str(inst4)])
+        results.append(check("29. [knowledge_index] instance passes full eif_verify_runtime AFTER the rollback",
+                             verify_after.returncode == 0, verify_after.stdout))
+
+        # Prove the stage really was reached and staged (not silently
+        # skipped, which would make the "injected failure" assertion above
+        # a false positive for the wrong reason) by re-running for real
+        # (no fault injection) and confirming the index NOW appears.
+        third = run([str(fake_fw / "scripts" / "eif_init.py"), "--framework-root", str(fake_fw),
+                     "--instance-path", str(inst4), "--allow-dirty", "--framework-ref", fake_ref])
+        results.append(check("29. [knowledge_index] a real re-run (no fault injection) succeeds", third.returncode == 0, third.stdout + third.stderr))
+        results.append(check("29. [knowledge_index] and NOW the index exists with the seeded fact indexed",
+                             (inst4 / "knowledge" / "index.md").exists() and "FACT-0001" in (inst4 / "knowledge" / "index.md").read_text(encoding="utf-8")))
+
     passed = sum(results)
     print(f"\ntest_journey: {passed}/{len(results)} passed")
     return 0 if all(results) else 1

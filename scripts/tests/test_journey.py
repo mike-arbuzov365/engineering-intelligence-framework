@@ -475,6 +475,57 @@ def main() -> int:
         results.append(check("29. [knowledge_index] and NOW the index exists with the seeded fact indexed",
                              (inst4 / "knowledge" / "index.md").exists() and "FACT-0001" in (inst4 / "knowledge" / "index.md").read_text(encoding="utf-8")))
 
+    # --- 30. Injected failure on a genuinely FIRST-EVER init (no prior
+    # successful run) - independent-review pilot finding against a real
+    # adopted repository: eif_init.py's own `.eif` directory is mkdir'd
+    # eagerly, outside every _Stage's rollback bookkeeping (each _Stage only
+    # knows how to restore its own live_path, never the directory
+    # containing it). Every OTHER fault-injection test above (16-28, 29)
+    # injects its failure into a SECOND run against an instance a first,
+    # successful run already initialized, so .eif/ always already existed
+    # going in - none of them could have caught a rollback leaving a new,
+    # empty .eif/ behind. This test's instance directory is never
+    # initialized before the faulted call. ---
+    with tempfile.TemporaryDirectory() as tmp4:
+        fake_fw2 = Path(tmp4) / "framework-copy"
+        fake_fw2.mkdir()
+        shutil.copytree(SCRIPTS, fake_fw2 / "scripts")
+        shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw2 / "core")
+        shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw2 / "locales")
+        shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw2 / "templates")
+
+        inst5 = Path(tmp4) / "instance-5"
+        inst5.mkdir()
+        fake_ref2 = "c" * 40
+        results.append(check("30. [fresh-init] .eif does not exist before the first-ever run", not (inst5 / ".eif").exists()))
+
+        first_ever = run(
+            [str(fake_fw2 / "scripts" / "eif_init.py"), "--framework-root", str(fake_fw2),
+             "--instance-path", str(inst5), "--project-name", "fresh-init-rollback-test",
+             "--locale", "en", "--framework-ref", fake_ref2],
+            env={"EIF_INIT_TEST_FAIL_AFTER": "runtime"},
+        )
+        results.append(check("30. [fresh-init] injected failure on the very first run makes it fail",
+                             first_ever.returncode != 0, first_ever.stdout + first_ever.stderr))
+        results.append(check("30. [fresh-init] .eif does not exist at all after rollback (not left behind empty)",
+                             not (inst5 / ".eif").exists(), f"exists={( inst5 / '.eif').exists()}, contents={list((inst5 / '.eif').iterdir()) if (inst5 / '.eif').exists() else None}"))
+        results.append(check("30. [fresh-init] CLAUDE.md was not created either (nothing partially written outside .eif)",
+                             not (inst5 / "CLAUDE.md").exists()))
+        results.append(check("30. [fresh-init] no orphaned .next/.previous files anywhere in the instance directory",
+                             not any(inst5.rglob("*.next")) and not any(inst5.rglob("*.previous"))))
+
+        # Prove the stage really was reached (not silently skipped, which
+        # would make "injected failure" above a false positive for the
+        # wrong reason) by re-running for real and confirming it succeeds
+        # cleanly from this now-genuinely-empty starting point.
+        real_run = run([str(fake_fw2 / "scripts" / "eif_init.py"), "--framework-root", str(fake_fw2),
+                        "--instance-path", str(inst5), "--project-name", "fresh-init-rollback-test",
+                        "--locale", "en", "--framework-ref", fake_ref2])
+        results.append(check("30. [fresh-init] a real re-run (no fault injection) succeeds from the clean slate",
+                             real_run.returncode == 0, real_run.stdout + real_run.stderr))
+        results.append(check("30. [fresh-init] .eif now exists for real after the successful re-run",
+                             (inst5 / ".eif" / "config.yaml").exists() and (inst5 / ".eif" / "runtime").is_dir()))
+
     passed = sum(results)
     print(f"\ntest_journey: {passed}/{len(results)} passed")
     return 0 if all(results) else 1

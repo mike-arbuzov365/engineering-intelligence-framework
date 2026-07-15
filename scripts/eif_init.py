@@ -901,7 +901,25 @@ def main() -> int:
 
     # --- Stage everything, then commit as one transaction (Finding B) ---
     eif_dir = instance_path / ".eif"
+    # independent-review pilot finding: on a genuine first-ever init (this
+    # directory did not exist before this run), mkdir() here is itself
+    # outside the _Stage/rollback bookkeeping below - every _Stage only
+    # knows how to undo its own live_path, never the directory containing
+    # it. Without eif_dir_is_new, a fault on ANY later stage (bundle
+    # verification, or commit_transaction itself) rolls back every staged
+    # file correctly but leaves a new, empty .eif/ behind - an orphaned
+    # directory the same class of bug Item 1's transaction guarantee is
+    # supposed to rule out. Caught against a real adopted repository
+    # (wm-freelance-ops pilot copy), not by the synthetic fixtures, because
+    # every existing fault-injection test runs its second (faulted) attempt
+    # against an instance a first, successful run already initialized -
+    # .eif/ always already existed in those cases.
+    eif_dir_is_new = not eif_dir.exists()
     eif_dir.mkdir(parents=True, exist_ok=True)
+
+    def _cleanup_orphaned_eif_dir() -> None:
+        if eif_dir_is_new and eif_dir.is_dir() and not any(eif_dir.iterdir()):
+            eif_dir.rmdir()
 
     stages: list[_Stage] = []
 
@@ -918,6 +936,7 @@ def main() -> int:
         shutil.rmtree(runtime_next, ignore_errors=True)
         if config_action != "keep":
             (eif_dir / "config.yaml.next").unlink(missing_ok=True)
+        _cleanup_orphaned_eif_dir()
         print("eif-init: staged bundle failed verification, nothing committed:", file=sys.stderr)
         for p in problems:
             print(f"  - {p}", file=sys.stderr)
@@ -956,6 +975,7 @@ def main() -> int:
     try:
         commit_transaction(stages)
     except Exception as e:
+        _cleanup_orphaned_eif_dir()
         print(f"eif-init: transaction failed and was rolled back: {e}", file=sys.stderr)
         return 1
 

@@ -30,6 +30,14 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
+      - name: Install pinned dependencies
+        # Newly required by this job: eif_privacy_scan.py now imports
+        # PyYAML (privacy.suppressions support) - caught live by this same
+        # PR's own CI run, not by local testing, since the local machine
+        # already had PyYAML installed for other scripts. Without this
+        # step, the import fails, suppressions silently load as [], and
+        # every suppression-mechanism test fails on a clean runner.
+        run: pip install -r scripts/requirements.txt
       - name: Run privacy scan unit tests
         # Adoption-hardening correction: this suite (detection, redaction,
         # fail-closed, and the suppression/baseline mechanism) previously

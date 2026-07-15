@@ -3,8 +3,8 @@
 <!-- Canonical source document. README, website copy, articles, diagrams,
 FAQ, and launch posts should all derive from this file, not diverge from it. -->
 
-**Status: pre-v0.1, first full draft** (revised once, 2026-07-15, after an
-independent review pass - see
+**Status: pre-v0.1, first full draft** (revised across two independent
+review passes, both 2026-07-15 - see
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for what
 that review changed). Extracted and genericized from a private production
 instance that has run this methodology daily since May 2026. Sections
@@ -173,12 +173,19 @@ lessons, recurring failure patterns, and rejected approaches - not just
 rely on whatever happens to already be in context. This is a deliberate
 preflight step, not a hope that the agent remembers.
 
-*(Not built yet in this repository: the retrieval tooling itself. The
-private instance implements this as a lightweight ripgrep-based search over
-a knowledge index, deliberately avoiding embeddings/vector search for a
-structured, file-based knowledge base - see
-[Limitations](#limitations) for why that tradeoff was made and when it
-might not hold.)*
+Built: [`scripts/eif_generate_index.py`](../../scripts/eif_generate_index.py)
+builds a knowledge index from every artifact under `knowledge.root`
+(reporting malformed-YAML and schema-invalid rows as distinct, honest
+categories, never conflated with "no results"), and
+[`scripts/eif_search_knowledge.py`](../../scripts/eif_search_knowledge.py)
+is an offline, Unicode-aware keyword search over it that excludes
+`rejected`/`superseded` artifacts by default - a lightweight,
+substring/keyword search, deliberately avoiding embeddings/vector search
+for a structured, file-based knowledge base, verified against real
+English and Ukrainian content in `scripts/tests/test_search_knowledge.py`
+and the vertical-slice demo. See [Limitations](#limitations) for why that
+tradeoff was made and when it might not hold - no semantic search, and not
+tested against a realistic-sized knowledge base.
 
 ## Session lifecycle
 
@@ -205,7 +212,10 @@ session) should be able to verify the claimed evidence against the actual
 repository state (merged PRs, passing CI, working code) rather than trust
 the closeout narrative at face value.
 
-*(Templates not ported yet - see [`templates/README.md`](../../templates/README.md).)*
+*(Planning-packet templates specifically - charter, facts, decisions,
+roadmap - not ported yet. The task-scope, Knowledge Delta, and
+session-closeout templates used by a single-session task ARE built and in
+use - see [`templates/README.md`](../../templates/README.md).)*
 
 ## Knowledge Delta
 
@@ -285,7 +295,21 @@ a mandatory check is failing - if your CI/hosting plan doesn't support
 required-status-check enforcement natively, the merge path itself (not
 just documentation) needs to check status before allowing a merge.
 
-*(Concrete gate scripts not ported yet - see [`scripts/README.md`](../../scripts/README.md).)*
+Built: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs
+privacy scanning, frontmatter/config/lock schema validation, link
+checking, a YAML/JSON-Schema self-consistency check, and Knowledge Delta
+completeness (fetched from the live PR body, not the frozen trigger
+payload) on every PR, plus the full runtime test suite - see
+[`scripts/README.md`](../../scripts/README.md) for what each gate script
+does. A controlled merge entrypoint
+([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py)) re-verifies
+checks, Knowledge Delta, and review state before merging, pinned to the
+verified head SHA. What's *not* done: none of this is the only path to
+merge yet - required-status-checks/branch-protection are not configured
+at the repository-settings level, and no agent-hook guard blocks a direct
+`gh pr merge` (the one adapter that exists, Claude Code, ships no hook
+scripts) - see [Limitations](#limitations) and the
+[Public-Ready checklist](#definition-of-public-ready).
 
 ## Privacy and security
 
@@ -322,13 +346,20 @@ extensions" in
 
 ## End-to-end example
 
-*(Not built yet.)* Planned: a synthetic demo under
-[`examples/demo-workspace/`](../../examples/README.md) walking through a
-new task, experience retrieval, source authority, structural navigation (or
-its degraded-mode fallback), controlled implementation, shell-output
-compression (or its fallback), tests, a Knowledge Delta, a promotion
-decision, and session cleanup - against synthetic code with no real project
-data.
+Built: [`examples/demo-workspace/`](../../examples/README.md) is a real,
+materialized EIF instance against a synthetic leap-year calculator -
+initialize the instance, seed and search real knowledge (experience
+retrieval), scope and implement one real change informed by that
+retrieval (controlled implementation), verify it with a real
+failing-before/passing-after test, write a Knowledge Delta and close out
+truthfully, in Ukrainian. Reproduced from a clean checkout with captured
+command output - see [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
+and [`docs/product/claims-evidence.md`](../product/claims-evidence.md) for
+exactly what this does and does not prove. Not included: structural-graph
+and shell-output-compression navigation (both optional integrations,
+explicitly excluded from this slice - see
+[Optional integrations](../../README.md#optional-integrations)), a second
+scenario, and a second adapter.
 
 ## Metrics and benchmark methodology
 
@@ -465,7 +496,9 @@ formally ratified (the file is explicit about which is which).
 - [ ] No private paths, customer data, internal telemetry, or raw
       structural-graph artifacts present (spot-checked in ported files so
       far; not exhaustively verified).
-- [ ] Synthetic demo replaces private examples.
+- [x] Synthetic demo replaces private examples: the only content under
+      `examples/` is `demo-workspace/`, a synthetic leap-year calculator
+      with no real project data.
 
 ### Legal and community
 - [x] Open-source license added (Apache-2.0).
@@ -480,18 +513,33 @@ formally ratified (the file is explicit about which is which).
       ([`core/schemas/eif-config.schema.json`](../../core/schemas/eif-config.schema.json));
       not finalized, no loader/validator CLI wired up yet.
 - [x] English canonical docs exist for the ontology core.
-- [ ] A non-English locale works end to end.
-- [ ] Generic bootstrap (`eifctl init`) works without any private
-      repository.
+- [x] A non-English locale works end to end, **partially**: Ukrainian
+      status messages, Knowledge Delta, closeout headings, and knowledge
+      retrieval are verified (`locales/uk/`,
+      `scripts/tests/test_locale.py`, `test_journey.py`); full
+      agent-response localization and `terminology.yaml` are not covered.
+- [x] An **experimental** bootstrap (`eif_init.py`) works without any
+      private repository - proven against a temp-directory instance and a
+      disposable copy of a private repository (adoption pilot). Not done:
+      a ratified, packaged CLI (`eifctl init` or equivalent - D-05/D-08
+      remain open); today it's an invoked script, not an installed
+      command.
 - [x] Existing-repository adoption does not silently override pre-existing
       project governance: an adoption preflight detects it and stops
-      before any write without an explicit coexistence decision; a
-      `coexist` mode generates a block that defers to existing rules
-      instead of claiming sole authority; knowledge paths are
-      user-configured, not hardcoded. Tested against a realistic sanitized
-      fixture (`scripts/tests/test_adoption.py`), not yet re-validated
-      against the original pilot repository after this round's changes
-      (tracked separately, private planning packet).
+      before any write without an explicit coexistence decision, keyed off
+      the resolved/persisted adoption basis so a prior decision survives a
+      later flagless run; a `coexist` mode generates a block that defers
+      to existing rules instead of claiming sole authority; knowledge
+      paths are user-configured and validated against path escape
+      (absolute, drive/UNC, `..` traversal, outside-instance); an existing
+      knowledge-index file without EIF's own ownership marker is never
+      overwritten; privacy-scan suppressions identify one exact finding
+      (rule + path + content fingerprint), never a whole rule+file; an
+      existing but broken `.eif/config.yaml` stops before any write rather
+      than being treated as absent. Tested against a realistic sanitized
+      fixture (`scripts/tests/test_adoption.py`, 67 checks), not yet
+      re-validated against the original pilot repository after this
+      round's changes (tracked separately, private planning packet).
 - [ ] At least two agent adapters tested against this repository.
 - [x] Structural-graph and shell-compression integrations documented as
       optional.
@@ -514,29 +562,41 @@ formally ratified (the file is explicit about which is which).
       `--dry-run` against this repository's real PR #1.
 - [ ] Those CI checks and the merge-gate script are not yet the *only*
       path to merge - nothing at the repository-settings level (required
-      status checks / branch protection) or the agent-hook level (no
-      adapters ported yet to wire a "deny direct `gh pr merge`" guard into)
-      technically prevents bypassing them. Checks are labeled "required by
-      policy," not "blocking," for exactly this reason. This is the same
-      gap the private instance found and fixed in itself (see
-      Limitations) - do not consider this item done until it's closed the
-      same way (repository settings + a hook guard once an adapter
-      exists).
+      status checks / branch protection) or the agent-hook level (the one
+      adapter that exists, Claude Code, ships no hook scripts, so there is
+      no "deny direct `gh pr merge`" guard) technically prevents bypassing
+      them. Checks are labeled "required by policy," not "blocking," for
+      exactly this reason. This is the same gap the private instance found
+      and fixed in itself (see Limitations) - do not consider this item
+      done until it's closed the same way (repository settings + a hook
+      guard for that adapter).
 - [ ] Graph freshness derived from commit evidence (pattern exists in the
       private instance; not ported here).
-- [ ] Generated adapters have drift checks (no adapters ported yet).
+- [ ] Generated adapters have drift checks beyond config/entrypoint
+      consistency: `eif_verify_runtime.py` already catches config-vs-lock
+      adapter mismatches and config-vs-generated-block drift for the one
+      adapter that exists (Claude Code); it does not track drift in that
+      adapter's own behavior (e.g. a Claude Code version changing hook
+      semantics), and there is no second adapter to compare against yet.
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
-- [ ] Demo workflow has executable evidence (see
-      [`docs/guides/vertical-slice.md`](../guides/vertical-slice.md)).
+- [x] Demo workflow has executable evidence:
+      `scripts/tests/test_journey.py` (88 checks) drives a real subprocess
+      journey against a fresh instance, and
+      [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
+      has real captured command output, both reproducible from a clean
+      checkout - see
+      [`docs/guides/vertical-slice.md`](../guides/vertical-slice.md).
 - [ ] Benchmark measures quality together with tokens (not run).
 
 ### Documentation
 - [x] This document exists and is the canonical source for README/website/
       FAQ content.
 - [ ] README explains EIF in 2-3 minutes (draft exists, not user-tested).
-- [ ] Quickstart completes in 10 minutes (not possible yet - bootstrap
-      tooling doesn't exist).
+- [ ] Quickstart completes in 10 minutes (the experimental bootstrap
+      exists and the demo README documents exact commands, but the
+      10-minute claim itself has not been user-timed outside this
+      session).
 - [ ] FAQ covers memory/RAG/structural-graph/shell-compression/privacy/
       overhead questions (see [FAQ](#faq) below - partial).
 - [x] Limitations are explicit (see [Limitations](#limitations)).

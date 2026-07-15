@@ -221,9 +221,10 @@ checkout:
 | Knowledge frontmatter + schema-aware indexing | `eif_generate_index.py`, `eif_search_knowledge.py` | Distinguishes valid / schema-invalid / unparseable-YAML artifacts - see their own docstrings |
 | Config schema | `eif_validate_frontmatter.py --config` | `.eif/config.yaml` against `eif-config.schema.json` |
 | Lock schema | `eif_validate_frontmatter.py --lock` | `.eif/framework.lock.yaml` against `framework-lock.schema.json` |
-| Privacy scan | `eif_privacy_scan.py` | Absolute-path leaks, secret-shaped strings, denylisted tokens across the instance's own git-tracked files |
+| Privacy scan | `eif_privacy_scan.py` | Absolute-path leaks, secret-shaped strings, denylisted tokens across the instance's own git-tracked files - including finding-specific suppression validation |
 | Relative link check | `eif_check_links.py` | Markdown relative links resolve within the instance |
 | Localized rendering | `eif_render.py` | Not a validator, but writes real files - included here because "validate the instance" implies these files actually got generated, not just described |
+| Self-verification ("doctor") | `eif_verify_runtime.py` | Config/lock schema validity, manifest digest self-consistency, per-file bundle hash verification, missing/unexpected-file detection, config/adapter/lock/entrypoint consistency, provenance notes, marker integrity, and drift between `.eif/config.yaml` and the generated entrypoint block or knowledge index |
 
 What is **deliberately framework-maintainer-only**, not shipped in the
 bundle:
@@ -231,13 +232,16 @@ bundle:
 | Not bundled | Why |
 |---|---|
 | `eif_init.py` | You always run the *framework's* copy to init/upgrade an instance - an instance never re-inits itself from inside |
+| `eif_preflight.py` | `eif_init.py`'s own adoption-preflight helper - exclusively framework-side, same reasoning as `eif_init.py` itself |
+| `eif_paths.py` | `eif_init.py`'s own path-policy helper (validates `knowledge.root`/`knowledge.index_path` at init/upgrade time) - exclusively framework-side, same reasoning |
 | `eif_check_knowledge_delta.py` | Validates a *PR body* against this framework repository's own PR template - not applicable to a generic project instance's PR process |
 | `eif_merge_pr.py` | This framework repository's own merge-gate script, not a generic tool |
 
 An instance's own bundle validation surface is therefore: frontmatter/config/
-lock schema validation, privacy scanning, link checking, and localized
-rendering. It is not a claim that the bundle re-implements this framework
-repository's entire CI - PR-workflow-specific tooling stays in the framework.
+lock schema validation, privacy scanning, link checking, localized
+rendering, and self-verification. It is not a claim that the bundle
+re-implements this framework repository's entire CI - PR-workflow-specific
+tooling stays in the framework.
 
 ## What this is not
 

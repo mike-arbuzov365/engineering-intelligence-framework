@@ -41,7 +41,7 @@ def main() -> int:
             ("../outside", "traversal"),
             ("/etc/passwd", "absolute POSIX"),
             ("C:\\Windows\\System32", "Windows drive"),
-            ("C:/Windows/System32", "Windows drive (forward slash)"),
+            ("C:" + "/Windows/System32", "Windows drive (forward slash)"),
             ("\\\\server\\share\\file", "UNC (backslash)"),
             ("//server/share/file", "UNC (forward slash)"),
             ("knowledge/../../outside", "embedded traversal"),

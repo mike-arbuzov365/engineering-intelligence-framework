@@ -1,226 +1,153 @@
 # Demo: v0.1 vertical slice
 
-<!-- Knowledge source: this PR's vertical slice, 2026-07-15. Every command
-below was actually run to build this demo; the output blocks are real
-captured evidence, not hand-written examples. See task-scope.md,
-knowledge-delta.md, and session-closeout.md in this directory for the
-task's own records. -->
+<!-- Knowledge source: vertical slice + takeover review, 2026-07-15. Every
+command below was actually run; output blocks are real captured evidence.
+This demo is a project instance that lives inside the framework repo, but its
+generated commands reference the pinned `.eif/runtime/` bundle, so they are
+exactly what a *separate* repository would run. See the private migration
+ledger and PR #2 description for provenance. -->
 
-A synthetic, single-file Python task that walks through the smallest
-complete EIF workflow: initialize an instance, seed knowledge, retrieve a
-relevant lesson before implementing, make one real change, verify it with
-a real test, and close out truthfully - in Ukrainian, via the locale
-layer, for two of the required outputs.
+A synthetic single-file Python task that walks through the smallest complete
+EIF workflow, as a real, separately-runnable project instance: initialize,
+seed and retrieve knowledge (lifecycle-aware), make one real change informed
+by that retrieval, verify with a real test, and close out in Ukrainian via
+the locale layer.
 
-This README assumes no familiarity with the private Engineering
-Intelligence instance this framework was extracted from.
+No familiarity with the private EI this framework was extracted from is
+assumed.
 
 ## Prerequisites
 
-- Python 3.11+ (the CLI 8-space example below uses whatever `python` is
-  first on `PATH`; any recent CPython 3 works)
-- `pip install -r scripts/requirements.txt` (PyYAML + jsonschema, pinned -
-  see `scripts/README.md`)
-- No pytest, no other dependency - the demo's own test uses only the
-  standard library's `unittest`.
+- Python 3.11+
+- After step 1 generates the runtime bundle: `pip install -r .eif/runtime/requirements.txt`
+  (PyYAML + jsonschema, pinned). No pytest - the demo's behavioral test uses
+  only the standard library.
 
-All commands below are run from the framework repository root (the
-directory containing this `README.md` at `examples/demo-workspace/`).
+## 1. Initialize the instance
 
-## 1-2-3. Initialize the instance, create and validate `.eif/config.yaml`, generate instructions
-
-One command does all three (`scripts/eif_init.py` is an **experimental**
-bootstrap - see its own docstring; it does not ratify a final CLI name or
-packaging strategy, D-05/D-08 in `core/policies/decisions.md` remain
-open):
+`scripts/eif_init.py` is an **experimental** bootstrap (it does not ratify a
+CLI name or packaging strategy - D-05/D-08 remain open). From the framework
+root:
 
 ```
-python scripts/eif_init.py --framework-root . --instance-path examples/demo-workspace --project-name demo-workspace --locale uk
+python scripts/eif_init.py --framework-root . --instance-path examples/demo-workspace --project-name demo-workspace --locale uk --force
 ```
 
-Actual output, captured 2026-07-15:
+Real output, captured 2026-07-15:
 
 ```text
 Ініціалізація EIF project instance у <path>/examples/demo-workspace
-ok   <path>/examples/demo-workspace/.eif/config.yaml
+overwrite .eif/config.yaml (framework.ref 4a5c804)
 eif-validate: 1 file, 0 error(s)
 Створено .eif/config.yaml (locale: uk)
-Згенеровано agent instructions у <path>/examples/demo-workspace/AGENTS.md
+refresh .eif/runtime (pinned bundle)
+create CLAUDE.md (EIF-managed block)
+Згенеровано agent instructions у <path>/examples/demo-workspace/CLAUDE.md
 Knowledge index згенеровано: 2 артефакт(ів)
-EIF instance ініціалізовано у <path>/examples/demo-workspace
 ```
 
-(Absolute paths shortened to `<path>` here; the real run printed the full
-local path - the vertical slice proves this works on a real filesystem,
-not that it hides paths.) Note the Ukrainian status messages - this is one
-of the three required Ukrainian-output proof points for this slice, backed
-by `locales/uk/messages.yaml` and `scripts/eif_locale.py`, not hardcoded
-per-script strings.
+This generates three things, all runnable from the instance root even with no
+framework checkout present:
 
-Files created: `.eif/config.yaml` (validated against
-`core/schemas/eif-config.schema.json` as part of the same command - it
-fails loudly, not silently, if the generated config doesn't validate),
-`AGENTS.md` (copied verbatim from `templates/agent-instructions.md` -
-English-canonical, see that template's own "Language" section for why),
-`knowledge/index.md` (see step 5).
+- `.eif/config.yaml` - records the **real** framework commit it was generated
+  from (`framework.ref`), validated on the spot against the config schema.
+- `.eif/runtime/` - a pinned, self-contained bundle of the scripts, schemas,
+  ontology, locales and templates the instance's own commands use (gitignored;
+  regenerated on init/upgrade).
+- `CLAUDE.md` - the agent entrypoint Claude Code loads at session start (not
+  AGENTS.md - verified against the official docs and CLI `2.1.169`). Only the
+  `EIF:BEGIN`/`EIF:END` block is managed; project-authored content is never
+  clobbered.
 
-A real defect was found and fixed while building this: the first run of
-this exact command crashed with `UnicodeEncodeError` because Windows
-consoles default `stdout` to a codepage (`cp1252`) that cannot encode
-Cyrillic. Fixed in `scripts/eif_init.py` and `scripts/eif_search_knowledge.py`
-with `sys.stdout.reconfigure(encoding="utf-8")`. Recorded in this demo's
-own `knowledge-delta.md` under "Інциденти" - it's real evidence the
-workflow surfaces genuine incidents, not just happy-path output.
+Init is **non-destructive**: it refuses to overwrite an existing config
+without `--force` (which backs it up first), and `--dry-run` writes nothing.
+That is what makes adopting an existing repository - the eventual migration of
+the private production instance - safe. See
+[`../../docs/architecture/instance-contract.md`](../../docs/architecture/instance-contract.md).
 
-## 4. Knowledge index
+## 2-3. Retrieve a relevant prior lesson (lifecycle-aware)
 
-Already generated by step 1-2-3 above (`eif_init.py` calls the same logic
-`scripts/eif_generate_index.py` exposes standalone). It indexed the two
-knowledge artifacts already present in `knowledge/`:
-
-- [`knowledge/facts/FACT-0001-gregorian-leap-year-rule.md`](knowledge/facts/FACT-0001-gregorian-leap-year-rule.md)
-- [`knowledge/failure-patterns/PATTERN-0001-naive-leap-year-check.md`](knowledge/failure-patterns/PATTERN-0001-naive-leap-year-check.md)
-
-Both are real, machine-validated knowledge artifacts (see "Validation"
-below) - not placeholders. The failure pattern is the seeded lesson this
-demo's task is designed to need.
-
-## 5-6. Retrieve a relevant prior lesson
+The knowledge index was built by step 1. Search it - by default only
+validated knowledge is returned, and every result shows its status/evidence:
 
 ```
-python scripts/eif_search_knowledge.py --knowledge-root examples/demo-workspace/knowledge "leap year"
+python .eif/runtime/eif_search_knowledge.py --knowledge-root knowledge "leap year"
 ```
-
-Actual output, captured 2026-07-15:
 
 ```text
 eif-search-knowledge: 2 result(s) for query: leap year
-  [ 44] failure-patterns/PATTERN-0001-naive-leap-year-check.md  (type=failure_pattern, status=validated)
+  [ 44] failure-patterns/PATTERN-0001-naive-leap-year-check.md  (status=validated, evidence=OBSERVED, confidence=high, type=failure_pattern)
         The obvious, plausible-looking implementation of a leap-year check is:
-  [ 21] facts/FACT-0001-gregorian-leap-year-rule.md  (type=fact, status=validated)
+  [ 21] facts/FACT-0001-gregorian-leap-year-rule.md  (status=validated, evidence=OBSERVED, confidence=high, type=fact)
         A year is a leap year if and only if:
 ```
 
-For comparison, a query with no relevant match returns an explicit
-"nothing found," not a false positive:
+Retrieval is not decorative: [`task-scope.md`](task-scope.md) records it and
+the implementation follows the retrieved rule rather than the naive check the
+failure pattern warns against. A `rejected` hypothesis on the same topic would
+be **skipped** by default (reported as status-ineligible), not returned as if
+it were validated - see `scripts/tests/test_search_knowledge.py`. Ukrainian
+(Cyrillic) queries work too - the tokenizer is Unicode-aware.
+
+## 4. Task scope
+
+[`task-scope.md`](task-scope.md), written before the change.
+
+## 5-6. Make the change, verify with a real test
+
+The behavioral test [`tests/test_calendar_utils.py`](tests/test_calendar_utils.py)
+covers ordinary years and the century-exception cases (1900, 2000, 2100) that
+a naive `year % 4 == 0` fails. `src/calendar_utils.py` implements the rule from
+`FACT-0001`.
+
+The failing-before -> passing-after transition is reproduced **deterministically**
+by [`../../scripts/tests/test_journey.py`](../../scripts/tests/test_journey.py):
+in an isolated copy it resets the implementation to an unimplemented stub,
+asserts the test FAILS, applies the committed solution, and asserts it PASSES.
+That test is what proves the journey reproduces from a clean clone - not merely
+re-running the already-passing committed state.
 
 ```
-python scripts/eif_search_knowledge.py --knowledge-root examples/demo-workspace/knowledge "quantum encryption"
+python examples/demo-workspace/tests/test_calendar_utils.py -v   # passes on the committed solution
+python scripts/tests/test_journey.py                             # proves failing-before -> passing-after
 ```
 
-```text
-eif-search-knowledge: no relevant knowledge found for query: quantum encryption
-```
-
-This retrieval is not decorative: [`task-scope.md`](task-scope.md)'s
-"Experience retrieval preflight" section records it, and the actual
-implementation in `src/calendar_utils.py` follows the retrieved fact's
-rule rather than the naive check the retrieved failure pattern warns
-against - see that file's comments for the direct link.
-
-## 7. Task scope and stop conditions
-
-[`task-scope.md`](task-scope.md) - written before the code change, not
-after.
-
-## 8-9. Make the change, verify with a real test
-
-Before the change, `src/calendar_utils.py` had `is_leap_year` raise
-`NotImplementedError`. Running the test at that point:
-
-```
-python examples/demo-workspace/tests/test_calendar_utils.py -v
-```
-
-```text
-test_century_year_divisible_by_400_is_leap ... ERROR
-test_century_year_not_divisible_by_400_is_not_leap ... ERROR
-test_ordinary_leap_year ... ERROR
-test_ordinary_non_leap_year ... ERROR
-...
-NotImplementedError: is_leap_year is not implemented yet - see task-scope.md
-...
-Ran 4 tests in 0.004s
-
-FAILED (errors=4)
-```
-
-After implementing `is_leap_year` per the retrieved fact (see
-`src/calendar_utils.py`), the same command:
-
-```text
-test_century_year_divisible_by_400_is_leap ... ok
-test_century_year_not_divisible_by_400_is_not_leap ... ok
-test_ordinary_leap_year ... ok
-test_ordinary_non_leap_year ... ok
-
-Ran 4 tests in 0.001s
-
-OK
-```
-
-Both runs are real, captured output from this session - not a
-reconstruction. `test_century_year_not_divisible_by_400_is_not_leap` is
-exactly the case a naive `year % 4 == 0` implementation would fail (1900,
-2100); it's the test the seeded failure pattern exists to prevent regressing.
-
-## 10-11. Knowledge Delta and closeout, in Ukrainian
+## 7-8. Knowledge Delta and closeout, in Ukrainian
 
 [`knowledge-delta.md`](knowledge-delta.md) and
-[`session-closeout.md`](session-closeout.md) in this directory - both
-generated from `locales/uk/templates/` via `scripts/eif_locale.py`
-(headings and boilerplate are the real Ukrainian locale pack content, not
-hand-translated for this README), then filled in with what actually
-happened in this session, including the Windows console encoding incident
-above.
-
-## 12. Validate the instance
-
-Framework-root stays the framework checkout; instance-root is this demo
-directory - the same separation introduced in PR #1, exercised here
-against a real second "instance" rather than the framework validating
-itself:
+[`session-closeout.md`](session-closeout.md) were generated from the Ukrainian
+locale pack with the real render command (not a one-off script):
 
 ```
-python scripts/eif_validate_frontmatter.py --framework-root . --instance-root examples/demo-workspace "knowledge/**/*.md"
-python scripts/eif_validate_frontmatter.py --framework-root . --config examples/demo-workspace/.eif/config.yaml
-python scripts/eif_privacy_scan.py --repo .
-python scripts/eif_check_links.py --repo .
+python .eif/runtime/eif_render.py --framework-root .eif/runtime --locale uk knowledge-delta
+python .eif/runtime/eif_render.py --framework-root .eif/runtime --locale uk session-closeout
 ```
 
-All four passed with zero errors/findings when last run against this
-directory (2026-07-15) - see this PR's description for the exact captured
-output.
+then filled with what actually happened. The Knowledge Delta's promotion
+section demonstrates correct routing: the leap-year failure pattern is a
+**project-level** domain lesson and stays local; the two framework-tooling
+incidents found while building this (non-English console encoding, non-ASCII
+retrieval) are the **framework-level** promotion candidates, flagged for owner
+ratification, not auto-promoted.
 
-## 13. Reproduce from a clean environment
-
-`scripts/tests/test_init.py` does exactly this as an automated test: it
-runs `eif_init.py`'s logic against a `tempfile.TemporaryDirectory()`
-outside this repository entirely, confirms the instance-root is genuinely
-outside the framework-root, and confirms the generated config still
-validates without vendoring the framework into the temp directory. Run it
-yourself:
+## 9. Validate the instance
 
 ```
-python scripts/tests/test_init.py
+python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "knowledge/**/*.md"
+python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --config .eif/config.yaml
 ```
 
 ## Known limitations
 
-- One scenario (a leap-year calculator), not a representative sample of
-  real engineering tasks.
-- One adapter evidenced (Claude Code) - see
-  [`adapters/claude-code/README.md`](../../adapters/claude-code/README.md);
-  its hook behavior is carried over from earlier private-instance
-  evidence, not re-verified end-to-end in this round.
-- Retrieval is offline keyword/substring scoring over 2 seeded artifacts -
-  not tested at a realistic knowledge-base size.
-- No Graphify, no RTK - both explicitly out of scope for this slice.
-- `scripts/eif_init.py` is an experimental bootstrap, not a stable CLI.
-- Ukrainian locale coverage is 3 output surfaces (status messages,
-  Knowledge Delta, closeout headings), not full agent-response
-  localization.
+- One scenario (leap-year), one adapter (Claude Code - see
+  [`../../adapters/claude-code/README.md`](../../adapters/claude-code/README.md);
+  instruction/skill discovery verified live, hooks not re-verified end-to-end).
+- Retrieval is offline keyword/substring scoring, not tested at scale.
+- No Graphify, no RTK (out of scope for this slice).
+- `eif_init.py` is an experimental bootstrap, not a stable CLI.
+- Ukrainian locale coverage is status messages + Knowledge Delta + closeout
+  headings + knowledge retrieval - not full agent-response localization.
 
-See [`docs/product/claims-evidence.md`](../../docs/product/claims-evidence.md)
-for exactly which claims this demo does and does not support, and the
-allowed/forbidden wording for each.
+See [`../../docs/product/claims-evidence.md`](../../docs/product/claims-evidence.md)
+for exactly which claims this demo supports and the allowed/forbidden wording
+for each.

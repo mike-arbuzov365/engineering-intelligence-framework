@@ -64,12 +64,14 @@ jobs:
           python-version: "3.12"
       - name: Install pinned dependencies
         run: pip install -r scripts/requirements.txt
-      - name: Run eif_init.py / eif_generate_index.py / eif_search_knowledge.py / eif_locale.py unit tests
+      - name: Run runtime unit tests (init, index, search, locale, render, journey)
         run: |
           python scripts/tests/test_init.py
           python scripts/tests/test_generate_index.py
           python scripts/tests/test_search_knowledge.py
           python scripts/tests/test_locale.py
+          python scripts/tests/test_render.py
+          python scripts/tests/test_journey.py
       - name: Validate the demo project instance's knowledge artifacts and config
         # framework-root stays the framework checkout; instance-root points
         # at the demo, which is not vendoring the framework - this is the
@@ -159,6 +161,12 @@ jobs:
     name: Knowledge Delta completeness (required by policy)
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    # Needs pull-requests:read to fetch the live PR body via the API. A
+    # job-level permissions block replaces the top-level one, so contents:read
+    # (for checkout) is repeated here.
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
@@ -166,7 +174,14 @@ jobs:
           python-version: "3.12"
       - name: Run Knowledge Delta classifier tests
         run: python scripts/tests/test_knowledge_delta.py
-      - name: Classify this PR's Knowledge Delta
+      - name: Classify this PR's Knowledge Delta (live body, not the frozen event payload)
         env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-        run: echo "$PR_BODY" | python scripts/eif_check_knowledge_delta.py --body-stdin
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        # github.event.pull_request.body is frozen to the payload at trigger
+        # time: editing the PR body (or `gh run rerun`) does not refresh it, so
+        # a body-only fix could never turn the check green without a new commit.
+        # Fetching the body live via the API removes that trap entirely.
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""' > pr_body.txt
+          python scripts/eif_check_knowledge_delta.py --body-file pr_body.txt

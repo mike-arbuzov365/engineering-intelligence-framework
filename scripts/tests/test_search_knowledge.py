@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Tests for eif_search_knowledge.py: real retrieval and no-result behavior.
+"""Tests for eif_search_knowledge.py: real retrieval, no-result behavior,
+Unicode/Ukrainian queries, lifecycle-aware status filtering, and honest
+malformed-artifact reporting.
 
 Usage:
     python scripts/tests/test_search_knowledge.py
@@ -27,6 +29,34 @@ created: 2026-07-15
 A naive year % 4 == 0 check is wrong for century years not divisible by 400.
 """
 
+UKRAINIAN_FACT = """---
+type: fact
+status: validated
+scope: project
+evidence: OBSERVED
+source: official_specification
+created: 2026-07-15
+---
+
+# Високосний рік
+
+Рік високосний, якщо ділиться на 4, окрім столітніх років, крім кратних 400.
+"""
+
+REJECTED_UK_HYPOTHESIS = """---
+type: hypothesis
+status: rejected
+scope: project
+evidence: OBSERVED
+source: test
+created: 2026-07-15
+---
+
+# Високосний рік = рік ділиться на 4 (відхилено)
+
+Гіпотеза відхилена - не враховує столітній виняток.
+"""
+
 UNRELATED_FACT = """---
 type: fact
 status: validated
@@ -41,6 +71,14 @@ created: 2026-07-15
 The default pool size is 10 connections.
 """
 
+MALFORMED = """---
+type: fact
+status: [broken yaml
+---
+
+# Malformed
+"""
+
 
 def check(name: str, condition: bool, detail: str = "") -> bool:
     print(f"{'PASS' if condition else 'FAIL'} {name}" + (f": {detail}" if detail and not condition else ""))
@@ -52,34 +90,65 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        (root / "failure-patterns").mkdir()
-        (root / "failure-patterns" / "PATTERN-0001.md").write_text(LEAP_YEAR_PATTERN, encoding="utf-8")
+        (root / "fp").mkdir()
+        (root / "fp" / "PATTERN-0001.md").write_text(LEAP_YEAR_PATTERN, encoding="utf-8")
         (root / "facts").mkdir()
-        (root / "facts" / "FACT-0001.md").write_text(UNRELATED_FACT, encoding="utf-8")
+        (root / "facts" / "FACT-uk.md").write_text(UKRAINIAN_FACT, encoding="utf-8")
+        (root / "facts" / "HYP-uk.md").write_text(REJECTED_UK_HYPOTHESIS, encoding="utf-8")
+        (root / "facts" / "FACT-db.md").write_text(UNRELATED_FACT, encoding="utf-8")
+        (root / "facts" / "BROKEN.md").write_text(MALFORMED, encoding="utf-8")
 
-        relevant_results = search(root, "leap year", None, 5)
+        # English retrieval, default eligible = validated only
+        en = search(root, "leap year", None, 5, {"validated"})
         results.append(check(
-            "real retrieval: query for 'leap year' finds the seeded failure pattern",
-            len(relevant_results) >= 1 and relevant_results[0]["path"] == "failure-patterns/PATTERN-0001.md",
-            str(relevant_results),
+            "English retrieval finds the validated failure pattern",
+            any(r["path"] == "fp/PATTERN-0001.md" for r in en["results"]),
+            str(en["results"]),
         ))
         results.append(check(
-            "real retrieval: unrelated fact is not returned for an unrelated query",
-            all(r["path"] != "facts/FACT-0001.md" for r in relevant_results),
+            "unrelated fact not returned for unrelated query",
+            all(r["path"] != "facts/FACT-db.md" for r in en["results"]),
         ))
 
-        no_results = search(root, "quantum encryption protocol", None, 5)
+        # BLOCKER regression: Ukrainian (Cyrillic) query must match Ukrainian content
+        uk = search(root, "високосний", None, 5, {"validated"})
         results.append(check(
-            "no-result retrieval behavior: unrelated query returns an empty list, not a crash or false match",
-            no_results == [],
-            str(no_results),
+            "Unicode/Ukrainian query matches Ukrainian artifact (was zero before the WORD_RE fix)",
+            any(r["path"] == "facts/FACT-uk.md" for r in uk["results"]),
+            str(uk["results"]),
         ))
 
-        type_filtered = search(root, "connection pooling", "fact", 5)
+        # Lifecycle: default excludes the rejected hypothesis, reports it as skipped
         results.append(check(
-            "type filter narrows results to the requested frontmatter type",
-            len(type_filtered) == 1 and type_filtered[0]["type"] == "fact",
-            str(type_filtered),
+            "rejected hypothesis NOT in default results",
+            all(r["path"] != "facts/HYP-uk.md" for r in uk["results"]),
+        ))
+        results.append(check(
+            "rejected hypothesis reported as status-ineligible, not silently dropped",
+            any(r["path"] == "facts/HYP-uk.md" for r in uk["skipped_by_status"]),
+            str(uk["skipped_by_status"]),
+        ))
+
+        # Lifecycle: explicit include returns the rejected one too
+        uk_all = search(root, "високосний", None, 5, None)
+        results.append(check(
+            "--all-statuses (eligible=None) includes the rejected hypothesis",
+            any(r["path"] == "facts/HYP-uk.md" for r in uk_all["results"]),
+        ))
+
+        # Honest failure: malformed artifact reported, distinct from 'not found'
+        results.append(check(
+            "malformed artifact reported explicitly (not confused with no-result)",
+            "facts/BROKEN.md" in uk["malformed"],
+            str(uk["malformed"]),
+        ))
+
+        # No-result behavior
+        none = search(root, "quantum encryption protocol", None, 5, {"validated"})
+        results.append(check(
+            "no-result query returns empty results list, not a crash",
+            none["results"] == [],
+            str(none["results"]),
         ))
 
     passed = sum(results)

@@ -17,7 +17,25 @@
       "properties": {
         "version": { "type": "string" },
         "source": { "type": "string", "format": "uri" },
-        "ref": { "type": "string" }
+        "ref": { "type": "string", "description": "Real framework git commit this instance was generated from - not a placeholder. See scripts/eif_init.py." },
+        "ref_short": { "type": "string" },
+        "bundle": { "type": "string", "description": "Instance-relative path to the pinned self-contained runtime bundle (e.g. .eif/runtime)." }
+      }
+    },
+    "instance": {
+      "type": "object",
+      "description": "Provenance/upgrade contract for this project instance. See docs/architecture/instance-contract.md.",
+      "properties": {
+        "eif_instance_version": { "type": "string" },
+        "migration_status": { "type": "string", "enum": ["greenfield", "adopted"] }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "description": "Which agent adapter this instance's generated entrypoint targets.",
+      "properties": {
+        "name": { "type": "string" },
+        "entrypoint": { "type": "string" }
       }
     },
     "project": {

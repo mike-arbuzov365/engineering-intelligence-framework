@@ -11,8 +11,9 @@ skills, how hooks are layered, and - most load-bearing for EIF's own
 design - the verified evidence that hooks are local-machine state CI
 cannot see, which is exactly why EIF's core must not depend on them. -->
 
-Status: evidence-only. No hook scripts are shipped by this adapter yet -
-see "What this adapter does not include" below.
+Status: entrypoint generated, hooks evidence-only. `scripts/eif_init.py`
+generates the correct `CLAUDE.md` entrypoint for this adapter (see below);
+no hook scripts are shipped yet - see "What this adapter does not include."
 
 ## Verified evidence
 

@@ -78,7 +78,11 @@ def build_index(knowledge_root: Path) -> tuple[list[dict], list[Path]]:
                 "type": fm.get("type", ""),
                 "status": fm.get("status", ""),
                 "scope": fm.get("scope", ""),
-                "review_after": fm.get("review_after", ""),
+                "review_after": str(fm.get("review_after", "")),
+                # Carried for lifecycle-aware retrieval (eif_search_knowledge):
+                "evidence": fm.get("evidence", ""),
+                "confidence": fm.get("confidence", ""),
+                "source": fm.get("source", ""),
                 "excerpt": excerpt,
             }
         )

@@ -1,7 +1,8 @@
 # Example EIF project-instance configuration.
-# Copy to .eif/config.yaml in your own project and adjust. This is a spec
-# preview - the loader/validator (`eifctl validate`) does not exist yet.
+# In practice you do NOT hand-write this - `scripts/eif_init.py` generates it
+# with a real framework `ref` filled in. This example documents the shape.
 # Machine-readable schema: ../core/schemas/eif-config.schema.json
+# Instance/upgrade contract: ../docs/architecture/instance-contract.md
 # See docs/architecture/HOW-EIF-WORKS.md for what's built vs. planned.
 
 # This config file's OWN schema version - bump only when the config shape
@@ -10,17 +11,28 @@ schema_version: 1
 
 framework:
   # No versioned release exists yet - see
-  # docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready
-  # ("v0.1.0 tag exists" is unchecked). Do not pin `ref` to "v0.1.0" until
-  # that tag is real; until then, pin to the actual commit SHA you
-  # checked out (`git rev-parse HEAD` in your framework checkout), not a
-  # floating branch name - "main" below is illustrative only and will
-  # drift. This whole config is EXPERIMENTAL, repository-local development
-  # mode - the eventual package/submodule/installer distribution model is
-  # an open decision, see core/policies/decisions.md D-08.
+  # docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready. `ref` is
+  # the ACTUAL framework commit this instance was generated from; eif_init
+  # resolves it via `git rev-parse HEAD` and writes the real 40-char SHA
+  # here (the placeholder below is only for this hand-written example). This
+  # whole config is EXPERIMENTAL - the eventual package/submodule/installer
+  # distribution model is an open decision, see core/policies/decisions.md D-08.
   version: "0.1.0-dev"
   source: "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
-  ref: "<commit-sha-you-checked-out>"  # e.g. output of `git rev-parse HEAD`; "main" is illustrative only, do not leave it as a floating branch name in a real instance config
+  ref: "0000000000000000000000000000000000000000"  # example only; eif_init writes the real HEAD SHA
+  ref_short: "0000000"
+  bundle: .eif/runtime  # pinned self-contained runtime copied into the instance by eif_init
+
+instance:
+  # Provenance/upgrade contract - see docs/architecture/instance-contract.md.
+  eif_instance_version: 0.1.0
+  migration_status: greenfield  # greenfield (new repo) | adopted (pre-existing repo brought under EIF)
+
+adapter:
+  # Which agent adapter the generated entrypoint targets. claude-code ->
+  # CLAUDE.md (the file Claude Code loads at session start).
+  name: claude-code
+  entrypoint: CLAUDE.md
 
 project:
   name: example-project

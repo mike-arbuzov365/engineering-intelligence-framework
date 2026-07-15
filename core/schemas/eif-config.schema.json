@@ -1,45 +1,33 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/eif-config.schema.json",
-  "title": "EIF project-instance configuration (.eif/config.yaml)",
-  "description": "Mirrors .eif/config.yaml.example - keep both in sync. Validated by scripts/eif_validate_frontmatter.py --config (see scripts/README.md); this schema is the enforceable target.",
+  "title": "EIF project-instance configuration (.eif/config.yaml) - user/project-owned",
+  "description": "Mirrors .eif/config.yaml.example - keep both in sync. Validated by scripts/eif_validate_frontmatter.py --config. This file holds DESIRED, user-owned settings only - it is written once by eif_init and never overwritten by a routine upgrade. EIF-managed provenance (exact framework ref, bundle manifest, generated adapter entrypoint) lives in the separate, fully-regenerated framework-lock.schema.json / .eif/framework.lock.yaml - see docs/architecture/instance-contract.md for why the two are split.",
   "type": "object",
-  "required": ["schema_version", "framework", "project", "localization"],
+  "required": ["schema_version", "project", "localization"],
   "properties": {
     "schema_version": {
       "type": "integer",
       "minimum": 1,
-      "description": "This config file's own schema version, independent of framework.version."
+      "description": "This config file's own schema version."
     },
     "framework": {
       "type": "object",
-      "required": ["version"],
+      "description": "Optional DESIRED framework release line - not provenance. Which framework commit actually generated this instance is recorded in .eif/framework.lock.yaml, not here.",
       "properties": {
-        "version": { "type": "string" },
-        "source": { "type": "string", "format": "uri" },
-        "ref": { "type": "string", "description": "Real framework git commit this instance was generated from - not a placeholder. See scripts/eif_init.py." },
-        "ref_short": { "type": "string" },
-        "bundle": { "type": "string", "description": "Instance-relative path to the pinned self-contained runtime bundle (e.g. .eif/runtime)." }
-      }
-    },
-    "instance": {
-      "type": "object",
-      "description": "Provenance/upgrade contract for this project instance. See docs/architecture/instance-contract.md.",
-      "properties": {
-        "eif_instance_version": { "type": "string" },
-        "migration_status": { "type": "string", "enum": ["greenfield", "adopted"] }
-      }
-    },
-    "adapter": {
-      "type": "object",
-      "description": "Which agent adapter this instance's generated entrypoint targets.",
-      "properties": {
-        "name": { "type": "string" },
-        "entrypoint": { "type": "string" }
+        "version": { "type": "string" }
       }
     },
     "project": {
       "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "description": "User's declared adapter choice. The generated entrypoint file and verified-version evidence are managed provenance - see .eif/framework.lock.yaml.",
       "required": ["name"],
       "properties": {
         "name": { "type": "string" }

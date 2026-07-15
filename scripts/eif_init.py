@@ -1,48 +1,58 @@
 #!/usr/bin/env python3
 """EXPERIMENTAL bootstrap for a new (or existing) EIF project instance.
 
-This is the smallest credible entrypoint that makes the v0.1 vertical slice
-reproducible from a *separate* project instance - not a preview of a final
-`eifctl` CLI, and it does NOT ratify a CLI name, packaging strategy, or
-distribution mechanism (D-05 CLI name, D-08 dependency model in
-core/policies/decisions.md both remain open).
+Smallest credible entrypoint that makes the v0.1 vertical slice reproducible
+from a *separate* project instance - not a preview of a final `eifctl` CLI.
+Does NOT ratify a CLI name, packaging strategy, or distribution mechanism
+(D-05, D-08 in core/policies/decisions.md both remain open).
 
-Design decisions this script embodies (all reversible, none ratified):
+Design, all reversible, none ratified:
 
-1. Self-contained instance. eif_init writes a pinned `.eif/runtime/` bundle
-   (the scripts, schemas, ontology, templates and locales the instance's
-   own generated commands need) into the instance. The generated CLAUDE.md's
-   commands reference `.eif/runtime/...`, so they run from the instance root
-   even when the framework itself is not checked out. This is one distribution
-   option ("local runtime bundle"), chosen for v0.1 because it makes a
-   separate instance genuinely runnable and makes upgrade a re-run; it is not
-   a ratification of D-08.
+1. Config/lock split. `.eif/config.yaml` is USER-OWNED desired configuration
+   (project name, adapter choice, locale, governance) - written once, never
+   touched by a routine upgrade. `.eif/framework.lock.yaml` is EIF-MANAGED
+   provenance (exact framework commit, whether the source tree was dirty, a
+   hashed bundle manifest, the generated adapter entrypoint) - fully
+   regenerated on every init/upgrade. A `--force` re-run only ever replaces
+   config.yaml (backed up first); a bare re-run only ever refreshes the lock
+   + runtime bundle + managed CLAUDE.md block. See
+   docs/architecture/instance-contract.md.
 
-2. Real provenance. `.eif/config.yaml` records the *actual* framework git
-   commit the bundle was generated from (resolved via `git rev-parse`), not a
-   placeholder. Upgrade = re-run eif_init from a newer framework checkout;
-   the recorded ref changes, the bundle refreshes.
+2. Exact provenance. The framework ref is the real `git rev-parse HEAD` of
+   --framework-root, never a placeholder. A dirty framework checkout (git
+   status --porcelain non-empty) is refused by default - the materialized
+   bundle would not actually match the recorded ref - unless --allow-dirty,
+   which proceeds and records `dirty: true` in the lock. Every bundled file
+   is sha256-hashed into a manifest with a combined digest, so provenance is
+   auditable at the file level, not just "some commit produced this."
 
-3. Non-destructive by default. eif_init refuses to overwrite an existing
-   `.eif/config.yaml` unless `--force` (which backs it up first). CLAUDE.md is
-   updated by *merging* an EIF-managed marker block, never clobbering
-   project-authored content. This is required for the later, safe migration of
-   an existing repository (e.g. wm-engineering-intelligence) that already has
-   its own CLAUDE.md and rules. `--dry-run` writes nothing and prints the plan.
+3. Transactional runtime. The bundle is built into `.eif/runtime.next`,
+   every file is re-hashed against the manifest computed from the source
+   (catches any copy corruption), and only then atomically swapped into
+   `.eif/runtime` (previous runtime kept until the swap succeeds, restored on
+   any failure). An instance is never left with a missing or half-written
+   runtime.
 
-4. Correct adapter entrypoint. The generated persistent-instruction file is
-   CLAUDE.md, which Claude Code loads at session start (verified against the
-   official docs and CLI 2.1.169) - not AGENTS.md.
+4. Instance-owned .gitignore. A separate project instance does not inherit
+   this framework repo's own .gitignore, so eif_init manages an EIF block in
+   the INSTANCE's `.gitignore` - without this, the regenerable runtime bundle
+   and init backups could be committed by accident in a real project.
+
+5. Correct adapter entrypoint, from a small registry (scripts/eif_adapters.py)
+   - CLAUDE.md for claude-code (verified against the official docs and CLI
+   2.1.169: it is loaded as persistent context, not enforced configuration).
+   `--adapter` is restricted to registered names.
 
 Usage:
     python scripts/eif_init.py --framework-root PATH --instance-path PATH \\
         --project-name NAME [--locale en|uk] [--adapter claude-code] \\
-        [--dry-run] [--force]
+        [--allow-dirty] [--dry-run] [--force]
 """
 from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import shutil
 import subprocess
 import sys
@@ -51,30 +61,74 @@ from pathlib import Path
 if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     # Windows consoles default stdout to the active codepage (e.g. cp1252),
     # which cannot encode Cyrillic - and this script prints locale-aware
-    # messages that may not be ASCII. Without this, a non-English locale
-    # crashes on the first print() with UnicodeEncodeError.
+    # messages that may not be ASCII.
     sys.stdout.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from eif_locale import msg  # noqa: E402
-from eif_validate_frontmatter import validate_config_mode  # noqa: E402
+from eif_adapters import ADAPTERS, DEFAULT_ADAPTER, entrypoint_for  # noqa: E402
+from eif_validate_frontmatter import (  # noqa: E402
+    validate_config_mode, validate_lock_mode, load_schema, validate_one,
+)
 from eif_generate_index import build_index, render as render_index  # noqa: E402
+
+try:
+    import yaml
+except ImportError:
+    print(
+        "eif-init: PyYAML is required. Install with: "
+        "pip install -r scripts/requirements.txt",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 EIF_BEGIN = "<!-- EIF:BEGIN"
 EIF_END = "<!-- EIF:END -->"
 
+GITIGNORE_MARKER = "# EIF:BEGIN gitignore"
+GITIGNORE_BLOCK = (
+    f"{GITIGNORE_MARKER} - managed by scripts/eif_init.py, do not hand-edit this block\n"
+    ".eif/runtime/\n"
+    ".eif/runtime.next/\n"
+    ".eif/runtime.previous/\n"
+    "*.bak-*\n"
+    "# EIF:END gitignore\n"
+)
+
+CONFIG_HEADER = (
+    "# Generated by scripts/eif_init.py - USER-OWNED desired configuration.\n"
+    "# eif_init never overwrites this file on a routine upgrade; only an\n"
+    "# explicit --force re-run replaces it (after backing it up). Framework\n"
+    "# provenance (exact ref, bundle hashes, generated entrypoint) lives in\n"
+    "# .eif/framework.lock.yaml, not here - see\n"
+    "# docs/architecture/instance-contract.md. Schema:\n"
+    "# core/schemas/eif-config.schema.json\n\n"
+)
+
+LOCK_HEADER = (
+    "# EIF-MANAGED. Do not hand-edit - fully regenerated by scripts/eif_init.py\n"
+    "# on every init/upgrade. Schema: core/schemas/framework-lock.schema.json\n\n"
+)
+
 # What goes into the pinned per-instance runtime bundle. Paths are relative to
-# the framework root. Scripts the generated CLAUDE.md invokes, plus everything
-# those scripts read (schemas, locales, templates) and the ontology the
-# generated instructions link to.
+# the framework root. All mandatory - a partial bundle silently missing a
+# file is a correctness bug, not something to degrade past.
 BUNDLE_SCRIPTS = [
     "eif_locale.py",
+    "eif_adapters.py",
     "eif_generate_index.py",
     "eif_search_knowledge.py",
     "eif_validate_frontmatter.py",
     "eif_render.py",
+    "eif_privacy_scan.py",
+    "eif_check_links.py",
     "requirements.txt",
 ]
+# NOT bundled, deliberately: eif_init.py itself (you always run the
+# framework's own copy to init/upgrade an instance, never a copy from
+# inside the instance), eif_check_knowledge_delta.py and eif_merge_pr.py
+# (framework-repo PR/merge-gate tooling, not applicable to a generic
+# project instance). See docs/architecture/instance-contract.md#validation-surface.
 BUNDLE_TREES = [
     "core/schemas",
     "core/ontology",
@@ -82,45 +136,16 @@ BUNDLE_TREES = [
     "templates",
 ]
 
-CONFIG_TEMPLATE = """\
-schema_version: 1
 
-framework:
-  version: {framework_version}
-  # Real framework commit this instance was generated from - not a placeholder.
-  # Upgrade = re-run eif_init from a newer framework checkout.
-  ref: {framework_ref}
-  ref_short: {framework_ref_short}
-  bundle: .eif/runtime
+# --------------------------------------------------------------------------
+# Provenance
+# --------------------------------------------------------------------------
 
-instance:
-  eif_instance_version: 0.1.0
-  migration_status: {migration_status}
-
-adapter:
-  name: {adapter}
-  entrypoint: CLAUDE.md
-
-project:
-  name: {project_name}
-
-localization:
-  documentation_locale: {locale}
-  agent_response_locale: {locale}
-  fallback_locale: en
-  preserve_technical_terms: true
-  code_comments_locale: en
-  commit_messages_locale: en
-
-governance:
-  knowledge_delta_required: true
-  evidence_labels_required: true
-"""
-
-
-def resolve_framework_ref(framework_root: Path) -> tuple[str | None, str | None]:
-    """Return (full_sha, short_sha) of the framework checkout, or (None, None)
-    if it is not a git repo (caller then requires --framework-ref)."""
+def resolve_framework_state(framework_root: Path) -> tuple[str | None, str | None, bool]:
+    """Return (full_sha, short_sha, dirty). dirty is always False when the ref
+    could not be resolved via git at all (caller then requires
+    --framework-ref, and dirty-checking doesn't apply to an externally
+    supplied ref - that's the caller's own responsibility)."""
     try:
         full = subprocess.run(
             ["git", "-C", str(framework_root), "rev-parse", "HEAD"],
@@ -130,9 +155,171 @@ def resolve_framework_ref(framework_root: Path) -> tuple[str | None, str | None]
             ["git", "-C", str(framework_root), "rev-parse", "--short", "HEAD"],
             capture_output=True, text=True, check=True,
         ).stdout.strip()
-        return full, short
+        status = subprocess.run(
+            ["git", "-C", str(framework_root), "status", "--porcelain"],
+            capture_output=True, text=True, check=True,
+        ).stdout
+        return full, short, bool(status.strip())
     except (subprocess.CalledProcessError, FileNotFoundError):
-        return None, None
+        return None, None, False
+
+
+def hash_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def collect_bundle_sources(framework_root: Path) -> list[tuple[Path, str]]:
+    """(absolute_src_path, manifest_relative_posix_path) for every mandatory
+    bundle file. Raises FileNotFoundError if anything mandatory is missing."""
+    sources: list[tuple[Path, str]] = []
+    for script in BUNDLE_SCRIPTS:
+        src = framework_root / "scripts" / script
+        if not src.exists():
+            raise FileNotFoundError(f"mandatory bundle source missing: scripts/{script}")
+        sources.append((src, script))
+    for tree in BUNDLE_TREES:
+        src_root = framework_root / tree
+        if not src_root.is_dir():
+            raise FileNotFoundError(f"mandatory bundle source missing: {tree}/")
+        for f in sorted(src_root.rglob("*")):
+            if f.is_file():
+                rel = f"{tree}/{f.relative_to(src_root).as_posix()}"
+                sources.append((f, rel))
+    return sources
+
+
+def build_manifest(sources: list[tuple[Path, str]]) -> list[dict]:
+    return sorted(
+        ({"path": rel, "sha256": hash_file(src)} for src, rel in sources),
+        key=lambda r: r["path"],
+    )
+
+
+def combined_digest(manifest: list[dict]) -> str:
+    h = hashlib.sha256()
+    for entry in manifest:  # manifest is already sorted by build_manifest
+        h.update(f"{entry['path']}:{entry['sha256']}\n".encode("utf-8"))
+    return f"sha256:{h.hexdigest()}"
+
+
+# --------------------------------------------------------------------------
+# Transactional runtime bundle: stage -> verify -> atomic swap
+# --------------------------------------------------------------------------
+
+def stage_bundle(instance_path: Path, sources: list[tuple[Path, str]]) -> Path:
+    staging = instance_path / ".eif" / "runtime.next"
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    for src, rel in sources:
+        dest = staging / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(src, dest)
+    (staging / "README.md").write_text(
+        "# .eif/runtime (EIF-managed bundle)\n\n"
+        "Pinned copy of the framework runtime this instance was generated "
+        "from - a *source* bundle (Python dependencies still need "
+        "`pip install -r requirements.txt`, this is not a fully "
+        "self-contained interpreter environment). Do not edit by hand - "
+        "fully regenerated by `eif_init` on upgrade. Exact provenance "
+        "(framework commit, per-file hashes) is in `../framework.lock.yaml`.\n",
+        encoding="utf-8",
+    )
+    return staging
+
+
+def verify_staged_bundle(staging: Path, manifest: list[dict]) -> list[str]:
+    """Re-hash every staged file against the manifest computed from the
+    source, catching copy corruption before the bundle goes live."""
+    problems = []
+    for entry in manifest:
+        dest = staging / entry["path"]
+        if not dest.exists():
+            problems.append(f"missing after staging: {entry['path']}")
+            continue
+        if hash_file(dest) != entry["sha256"]:
+            problems.append(f"hash mismatch after staging: {entry['path']}")
+    return problems
+
+
+def swap_runtime(instance_path: Path, staging: Path) -> None:
+    """Atomic-as-possible swap: rename the current runtime aside, rename
+    staging into place, delete the aside copy only once the second rename
+    succeeds. On any exception, the aside copy is restored - an instance is
+    never left without a valid runtime."""
+    runtime = instance_path / ".eif" / "runtime"
+    previous = instance_path / ".eif" / "runtime.previous"
+    if previous.exists():
+        shutil.rmtree(previous)
+    had_previous = False
+    if runtime.exists():
+        runtime.rename(previous)
+        had_previous = True
+    try:
+        staging.rename(runtime)
+    except Exception:
+        if had_previous:
+            if runtime.exists():
+                shutil.rmtree(runtime)
+            previous.rename(runtime)
+        raise
+    if had_previous:
+        shutil.rmtree(previous)
+
+
+# --------------------------------------------------------------------------
+# Config (user-owned) / lock (EIF-managed) generation - real YAML
+# serialization, not string interpolation, so a project name or locale
+# containing YAML-special characters can never corrupt the file structure.
+# --------------------------------------------------------------------------
+
+def render_config_data(project_name: str, adapter_name: str, locale: str,
+                       framework_version: str | None) -> dict:
+    data = {
+        "schema_version": 1,
+        "project": {"name": project_name},
+        "adapter": {"name": adapter_name},
+        "localization": {
+            "documentation_locale": locale,
+            "agent_response_locale": locale,
+            "fallback_locale": "en",
+            "preserve_technical_terms": True,
+            "code_comments_locale": "en",
+            "commit_messages_locale": "en",
+        },
+        "governance": {
+            "knowledge_delta_required": True,
+            "evidence_labels_required": True,
+        },
+    }
+    if framework_version:
+        data["framework"] = {"version": framework_version}
+    return data
+
+
+def render_lock_data(ref: str, ref_short: str, dirty: bool, adapter_name: str,
+                     entrypoint: str, bundle_path: str, manifest: list[dict],
+                     digest: str, migration_status: str, instance_version: str,
+                     generated_at: str) -> dict:
+    return {
+        "lock_schema_version": 1,
+        "framework": {"ref": ref, "ref_short": ref_short, "dirty": dirty},
+        "instance": {"eif_instance_version": instance_version, "migration_status": migration_status},
+        "adapter": {"name": adapter_name, "entrypoint": entrypoint},
+        "bundle": {"path": bundle_path, "manifest": manifest, "digest": digest},
+        "generated_at": generated_at,
+    }
+
+
+def _dump_yaml(header: str, data: dict) -> str:
+    return header + yaml.safe_dump(data, sort_keys=False, default_flow_style=False, allow_unicode=True)
+
+
+def validate_in_memory(framework_root: Path, schema_rel: str, data: dict) -> list[str]:
+    """Validate a rendered dict against a schema before anything is written -
+    catches a bad render before it ever touches disk, not just after."""
+    schema = load_schema(framework_root / "core" / "schemas" / schema_rel)
+    return validate_one(data, schema, schema_rel)
 
 
 def _backup(path: Path) -> Path:
@@ -142,55 +329,15 @@ def _backup(path: Path) -> Path:
     return dest
 
 
-def build_runtime_bundle(framework_root: Path, instance_path: Path, dry_run: bool) -> Path:
-    """(Re)generate the self-contained .eif/runtime/ bundle. Always a full
-    refresh - this is managed framework code, and refreshing it is exactly
-    what 'upgrade' means."""
-    runtime = instance_path / ".eif" / "runtime"
-    if dry_run:
-        return runtime
-    if runtime.exists():
-        shutil.rmtree(runtime)
-    runtime.mkdir(parents=True, exist_ok=True)
-    for script in BUNDLE_SCRIPTS:
-        src = framework_root / "scripts" / script
-        if src.exists():
-            shutil.copyfile(src, runtime / src.name)
-    for tree in BUNDLE_TREES:
-        src = framework_root / tree
-        if src.exists():
-            shutil.copytree(src, runtime / tree, dirs_exist_ok=True)
-    (runtime / "README.md").write_text(
-        "# .eif/runtime (managed bundle)\n\n"
-        "Pinned copy of the framework runtime this instance was generated "
-        "from. Do not edit by hand - it is fully regenerated by `eif_init` on "
-        "upgrade. The framework commit it corresponds to is recorded in "
-        "`../config.yaml` `framework.ref`.\n",
-        encoding="utf-8",
-    )
-    return runtime
-
-
-def render_config(framework_ref: str, framework_ref_short: str, project_name: str,
-                  locale: str, adapter: str, migration_status: str, framework_version: str) -> str:
-    return CONFIG_TEMPLATE.format(
-        framework_version=framework_version,
-        framework_ref=framework_ref,
-        framework_ref_short=framework_ref_short,
-        project_name=project_name,
-        locale=locale,
-        adapter=adapter,
-        migration_status=migration_status,
-    )
-
-
 def write_config(instance_path: Path, content: str, dry_run: bool, force: bool) -> tuple[str, Path]:
-    """Return (action, path). action in {create, overwrite, conflict, dry-run}."""
+    """Return (action, path). 'create' (new instance), 'keep' (existing
+    config left untouched - THIS is the normal upgrade path), 'overwrite'
+    (only with --force, backed up first)."""
     eif_dir = instance_path / ".eif"
     config_path = eif_dir / "config.yaml"
     if config_path.exists():
         if not force:
-            return "conflict", config_path
+            return "keep", config_path
         if not dry_run:
             _backup(config_path)
         action = "overwrite"
@@ -202,6 +349,10 @@ def write_config(instance_path: Path, content: str, dry_run: bool, force: bool) 
     return action, config_path
 
 
+# --------------------------------------------------------------------------
+# Adapter entrypoint (CLAUDE.md managed block) + instance .gitignore
+# --------------------------------------------------------------------------
+
 def _managed_block(framework_root: Path) -> str:
     template = (framework_root / "templates" / "agent-instructions.md").read_text(encoding="utf-8")
     begin = template.index(EIF_BEGIN)
@@ -209,11 +360,9 @@ def _managed_block(framework_root: Path) -> str:
     return template[begin:end]
 
 
-def merge_entrypoint(framework_root: Path, instance_path: Path, dry_run: bool) -> tuple[str, Path]:
-    """Insert/replace the EIF-managed marker block in CLAUDE.md without ever
-    destroying project-authored content. Return (action, path)."""
+def merge_entrypoint(framework_root: Path, instance_path: Path, entrypoint: str, dry_run: bool) -> tuple[str, Path]:
     block = _managed_block(framework_root)
-    target = instance_path / "CLAUDE.md"
+    target = instance_path / entrypoint
     if not target.exists():
         action = "create"
         new_text = block + "\n\n# Project-specific rules\n\n<Add this project instance's own rules here.>\n"
@@ -232,36 +381,62 @@ def merge_entrypoint(framework_root: Path, instance_path: Path, dry_run: bool) -
     return action, target
 
 
+def ensure_gitignore(instance_path: Path, dry_run: bool) -> str:
+    """A separate project instance does not inherit this framework repo's own
+    .gitignore, so without this the regenerable runtime bundle and init
+    backups could be committed by accident in a real project."""
+    path = instance_path / ".gitignore"
+    if path.exists():
+        text = path.read_text(encoding="utf-8")
+        if GITIGNORE_MARKER in text:
+            return "already-present"
+        if not dry_run:
+            path.write_text(text.rstrip("\n") + "\n\n" + GITIGNORE_BLOCK, encoding="utf-8")
+        return "appended"
+    if not dry_run:
+        path.write_text(GITIGNORE_BLOCK, encoding="utf-8")
+    return "created"
+
+
 def generate_index(instance_path: Path, dry_run: bool) -> tuple[Path, int]:
     knowledge_root = instance_path / "knowledge"
     if not knowledge_root.is_dir():
         return knowledge_root, 0
-    rows, malformed = build_index(knowledge_root)
+    # Schema-aware: the bundle was just swapped into .eif/runtime, so its
+    # schemas are available even without the framework itself checked out.
+    bundle_root = instance_path / ".eif" / "runtime"
+    rows, malformed, schema_invalid = build_index(knowledge_root, bundle_root if bundle_root.is_dir() else None)
     if not dry_run:
-        (knowledge_root / "index.md").write_text(render_index(rows, malformed, knowledge_root), encoding="utf-8")
+        (knowledge_root / "index.md").write_text(render_index(rows, malformed, schema_invalid, knowledge_root), encoding="utf-8")
     return knowledge_root / "index.md", len(rows)
 
 
+# --------------------------------------------------------------------------
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--framework-root", required=True, help="This framework's checkout (source of the runtime bundle)")
-    ap.add_argument("--instance-path", required=True, help="Where to create/adopt the project instance")
+    ap.add_argument("--framework-root", required=True)
+    ap.add_argument("--instance-path", required=True)
     ap.add_argument("--project-name", required=True)
     ap.add_argument("--locale", default="en")
-    ap.add_argument("--adapter", default="claude-code", help="Adapter whose entrypoint to generate (default: claude-code -> CLAUDE.md)")
+    ap.add_argument("--adapter", default=DEFAULT_ADAPTER, choices=sorted(ADAPTERS),
+                     help="Restricted to registered adapters - see scripts/eif_adapters.py")
     ap.add_argument("--framework-version", default="0.1.0-dev")
-    ap.add_argument("--framework-ref", default=None, help="Override the resolved framework commit (used when framework-root is not a git checkout)")
-    ap.add_argument("--migration-status", default="greenfield", choices=["greenfield", "adopted"], help="greenfield = new repo; adopted = pre-existing repo being brought under EIF")
-    ap.add_argument("--dry-run", action="store_true", help="Print the plan and write nothing")
-    ap.add_argument("--force", action="store_true", help="Overwrite an existing .eif/config.yaml (backed up first)")
+    ap.add_argument("--framework-ref", default=None, help="Override the resolved framework commit (framework-root not a git checkout). Dirty-checking does not apply to an explicit override.")
+    ap.add_argument("--allow-dirty", action="store_true", help="Proceed even if --framework-root has uncommitted changes (recorded as dirty: true in the lock)")
+    ap.add_argument("--migration-status", default="greenfield", choices=["greenfield", "adopted"])
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--force", action="store_true", help="Overwrite an existing .eif/config.yaml (backed up first). Never required for a routine upgrade - only to change user-owned settings.")
     args = ap.parse_args()
 
     framework_root = Path(args.framework_root).resolve()
     instance_path = Path(args.instance_path).resolve()
+    prefix = "[dry-run] would " if args.dry_run else ""
 
-    ref, ref_short = resolve_framework_ref(framework_root)
+    # --- Provenance ---
+    ref, ref_short, dirty = resolve_framework_state(framework_root)
     if args.framework_ref:
-        ref, ref_short = args.framework_ref, args.framework_ref[:12]
+        ref, ref_short, dirty = args.framework_ref, args.framework_ref[:12], False
     if not ref:
         print(
             "eif-init: could not resolve the framework commit (framework-root is "
@@ -270,44 +445,96 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
-
-    prefix = "[dry-run] would " if args.dry_run else ""
-    print(msg(framework_root, args.locale, "init_start", path=instance_path))
-
-    if not args.dry_run:
-        instance_path.mkdir(parents=True, exist_ok=True)
-
-    content = render_config(ref, ref_short, args.project_name, args.locale, args.adapter, args.migration_status, args.framework_version)
-    action, config_path = write_config(instance_path, content, args.dry_run, args.force)
-    if action == "conflict":
+    if dirty and not args.allow_dirty:
         print(
-            f"eif-init: {config_path} already exists. Refusing to overwrite it. "
-            f"Re-run with --force to back it up and replace it, or --dry-run to "
-            f"preview. (This guard exists so adopting an existing repo never "
-            f"silently discards its config.)",
+            f"eif-init: framework checkout at {framework_root} has uncommitted "
+            f"changes. The materialized bundle would not exactly match the "
+            f"recorded ref {ref_short}. Commit/stash first, or re-run with "
+            f"--allow-dirty to proceed anyway (recorded as dirty: true in the lock).",
             file=sys.stderr,
         )
         return 1
-    print(f"{prefix}{action} .eif/config.yaml (framework.ref {ref_short})")
 
-    # Validate the config we just rendered (skip file read on dry-run - validate
-    # the in-memory content by writing to a temp path is overkill; instead
-    # validate the real file when not dry-run).
+    print(msg(framework_root, args.locale, "init_start", path=instance_path))
+    if not args.dry_run:
+        instance_path.mkdir(parents=True, exist_ok=True)
+
+    # --- Preflight: mandatory bundle sources exist, before any write ---
+    try:
+        sources = collect_bundle_sources(framework_root)
+    except FileNotFoundError as e:
+        print(f"eif-init: {e}", file=sys.stderr)
+        return 1
+    manifest = build_manifest(sources)
+    digest = combined_digest(manifest)
+
+    # --- User config (create / keep / overwrite) ---
+    config_data = render_config_data(args.project_name, args.adapter, args.locale, args.framework_version)
+    config_errors = validate_in_memory(framework_root, "eif-config.schema.json", config_data)
+    if config_errors:
+        print("eif-init: rendered config failed in-memory validation, not writing:", file=sys.stderr)
+        for e in config_errors:
+            print(f"  - {e}", file=sys.stderr)
+        return 1
+    config_content = _dump_yaml(CONFIG_HEADER, config_data)
+    action, config_path = write_config(instance_path, config_content, args.dry_run, args.force)
+    print(f"{prefix}{action} .eif/config.yaml" + (f" (framework.ref {ref_short})" if action != "keep" else " (unchanged - routine upgrade)"))
     if not args.dry_run:
         rc = validate_config_mode(framework_root, config_path)
         if rc != 0:
-            print(f"eif-init: generated config failed validation: {config_path}", file=sys.stderr)
+            print(f"eif-init: on-disk config failed validation: {config_path}", file=sys.stderr)
             return rc
+        if action != "keep":
+            print(msg(framework_root, args.locale, "config_created", locale=args.locale))
+
+    # --- Lock (always regenerated) ---
+    entrypoint = entrypoint_for(args.adapter)
+    lock_data = render_lock_data(
+        ref, ref_short, dirty, args.adapter, entrypoint, ".eif/runtime",
+        manifest, digest, args.migration_status, "0.1.0",
+        datetime.datetime.now(datetime.timezone.utc).isoformat(),
+    )
+    lock_errors = validate_in_memory(framework_root, "framework-lock.schema.json", lock_data)
+    if lock_errors:
+        print("eif-init: rendered lock failed in-memory validation, not writing:", file=sys.stderr)
+        for e in lock_errors:
+            print(f"  - {e}", file=sys.stderr)
+        return 1
+    lock_content = _dump_yaml(LOCK_HEADER, lock_data)
+
+    # --- Transactional runtime bundle: stage, verify, swap only after both
+    # config and lock have validated in memory - a failed validation above
+    # never touches the runtime at all. ---
     if not args.dry_run:
-        print(msg(framework_root, args.locale, "config_created", locale=args.locale))
+        staging = stage_bundle(instance_path, sources)
+        problems = verify_staged_bundle(staging, manifest)
+        if problems:
+            shutil.rmtree(staging, ignore_errors=True)
+            print("eif-init: staged bundle failed verification, not swapped in:", file=sys.stderr)
+            for p in problems:
+                print(f"  - {p}", file=sys.stderr)
+            return 1
+        swap_runtime(instance_path, staging)
+        lock_path = instance_path / ".eif" / "framework.lock.yaml"
+        lock_path.write_text(lock_content, encoding="utf-8")
+        rc = validate_lock_mode(framework_root, lock_path)
+        if rc != 0:
+            print(f"eif-init: on-disk lock failed validation: {lock_path}", file=sys.stderr)
+            return rc
+    print(f"{prefix}refresh .eif/runtime ({len(manifest)} file(s), {digest[:19]}...)")
+    print(f"{prefix}write .eif/framework.lock.yaml")
 
-    runtime = build_runtime_bundle(framework_root, instance_path, args.dry_run)
-    print(f"{prefix}refresh {runtime.relative_to(instance_path) if not args.dry_run else '.eif/runtime'} (pinned bundle)")
-
-    entry_action, entry_path = merge_entrypoint(framework_root, instance_path, args.dry_run)
-    print(f"{prefix}{entry_action} CLAUDE.md (EIF-managed block)")
+    # --- Adapter entrypoint + instance .gitignore ---
+    entry_action, entry_path = merge_entrypoint(framework_root, instance_path, entrypoint, args.dry_run)
+    print(f"{prefix}{entry_action} {entrypoint} (EIF-managed block)")
     if not args.dry_run:
         print(msg(framework_root, args.locale, "instructions_generated", path=entry_path))
+
+    gi_action = ensure_gitignore(instance_path, args.dry_run)
+    if gi_action == "already-present":
+        print("ok   .gitignore already has the EIF-managed ignore block")
+    else:
+        print(f"{prefix}{gi_action} EIF-managed ignore block in .gitignore")
 
     index_path, count = generate_index(instance_path, args.dry_run)
     if (instance_path / "knowledge").is_dir() and not args.dry_run:

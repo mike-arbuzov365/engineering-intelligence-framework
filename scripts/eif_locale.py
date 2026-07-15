@@ -29,6 +29,18 @@ except ImportError:
 DEFAULT_LOCALE = "en"
 
 
+class _KeepMissing(dict):
+    """dict that leaves an unrecognized {key} token as literal text instead of
+    raising KeyError - str.format() requires every placeholder in a template
+    to be supplied at once, which is wrong for a partial-fill workflow (e.g.
+    filling task_name now, verification_result after the test runs). Known
+    keys still get replaced; everything else stays as `{key}` for the next
+    fill or for manual completion."""
+
+    def __missing__(self, key):
+        return "{" + key + "}"
+
+
 def _locales_dir(framework_root: Path) -> Path:
     return framework_root / "locales"
 
@@ -58,7 +70,10 @@ def msg(framework_root: Path, loc: str, key: str, **kwargs) -> str:
     return template.format(**kwargs)
 
 
-def render_template(framework_root: Path, locale: str, template_name: str, **kwargs) -> str:
+def render_template(framework_root: Path, locale: str, template_name: str, **kwargs) -> tuple[str, str]:
+    """Returns (rendered_text, locale_actually_used) - the second element lets
+    a caller report a fallback instead of silently pretending the requested
+    locale was used."""
     locales_dir = _locales_dir(framework_root)
     path = locales_dir / locale / "templates" / template_name
     used_locale = locale
@@ -72,5 +87,8 @@ def render_template(framework_root: Path, locale: str, template_name: str, **kwa
         )
     text = path.read_text(encoding="utf-8")
     if kwargs:
-        text = text.format(**kwargs)
+        # Partial fill, not str.format()'s all-or-KeyError: a caller filling
+        # in task_name before the test has even run (and verification_result
+        # after) is a normal workflow, not an error.
+        text = text.format_map(_KeepMissing(kwargs))
     return text, used_locale

@@ -37,10 +37,11 @@ reproduced from a clean checkout) walks through, start to finish:
 1. **Initialize a project instance.** Produce a real `.eif/config.yaml`
    from `.eif/config.yaml.example`, validated against
    `core/schemas/eif-config.schema.json`.
-2. **Generate compact agent instructions.** A minimal `AGENTS.md`/
-   `CLAUDE.md`-equivalent for the demo repo, in the style of this
-   repository's own [`AGENTS.md`](../../AGENTS.md) - short, pointing to
-   detail rather than duplicating it.
+2. **Generate compact agent instructions.** The correct entrypoint for the
+   chosen adapter (`CLAUDE.md` for Claude Code - the file it actually loads,
+   not `AGENTS.md`), in the style of this repository's own
+   [`AGENTS.md`](../../AGENTS.md) - short, pointing to detail rather than
+   duplicating it.
 3. **Create a knowledge index.** A handful of seeded knowledge artifacts
    (2-3 facts, 1 rule, 1 decision) in the demo repo, each passing
    `eif_validate_frontmatter.py`.

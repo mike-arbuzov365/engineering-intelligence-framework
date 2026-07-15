@@ -1,0 +1,6 @@
+# EIF:BEGIN gitignore - managed by scripts/eif_init.py, do not hand-edit this block
+.eif/runtime/
+.eif/runtime.next/
+.eif/runtime.previous/
+*.bak-*
+# EIF:END gitignore

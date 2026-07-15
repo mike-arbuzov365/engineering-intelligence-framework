@@ -51,6 +51,8 @@ jobs:
         run: python scripts/eif_validate_frontmatter.py --framework-root . --instance-root . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md" "docs/product/*.md"
       - name: Validate .eif/config.yaml.example against the config schema
         run: python scripts/eif_validate_frontmatter.py --framework-root . --config .eif/config.yaml.example
+      - name: Validate .eif/framework.lock.yaml.example against the lock schema
+        run: python scripts/eif_validate_frontmatter.py --framework-root . --lock .eif/framework.lock.yaml.example
       - name: Run validator fixture tests (positive + negative)
         run: python scripts/tests/test_validate.py
 
@@ -81,6 +83,7 @@ jobs:
         run: |
           python scripts/eif_validate_frontmatter.py --framework-root . --instance-root examples/demo-workspace "knowledge/**/*.md"
           python scripts/eif_validate_frontmatter.py --framework-root . --config examples/demo-workspace/.eif/config.yaml
+          python scripts/eif_validate_frontmatter.py --framework-root . --lock examples/demo-workspace/.eif/framework.lock.yaml
       - name: Run the demo's behavioral test (stdlib unittest, no extra dependency)
         run: python examples/demo-workspace/tests/test_calendar_utils.py -v
 

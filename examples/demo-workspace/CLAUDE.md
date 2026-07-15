@@ -7,10 +7,13 @@ EIF:END marker, not inside this block. It is deliberately short - detail
 lives in the files it points to.
 
 Runnable commands below assume you are at the instance root and have run
-`pip install -r .eif/runtime/requirements.txt` once. They do not require the
-framework itself to be checked out - `.eif/runtime/` is a pinned,
-self-contained bundle (see `.eif/config.yaml` `framework.ref` for which
-framework commit it was generated from).
+`pip install -r .eif/runtime/requirements.txt` once. `.eif/runtime/` is a
+pinned *source* bundle - it does not require the framework to be checked out,
+but it still needs that one dependency install (it is not a self-contained
+interpreter environment). Exact provenance - which framework commit
+generated it, whether that checkout was clean, hashes of every bundled file
+- is in `.eif/framework.lock.yaml`, not `.eif/config.yaml` (that file is
+yours; the lock is EIF-managed and rewritten on every upgrade).
 
 ## Before non-trivial work
 
@@ -34,12 +37,15 @@ reason about, never a standing instruction).
 
 1. Run the verification commands from the task-scope file. Record PASS/FAIL,
    not "looks fine."
-2. Generate a localized Knowledge Delta and closeout:
-   `python .eif/runtime/eif_render.py --framework-root .eif/runtime --locale <your locale> knowledge-delta`
-   `python .eif/runtime/eif_render.py --framework-root .eif/runtime --locale <your locale> session-closeout`
+2. Generate a localized Knowledge Delta and closeout - locale is read from
+   `.eif/config.yaml` automatically, and these commands write the files, not
+   just print them:
+   `python .eif/runtime/eif_render.py --framework-root .eif/runtime knowledge-delta`
+   `python .eif/runtime/eif_render.py --framework-root .eif/runtime session-closeout`
 3. Validate the instance before opening a PR:
    `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "knowledge/**/*.md"`
    `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --config .eif/config.yaml`
+   `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --lock .eif/framework.lock.yaml`
 
 ## Language
 

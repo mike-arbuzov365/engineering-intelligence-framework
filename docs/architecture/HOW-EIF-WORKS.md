@@ -377,6 +377,25 @@ from the private production instance:
 - No independent, multi-project benchmark has validated the framework's
   actual effect on task success, rework rate, or total cost - only
   component-level, single-instance measurements exist so far.
+- **A documented rollback procedure did not by itself account for a
+  generated artifact living outside the directory it names.** The
+  adoption-hardening round's own end-to-end test proved this the hard
+  way: "delete `.eif/`, restore `CLAUDE.md`/`.gitignore`" is not a
+  complete rollback once a knowledge index has been generated at a
+  configured path outside `.eif/` (the common case for an adopted, not
+  greenfield, repository) - the generated `index.md` was left behind
+  until the test's own assertion caught it. Fixed in the test; the same
+  correction belongs in any hand-followed rollback instructions, not just
+  code.
+- **Existing-project "governance detected" is a heuristic, not semantic
+  understanding.** The adoption preflight (`scripts/eif_preflight.py`)
+  decides whether to require an explicit `--adoption-mode` by checking
+  whether the existing entrypoint file has more than a small amount of
+  content and no EIF markers yet - a content-*presence* check, not a
+  content-*meaning* check. It can both over-trigger (a long file that
+  isn't actually governance) and under-trigger (real but terse governance
+  under the length threshold). Documented as a known limitation rather
+  than presented as understanding what the text says.
 - **The first version of this repository's own ontology had the exact
   failure mode it warns against**: a single linear "vendor docs always
   outrank logs" authority ranking that conflated normative claims with
@@ -399,9 +418,14 @@ High-level sequence, updated after the 2026-07-15 review round:
 1. ~~Public/private security audit~~ -> ~~legal foundation~~ -> ~~ontology
    consistency, machine-readable schemas, decision ledger, self-governance
    CI~~ (done, this round).
-2. Build the [vertical slice](../guides/vertical-slice.md): one synthetic
-   demo, one adapter (Claude Code), end to end, before porting anything
-   else.
+2. ~~Build the [vertical slice](../guides/vertical-slice.md): one
+   synthetic demo, one adapter (Claude Code), end to end~~ (done) ->
+   ~~existing-repository adoption hardening (preflight, coexistence mode,
+   configurable knowledge paths, privacy-scan suppression baseline),
+   driven directly by a real throwaway-copy pilot against a private
+   Tier-2 repository~~ (done, this round - see
+   [Limitations](#limitations) for what the pilot found and what remains
+   a heuristic, not a solved problem).
 3. Repeat the slice against a second adapter (Cursor) to prove the
    framework/adapter boundary holds.
 4. Real merge-gate/CI enforcement wired up in repository settings, not just
@@ -459,6 +483,15 @@ formally ratified (the file is explicit about which is which).
 - [ ] A non-English locale works end to end.
 - [ ] Generic bootstrap (`eifctl init`) works without any private
       repository.
+- [x] Existing-repository adoption does not silently override pre-existing
+      project governance: an adoption preflight detects it and stops
+      before any write without an explicit coexistence decision; a
+      `coexist` mode generates a block that defers to existing rules
+      instead of claiming sole authority; knowledge paths are
+      user-configured, not hardcoded. Tested against a realistic sanitized
+      fixture (`scripts/tests/test_adoption.py`), not yet re-validated
+      against the original pilot repository after this round's changes
+      (tracked separately, private planning packet).
 - [ ] At least two agent adapters tested against this repository.
 - [x] Structural-graph and shell-compression integrations documented as
       optional.
@@ -539,6 +572,21 @@ No. EIF is documentation, templates, and scripts that run in your own
 environment against your own repositories. It doesn't introduce a hosted
 service, telemetry backend, or cloud memory store. Read the actual scripts
 before trusting this answer for your threat model.
+
+**Can EIF be adopted into an existing repository that already has its own
+agent rules?**
+Yes, that is the specific scenario the adoption-hardening round targeted,
+driven by a real pilot against a private repository. `eif_init.py` runs a
+preflight before writing anything: if your entrypoint file (e.g.
+`CLAUDE.md`) already has real content and you have not set an explicit
+`adoption.mode`, it stops rather than silently appending a second,
+competing authority statement. Passing `--adoption-mode coexist`
+generates a block that explicitly defers to your existing rules instead
+of claiming to be the project's sole authority, and reads knowledge paths
+from your config instead of assuming a root `knowledge/` directory. See
+[Limitations](#limitations) for what this preflight is - a content-
+presence heuristic - and is not - semantic understanding of your existing
+rules.
 
 **What's the overhead of adopting this?**
 Not yet measured end to end - see

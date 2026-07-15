@@ -120,7 +120,8 @@ config-shape change is where that becomes necessary, not before.
 ## Adoption (existing repositories)
 
 `--migration-status adopted` marks an instance created on top of a
-pre-existing repository. Non-destructive defaults make this safe:
+pre-existing repository (recorded provenance, in the lock). Non-destructive
+defaults make bootstrapping onto one safe:
 
 - an existing `.eif/config.yaml` is **kept, unchanged** by default - this is
   now the *routine* upgrade path, not a special case; only explicit `--force`
@@ -132,9 +133,78 @@ pre-existing repository. Non-destructive defaults make this safe:
 - `--dry-run` reports exactly what would change (create/keep/overwrite,
   per file) before anything is written.
 
+**Adoption preflight and coexistence (adoption-hardening round).** Being
+non-destructive is not the same as being non-*competing*: a marker-safe
+append is still the wrong outcome if the appended block declares itself
+the project's authority into a `CLAUDE.md` that already has its own real
+governance. `scripts/eif_preflight.py` runs before any write and detects
+this case - substantial pre-existing entrypoint content, no EIF markers
+yet. On `init`, if that's detected and no `--adoption-mode` was passed,
+`eif_init.py` refuses to write anything at all (`--dry-run` shows the
+identical STOP a real run enforces - the two cannot drift, they call the
+same function). Resolving it is an explicit decision, not a default:
+
+- `--adoption-mode coexist` generates a block that says explicitly it is
+  **not** the project's sole or primary authority, that project-owned
+  instructions outside the `EIF:BEGIN`/`EIF:END` markers stay canonical,
+  and that only paths actually named in `.eif/config.yaml` are referenced
+  (see below) - it fills gaps, it does not compete.
+- `--adoption-mode greenfield` is an explicit, informed override if you
+  want the framework-authority framing anyway.
+
+`adoption.mode` lives in `.eif/config.yaml` (user-owned), deliberately not
+in `framework.lock.yaml` - it is a project decision about how EIF should
+present itself, not EIF-managed provenance, and a routine upgrade
+preserves it exactly like locale or adapter.
+
+**Configurable knowledge paths.** `knowledge.root` and
+`knowledge.index_path` in `.eif/config.yaml` control where
+`eif_generate_index.py`/`eif_search_knowledge.py` look and where the
+generated block's own example commands point - the greenfield default is
+`knowledge`/`knowledge/index.md`, but an adopted repository with existing
+knowledge at, say, `docs/knowledge/` does not have to migrate it to match
+the default. If the configured root does not exist, index generation
+stays inert - it is never created silently, so adoption never produces a
+second, parallel knowledge system next to whatever the project already
+has.
+
 This is the property the eventual migration of the private production
-instance depends on: bringing a real, populated repository under EIF without
-discarding its existing configuration, instructions, or knowledge.
+instance depends on: bringing a real, populated repository under EIF
+without discarding, or silently out-authoring, its existing configuration,
+governance, or knowledge. Tested against a realistic sanitized fixture,
+not a real repository, in `scripts/tests/test_adoption.py` - see
+[claims-evidence.md](../product/claims-evidence.md) for exactly what that
+proves and does not prove.
+
+## Uninstalling / rollback
+
+Not yet a dedicated command - `eif_init.py` has no `--rollback`/`--undo`
+flag (only within-transaction rollback if a single run fails partway, see
+above). To remove an EIF instance by hand:
+
+1. Delete `.eif/` (config, lock, and the runtime bundle all live there).
+2. Restore `CLAUDE.md` and `.gitignore` to their pre-EIF content. For a
+   git-tracked file this was never committed with the EIF block, `git
+   checkout -- CLAUDE.md .gitignore` is byte-exact by construction -
+   prefer it over hand-editing, which is exact-whitespace-sensitive (a
+   stray blank line at the removed block's former seam costs nothing
+   functionally but does break a literal byte-for-byte claim). For an
+   untracked file, or one where the EIF block was already committed,
+   manually delete everything between and including the
+   `<!-- EIF:BEGIN -->`/`<!-- EIF:END -->` (or `# EIF:BEGIN gitignore`/
+   `# EIF:END gitignore`) markers, then verify with `git diff`/`git
+   status`, not by eye.
+3. **If a knowledge index was ever generated** (`eif_generate_index.py`,
+   directly or via `eif_init.py`), delete the generated index file too -
+   it lives at the configured `knowledge.index_path`, which may be
+   outside `.eif/` (the common case for an adopted, not greenfield,
+   repository) and is therefore NOT removed by step 1. A real gap this
+   round's own adoption test caught: "delete `.eif/`, restore the two
+   managed files" looked complete and was not - the generated index was
+   left behind until the test's own byte-for-byte comparison against the
+   pre-install snapshot caught it.
+4. Verify: `git status`/`git diff` should show the tree back to its
+   pre-EIF state exactly, not "looks about right."
 
 ## Validation surface
 

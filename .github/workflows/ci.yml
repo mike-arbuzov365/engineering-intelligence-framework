@@ -30,6 +30,13 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
+      - name: Run privacy scan unit tests
+        # Adoption-hardening correction: this suite (detection, redaction,
+        # fail-closed, and the suppression/baseline mechanism) previously
+        # ran nowhere in CI despite claims-evidence.md counting it among
+        # the tested suites - a real doc-vs-CI gap, fixed here rather than
+        # just corrected in the doc.
+        run: python scripts/tests/test_privacy_scan.py
       - name: Run privacy scan
         run: python scripts/eif_privacy_scan.py --repo .
 
@@ -66,14 +73,20 @@ jobs:
           python-version: "3.12"
       - name: Install pinned dependencies
         run: pip install -r scripts/requirements.txt
-      - name: Run runtime unit tests (init, index, search, locale, render, journey)
+      - name: Run runtime unit tests (init, markers, verify-runtime, index, search, locale, render, journey, adoption)
+        # markers/verify-runtime/adoption additions are the same doc-vs-CI
+        # gap fix as the privacy-scan job above - these suites existed and
+        # passed locally but were never actually wired into a CI job.
         run: |
           python scripts/tests/test_init.py
+          python scripts/tests/test_markers.py
+          python scripts/tests/test_verify_runtime.py
           python scripts/tests/test_generate_index.py
           python scripts/tests/test_search_knowledge.py
           python scripts/tests/test_locale.py
           python scripts/tests/test_render.py
           python scripts/tests/test_journey.py
+          python scripts/tests/test_adoption.py
       - name: Validate the demo project instance's knowledge artifacts and config
         # framework-root stays the framework checkout; instance-root points
         # at the demo, which is not vendoring the framework - this is the

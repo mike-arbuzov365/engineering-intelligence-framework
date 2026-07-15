@@ -161,25 +161,64 @@ def load_denylist(path: Path) -> list[str]:
     return tokens
 
 
+class SuppressionConfigError(Exception):
+    """The suppression config EXISTS but cannot be trusted to read -
+    independent-review requirement: a broken existing config must fail the
+    scan loudly, never be silently treated as an empty suppression list
+    (which would let a real finding through if the config the operator
+    thinks is suppressing something is actually not being read at all)."""
+
+
 def load_suppressions(config_path: Path) -> list[dict]:
     """Read privacy.suppressions from .eif/config.yaml, UNvalidated - call
-    validate_suppressions() on the result before trusting it. Missing
-    file, missing key, or missing PyYAML all mean "no suppressions
-    configured" - not an error; a project with no .eif/config.yaml yet
-    scans exactly like today, unsuppressed. A config file that EXISTS but
-    is malformed YAML is a separate, real problem - but this scanner is
-    not the tool that owns that decision (eif_init.py's config-state
-    handling is); this function stays lenient about the file itself and
-    only validates the suppressions list's own shape."""
-    if yaml is None or not config_path.exists():
+    validate_suppressions() on the result before trusting it.
+
+    Four states, deliberately distinguished (independent-review fix - the
+    previous version collapsed the last three into a silent empty list):
+      - config ABSENT            -> [] (no suppressions; scan continues
+                                        exactly as for a repo with no
+                                        .eif/config.yaml yet)
+      - config exists + VALID    -> the suppressions list (possibly empty)
+      - config exists + invalid  -> SuppressionConfigError (bad YAML, not a
+        YAML / not a mapping      mapping, or privacy/suppressions of the
+                                  wrong type)
+      - config exists + PyYAML   -> SuppressionConfigError (cannot read it,
+        UNAVAILABLE               so cannot honor its suppressions - do not
+                                  pretend there are none)
+    """
+    if not config_path.exists():
         return []
+    if yaml is None:
+        raise SuppressionConfigError(
+            f"{config_path} exists but PyYAML is not installed, so its "
+            f"privacy.suppressions cannot be read - refusing to scan as if there "
+            f"were no suppressions (a real one could be silently ignored). Install "
+            f"with: pip install -r scripts/requirements.txt"
+        )
     try:
-        data = yaml.safe_load(config_path.read_text(encoding="utf-8", errors="replace")) or {}
-    except yaml.YAMLError:
-        return []
+        data = yaml.safe_load(config_path.read_text(encoding="utf-8", errors="replace"))
+    except yaml.YAMLError as e:
+        raise SuppressionConfigError(f"{config_path} is not valid YAML: {e}")
+    if data is None:
+        return []  # an empty file is a valid, suppression-free config
     if not isinstance(data, dict):
+        raise SuppressionConfigError(
+            f"{config_path} does not contain a YAML mapping at the top level "
+            f"(got {type(data).__name__})"
+        )
+    privacy = data.get("privacy")
+    if privacy is None:
         return []
-    return (data.get("privacy") or {}).get("suppressions") or []
+    if not isinstance(privacy, dict):
+        raise SuppressionConfigError(f"{config_path}: 'privacy' must be a mapping, got {type(privacy).__name__}")
+    suppressions = privacy.get("suppressions")
+    if suppressions is None:
+        return []
+    if not isinstance(suppressions, list):
+        raise SuppressionConfigError(
+            f"{config_path}: 'privacy.suppressions' must be a list, got {type(suppressions).__name__}"
+        )
+    return suppressions
 
 
 def validate_suppressions(suppressions: list[dict]) -> list[str]:
@@ -402,7 +441,15 @@ def main() -> int:
     denylist_path = Path(args.denylist) if args.denylist else repo / ".eif" / "local-denylist.txt"
     denylist = load_denylist(denylist_path)
     config_path = Path(args.config) if args.config else repo / ".eif" / "config.yaml"
-    suppressions = load_suppressions(config_path)
+    try:
+        suppressions = load_suppressions(config_path)
+    except SuppressionConfigError as e:
+        # A broken EXISTING config fails loudly here (independent-review
+        # requirement) - never silently degrade to "no suppressions",
+        # which would let a finding the operator believes is suppressed
+        # through, or hide that the config isn't being read at all.
+        print(f"eif-privacy-scan: cannot load suppression config - {e}", file=sys.stderr)
+        return 1
 
     suppression_errors = validate_suppressions(suppressions)
     if suppression_errors:

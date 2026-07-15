@@ -319,6 +319,17 @@ class _Stage:
 # specific point ("after runtime", "before lock", etc.) without a synthetic
 # preflight failure - a name no real user would set by accident.
 FAULT_INJECT_ENV = "EIF_INIT_TEST_FAIL_AFTER"
+# Sibling hook for the PRE-commit staging phase (independent-review fix):
+# proves that a failure while a `.next` artifact is being written/copied -
+# before commit_transaction even starts - still unwinds to the exact prior
+# tree. AFTER-commit rollback and BEFORE-commit staging cleanup are two
+# different code paths; each needs its own fault-injection point.
+FAULT_INJECT_BEFORE_ENV = "EIF_INIT_TEST_FAIL_BEFORE"
+
+
+def _maybe_fault_before(stage_name: str) -> None:
+    if os.environ.get(FAULT_INJECT_BEFORE_ENV) == stage_name:
+        raise RuntimeError(f"injected test failure before staging {stage_name!r}")
 
 
 def commit_transaction(stages: list[_Stage]) -> None:
@@ -635,6 +646,85 @@ def _resolve_mode_and_values(args, existing_config: dict | None, existing_lock: 
     )
 
 
+def finalize_migration_status(
+    *,
+    mode: str,
+    resolved_status: str,
+    explicit_status: str | None,
+    adoption_mode: str,
+    detected_pre_existing_state: bool,
+) -> tuple[str | None, str | None]:
+    """Reconcile the provisional migration_status from _resolve_mode_and_values
+    with the FACTUAL evidence, and refuse contradictions before any write.
+
+    Returns (status, stop_reason). status is None exactly when stop_reason
+    is set (the caller must then STOP without writing anything).
+
+    Independent-review finding: `adoption.mode` describes the CURRENT
+    coexistence behavior; `lock.instance.migration_status` records HOW the
+    instance came to exist. They are different questions, but they cannot
+    contradict the evidence:
+
+      - coexist mode means there IS pre-existing project governance to
+        coexist with -> the instance was, historically, `adopted`. So a
+        coexist instance can never truthfully record a greenfield
+        (empty-repo) birth. That pairing is the one hard contradiction,
+        rejected in every mode.
+      - a greenfield AUTHORITY override on a repo that already had project
+        state does not rewrite history: the repo did not become empty just
+        because the generated block now claims sole authority. Its
+        historical status stays `adopted`.
+      - a genuinely empty new repo (no pre-existing state, greenfield mode)
+        is `greenfield`.
+      - a routine upgrade preserves the persisted status verbatim.
+      - a reconfigure honors an explicit --migration-status, and otherwise
+        preserves the persisted one - never silently rewriting recorded
+        history, and never silently leaving a coexist+greenfield lie behind
+        when the mode is switched to coexist.
+    """
+    coexist_greenfield_msg = (
+        "migration-provenance contradiction: --adoption-mode coexist means this "
+        "instance coexists with pre-existing project governance, but "
+        "--migration-status greenfield claims it was created in an empty "
+        "repository. Both cannot be true. Drop --migration-status (it will be "
+        "recorded as 'adopted'), or drop --adoption-mode coexist."
+    )
+    if adoption_mode == "coexist" and explicit_status == "greenfield":
+        return None, coexist_greenfield_msg
+
+    if mode == "upgrade":
+        return resolved_status, None  # persisted, preserved verbatim
+
+    if mode == "init":
+        history_is_adopted = detected_pre_existing_state or adoption_mode == "coexist"
+        if explicit_status is not None:
+            if explicit_status == "greenfield" and detected_pre_existing_state:
+                return None, (
+                    "migration-provenance contradiction: --migration-status greenfield "
+                    "claims this instance was created in an empty repository, but the "
+                    "adoption preflight detected substantial pre-existing project content "
+                    "in the entrypoint file. A greenfield AUTHORITY override "
+                    "(--adoption-mode greenfield) is allowed here, but the historical "
+                    "migration_status must still be 'adopted' - drop --migration-status."
+                )
+            return explicit_status, None
+        return ("adopted" if history_is_adopted else "greenfield"), None
+
+    # reconfigure
+    if explicit_status is not None:
+        return explicit_status, None  # the coexist+greenfield case is already caught above
+    if adoption_mode == "coexist" and resolved_status == "greenfield":
+        return None, (
+            "reconfiguring to --adoption-mode coexist, but the recorded "
+            "migration_status is 'greenfield' - switching to coexist would leave the "
+            "lock claiming this instance was born into an empty repo while its config "
+            "says it coexists with pre-existing governance. Pass --migration-status "
+            "adopted to record that it now coexists (refusing to silently rewrite "
+            "recorded history), or keep greenfield mode."
+        )
+    return resolved_status, None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--framework-root", required=True)
@@ -804,6 +894,23 @@ def main() -> int:
         )
         return 1
 
+    # --- Migration provenance (independent-review fix) ---
+    # adoption.mode (current coexistence behavior) and migration_status
+    # (historical origin) are resolved from different inputs and must not be
+    # allowed to contradict the evidence. This runs AFTER the preflight
+    # because the "was there pre-existing project state?" signal comes from
+    # it, and BEFORE any write so a contradiction STOPs cleanly.
+    migration_status, migration_stop = finalize_migration_status(
+        mode=mode,
+        resolved_status=migration_status,
+        explicit_status=args.migration_status,
+        adoption_mode=adoption_mode,
+        detected_pre_existing_state=preflight.detected_pre_existing_entrypoint,
+    )
+    if migration_stop is not None:
+        print(f"{prefix}eif-init: {migration_stop} Refusing to write anything.", file=sys.stderr)
+        return 1
+
     # Real action for staging purposes - same function as the preflight
     # report above, called again (cheap, read-only) rather than threading
     # extra return values through the report object.
@@ -921,61 +1028,100 @@ def main() -> int:
         if eif_dir_is_new and eif_dir.is_dir() and not any(eif_dir.iterdir()):
             eif_dir.rmdir()
 
+    # --- Cleanup-safe staging boundary (independent-review fix) ---
+    # Every artifact writes to a `.next` path first; the whole pre-commit
+    # phase is wrapped so ANY failure while staging - including an injected
+    # pre-commit fault, a disk error mid-copy, or a failed bundle
+    # verification - unwinds to the EXACT prior tree: every `.next` removed,
+    # a fresh-init `.eif/` removed if now empty, and a `--force` config
+    # backup removed (policy below). Nothing already live is touched until
+    # commit_transaction's atomic renames; the AFTER-commit path
+    # (commit_transaction's own rollback) and this BEFORE-commit path are
+    # distinct, so both are exercised by fault injection.
     stages: list[_Stage] = []
+    staged_next_paths: list[Path] = []
+    backup_path: Path | None = None
 
-    if config_action != "keep":
-        if config_action == "overwrite" and config_path.exists():
-            _backup(config_path)
-        config_next = eif_dir / "config.yaml.next"
-        config_next.write_text(config_content, encoding="utf-8")
-        stages.append(_Stage("config", config_next, config_path, is_dir=False))
-
-    runtime_next = stage_bundle(instance_path, sources)
-    problems = verify_staged_bundle(runtime_next, manifest)
-    if problems:
-        shutil.rmtree(runtime_next, ignore_errors=True)
-        if config_action != "keep":
-            (eif_dir / "config.yaml.next").unlink(missing_ok=True)
+    def _cleanup_staging() -> None:
+        for p in staged_next_paths:
+            if not p.exists():
+                continue
+            if p.is_dir():
+                shutil.rmtree(p, ignore_errors=True)
+            else:
+                p.unlink(missing_ok=True)
+        # --force config-backup policy: a backup taken THIS run is transient
+        # until the reconfigure commits. On failure delete it, so the tree
+        # returns byte-for-byte to its prior state (no orphaned backup); a
+        # SUCCESSFUL reconfigure keeps it as the recovery copy. Documented in
+        # docs/architecture/instance-contract.md#config-backup-policy.
+        if backup_path is not None and backup_path.exists():
+            backup_path.unlink(missing_ok=True)
         _cleanup_orphaned_eif_dir()
-        print("eif-init: staged bundle failed verification, nothing committed:", file=sys.stderr)
-        for p in problems:
-            print(f"  - {p}", file=sys.stderr)
+
+    try:
+        if config_action != "keep":
+            if config_action == "overwrite" and config_path.exists():
+                backup_path = _backup(config_path)
+            _maybe_fault_before("config")
+            config_next = eif_dir / "config.yaml.next"
+            config_next.write_text(config_content, encoding="utf-8")
+            staged_next_paths.append(config_next)
+            stages.append(_Stage("config", config_next, config_path, is_dir=False))
+
+        _maybe_fault_before("runtime")
+        runtime_next = stage_bundle(instance_path, sources)
+        staged_next_paths.append(runtime_next)
+        problems = verify_staged_bundle(runtime_next, manifest)
+        if problems:
+            print("eif-init: staged bundle failed verification, nothing committed:", file=sys.stderr)
+            for p in problems:
+                print(f"  - {p}", file=sys.stderr)
+            _cleanup_staging()
+            return 1
+        stages.append(_Stage("runtime", runtime_next, eif_dir / "runtime", is_dir=True))
+
+        _maybe_fault_before("lock")
+        lock_next = eif_dir / "framework.lock.yaml.next"
+        lock_next.write_text(lock_content, encoding="utf-8")
+        staged_next_paths.append(lock_next)
+        stages.append(_Stage("lock", lock_next, lock_path, is_dir=False))
+
+        _maybe_fault_before("entrypoint")
+        entry_next = entry_path.with_name(entry_path.name + ".next")
+        entry_next.write_text(entry_new_text, encoding="utf-8")
+        staged_next_paths.append(entry_next)
+        stages.append(_Stage("entrypoint", entry_next, entry_path, is_dir=False))
+
+        _maybe_fault_before("gitignore")
+        gi_next = gi_path.with_name(gi_path.name + ".next")
+        gi_next.write_text(gi_new_text, encoding="utf-8")
+        staged_next_paths.append(gi_next)
+        stages.append(_Stage("gitignore", gi_next, gi_path, is_dir=False))
+
+        # Knowledge index - staged into the SAME transaction as everything
+        # else (last stage). write_bytes, not write_text: write_text's
+        # platform-default newline translation (LF -> CRLF on Windows) would
+        # make the on-disk bytes NOT match lock_knowledge_index['sha256']
+        # above, which eif_verify_runtime.py's drift check compares exactly.
+        if index_content is not None:
+            _maybe_fault_before("knowledge_index")
+            index_next = knowledge_index_path_abs.with_name(knowledge_index_path_abs.name + ".next")
+            index_next.write_bytes(index_content.encode("utf-8"))
+            staged_next_paths.append(index_next)
+            stages.append(_Stage("knowledge_index", index_next, knowledge_index_path_abs, is_dir=False))
+    except Exception as e:
+        _cleanup_staging()
+        print(f"eif-init: staging failed before commit, nothing written to live files: {e}", file=sys.stderr)
         return 1
-    stages.append(_Stage("runtime", runtime_next, eif_dir / "runtime", is_dir=True))
-
-    lock_next = eif_dir / "framework.lock.yaml.next"
-    lock_next.write_text(lock_content, encoding="utf-8")
-    stages.append(_Stage("lock", lock_next, lock_path, is_dir=False))
-
-    entry_next = entry_path.with_name(entry_path.name + ".next")
-    entry_next.write_text(entry_new_text, encoding="utf-8")
-    stages.append(_Stage("entrypoint", entry_next, entry_path, is_dir=False))
-
-    gi_next = gi_path.with_name(gi_path.name + ".next")
-    gi_next.write_text(gi_new_text, encoding="utf-8")
-    stages.append(_Stage("gitignore", gi_next, gi_path, is_dir=False))
-
-    # Knowledge index - independent-review fix: now staged into the SAME
-    # transaction as everything else (last stage, so a fault-injection
-    # test after it proves the full chain, index included, rolls back to
-    # exact prior bytes). Only staged when there is something to write -
-    # "skip" (management off, or no knowledge root yet) adds no stage at
-    # all, so nothing new is created for that case either.
-    if index_content is not None:
-        index_next = knowledge_index_path_abs.with_name(knowledge_index_path_abs.name + ".next")
-        # write_bytes, not write_text: write_text's platform-default
-        # newline translation (LF -> CRLF on Windows) would make the
-        # on-disk bytes NOT match lock_knowledge_index['sha256'] above,
-        # which was computed straight from index_content's in-memory LF
-        # bytes - eif_verify_runtime.py's drift check needs these to be
-        # exactly the same bytes, not "the same text modulo line endings".
-        index_next.write_bytes(index_content.encode("utf-8"))
-        stages.append(_Stage("knowledge_index", index_next, knowledge_index_path_abs, is_dir=False))
 
     try:
         commit_transaction(stages)
     except Exception as e:
-        _cleanup_orphaned_eif_dir()
+        # commit_transaction already rolled back committed stages and removed
+        # its own uncommitted .next files; _cleanup_staging then removes the
+        # fresh-init .eif/ and (on a failed --force) the config backup.
+        _cleanup_staging()
         print(f"eif-init: transaction failed and was rolled back: {e}", file=sys.stderr)
         return 1
 

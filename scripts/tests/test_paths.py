@@ -79,6 +79,42 @@ def main() -> int:
         except eif_paths.PathPolicyError as e:
             results.append(check("path with spaces is allowed (not rejected)", False, str(e)))
 
+        # A root that is exactly the required real-repo example must pass -
+        # 'docs/project knowledge' is the acceptance case named in the review.
+        try:
+            eif_paths.validate_instance_relative_path("docs/project knowledge", instance, "knowledge.root")
+            results.append(check("'docs/project knowledge' (spaced) is accepted", True))
+        except eif_paths.PathPolicyError as e:
+            results.append(check("'docs/project knowledge' (spaced) is accepted", False, str(e)))
+
+        # --- Shell-metacharacter rejection (independent-review finding):
+        # every one must be refused before any write, and (like the
+        # traversal cases above) create nothing anywhere. ---
+        meta_before = sorted(str(p) for p in Path(td).rglob("*"))
+        metachar_cases = [
+            ("docs/knowledge; rm -rf .", "semicolon command separator"),
+            ("docs/" + "$(" + "whoami)", "command substitution $()"),
+            ("docs/" + chr(96) + "id" + chr(96), "backtick command substitution"),
+            ('docs/"quoted', "double quote"),
+            ("docs/'quoted", "single quote"),
+            ("docs/know" + chr(10) + "ledge", "embedded newline"),
+            ("docs/knowledge" + chr(10), "trailing newline (regex $ hole)"),
+            ("%TEMP%/knowledge", "Windows env-var expansion %TEMP%"),
+            ("docs/a|b", "pipe"),
+            ("docs/a&b", "background/and"),
+            ("docs/a>b", "output redirect"),
+            ("docs/a<b", "input redirect"),
+            ("docs/a$b", "bare dollar"),
+        ]
+        for raw, label in metachar_cases:
+            try:
+                eif_paths.validate_instance_relative_path(raw, instance, "knowledge.root")
+                results.append(check(f"rejects {label} ({raw!r})", False))
+            except eif_paths.PathPolicyError:
+                results.append(check(f"rejects {label} ({raw!r})", True))
+        meta_after = sorted(str(p) for p in Path(td).rglob("*"))
+        results.append(check("no metacharacter path created any file/directory anywhere in the temp tree", meta_before == meta_after))
+
     # --- index-inside-root check ---
     try:
         eif_paths.validate_index_inside_root("docs/knowledge/index.md", "docs/knowledge")

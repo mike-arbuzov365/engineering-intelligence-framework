@@ -12,10 +12,22 @@ drive paths, UNC paths, `..` traversal, and - the check none of the
 others can substitute for - a resolved path that lands outside
 instance_path even without any of the above (e.g. a deep symlink, or a
 technically-relative path this module's own string checks didn't
-anticipate). Spaces are explicitly ALLOWED (a legitimate directory name
-can contain them) - the policy is that generated commands must quote
-them, not that the path itself is rejected; see templates/agent-
-instructions.md's use of these values.
+anticipate).
+
+Shell-safety (independent-review finding): these configured values are
+interpolated into commands the generated CLAUDE.md tells an agent to run
+in a real shell, so the path text itself must be shell-safe, not just
+schema-valid. The policy is a strict ALLOWLIST - letters, digits, and
+`/ \ . _ -` plus spaces - and nothing else. Spaces are allowed (a
+legitimate directory name can contain them), but ONLY because generated
+commands quote every interpolated path; a space with an unquoted command
+would split into two arguments, so the two changes ship together. Every
+other character - quotes, backticks, `$`, `%`, `;`, `&`, `|`, `<`, `>`,
+`(` `)`, `{` `}`, glob metacharacters, control characters, newlines - is
+rejected before anything is written, because there is no safe way to
+interpolate it into a cross-platform shell command. This is defense in
+depth even with quoting: a value containing a literal `"` or backtick or
+`$(...)` could break out of the quotes on at least one supported shell.
 """
 from __future__ import annotations
 
@@ -24,6 +36,14 @@ from pathlib import Path
 
 _WINDOWS_DRIVE_RE = re.compile(r"^[A-Za-z]:[\\/]")
 _UNC_RE = re.compile(r"^[\\/]{2}")
+# Strict allowlist: alnum, forward/back slash, dot, underscore, hyphen,
+# space. Everything else is a potential shell metacharacter and is
+# rejected. Checked against the RAW value (before slash-normalization) so
+# a stray backslash is treated as a Windows separator, nothing more.
+# Deliberately anchored with fullmatch (below), NOT `$` - `$` in Python
+# regex also matches just before a TRAILING newline, so `^...$` would let
+# a path ending in "\n" through; fullmatch has no such hole.
+_SAFE_PATH_CHARS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ._/\\-")
 
 
 class PathPolicyError(ValueError):
@@ -50,6 +70,20 @@ def validate_instance_relative_path(raw: str, instance_path: Path, label: str) -
         raise PathPolicyError(f"{label}: UNC paths are not allowed ({raw!r})")
     if any(part == ".." for part in normalized.split("/")):
         raise PathPolicyError(f"{label}: '..' path traversal is not allowed ({raw!r})")
+    # Shell-safety allowlist (independent-review finding): reject any
+    # character that could act as a shell metacharacter when this path is
+    # interpolated into a generated command. Runs AFTER the more specific
+    # checks above so an absolute/drive/UNC path gets its own clearer
+    # message, not this generic one.
+    bad = sorted({c for c in raw if c not in _SAFE_PATH_CHARS})
+    if bad:
+        bad_display = [repr(c) if c.isprintable() else f"U+{ord(c):04X}" for c in bad]
+        raise PathPolicyError(
+            f"{label}: contains character(s) not allowed in a configured path "
+            f"({', '.join(bad_display)}) - only letters, digits, and '/ \\ . _ -' plus "
+            f"spaces are allowed, so the value is safe to quote into a shell command "
+            f"({raw!r})"
+        )
 
     instance_resolved = instance_path.resolve()
     candidate = (instance_path / raw).resolve()

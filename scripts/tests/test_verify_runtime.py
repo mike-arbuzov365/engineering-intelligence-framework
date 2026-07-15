@@ -324,6 +324,46 @@ def main() -> int:
             output[-800:],
         ))
 
+    # --- Migration provenance consistency (independent-review): adoption.mode
+    # (current coexistence behavior) vs migration_status (historical origin).
+    # Pure-function truth table + one end-to-end. ---
+    def cfg(mode):
+        return {"adoption": {"mode": mode}}
+
+    def lk(status):
+        return {"instance": {"migration_status": status}}
+
+    results.append(check("provenance doctor: coexist + greenfield -> FAIL",
+                         verify.check_migration_provenance_consistency(cfg("coexist"), lk("greenfield")) != []))
+    results.append(check("provenance doctor: coexist + adopted -> OK",
+                         verify.check_migration_provenance_consistency(cfg("coexist"), lk("adopted")) == []))
+    results.append(check("provenance doctor: greenfield + adopted -> OK (override history permissible)",
+                         verify.check_migration_provenance_consistency(cfg("greenfield"), lk("adopted")) == []))
+    results.append(check("provenance doctor: greenfield + greenfield -> OK",
+                         verify.check_migration_provenance_consistency(cfg("greenfield"), lk("greenfield")) == []))
+    results.append(check("provenance doctor: FAIL message names the concrete repair",
+                         "--migration-status adopted" in verify.check_migration_provenance_consistency(cfg("coexist"), lk("greenfield"))[0]))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "e2e-migration-contradiction"
+        _init_real_instance_variant(inst, adoption_mode="coexist")  # coexist + adopted, clean
+        lock_path = inst / ".eif" / "framework.lock.yaml"
+        lock = verify._load_yaml(lock_path)
+        lock["instance"]["migration_status"] = "greenfield"  # corrupt to contradict the coexist config
+        lock_path.write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, lock), encoding="utf-8")
+        buf = io.StringIO()
+        old_argv = sys.argv
+        sys.argv = ["eif_verify_runtime.py", "--framework-root", str(FRAMEWORK_ROOT), "--instance-path", str(inst)]
+        try:
+            with contextlib.redirect_stdout(buf):
+                rc = verify.main()
+        finally:
+            sys.argv = old_argv
+        output = buf.getvalue()
+        results.append(check("doctor e2e: coexist config + greenfield lock exits non-zero", rc == 1))
+        results.append(check("doctor e2e: names the migration provenance contradiction",
+                             "migration provenance" in output and "contradict" in output, output[-800:]))
+
     passed = sum(results)
     print(f"\ntest_verify_runtime: {passed}/{len(results)} passed")
     return 0 if all(results) else 1

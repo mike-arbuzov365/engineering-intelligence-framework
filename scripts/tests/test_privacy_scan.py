@@ -323,6 +323,77 @@ def main() -> int:
         result = json.loads(proc.stdout)
         check(".example files are scanned normally, not excluded", "api_key_assignment" in result["secret_shaped"])
 
+    # --- 8h. Suppression-config STATE distinctions (independent-review
+    # finding): a broken EXISTING config must fail loudly, never be treated
+    # as an empty suppression list (which would let a finding the operator
+    # believes is suppressed through, or silently ignore a config that isn't
+    # being read at all). Four states, one behavior each. ---
+    # (i) config ABSENT -> scan runs normally, unsuppressed
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "clean.md").write_text("Nothing sensitive.\n", encoding="utf-8")
+        git_add(tmp)  # no .eif/config.yaml at all
+        proc = run(["--repo", str(tmp), "--json"])
+        check("config absent: scan continues, exit 0", proc.returncode == 0, proc.stdout + proc.stderr)
+
+    # (ii) config exists + VALID (no privacy key) -> scan runs normally
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "clean.md").write_text("Nothing sensitive.\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text("project:\n  name: p\n", encoding="utf-8")
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        check("config valid (no privacy key): scan continues, exit 0", proc.returncode == 0, proc.stdout + proc.stderr)
+
+    # (iii) config exists + INVALID YAML -> exit 1, no JSON, clear message
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "clean.md").write_text("Nothing sensitive.\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text("privacy:\n  suppressions: 'unterminated\n", encoding="utf-8")
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        check("config invalid YAML: exits 1 (not a silent empty-suppressions pass)", proc.returncode == 1, proc.stdout + proc.stderr)
+        check("config invalid YAML: no JSON on stdout (refused before scanning)", proc.stdout.strip() == "")
+        check("config invalid YAML: stderr says it cannot load the suppression config", "cannot load suppression config" in proc.stderr, proc.stderr)
+
+    # (iv) config exists but is NOT A MAPPING (top-level list) -> exit 1
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "clean.md").write_text("Nothing sensitive.\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text("- not\n- a\n- mapping\n", encoding="utf-8")
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        check("config not-a-mapping: exits 1", proc.returncode == 1, proc.stdout + proc.stderr)
+        check("config not-a-mapping: stderr says it cannot load the suppression config", "cannot load suppression config" in proc.stderr, proc.stderr)
+
+    # (v) PyYAML UNAVAILABLE while config EXISTS -> hard error (tested at the
+    # function level: forcing a clean-runner uninstall in a subprocess is not
+    # worth it, but the code path must be exercised). Absent config with no
+    # PyYAML still returns [] (no error).
+    saved_yaml = eif_privacy_scan.yaml
+    try:
+        eif_privacy_scan.yaml = None
+        with tempfile.TemporaryDirectory() as td:
+            cfg = Path(td) / "config.yaml"
+            cfg.write_text("privacy:\n  suppressions: []\n", encoding="utf-8")
+            try:
+                eif_privacy_scan.load_suppressions(cfg)
+                check("PyYAML unavailable + config exists: raises (does not silently skip)", False)
+            except eif_privacy_scan.SuppressionConfigError as e:
+                check("PyYAML unavailable + config exists: raises SuppressionConfigError", True)
+                check("PyYAML unavailable: message names the missing dependency", "PyYAML" in str(e), str(e))
+            check("PyYAML unavailable + config absent: still returns [] (no error)",
+                  eif_privacy_scan.load_suppressions(Path(td) / "does-not-exist.yaml") == [])
+    finally:
+        eif_privacy_scan.yaml = saved_yaml
+
     total_checks = failures
     print(f"\ntest_privacy_scan: {'ALL PASSED' if not failures else str(len(failures)) + ' FAILED'}")
     if failures:

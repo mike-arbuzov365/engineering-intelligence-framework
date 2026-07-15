@@ -138,6 +138,53 @@ def main() -> int:
     results.append(check("reconfigure: un-passed knowledge root/adoption mode keep their prior values",
                          (r5.knowledge_root, r5.adoption_mode) == ("docs/knowledge", "coexist")))
 
+    # --- Migration provenance (independent-review): adoption.mode (current
+    # coexistence behavior) reconciled against migration_status (historical
+    # origin) via finalize_migration_status, using the preflight's
+    # pre-existing-state signal. (status, stop_reason) tuples. ---
+    def fin(*, mode, resolved, explicit, adoption_mode, detected):
+        return eif_init.finalize_migration_status(
+            mode=mode, resolved_status=resolved, explicit_status=explicit,
+            adoption_mode=adoption_mode, detected_pre_existing_state=detected,
+        )
+
+    # init: genuinely empty greenfield repo stays greenfield
+    results.append(check("provenance init: empty greenfield -> greenfield",
+                         fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", detected=False) == ("greenfield", None)))
+    # init: coexist mode implies adopted history even with nothing detected yet
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="coexist", detected=False)
+    results.append(check("provenance init: coexist -> adopted (no --migration-status needed)", (st, stop) == ("adopted", None)))
+    # init: greenfield AUTHORITY override on a repo with detected pre-existing state still records adopted
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", detected=True)
+    results.append(check("provenance init: greenfield override on existing repo -> adopted history", (st, stop) == ("adopted", None)))
+    # init: explicit coexist + greenfield is the hard contradiction -> STOP
+    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="coexist", detected=False)
+    results.append(check("provenance init: coexist + explicit greenfield -> STOP", st is None and stop is not None and "contradiction" in stop))
+    # init: explicit greenfield over DETECTED pre-existing state -> STOP (false history)
+    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", detected=True)
+    results.append(check("provenance init: explicit greenfield over detected state -> STOP", st is None and stop is not None))
+    # init: explicit greenfield on a genuinely empty repo is fine
+    results.append(check("provenance init: explicit greenfield on empty repo -> greenfield",
+                         fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", detected=False) == ("greenfield", None)))
+    # init: explicit adopted honored
+    results.append(check("provenance init: explicit adopted honored",
+                         fin(mode="init", resolved="greenfield", explicit="adopted", adoption_mode="coexist", detected=False) == ("adopted", None)))
+    # upgrade: persisted preserved verbatim, no contradiction logic
+    results.append(check("provenance upgrade: persisted adopted preserved",
+                         fin(mode="upgrade", resolved="adopted", explicit=None, adoption_mode="coexist", detected=False) == ("adopted", None)))
+    # reconfigure: switching to coexist under recorded greenfield -> STOP (do not silently rewrite)
+    st, stop = fin(mode="reconfigure", resolved="greenfield", explicit=None, adoption_mode="coexist", detected=False)
+    results.append(check("provenance reconfigure: coexist over recorded greenfield, no flag -> STOP", st is None and stop is not None))
+    # reconfigure: switching to coexist with explicit adopted is fine
+    results.append(check("provenance reconfigure: coexist + explicit adopted -> adopted",
+                         fin(mode="reconfigure", resolved="greenfield", explicit="adopted", adoption_mode="coexist", detected=False) == ("adopted", None)))
+    # reconfigure: coexist + explicit greenfield still a contradiction
+    st, stop = fin(mode="reconfigure", resolved="adopted", explicit="greenfield", adoption_mode="coexist", detected=False)
+    results.append(check("provenance reconfigure: coexist + explicit greenfield -> STOP", st is None and stop is not None))
+    # reconfigure: greenfield authority over recorded adopted history is allowed (preserve adopted)
+    results.append(check("provenance reconfigure: greenfield mode keeps recorded adopted history",
+                         fin(mode="reconfigure", resolved="adopted", explicit=None, adoption_mode="greenfield", detected=False) == ("adopted", None)))
+
     # --- Config/lock rendering + schema validation, safe YAML for special characters ---
     tricky_name = "weird: name, with \"quotes\" and a # hash"
     data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield", True)

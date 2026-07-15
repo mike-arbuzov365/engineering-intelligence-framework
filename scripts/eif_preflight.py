@@ -59,6 +59,13 @@ class PreflightCheck:
 @dataclass
 class PreflightReport:
     checks: list[PreflightCheck] = field(default_factory=list)
+    # True when the entrypoint file already holds substantial project
+    # content with no EIF markers yet - i.e. this instance is being created
+    # ON TOP OF a repository that already had its own governance. Exposed
+    # so the caller can derive the historical migration_status from the same
+    # single detection this preflight already performs, instead of a second,
+    # possibly-drifting copy of the "is there pre-existing state" logic.
+    detected_pre_existing_entrypoint: bool = False
 
     def add(self, level: str, message: str) -> None:
         self.checks.append(PreflightCheck(level, message))
@@ -167,6 +174,7 @@ def run_preflight(
 
         substantial = len(existing_entry_text.strip()) >= GOVERNANCE_CONTENT_THRESHOLD
         if substantial and not has_existing_markers:
+            report.detected_pre_existing_entrypoint = True
             if adoption_basis in ("explicit_coexist", "persisted_coexist"):
                 report.add(
                     "OK",

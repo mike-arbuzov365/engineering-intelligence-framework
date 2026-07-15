@@ -21,16 +21,20 @@ Checks, each independently reported:
                             eif_init.py) - anything else is flagged as a
                             real integrity concern, not silently ignored.
   7. config/adapter/lock/entrypoint consistency (see check_consistency())
-  8. provenance state    - dirty / asserted, surfaced, not just recorded
-  9. marker integrity     - CLAUDE.md and .gitignore's managed blocks are
+  8. migration provenance - config.adoption.mode vs lock.migration_status
+                            do not contradict (coexist + greenfield is
+                            impossible - see
+                            check_migration_provenance_consistency())
+  9. provenance state    - dirty / asserted, surfaced, not just recorded
+ 10. marker integrity     - CLAUDE.md and .gitignore's managed blocks are
                             each a single well-formed BEGIN/END pair
- 10. config/generated-block drift - .eif/config.yaml's adoption.mode and
+ 11. config/generated-block drift - .eif/config.yaml's adoption.mode and
                             knowledge.root/index_path still match what is
                             actually written into the generated managed
                             block (catches a hand-edited config.yaml, or
                             entrypoint file, with no regeneration since -
                             see check_config_block_drift())
- 11. knowledge index drift  - if the lock records an EIF-managed knowledge
+ 12. knowledge index drift  - if the lock records an EIF-managed knowledge
                             index, it still exists, still carries EIF's
                             ownership marker, and its hash still matches
                             what was generated (see
@@ -208,6 +212,37 @@ def check_consistency(config: dict | None, lock: dict | None) -> list[str]:
     return problems
 
 
+def check_migration_provenance_consistency(config: dict | None, lock: dict | None) -> list[str]:
+    """Independent-review addition: config.adoption.mode (current coexistence
+    behavior) and lock.instance.migration_status (historical origin) answer
+    different questions but must not contradict the evidence.
+
+    The one hard contradiction: adoption.mode: coexist means this instance
+    coexists with pre-existing project governance, so it cannot also claim a
+    greenfield (empty-repo) birth. That pairing FAILs with a concrete repair
+    instruction (an explicit reconfigure is the only supported way to change
+    it - never a hand-edit of one file).
+
+    The reverse - a greenfield authority mode over an `adopted` history - is
+    NOT flagged: it is exactly what a greenfield authority override on an
+    already-existing repo produces, and stays permissible/documented (an
+    override changes who the block claims authority for; it does not rewrite
+    how the repository came to be)."""
+    if config is None or lock is None:
+        return []  # schema checks already surface a missing/invalid file
+    adoption_mode = (config.get("adoption") or {}).get("mode", "greenfield")
+    migration_status = (lock.get("instance") or {}).get("migration_status")
+    if adoption_mode == "coexist" and migration_status == "greenfield":
+        return [
+            "config says adoption.mode: coexist (this instance coexists with pre-existing "
+            "project governance), but the lock records migration_status: greenfield (created "
+            "in an empty repo) - these contradict. Re-run eif_init.py with "
+            "--force --adoption-mode coexist --migration-status adopted to record the true "
+            "history (do not hand-edit one file to match the other)."
+        ]
+    return []
+
+
 def check_provenance(lock: dict | None) -> list[str]:
     if lock is None:
         return ["cannot check provenance: lock missing/invalid"]
@@ -286,10 +321,14 @@ def check_config_block_drift(config: dict | None, instance_path: Path, entrypoin
             f"config says knowledge.index_path: {knowledge_index_path!r}, but {entrypoint}'s generated block "
             f"does not reference that path - run eif_init.py again (a routine upgrade) to regenerate it"
         )
-    if f"--knowledge-root {knowledge_root}" not in block_text:
+    # The generated search command quotes the interpolated knowledge root
+    # (shell-safety fix - a root with a space would otherwise split into two
+    # arguments). Match the quoted form the current template emits.
+    if f'--knowledge-root "{knowledge_root}"' not in block_text:
         problems.append(
             f"config says knowledge.root: {knowledge_root!r}, but {entrypoint}'s generated block's search "
-            f"command does not reference it - run eif_init.py again (a routine upgrade) to regenerate it"
+            f"command does not reference it (as a quoted --knowledge-root argument) - run eif_init.py "
+            f"again (a routine upgrade) to regenerate it"
         )
     return problems
 
@@ -348,6 +387,7 @@ def main() -> int:
         report.add("unexpected managed files (outside manifest, not README.md/__pycache__)", unexpected)
 
     report.add("config/adapter/lock/entrypoint consistency", check_consistency(config, lock))
+    report.add("migration provenance consistency (adoption.mode vs migration_status)", check_migration_provenance_consistency(config, lock))
 
     provenance_notes = check_provenance(lock)
     if provenance_notes:

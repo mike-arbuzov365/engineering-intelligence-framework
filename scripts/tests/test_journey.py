@@ -26,6 +26,7 @@ Usage:
 """
 from __future__ import annotations
 
+import hashlib
 import os
 import shutil
 import subprocess
@@ -33,8 +34,26 @@ import sys
 import tempfile
 from pathlib import Path
 
+import yaml
+
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = FRAMEWORK_ROOT / "scripts"
+
+
+def tree_snapshot(root: Path) -> str:
+    """Combined sha256 over every file AND directory under root (excluding
+    .git), so an orphaned empty directory or a leftover .next/.bak changes
+    the hash - a stronger equality claim than 'no orphaned .next files'."""
+    h = hashlib.sha256()
+    for p in sorted(root.rglob("*")):
+        if ".git" in p.parts:
+            continue
+        rel = p.relative_to(root).as_posix()
+        if p.is_file():
+            h.update(rel.encode("utf-8") + b"\x00" + p.read_bytes())
+        else:
+            h.update(rel.encode("utf-8") + b"\x00<DIR>")
+    return h.hexdigest()
 
 STUB_IMPL = '''\
 def is_leap_year(year: int) -> bool:
@@ -525,6 +544,144 @@ def main() -> int:
                              real_run.returncode == 0, real_run.stdout + real_run.stderr))
         results.append(check("30. [fresh-init] .eif now exists for real after the successful re-run",
                              (inst5 / ".eif" / "config.yaml").exists() and (inst5 / ".eif" / "runtime").is_dir()))
+
+    # --- 31. Migration provenance (independent-review): adoption.mode
+    # (current coexistence behavior) vs migration_status (historical origin)
+    # reconciled end to end, against a repo with real pre-existing content. ---
+    GOVERNANCE = "# Existing project rules\n\n" + ("This project already has its own substantial governance. " * 5) + "\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+
+        # 31a: coexist init WITHOUT --migration-status -> lock records adopted.
+        inst = base / "coexist-adopted"
+        inst.mkdir()
+        (inst / "CLAUDE.md").write_text(GOVERNANCE, encoding="utf-8")
+        r = init(inst, "--project-name", "prov", "--locale", "en", "--adoption-mode", "coexist")
+        results.append(check("31a. coexist init (no --migration-status) succeeds", r.returncode == 0, r.stdout + r.stderr))
+        lock = yaml.safe_load((inst / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8"))
+        results.append(check("31a. coexist init records migration_status: adopted (derived, not defaulted greenfield)",
+                             lock["instance"]["migration_status"] == "adopted", str(lock.get("instance"))))
+        doctor = run([str(inst / ".eif" / "runtime" / "eif_verify_runtime.py"), "--framework-root", str(inst / ".eif" / "runtime"), "--instance-path", str(inst)])
+        results.append(check("31a. doctor passes on the coexist/adopted instance", doctor.returncode == 0, doctor.stdout))
+
+        # 31b: explicit contradictory coexist + greenfield STOPs before any write.
+        inst2 = base / "contradiction"
+        inst2.mkdir()
+        (inst2 / "CLAUDE.md").write_text(GOVERNANCE, encoding="utf-8")
+        before = tree_snapshot(inst2)
+        r2 = init(inst2, "--project-name", "prov", "--locale", "en", "--adoption-mode", "coexist", "--migration-status", "greenfield")
+        results.append(check("31b. coexist + --migration-status greenfield STOPs (non-zero exit)", r2.returncode != 0, r2.stdout + r2.stderr))
+        results.append(check("31b. STOP names the contradiction", "contradiction" in (r2.stdout + r2.stderr)))
+        results.append(check("31b. no .eif written after the contradiction STOP", not (inst2 / ".eif").exists()))
+        results.append(check("31b. tree byte-for-byte unchanged after STOP", tree_snapshot(inst2) == before))
+
+        # 31c: greenfield AUTHORITY override on the same repo still records adopted history.
+        inst3 = base / "greenfield-override"
+        inst3.mkdir()
+        (inst3 / "CLAUDE.md").write_text(GOVERNANCE, encoding="utf-8")
+        r3 = init(inst3, "--project-name", "prov", "--locale", "en", "--adoption-mode", "greenfield")
+        results.append(check("31c. greenfield override on existing repo succeeds (informed override)", r3.returncode == 0, r3.stdout + r3.stderr))
+        lock3 = yaml.safe_load((inst3 / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8"))
+        results.append(check("31c. greenfield override still records migration_status: adopted (history not rewritten by authority mode)",
+                             lock3["instance"]["migration_status"] == "adopted", str(lock3.get("instance"))))
+
+        # 31d: reconfigure greenfield instance -> coexist without --migration-status STOPs;
+        # with --migration-status adopted it succeeds and doctor passes.
+        inst4 = base / "reconf"
+        inst4.mkdir()
+        r4a = init(inst4, "--project-name", "prov", "--locale", "en")  # empty repo -> greenfield/greenfield
+        results.append(check("31d. baseline greenfield init succeeds", r4a.returncode == 0, r4a.stdout + r4a.stderr))
+        r4b = init(inst4, "--force", "--adoption-mode", "coexist")  # no --migration-status
+        results.append(check("31d. reconfigure to coexist without --migration-status STOPs", r4b.returncode != 0, r4b.stdout + r4b.stderr))
+        r4c = init(inst4, "--force", "--adoption-mode", "coexist", "--migration-status", "adopted")
+        results.append(check("31d. reconfigure to coexist WITH --migration-status adopted succeeds", r4c.returncode == 0, r4c.stdout + r4c.stderr))
+        doctor4 = run([str(inst4 / ".eif" / "runtime" / "eif_verify_runtime.py"), "--framework-root", str(inst4 / ".eif" / "runtime"), "--instance-path", str(inst4)])
+        results.append(check("31d. doctor passes on the reconfigured coexist/adopted instance", doctor4.returncode == 0, doctor4.stdout))
+
+    # --- 32. Shell-safe generated commands (independent-review): a knowledge
+    # root with a SPACE is accepted, the generated CLAUDE.md's commands
+    # actually run in a real shell (quoted, not just Markdown-correct), and a
+    # metacharacter path STOPs before any write. ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "spaced"
+        inst.mkdir()
+        kroot = inst / "docs" / "project knowledge"
+        (kroot / "facts").mkdir(parents=True)
+        (kroot / "facts" / "FACT-0001.md").write_text(FACT_ARTIFACT, encoding="utf-8")
+        r = init(inst, "--project-name", "spaced", "--locale", "en",
+                 "--knowledge-root", "docs/project knowledge",
+                 "--knowledge-index-path", "docs/project knowledge/index.md",
+                 "--manage-knowledge-index")
+        results.append(check("32. init with a spaced knowledge root succeeds", r.returncode == 0, r.stdout + r.stderr))
+
+        claude = (inst / "CLAUDE.md").read_text(encoding="utf-8")
+        search_line = next((ln for ln in claude.splitlines() if "eif_search_knowledge.py" in ln), "")
+        val_line = next((ln for ln in claude.splitlines() if "eif_validate_frontmatter.py" in ln and "**/*.md" in ln), "")
+        search_cmd = search_line.strip().strip("`").strip()
+        val_cmd = val_line.strip().strip("`").strip()
+        results.append(check('32. generated search command quotes the spaced root',
+                             '--knowledge-root "docs/project knowledge"' in search_cmd, search_cmd))
+        # Run the generated commands through a REAL shell (shell=True), the way
+        # an agent following CLAUDE.md would - the quoting must actually hold.
+        search_run = search_cmd.replace('"<your task in a few words>"', '"leap year"')
+        sp = subprocess.run(search_run, shell=True, cwd=str(inst), capture_output=True, text=True, encoding="utf-8")
+        results.append(check("32. generated search command actually runs in a shell (exit 0)", sp.returncode == 0, sp.stdout + sp.stderr))
+        results.append(check("32. generated search command finds the seeded artifact", "FACT-0001" in sp.stdout, sp.stdout + sp.stderr))
+        vp = subprocess.run(val_cmd, shell=True, cwd=str(inst), capture_output=True, text=True, encoding="utf-8")
+        results.append(check("32. generated validation command actually runs in a shell (exit 0)", vp.returncode == 0, vp.stdout + vp.stderr))
+
+        # Metacharacter path: rejected before any write, tree unchanged.
+        inst_m = Path(tmp) / "metachar"
+        inst_m.mkdir()
+        (inst_m / "seed.txt").write_text("x\n", encoding="utf-8")
+        before = tree_snapshot(inst_m)
+        rm = init(inst_m, "--project-name", "m", "--locale", "en", "--knowledge-root", "docs/" + "$(" + "id)")
+        results.append(check("32. metacharacter knowledge root STOPs (non-zero exit)", rm.returncode != 0, rm.stdout + rm.stderr))
+        results.append(check("32. metacharacter path: no .eif written", not (inst_m / ".eif").exists()))
+        results.append(check("32. metacharacter path: tree byte-for-byte unchanged", tree_snapshot(inst_m) == before))
+
+    # --- 33. Pre-commit staging cleanup (independent-review): a fault while
+    # staging (BEFORE commit_transaction) unwinds to the exact prior tree -
+    # a DIFFERENT code path from the after-commit rollback of steps 16-30. ---
+    for stage in ["config", "runtime", "lock", "entrypoint", "gitignore", "knowledge_index"]:
+        with tempfile.TemporaryDirectory() as tmp:
+            inst = Path(tmp) / "inst"
+            inst.mkdir()
+            (inst / "knowledge" / "facts").mkdir(parents=True)
+            (inst / "knowledge" / "facts" / "FACT-0001.md").write_text(FACT_ARTIFACT, encoding="utf-8")
+            before = tree_snapshot(inst)
+            r = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                     "--instance-path", str(inst), "--allow-dirty",
+                     "--project-name", f"fault-{stage}", "--locale", "en"],
+                    env={"EIF_INIT_TEST_FAIL_BEFORE": stage})
+            results.append(check(f"33. [{stage}] pre-commit fault makes the run fail", r.returncode != 0, r.stdout + r.stderr))
+            results.append(check(f"33. [{stage}] no .eif left behind (fresh init)", not (inst / ".eif").exists(),
+                                 f"contents={list((inst / '.eif').rglob('*')) if (inst / '.eif').exists() else None}"))
+            results.append(check(f"33. [{stage}] no CLAUDE.md written", not (inst / "CLAUDE.md").exists()))
+            results.append(check(f"33. [{stage}] no orphaned .next/.previous anywhere", not any(inst.rglob("*.next")) and not any(inst.rglob("*.previous"))))
+            results.append(check(f"33. [{stage}] tree byte-for-byte unchanged", tree_snapshot(inst) == before))
+
+    # 33b. A failed --force reconfigure removes the config backup it made, so
+    # the tree returns byte-for-byte to prior state; a SUCCESSFUL reconfigure
+    # keeps it as the documented recovery artifact.
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "inst"
+        inst.mkdir()
+        r0 = init(inst, "--project-name", "recon", "--locale", "en")
+        results.append(check("33b. baseline init succeeds", r0.returncode == 0, r0.stdout + r0.stderr))
+        before = tree_snapshot(inst)
+        r1 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", "--force", "--locale", "uk"],
+                 env={"EIF_INIT_TEST_FAIL_BEFORE": "lock"})
+        results.append(check("33b. failed --force reconfigure exits non-zero", r1.returncode != 0, r1.stdout + r1.stderr))
+        results.append(check("33b. no config backup left behind (deleted on failed reconfigure)",
+                             not any(inst.glob(".eif/config.yaml.bak-*")), str(list(inst.glob(".eif/config.yaml.bak-*")))))
+        results.append(check("33b. no orphaned .next anywhere", not any(inst.rglob("*.next"))))
+        results.append(check("33b. tree byte-for-byte unchanged (prior instance intact)", tree_snapshot(inst) == before))
+        r2 = init(inst, "--force", "--locale", "uk")
+        results.append(check("33b. successful reconfigure succeeds", r2.returncode == 0, r2.stdout + r2.stderr))
+        results.append(check("33b. successful reconfigure keeps a config backup (recovery artifact)",
+                             len(list(inst.glob(".eif/config.yaml.bak-*"))) >= 1))
 
     passed = sum(results)
     print(f"\ntest_journey: {passed}/{len(results)} passed")

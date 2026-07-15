@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
-"""Tests for eif_init.py: config/lock split, real provenance + dirty-check,
-transactional bundle staging/swap (including injected-failure rollback),
-safe YAML generation, adapter registry restriction, and instance .gitignore
-management.
+"""Unit-level tests for eif_init.py: provenance/dirty-check (Finding E),
+bundle manifest hashing, the init/upgrade/reconfigure contract (Finding A),
+safe YAML generation, adapter registry restriction, and the transactional
+commit/rollback primitives (Finding B) including injected-failure orphan
+cleanup.
+
+Full real-CLI subprocess scenarios (real upgrade preserving locale/adapter/
+migration_status, real reconfigure, real rollback via the FAULT_INJECT_ENV
+hook, marker-safety refusal) live in scripts/tests/test_journey.py - this
+file is the fast unit layer underneath them.
 
 Usage:
     python scripts/tests/test_init.py
@@ -13,6 +19,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import eif_init  # noqa: E402
@@ -28,23 +35,24 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
     return condition
 
 
-def _real_ref():
-    ref, short, dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
-    return ref or "a" * 40, short or "aaaaaaa"
+def _args(**overrides):
+    base = dict(project_name=None, locale=None, adapter=None, migration_status=None,
+                framework_version=None, force=False)
+    base.update(overrides)
+    return SimpleNamespace(**base)
 
 
 def main() -> int:
     results = []
 
-    # --- Provenance ---
-    ref, ref_short, dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
+    # --- Provenance (Finding E) ---
+    ref, short, dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
     results.append(check("resolve_framework_state returns a real 40-hex SHA", bool(ref) and bool(SHA_RE.match(ref)), str(ref)))
-    results.append(check("dirty flag is a real bool, not always False for a real repo", isinstance(dirty, bool)))
+    results.append(check("dirty flag is a real bool", isinstance(dirty, bool)))
+    not_a_repo_ref, _, _ = eif_init.resolve_framework_state(Path(tempfile.gettempdir()) / "definitely-not-a-repo-xyz")
+    results.append(check("non-git framework-root resolves to None", not_a_repo_ref is None, str(not_a_repo_ref)))
 
-    not_a_repo_ref, not_a_repo_short, not_a_repo_dirty = eif_init.resolve_framework_state(Path(tempfile.gettempdir()))
-    results.append(check("non-git framework-root resolves to None (forces --framework-ref)", not_a_repo_ref is None, str(not_a_repo_ref)))
-
-    # --- Bundle manifest: real hashing over a synthetic source tree ---
+    # --- Bundle manifest ---
     with tempfile.TemporaryDirectory() as tmp:
         fake_fw = Path(tmp) / "fw"
         (fake_fw / "scripts").mkdir(parents=True)
@@ -58,88 +66,99 @@ def main() -> int:
         sources = eif_init.collect_bundle_sources(fake_fw)
         results.append(check("collect_bundle_sources finds every mandatory file",
                              len(sources) == len(eif_init.BUNDLE_SCRIPTS) + len(eif_init.BUNDLE_TREES)))
-
         manifest = eif_init.build_manifest(sources)
-        results.append(check("manifest entries are sorted by path",
-                             [m["path"] for m in manifest] == sorted(m["path"] for m in manifest)))
-        results.append(check("manifest hashes are real sha256 hex",
-                             all(re.match(r"^[0-9a-f]{64}$", m["sha256"]) for m in manifest)))
-
+        results.append(check("manifest sorted by path", [m["path"] for m in manifest] == sorted(m["path"] for m in manifest)))
         digest = eif_init.combined_digest(manifest)
-        results.append(check("combined digest has the sha256: prefix", digest.startswith("sha256:")))
-        results.append(check("combined digest is deterministic for the same manifest",
-                             eif_init.combined_digest(manifest) == digest))
+        results.append(check("combined digest deterministic", eif_init.combined_digest(manifest) == digest))
 
-        # Mandatory bundle source missing -> raises, not silently skipped.
         (fake_fw / "scripts" / eif_init.BUNDLE_SCRIPTS[0]).unlink()
         try:
             eif_init.collect_bundle_sources(fake_fw)
-            results.append(check("missing mandatory bundle source raises FileNotFoundError", False))
+            results.append(check("missing mandatory bundle source raises", False))
         except FileNotFoundError:
-            results.append(check("missing mandatory bundle source raises FileNotFoundError", True))
+            results.append(check("missing mandatory bundle source raises", True))
 
-    # --- Transactional swap_runtime: injected-failure rollback ---
-    with tempfile.TemporaryDirectory() as tmp:
-        inst = Path(tmp) / "inst"
-        eif_dir = inst / ".eif"
-        eif_dir.mkdir(parents=True)
-        runtime = eif_dir / "runtime"
-        runtime.mkdir()
-        sentinel = runtime / "sentinel.txt"
-        sentinel.write_text("original runtime - must survive a failed swap", encoding="utf-8")
+    # --- Finding A: init / upgrade / reconfigure mode resolution ---
+    # init: no existing config -> requires project_name, applies CLI defaults.
+    try:
+        eif_init._resolve_mode_and_values(_args(), None, None)
+        results.append(check("init without --project-name raises", False))
+    except ValueError:
+        results.append(check("init without --project-name raises", True))
 
-        # Inject a failure: staging path does not exist, so the rename inside
-        # swap_runtime raises. The pre-existing runtime must be restored.
-        bogus_staging = eif_dir / "runtime.next-does-not-exist"
-        try:
-            eif_init.swap_runtime(inst, bogus_staging)
-            results.append(check("swap_runtime with a bad staging path raises", False))
-        except (FileNotFoundError, OSError):
-            results.append(check("swap_runtime with a bad staging path raises", True))
+    mode, proj, loc, adapt, mig, fver, ignored = eif_init._resolve_mode_and_values(
+        _args(project_name="p", locale="uk", adapter="claude-code", migration_status="adopted"), None, None,
+    )
+    results.append(check("init: mode is 'init'", mode == "init"))
+    results.append(check("init: values come from CLI args", (proj, loc, adapt, mig) == ("p", "uk", "claude-code", "adopted")))
 
-        results.append(check("runtime directory still exists after a failed swap (rollback)", runtime.is_dir()))
-        results.append(check("original runtime content survives a failed swap (rollback)",
-                             sentinel.exists() and sentinel.read_text(encoding="utf-8").startswith("original")))
-        results.append(check("no leftover runtime.previous after successful rollback",
-                             not (eif_dir / "runtime.previous").exists()))
+    mode2, proj2, loc2, adapt2, mig2, fver2, ignored2 = eif_init._resolve_mode_and_values(_args(project_name="p"), None, None)
+    results.append(check("init: unset flags fall back to sane defaults", (loc2, adapt2, mig2) == ("en", eif_init.DEFAULT_ADAPTER, "greenfield")))
 
-        # Now a real successful swap: stage a new runtime, verify it wins.
-        staging = eif_dir / "runtime.next"
-        staging.mkdir()
-        (staging / "new.txt").write_text("new runtime", encoding="utf-8")
-        eif_init.swap_runtime(inst, staging)
-        results.append(check("successful swap replaces the runtime contents", (runtime / "new.txt").exists() and not sentinel.exists()))
-        results.append(check("successful swap leaves no staging or previous dirs behind",
-                             not staging.exists() and not (eif_dir / "runtime.previous").exists()))
+    # upgrade: existing config present, no --force -> config/lock are the
+    # sole source of truth; any CLI values passed anyway are reported as ignored.
+    existing_config = {"project": {"name": "existing-proj"}, "adapter": {"name": "claude-code"},
+                       "localization": {"documentation_locale": "uk"}, "framework": {"version": "0.1.0-dev"}}
+    existing_lock = {"instance": {"migration_status": "adopted"}}
+    mode3, proj3, loc3, adapt3, mig3, fver3, ignored3 = eif_init._resolve_mode_and_values(_args(), existing_config, existing_lock)
+    results.append(check("upgrade: mode is 'upgrade'", mode3 == "upgrade"))
+    results.append(check("upgrade: values derived from existing config/lock, not CLI defaults",
+                         (proj3, loc3, adapt3, mig3) == ("existing-proj", "uk", "claude-code", "adopted")))
+    results.append(check("upgrade: ignored list is empty when no conflicting flags were passed", ignored3 == []))
 
-    # --- verify_staged_bundle catches corruption ---
-    with tempfile.TemporaryDirectory() as tmp:
-        staging = Path(tmp) / "staging"
-        staging.mkdir()
-        (staging / "f.txt").write_text("correct content", encoding="utf-8")
-        manifest = [{"path": "f.txt", "sha256": eif_init.hash_file(staging / "f.txt")}]
-        results.append(check("verify_staged_bundle: clean bundle has no problems", eif_init.verify_staged_bundle(staging, manifest) == []))
+    mode4, proj4, loc4, adapt4, mig4, fver4, ignored4 = eif_init._resolve_mode_and_values(
+        _args(project_name="ignored-name", locale="en"), existing_config, existing_lock,
+    )
+    results.append(check("upgrade: passing --project-name/--locale anyway does NOT change the derived values",
+                         (proj4, loc4) == ("existing-proj", "uk")))
+    results.append(check("upgrade: passed-but-ignored flags are reported for the caller to warn about",
+                         set(ignored4) == {"--project-name", "--locale"}, str(ignored4)))
 
-        (staging / "f.txt").write_text("CORRUPTED", encoding="utf-8")
-        problems = eif_init.verify_staged_bundle(staging, manifest)
-        results.append(check("verify_staged_bundle: corrupted file is caught", len(problems) == 1 and "hash mismatch" in problems[0]))
+    # reconfigure: --force -> only explicitly-passed values change; everything else keeps its prior value.
+    mode5, proj5, loc5, adapt5, mig5, fver5, ignored5 = eif_init._resolve_mode_and_values(
+        _args(force=True, locale="en"), existing_config, existing_lock,
+    )
+    results.append(check("reconfigure: mode is 'reconfigure'", mode5 == "reconfigure"))
+    results.append(check("reconfigure: explicitly-passed --locale changes", loc5 == "en"))
+    results.append(check("reconfigure: un-passed project_name/adapter/migration_status keep their prior values",
+                         (proj5, adapt5, mig5) == ("existing-proj", "claude-code", "adopted")))
 
-        (staging / "f.txt").unlink()
-        problems = eif_init.verify_staged_bundle(staging, manifest)
-        results.append(check("verify_staged_bundle: missing file is caught", len(problems) == 1 and "missing" in problems[0]))
-
-    # --- Config: safe YAML generation + schema validity + special characters ---
-    ref, ref_short = _real_ref()
-    tricky_name = "weird: name, with \"quotes\" and a # hash and a \nnewline-ish thing"
+    # --- Config/lock rendering + schema validation, safe YAML for special characters ---
+    tricky_name = "weird: name, with \"quotes\" and a # hash"
     data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev")
     errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "eif-config.schema.json", data)
-    results.append(check("config with YAML-special characters in project name still validates", errors == [], str(errors)))
-
+    results.append(check("config with YAML-special characters validates", errors == [], str(errors)))
     content = eif_init._dump_yaml(eif_init.CONFIG_HEADER, data)
-    import yaml as _yaml  # local import, mirrors eif_init's own dependency
+    import yaml as _yaml
     round_tripped = _yaml.safe_load(content.split("\n\n", 1)[1] if "\n\n" in content else content)
-    results.append(check("YAML-dumped config round-trips the tricky project name exactly",
-                         round_tripped["project"]["name"] == tricky_name, repr(round_tripped.get("project"))))
+    results.append(check("YAML-dumped config round-trips the tricky name exactly", round_tripped["project"]["name"] == tricky_name))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        cfg_path = Path(tmp) / "config.yaml"
+        cfg_path.write_text(content, encoding="utf-8")
+        results.append(check("on-disk config validates via validate_config_mode", validate_config_mode(FRAMEWORK_ROOT, cfg_path) == 0))
+
+    # --- Lock rendering incl. ref_verification (Finding E) ---
+    lock_data = eif_init.render_lock_data(ref or "a" * 40, short or "aaaaaaa", True, "asserted",
+                                          "claude-code", "CLAUDE.md", ".eif/runtime",
+                                          [{"path": "x.py", "sha256": "a" * 64}], "sha256:" + "b" * 64,
+                                          "adopted", "0.1.0", "2026-07-15T00:00:00+00:00")
+    lock_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", lock_data)
+    results.append(check("lock with dirty=True + ref_verification=asserted validates", lock_errors == [], str(lock_errors)))
+    results.append(check("dirty=True is NOT silently cleared by asserted ref_verification", lock_data["framework"]["dirty"] is True))
+    with tempfile.TemporaryDirectory() as tmp:
+        lock_path = Path(tmp) / "framework.lock.yaml"
+        lock_path.write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, lock_data), encoding="utf-8")
+        results.append(check("on-disk lock validates via validate_lock_mode", validate_lock_mode(FRAMEWORK_ROOT, lock_path) == 0))
+
+    bad_lock = dict(lock_data)
+    bad_lock["framework"] = dict(lock_data["framework"], ref_verification="not-a-real-value")
+    bad_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", bad_lock)
+    results.append(check("an invalid ref_verification value is rejected by the schema", len(bad_errors) > 0))
+
+    missing_instance_lock = {k: v for k, v in lock_data.items() if k != "instance"}
+    missing_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", missing_instance_lock)
+    results.append(check("a lock missing the 'instance' block is rejected (now required)", len(missing_errors) > 0))
 
     # --- Adapter registry restriction ---
     try:
@@ -149,78 +168,55 @@ def main() -> int:
         results.append(check("entrypoint_for rejects an unregistered adapter", True))
     results.append(check("entrypoint_for('claude-code') returns CLAUDE.md", eif_init.entrypoint_for("claude-code") == "CLAUDE.md"))
 
-    # --- End-to-end: config create -> keep (upgrade) -> force overwrite ---
+    # --- Transactional _Stage / commit_transaction (Finding B) ---
     with tempfile.TemporaryDirectory() as tmp:
-        inst = Path(tmp) / "proj"
+        inst = Path(tmp) / "inst"
         inst.mkdir()
-        content = eif_init._dump_yaml(eif_init.CONFIG_HEADER, eif_init.render_config_data("p", "claude-code", "en", "0.1.0-dev"))
-        action, cfg = eif_init.write_config(inst, content, dry_run=False, force=False)
-        results.append(check("first write_config creates", action == "create" and cfg.exists()))
-        results.append(check("created config validates against the schema", validate_config_mode(FRAMEWORK_ROOT, cfg) == 0))
+        live = inst / "artifact.txt"
+        live.write_text("original", encoding="utf-8")
 
-        before = cfg.read_text(encoding="utf-8")
-        action2, _ = eif_init.write_config(inst, "schema_version: 999\n", dry_run=False, force=False)
-        results.append(check("second write_config without --force is 'keep' (the routine upgrade path), not an error",
-                             action2 == "keep"))
-        results.append(check("'keep' leaves the file byte-for-byte untouched", cfg.read_text(encoding="utf-8") == before))
-        results.append(check("'keep' creates no backup file", list(inst.glob(".eif/*.bak-*")) == []))
+        next1 = inst / "artifact.txt.next"
+        next1.write_text("updated", encoding="utf-8")
+        stage1 = eif_init._Stage("a", next1, live, is_dir=False)
+        stage1.commit()
+        results.append(check("_Stage.commit swaps content into place", live.read_text(encoding="utf-8") == "updated"))
+        results.append(check("_Stage.commit leaves a .previous during the run", stage1.previous_path.exists()))
+        stage1.cleanup()
+        results.append(check("_Stage.cleanup removes the .previous", not stage1.previous_path.exists()))
 
-        action3, _ = eif_init.write_config(inst, content, dry_run=False, force=True)
-        backups = list((inst / ".eif").glob("config.yaml.bak-*"))
-        results.append(check("--force overwrites and leaves exactly one backup", action3 == "overwrite" and len(backups) == 1))
+        # Full transaction: 3 stages, injected failure after the 2nd -> both
+        # committed stages roll back, and the 3rd stage's never-committed
+        # .next is cleaned up too (the orphan bug found via manual testing).
+        import os
+        a_live, b_live, c_live = inst / "a.txt", inst / "b.txt", inst / "c.txt"
+        a_live.write_text("a-orig", encoding="utf-8")
+        b_live.write_text("b-orig", encoding="utf-8")
+        # c has no prior version - a brand-new artifact this "run" would create.
+        a_next, b_next, c_next = inst / "a.txt.next", inst / "b.txt.next", inst / "c.txt.next"
+        a_next.write_text("a-new", encoding="utf-8")
+        b_next.write_text("b-new", encoding="utf-8")
+        c_next.write_text("c-new", encoding="utf-8")
+        stages = [
+            eif_init._Stage("stage-a", a_next, a_live, is_dir=False),
+            eif_init._Stage("stage-b", b_next, b_live, is_dir=False),
+            eif_init._Stage("stage-c", c_next, c_live, is_dir=False),
+        ]
+        os.environ[eif_init.FAULT_INJECT_ENV] = "stage-b"
+        try:
+            eif_init.commit_transaction(stages)
+            results.append(check("commit_transaction propagates the injected failure", False))
+        except RuntimeError:
+            results.append(check("commit_transaction propagates the injected failure", True))
+        finally:
+            del os.environ[eif_init.FAULT_INJECT_ENV]
 
-    # --- Lock rendering + schema validity ---
-    lock_data = eif_init.render_lock_data(ref, ref_short, True, "claude-code", "CLAUDE.md", ".eif/runtime",
-                                          [{"path": "x.py", "sha256": "a" * 64}], "sha256:" + "b" * 64,
-                                          "adopted", "0.1.0", "2026-07-15T00:00:00+00:00")
-    lock_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", lock_data)
-    results.append(check("rendered lock validates against the lock schema", lock_errors == [], str(lock_errors)))
-    with tempfile.TemporaryDirectory() as tmp:
-        lock_path = Path(tmp) / "framework.lock.yaml"
-        lock_path.write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, lock_data), encoding="utf-8")
-        results.append(check("on-disk lock validates via validate_lock_mode", validate_lock_mode(FRAMEWORK_ROOT, lock_path) == 0))
-
-    # --- Bad lock (placeholder ref) is rejected ---
-    bad_lock = dict(lock_data)
-    bad_lock["framework"] = dict(lock_data["framework"], ref="not-a-real-sha")
-    bad_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", bad_lock)
-    results.append(check("a non-40-hex ref is rejected by the lock schema (placeholder guard)", len(bad_errors) > 0))
-
-    # --- Instance .gitignore management ---
-    with tempfile.TemporaryDirectory() as tmp:
-        inst = Path(tmp) / "proj"
-        inst.mkdir()
-        action = eif_init.ensure_gitignore(inst, dry_run=False)
-        results.append(check("gitignore created on a fresh instance", action == "created" and (inst / ".gitignore").exists()))
-        results.append(check("created gitignore ignores the runtime bundle", ".eif/runtime/" in (inst / ".gitignore").read_text(encoding="utf-8")))
-        action2 = eif_init.ensure_gitignore(inst, dry_run=False)
-        results.append(check("re-running on an instance that already has the block is a no-op", action2 == "already-present"))
-
-        inst2 = Path(tmp) / "existing-gitignore"
-        inst2.mkdir()
-        (inst2 / ".gitignore").write_text("node_modules/\n", encoding="utf-8")
-        action3 = eif_init.ensure_gitignore(inst2, dry_run=False)
-        text = (inst2 / ".gitignore").read_text(encoding="utf-8")
-        results.append(check("appending to an existing .gitignore preserves prior content",
-                             action3 == "appended" and "node_modules/" in text and ".eif/runtime/" in text))
-
-    # --- CLAUDE.md marker merge (unchanged behavior, re-verified against new signature) ---
-    with tempfile.TemporaryDirectory() as tmp:
-        inst = Path(tmp) / "proj"
-        inst.mkdir()
-        action, claude = eif_init.merge_entrypoint(FRAMEWORK_ROOT, inst, "CLAUDE.md", dry_run=False)
-        results.append(check("generates CLAUDE.md (Claude Code's real entrypoint), not AGENTS.md",
-                             claude.name == "CLAUDE.md" and action == "create"))
-        text = claude.read_text(encoding="utf-8")
-        results.append(check("generated CLAUDE.md commands reference the bundle (.eif/runtime), not framework scripts/",
-                             ".eif/runtime/eif_search_knowledge.py" in text and "python scripts/" not in text))
-
-        user_line = "MY PROJECT RULE: never touch prod on Friday."
-        claude.write_text(text + "\n" + user_line + "\n", encoding="utf-8")
-        action2, _ = eif_init.merge_entrypoint(FRAMEWORK_ROOT, inst, "CLAUDE.md", dry_run=False)
-        merged = claude.read_text(encoding="utf-8")
-        results.append(check("re-init updates the managed block and preserves project-authored content",
-                             action2 == "update-block" and user_line in merged))
+        results.append(check("full rollback: stage-a restored to its original content", a_live.read_text(encoding="utf-8") == "a-orig"))
+        results.append(check("full rollback: stage-b restored to its original content", b_live.read_text(encoding="utf-8") == "b-orig"))
+        results.append(check("full rollback: stage-c (never committed) has no live artifact left behind", not c_live.exists()))
+        results.append(check("full rollback: no orphaned .next files for any stage",
+                             not a_next.exists() and not b_next.exists() and not c_next.exists()))
+        results.append(check("full rollback: no leftover .previous files",
+                             not stages[0].previous_path.exists() and not stages[1].previous_path.exists()))
 
     passed = sum(results)
     print(f"\ntest_init: {passed}/{len(results)} passed")

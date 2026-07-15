@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Tests for eif_render.py: config-driven locale resolution, real
-file-writing default (not stdout-only), overwrite protection, and English
-fallback.
+file-writing default, overwrite protection, English fallback, and truthful
+rendering (round-3 review, Finding H) - invalid config fails loudly rather
+than silently degrading to English, and a "final" (non-draft) render with
+unresolved placeholders fails rather than shipping an incomplete artifact.
 
 Invokes the script as a subprocess (the way a project author actually uses
 it), not just the underlying eif_locale functions.
@@ -28,6 +30,12 @@ adapter:
 localization:
   documentation_locale: uk
 """
+
+ALL_CLOSEOUT_SET = [
+    "--set", "task_name=t", "--set", "branch_or_pr=b",
+    "--set", "verification_result=v", "--set", "artifacts=a",
+    "--set", "promoted=p", "--set", "not_done=n", "--set", "open_questions=o",
+]
 
 
 def run(instance_root: Path, args: list[str]) -> subprocess.CompletedProcess:
@@ -65,47 +73,79 @@ def main() -> int:
         r3 = run(inst, ["knowledge-delta", "--force"])
         results.append(check("--force allows overwrite", r3.returncode == 0, r3.stdout + r3.stderr))
 
-        # session-closeout too.
+        # --- Finding H: strict-by-default rendering ---
         r4 = run(inst, ["session-closeout"])
+        results.append(check("FINAL closeout with NO --set fails by default (Finding H - not a silent partial artifact)",
+                             r4.returncode != 0, r4.stdout + r4.stderr))
+        results.append(check("closeout file NOT written when the strict render failed",
+                             not (inst / "session-closeout.md").exists()))
+
+        r4b = run(inst, ["session-closeout", "--draft"])
+        results.append(check("--draft explicitly allows an incomplete closeout to be written",
+                             r4b.returncode == 0, r4b.stdout + r4b.stderr))
         co_file = inst / "session-closeout.md"
-        results.append(check("session-closeout also writes a real file", co_file.exists()))
-        results.append(check("session-closeout file has Ukrainian headings", "Сесію завершено" in co_file.read_text(encoding="utf-8") if co_file.exists() else False))
+        results.append(check("draft closeout file is written and has Ukrainian headings",
+                             co_file.exists() and "Сесію завершено" in co_file.read_text(encoding="utf-8") if co_file.exists() else False))
+        co_file.unlink(missing_ok=True)
+
+        r4c = run(inst, ["session-closeout", *ALL_CLOSEOUT_SET])
+        results.append(check("FINAL closeout with every placeholder set succeeds (no --draft needed)",
+                             r4c.returncode == 0, r4c.stdout + r4c.stderr))
+        results.append(check("fully-set closeout file has no leftover {token}",
+                             co_file.exists() and "{" not in co_file.read_text(encoding="utf-8")))
 
         # --stdout opts out of file-writing.
         r5 = run(inst, ["--stdout", "message", "--key", "init_complete", "--set", "path=/tmp/x"])
         results.append(check("--stdout prints instead of writing a file", "EIF" in r5.stdout, r5.stdout + r5.stderr))
 
-        # --set on session-closeout: partial fill must not crash (real bug
-        # found this round - str.format() requires every placeholder at
-        # once, which is wrong for filling task_name now and
-        # verification_result after the test runs).
+        # Partial --set without --draft still fails (strict is the default
+        # regardless of --stdout vs file output).
         r6 = run(inst, ["--stdout", "session-closeout", "--set", "task_name=my task"])
-        results.append(check("--set with only ONE of several placeholders does not crash",
-                             r6.returncode == 0, r6.stdout + r6.stderr))
-        results.append(check("--set fills the given placeholder", "my task" in r6.stdout, r6.stdout))
-        results.append(check("--set leaves other placeholders as literal tokens for a later fill",
-                             "{branch_or_pr}" in r6.stdout, r6.stdout))
+        results.append(check("partial --set without --draft fails even in --stdout mode",
+                             r6.returncode != 0, r6.stdout + r6.stderr))
 
-        # All placeholders given at once: every token filled, none left over.
-        r7 = run(inst, ["--stdout", "session-closeout",
-                        "--set", "task_name=t", "--set", "branch_or_pr=b",
-                        "--set", "verification_result=v", "--set", "artifacts=a",
-                        "--set", "promoted=p", "--set", "not_done=n", "--set", "open_questions=o"])
-        results.append(check("--set with all placeholders leaves no {token} unfilled",
-                             "{" not in r7.stdout, r7.stdout))
+        # Partial --set WITH --draft: fills what's given, leaves the rest literal.
+        r6b = run(inst, ["--stdout", "session-closeout", "--draft", "--set", "task_name=my task"])
+        results.append(check("--draft + partial --set does not crash",
+                             r6b.returncode == 0, r6b.stdout + r6b.stderr))
+        results.append(check("--draft + partial --set fills the given placeholder", "my task" in r6b.stdout, r6b.stdout))
+        results.append(check("--draft + partial --set leaves other placeholders literal for a later fill",
+                             "{branch_or_pr}" in r6b.stdout, r6b.stdout))
+
+    # --- Finding H: invalid config fails loudly, not a silent English fallback ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst_broken = Path(tmp) / "broken-config-instance"
+        (inst_broken / ".eif").mkdir(parents=True)
+        (inst_broken / ".eif" / "config.yaml").write_text("schema_version: [this is not valid yaml\n", encoding="utf-8")
+        r = run(inst_broken, ["--stdout", "knowledge-delta"])
+        results.append(check("config.yaml exists but is invalid YAML -> render FAILS, not a silent English fallback",
+                             r.returncode != 0, r.stdout + r.stderr))
+
+        inst_incomplete = Path(tmp) / "incomplete-config-instance"
+        (inst_incomplete / ".eif").mkdir(parents=True)
+        (inst_incomplete / ".eif" / "config.yaml").write_text("schema_version: 1\nproject:\n  name: x\n", encoding="utf-8")
+        r2 = run(inst_incomplete, ["--stdout", "knowledge-delta"])
+        results.append(check("config.yaml exists but has no documentation_locale -> render FAILS",
+                             r2.returncode != 0, r2.stdout + r2.stderr))
+
+        # Explicit --locale bypasses config entirely, so it still works even
+        # with a broken config on disk - the flag is an explicit override,
+        # not a value that depends on the config being readable.
+        r3 = run(inst_broken, ["--locale", "en", "--stdout", "knowledge-delta"])
+        results.append(check("explicit --locale works even with a broken config.yaml present",
+                             r3.returncode == 0, r3.stdout + r3.stderr))
 
     with tempfile.TemporaryDirectory() as tmp:
         inst_en = Path(tmp) / "no-config-instance"
         inst_en.mkdir()
         # No .eif/config.yaml at all -> falls back to en, does not crash.
+        # (Genuinely different from "config exists but is broken" above.)
         r = run(inst_en, ["--stdout", "knowledge-delta"])
-        results.append(check("missing .eif/config.yaml falls back to en, not a crash", r.returncode == 0 and "Knowledge Delta" in r.stdout, r.stdout + r.stderr))
+        results.append(check("missing .eif/config.yaml (not broken - absent) falls back to en, not a crash", r.returncode == 0 and "Knowledge Delta" in r.stdout, r.stdout + r.stderr))
 
-        # Explicit --locale overrides config (there is none here, but proves override wins).
         r2 = run(inst_en, ["--locale", "uk", "--stdout", "knowledge-delta"])
         results.append(check("explicit --locale overrides (no config present) config-derived default", "Дельта знань" in r2.stdout, r2.stdout))
 
-        # Unknown locale falls back to en template, does not crash.
         r3 = run(inst_en, ["--locale", "xx-nonexistent", "--stdout", "knowledge-delta"])
         results.append(check("unknown locale falls back to en template (exit 0)", r3.returncode == 0 and "Knowledge Delta" in r3.stdout))
 

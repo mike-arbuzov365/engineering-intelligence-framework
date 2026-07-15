@@ -13,6 +13,7 @@ scripts/tests/test_locale.py for the parity check that enforces this.
 """
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,16 @@ except ImportError:
     raise SystemExit(1)
 
 DEFAULT_LOCALE = "en"
+
+PLACEHOLDER_RE = re.compile(r"\{[a-zA-Z_][a-zA-Z0-9_]*\}")
+
+
+class UnresolvedPlaceholderError(Exception):
+    """A 'final' (non-draft) render still has {placeholder} tokens after
+    substitution - round-3 review, Finding H: a final Knowledge Delta or
+    closeout with silently-unfilled tokens is a truthfulness bug, not a
+    convenience. Pass every value, or render with draft=True to explicitly
+    accept a partial fill."""
 
 
 class _KeepMissing(dict):
@@ -70,10 +81,21 @@ def msg(framework_root: Path, loc: str, key: str, **kwargs) -> str:
     return template.format(**kwargs)
 
 
-def render_template(framework_root: Path, locale: str, template_name: str, **kwargs) -> tuple[str, str]:
-    """Returns (rendered_text, locale_actually_used) - the second element lets
-    a caller report a fallback instead of silently pretending the requested
-    locale was used."""
+def render_template(framework_root: Path, locale: str, template_name: str,
+                    draft: bool = False, **kwargs) -> tuple[str, str]:
+    """Returns (rendered_text, locale_actually_used).
+
+    Substitution is always partial-fill (a caller filling task_name before
+    a test has run, and verification_result after, is a normal workflow,
+    not an error mid-way through). What differs is what happens with
+    whatever's LEFT unresolved once kwargs are applied:
+
+    - draft=False (default): any remaining {placeholder} raises
+      UnresolvedPlaceholderError - a "final" render with a silently-unfilled
+      token is a truthfulness bug (round-3 review, Finding H).
+    - draft=True: remaining placeholders are left as literal text, same as
+      before - an explicit, deliberate partial render.
+    """
     locales_dir = _locales_dir(framework_root)
     path = locales_dir / locale / "templates" / template_name
     used_locale = locale
@@ -87,8 +109,13 @@ def render_template(framework_root: Path, locale: str, template_name: str, **kwa
         )
     text = path.read_text(encoding="utf-8")
     if kwargs:
-        # Partial fill, not str.format()'s all-or-KeyError: a caller filling
-        # in task_name before the test has even run (and verification_result
-        # after) is a normal workflow, not an error.
         text = text.format_map(_KeepMissing(kwargs))
+    if not draft:
+        unresolved = sorted(set(PLACEHOLDER_RE.findall(text)))
+        if unresolved:
+            raise UnresolvedPlaceholderError(
+                f"{template_name}: unresolved placeholder(s) after substitution: "
+                f"{', '.join(unresolved)} - pass --set for each, or --draft to "
+                f"explicitly accept a partial render"
+            )
     return text, used_locale

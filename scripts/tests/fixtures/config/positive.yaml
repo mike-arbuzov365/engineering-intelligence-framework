@@ -5,6 +5,8 @@ framework:
   ref: "main"
 project:
   name: fixture-project
+adapter:
+  name: claude-code
 localization:
   documentation_locale: en
 integrations:

@@ -17,10 +17,15 @@ framework:
   # name like "main". This example uses an obviously-fake all-zero SHA.
   ref: "0000000000000000000000000000000000000000"
   ref_short: "0000000"
-  # True if the framework checkout had uncommitted changes when the bundle
-  # was materialized - eif_init refuses to proceed unless --allow-dirty was
-  # passed, in which case this is true and the ref is not an exact guarantee.
+  # True if --framework-root's working tree had uncommitted changes when the
+  # bundle was materialized - eif_init refuses to proceed unless --allow-dirty
+  # was passed, in which case this is true and the ref is not an exact guarantee.
+  # ALWAYS the real detected state - never forced false by ref_verification below.
   dirty: false
+  # git-verified: ref came from `git rev-parse HEAD`. asserted: ref was
+  # supplied via --framework-ref (framework-root wasn't a git checkout) -
+  # trustworthy only as far as whoever passed that flag.
+  ref_verification: git-verified
 
 instance:
   eif_instance_version: 0.1.0

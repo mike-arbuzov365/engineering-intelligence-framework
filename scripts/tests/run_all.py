@@ -23,6 +23,8 @@ SUITES = [
     "test_search_knowledge.py",
     "test_locale.py",
     "test_render.py",
+    "test_markers.py",
+    "test_verify_runtime.py",
     "test_init.py",
     "test_journey.py",
 ]

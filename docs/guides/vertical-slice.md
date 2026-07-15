@@ -1,8 +1,9 @@
 ---
 type: playbook
-status: draft
+status: validated
 scope: framework
 created: 2026-07-15
+updated: 2026-07-15
 review_after: 2026-10-15
 ---
 
@@ -10,7 +11,13 @@ review_after: 2026-10-15
 
 <!-- Knowledge source: review round 2026-07-15 - explicit instruction not
 to port all private playbooks/skills at once, but to design and build the
-smallest complete, testable EIF workflow first. -->
+smallest complete, testable EIF workflow first.
+
+Updated 2026-07-15 (Phase B2): the slice designed below is now built - see
+examples/demo-workspace/. status: validated reflects that this design was
+actually built and reproduced as written, not a re-endorsement of every
+detail as final; scope/adapter/CLI decisions referenced below are still
+open where noted. -->
 
 ## Why a slice, not a full port
 
@@ -23,16 +30,18 @@ large skeleton of "not built yet" stubs.
 
 ## The slice
 
-A single synthetic demo repository (`examples/demo-workspace/`, not built
-yet) walks through, start to finish:
+A single synthetic demo repository
+([`examples/demo-workspace/`](../../examples/demo-workspace/), built and
+reproduced from a clean checkout) walks through, start to finish:
 
 1. **Initialize a project instance.** Produce a real `.eif/config.yaml`
    from `.eif/config.yaml.example`, validated against
    `core/schemas/eif-config.schema.json`.
-2. **Generate compact agent instructions.** A minimal `AGENTS.md`/
-   `CLAUDE.md`-equivalent for the demo repo, in the style of this
-   repository's own [`AGENTS.md`](../../AGENTS.md) - short, pointing to
-   detail rather than duplicating it.
+2. **Generate compact agent instructions.** The correct entrypoint for the
+   chosen adapter (`CLAUDE.md` for Claude Code - the file it actually loads,
+   not `AGENTS.md`), in the style of this repository's own
+   [`AGENTS.md`](../../AGENTS.md) - short, pointing to detail rather than
+   duplicating it.
 3. **Create a knowledge index.** A handful of seeded knowledge artifacts
    (2-3 facts, 1 rule, 1 decision) in the demo repo, each passing
    `eif_validate_frontmatter.py`.
@@ -67,24 +76,45 @@ yet) walks through, start to finish:
 
 ## Definition of done for this slice
 
-- [ ] `examples/demo-workspace/` exists, is fully synthetic, and passes
-      `eif_privacy_scan.py` with zero findings.
-- [ ] Steps 1-9 above are each backed by a real, runnable command or file,
-      not prose describing what they would do.
-- [ ] A second person (or the same agent, in a fresh session with no
-      memory of building it) can follow the demo README and reproduce the
-      same result.
-- [ ] The demo's Knowledge Delta and closeout are reviewed against
+- [x] `examples/demo-workspace/` exists, is fully synthetic, and passes
+      `eif_privacy_scan.py` with zero findings. Verified 2026-07-15.
+- [x] Steps 1-9 above are each backed by a real, runnable command or file,
+      not prose describing what they would do. See
+      [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
+      for the exact commands and captured output.
+- [x] Reproduced from a clean checkout outside the framework's working
+      directory: the branch was cloned into a fresh temporary directory
+      and the full pipeline (init logic, retrieval, the demo's behavioral
+      test, frontmatter/config validation, privacy scan, link check) ran
+      identically there. This is a clean-environment reproduction, not
+      literally a different human trying it - that's still open, see
+      "Not yet done" below.
+- [x] The demo's Knowledge Delta and closeout are reviewed against
       [`core/ontology/knowledge-types.md`](../../core/ontology/knowledge-types.md)
       for type/status/evidence correctness - this is the first real test
       of whether the revised ontology (see
       [`core/ontology/authority-model.md`](../../core/ontology/authority-model.md))
       is actually usable in practice, not just internally consistent on
-      paper.
+      paper. The seeded artifacts (`FACT-0001`, `PATTERN-0001`) validate
+      against the schema; the Knowledge Delta's "Promote to shared
+      knowledge base?" entry for `PATTERN-0001` correctly defers to owner
+      ratification rather than auto-promoting it.
+
+## Not yet done
+
+- No independent human or separate agent session has followed the demo
+  README yet - only the same session that built it, plus one clean-clone
+  reproduction by that same agent.
+- A second adapter (Cursor) was not built in this round - see
+  `adapters/README.md`.
+- Structural-graph and shell-output-compression integrations remain
+  excluded, as scoped above.
 
 ## Sequencing
 
-This guide's existence, and the ontology/schema/CI work in this same
-review round, are prerequisites for the slice - not the slice itself. The
-next session that picks this up should build the slice, not add more
-scaffolding.
+This guide's design, and the ontology/schema/CI work from the prior
+review round, were prerequisites for the slice. They're no longer just
+prerequisites - the slice itself is built on top of them (see "The slice"
+above). The next session that picks this up should follow the
+"Recommended next PR" section of this PR's description, not re-scope this
+guide.

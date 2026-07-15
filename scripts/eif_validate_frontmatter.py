@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """Validate EIF artifacts against their JSON Schemas.
 
-Two modes:
+Three modes:
 
   Knowledge frontmatter (default): validates the YAML frontmatter of
   Markdown knowledge artifacts against
   core/schemas/knowledge-frontmatter.schema.json.
 
-  --config PATH: validates a single YAML file (typically .eif/config.yaml
-  or .eif/config.yaml.example) against core/schemas/eif-config.schema.json.
+  --config PATH: validates a single YAML file (typically .eif/config.yaml)
+  against core/schemas/eif-config.schema.json - the user-owned desired
+  configuration.
+
+  --lock PATH: validates a single YAML file (typically
+  .eif/framework.lock.yaml) against core/schemas/framework-lock.schema.json -
+  the EIF-managed provenance record. See docs/architecture/instance-contract.md
+  for why config and lock are separate files with separate schemas.
 
 Requires PyYAML and jsonschema[format] - see requirements.txt and
 scripts/README.md#dependency-update-ownership for the pinned versions and
@@ -25,6 +31,7 @@ repository against itself.
 Usage:
     python scripts/eif_validate_frontmatter.py [--framework-root PATH] [--instance-root PATH] [PATTERN ...]
     python scripts/eif_validate_frontmatter.py --framework-root PATH --config /path/to/.eif/config.yaml
+    python scripts/eif_validate_frontmatter.py --framework-root PATH --lock /path/to/.eif/framework.lock.yaml
 
 Default PATTERN (frontmatter mode) is every core/ontology/*.md and
 core/policies/*.md file under --instance-root.
@@ -142,31 +149,39 @@ def validate_frontmatter_mode(framework_root: Path, instance_root: Path, pattern
     return 1 if total_errors else 0
 
 
-def validate_config_mode(framework_root: Path, config_path: Path) -> int:
-    schema_path = framework_root / "core" / "schemas" / "eif-config.schema.json"
+def validate_yaml_mode(framework_root: Path, target_path: Path, schema_rel: str) -> int:
+    schema_path = framework_root / "core" / "schemas" / schema_rel
     schema = load_schema(schema_path)
 
-    if not config_path.exists():
-        print(f"eif-validate: config file not found: {config_path}", file=sys.stderr)
+    if not target_path.exists():
+        print(f"eif-validate: file not found: {target_path}", file=sys.stderr)
         return 1
 
     try:
-        instance = _normalize_yaml_scalars(yaml.safe_load(config_path.read_text(encoding="utf-8")) or {})
+        instance = _normalize_yaml_scalars(yaml.safe_load(target_path.read_text(encoding="utf-8")) or {})
     except yaml.YAMLError as e:
-        print(f"FAIL {config_path}: invalid YAML: {e}")
+        print(f"FAIL {target_path}: invalid YAML: {e}")
         return 1
 
-    errors = validate_one(instance, schema, str(config_path))
+    errors = validate_one(instance, schema, str(target_path))
     if errors:
-        print(f"FAIL {config_path}:")
+        print(f"FAIL {target_path}:")
         for e in errors:
             print(f"  - {e}")
         print(f"eif-validate: 1 file, {len(errors)} error(s)")
         return 1
 
-    print(f"ok   {config_path}")
+    print(f"ok   {target_path}")
     print("eif-validate: 1 file, 0 error(s)")
     return 0
+
+
+def validate_config_mode(framework_root: Path, config_path: Path) -> int:
+    return validate_yaml_mode(framework_root, config_path, "eif-config.schema.json")
+
+
+def validate_lock_mode(framework_root: Path, lock_path: Path) -> int:
+    return validate_yaml_mode(framework_root, lock_path, "framework-lock.schema.json")
 
 
 def main() -> int:
@@ -174,6 +189,7 @@ def main() -> int:
     ap.add_argument("--framework-root", default=".", help="Where core/schemas/ lives (this framework's checkout). Default: current directory.")
     ap.add_argument("--instance-root", default=None, help="Where the artifacts being validated live. Default: same as --framework-root.")
     ap.add_argument("--config", default=None, help="Validate this single YAML file against the .eif/config.yaml schema instead of frontmatter mode.")
+    ap.add_argument("--lock", default=None, help="Validate this single YAML file against the .eif/framework.lock.yaml schema instead of frontmatter mode.")
     ap.add_argument("patterns", nargs="*", help="Glob pattern(s) relative to --instance-root (frontmatter mode only)")
     args = ap.parse_args()
 
@@ -182,6 +198,8 @@ def main() -> int:
 
     if args.config:
         return validate_config_mode(framework_root, Path(args.config).resolve())
+    if args.lock:
+        return validate_lock_mode(framework_root, Path(args.lock).resolve())
     return validate_frontmatter_mode(framework_root, instance_root, args.patterns)
 
 

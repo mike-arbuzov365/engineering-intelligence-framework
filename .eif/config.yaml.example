@@ -1,34 +1,41 @@
-# Example EIF project-instance configuration.
-# Copy to .eif/config.yaml in your own project and adjust. This is a spec
-# preview - the loader/validator (`eifctl validate`) does not exist yet.
+# Example EIF project-instance configuration - USER-OWNED.
+# In practice you do NOT hand-write this - `scripts/eif_init.py` generates it.
+# It is created once and never overwritten by a routine upgrade (only an
+# explicit --force re-run replaces it, after backing it up).
+#
+# Framework PROVENANCE (exact commit, dirty flag, bundle file hashes,
+# generated adapter entrypoint) does NOT live here - it lives in the
+# separate, EIF-managed .eif/framework.lock.yaml, fully regenerated on every
+# init/upgrade. See framework.lock.yaml.example alongside this file, and
+# ../docs/architecture/instance-contract.md for why the two are split.
+#
 # Machine-readable schema: ../core/schemas/eif-config.schema.json
 # See docs/architecture/HOW-EIF-WORKS.md for what's built vs. planned.
 
 # This config file's OWN schema version - bump only when the config shape
-# changes in a breaking way. Independent of the framework release below.
+# changes in a breaking way.
 schema_version: 1
 
+# Optional: a DESIRED framework release line - not provenance, just a hint.
+# EXPERIMENTAL - the eventual package/submodule/installer distribution model
+# is an open decision, see core/policies/decisions.md D-08.
 framework:
-  # No versioned release exists yet - see
-  # docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready
-  # ("v0.1.0 tag exists" is unchecked). Do not pin `ref` to "v0.1.0" until
-  # that tag is real; until then, pin to the actual commit SHA you
-  # checked out (`git rev-parse HEAD` in your framework checkout), not a
-  # floating branch name - "main" below is illustrative only and will
-  # drift. This whole config is EXPERIMENTAL, repository-local development
-  # mode - the eventual package/submodule/installer distribution model is
-  # an open decision, see core/policies/decisions.md D-08.
   version: "0.1.0-dev"
-  source: "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
-  ref: "<commit-sha-you-checked-out>"  # e.g. output of `git rev-parse HEAD`; "main" is illustrative only, do not leave it as a floating branch name in a real instance config
 
 project:
   name: example-project
 
+adapter:
+  # Which agent adapter the generated entrypoint targets. The generated
+  # entrypoint FILE and its verified-version evidence are managed
+  # provenance - see framework.lock.yaml, not here. claude-code -> CLAUDE.md
+  # (the file Claude Code actually loads at session start).
+  name: claude-code
+
 localization:
   # BCP-47 language tags (en, uk, en-US, ...).
-  # Locale for generated project documentation (ADRs, Knowledge Delta,
-  # session context, playbook output).
+  # Locale for generated project documentation (Knowledge Delta, closeout,
+  # status messages) - scripts/eif_render.py reads this by default.
   documentation_locale: en
   # Locale the agent writes prose responses in - falls back to
   # documentation_locale if unset.

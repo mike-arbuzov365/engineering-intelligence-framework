@@ -33,7 +33,8 @@
         "analysis_digest",
         "open_question",
         "ontology",
-        "decision_register"
+        "decision_register",
+        "claim_register"
       ],
       "description": "ontology is reserved for framework-core vocabulary documents (core/ontology/*), not project knowledge artifacts. See knowledge-types.md for the single-claim vs. procedural/provenance/meta distinction that drives the evidence requirement below."
     },

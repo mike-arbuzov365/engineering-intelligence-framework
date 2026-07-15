@@ -1,30 +1,36 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/eif-config.schema.json",
-  "title": "EIF project-instance configuration (.eif/config.yaml)",
-  "description": "Mirrors .eif/config.yaml.example - keep both in sync. No validator wired up yet (see scripts/README.md); this schema is the enforceable target.",
+  "title": "EIF project-instance configuration (.eif/config.yaml) - user/project-owned",
+  "description": "Mirrors .eif/config.yaml.example - keep both in sync. Validated by scripts/eif_validate_frontmatter.py --config. This file holds DESIRED, user-owned settings only - it is written once by eif_init and never overwritten by a routine upgrade. EIF-managed provenance (exact framework ref, bundle manifest, generated adapter entrypoint) lives in the separate, fully-regenerated framework-lock.schema.json / .eif/framework.lock.yaml - see docs/architecture/instance-contract.md for why the two are split.",
   "type": "object",
-  "required": ["schema_version", "framework", "project", "localization"],
+  "required": ["schema_version", "project", "adapter", "localization"],
   "properties": {
     "schema_version": {
       "type": "integer",
       "minimum": 1,
-      "description": "This config file's own schema version, independent of framework.version."
+      "description": "This config file's own schema version."
     },
     "framework": {
       "type": "object",
-      "required": ["version"],
+      "description": "Optional DESIRED framework release line - not provenance. Which framework commit actually generated this instance is recorded in .eif/framework.lock.yaml, not here.",
       "properties": {
-        "version": { "type": "string" },
-        "source": { "type": "string", "format": "uri" },
-        "ref": { "type": "string" }
+        "version": { "type": "string" }
       }
     },
     "project": {
       "type": "object",
       "required": ["name"],
       "properties": {
-        "name": { "type": "string" }
+        "name": { "type": "string", "minLength": 1 }
+      }
+    },
+    "adapter": {
+      "type": "object",
+      "description": "User's declared adapter choice. `name` is deliberately NOT an enum here - the registry (scripts/eif_adapters.py) is the single source of truth for valid names, enforced by eif_init.py's argparse choices and cross-checked at runtime by eif_verify_runtime.py; duplicating the list in this schema would let the two drift silently. The generated entrypoint file and verified-version evidence are managed provenance - see .eif/framework.lock.yaml.",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 }
       }
     },
     "localization": {

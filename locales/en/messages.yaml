@@ -1,0 +1,11 @@
+# English (default/fallback) status and CLI messages.
+# Keys must match 1:1 with locales/uk/messages.yaml - see
+# scripts/tests/test_locale.py for the parity check.
+
+init_start: "Initializing EIF project instance at {path}"
+config_created: "Created .eif/config.yaml (locale: {locale})"
+instructions_generated: "Generated agent instructions at {path}"
+index_generated: "Knowledge index generated: {count} artifact(s)"
+init_complete: "EIF instance initialized at {path}"
+search_no_results: "No relevant knowledge found for query: {query}"
+search_results_found: "Found {count} relevant artifact(s) for query: {query}"

@@ -75,6 +75,30 @@ current and accurate - not the status of any individual entry.
   [`status-lifecycle.md#superseded`](status-lifecycle.md)), the same rule
   that applies to any other artifact.
 
+### `claim_register`
+<!-- Added 2026-07-15 (takeover review, NEW-CORRECTION): the public claims
+ledger (docs/product/claims-evidence.md) was mistyped as decision_register.
+Claims are not decisions: a decision register tracks what was decided
+(Ratified/Provisional/Open); a claim register tracks public-facing claims
+and how strongly evidence supports each (OBSERVED/UNVERIFIED/NOT TESTED).
+Reusing decision_register would have been choosing a type because it passed
+the schema, not because it modeled the artifact honestly. -->
+A maintained index of public-facing **claims** (for README, website,
+article, portfolio, talk), where **each claim carries its own evidence
+status** (OBSERVED / UNVERIFIED / NOT TESTED) and the register document's own
+`status` describes whether the register accurately reflects reality - not
+whether every claim is proven.
+- **Example:** [`../../docs/product/claims-evidence.md`](../../docs/product/claims-evidence.md)
+  - `status: validated` means "this table accurately reflects each claim's
+  evidence status," not "every claim is OBSERVED."
+- **vs. `decision_register`:** same "many independently-statused entries in
+  one document" shape, but the axis is *evidence strength of a claim*, not
+  *ratification state of a decision*. A claim only becomes OBSERVED when the
+  register names reproducible evidence for it.
+- Like `decision_register` and `analysis_digest`, it holds multiple entries,
+  so it takes no single frontmatter `evidence` label - see
+  [Evidence is not always one label per artifact](#evidence-is-not-always-one-label-per-artifact).
+
 ### `risk`
 An identified risk requiring monitoring or mitigation.
 - **Fields:** probability (H/M/L), impact (H/M/L), trigger, mitigation.
@@ -240,6 +264,9 @@ It does **not** make sense the same way for:
 - `decision_register` - holds multiple `decision` entries, each with its
   own status (see [`decision_register`](#decision_register) above);
   `evidence` doesn't apply to the register as a whole, omit it.
+- `claim_register` - holds multiple public claims, each with its own
+  evidence status (see [`claim_register`](#claim_register) above); the
+  register as a whole takes no single `evidence` label, omit it.
 
 See [`core/schemas/knowledge-frontmatter.schema.json`](../schemas/knowledge-frontmatter.schema.json)
 for the machine-enforced version of this rule: `evidence` is required only
@@ -331,9 +358,9 @@ source; this block is the explained one. Keep both in sync. -->
 
 ```yaml
 ---
-type: fact | rule | decision | risk | edge_case | failure_pattern | incident | assumption | hypothesis | playbook | knowledge_operation | source_manifest | extraction_manifest | analysis_digest | open_question | ontology | decision_register
+type: fact | rule | decision | risk | edge_case | failure_pattern | incident | assumption | hypothesis | playbook | knowledge_operation | source_manifest | extraction_manifest | analysis_digest | open_question | ontology | decision_register | claim_register
 status: draft | validated | superseded | deprecated | rejected  # rejected requires type: hypothesis, see status-lifecycle.md
-evidence: OBSERVED | INFERRED | ASSUMED  # epistemic label - see authority-model.md. Required once status is not draft, for single-claim types only (fact, rule, decision, risk, edge_case, failure_pattern, incident, assumption, hypothesis). Not applicable to analysis_digest, source_manifest, extraction_manifest, playbook, knowledge_operation, open_question, ontology, decision_register - omit there.
+evidence: OBSERVED | INFERRED | ASSUMED  # epistemic label - see authority-model.md. Required once status is not draft, for single-claim types only (fact, rule, decision, risk, edge_case, failure_pattern, incident, assumption, hypothesis). Not applicable to analysis_digest, source_manifest, extraction_manifest, playbook, knowledge_operation, open_question, ontology, decision_register, claim_register - omit there.
 source: chat | code | test | runtime_trace | official_specification | owner_decision | ci_evidence | customer_feedback | retro  # evidence channel, distinct from `evidence` (the epistemic label)
 confidence: low | medium | high  # see confidence-levels.md - not a verification bypass
 scope: framework | project

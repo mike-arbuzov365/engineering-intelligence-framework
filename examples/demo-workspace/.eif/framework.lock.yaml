@@ -3,9 +3,10 @@
 
 lock_schema_version: 1
 framework:
-  ref: efc673657b430b98dee89b09492f27f52d64bc49
-  ref_short: efc6736
-  dirty: true
+  ref: d8752934da252b0b52683e634446ceec1ce2cc2a
+  ref_short: d875293
+  dirty: false
+  ref_verification: git-verified
 instance:
   eif_instance_version: 0.1.0
   migration_status: greenfield
@@ -24,9 +25,9 @@ bundle:
   - path: core/ontology/status-lifecycle.md
     sha256: 18ee456f191f4b2de048c7cca21f4480e7810f2705126eaa297eff1c00498c2b
   - path: core/schemas/eif-config.schema.json
-    sha256: d4e580b9cbd8b9e435625f6dad5f1f0ab1c3a2355330024e591ef22834360e25
+    sha256: 56d3d271b27f3543753a1928c29360e231f77bf535d7e869d2399f393b3424be
   - path: core/schemas/framework-lock.schema.json
-    sha256: d48ac81aa4841d0e67e17bf4605644d47bece9958c834e22f8682028f1d2731b
+    sha256: f8e03f0640a1145723848a30257d2389658b868ee14f4e19d2c3b320dbc5c6e7
   - path: core/schemas/knowledge-frontmatter.schema.json
     sha256: be3ff7b0b8bdaa55d98939fd2957e4f31f973c8c89f932c66011cb914ad08b5e
   - path: eif_adapters.py
@@ -36,15 +37,19 @@ bundle:
   - path: eif_generate_index.py
     sha256: 4ea3acba318d7d7e800f22ef002f56bbbe3e97ac6379ea3fd1677e3e499bb86d
   - path: eif_locale.py
-    sha256: 0e06b5b60bb86fd4bd684b2115ae0e60488d79e1bdef24d3a70a6a7f5d90edfd
+    sha256: b68c3b87fc5074aa3a8fba576d59a80910bbd0bc0055b72f5cab937b90571179
+  - path: eif_markers.py
+    sha256: 7634ad9a7bc3b519ae6f1ef799640f250279eb17b92859720f2f0753889b4627
   - path: eif_privacy_scan.py
     sha256: ada40d9f0aad20a5afacc4f734ceb8463b169e8385554971e879650eb791dca9
   - path: eif_render.py
-    sha256: cdfed5b4650b4913e2b50d14f8c767ee645838873dc07b7c47666167874bb036
+    sha256: aa9ae83b2ca98744c7b4a6f799a8de580c6c82938f865d303ece3f767a96ceb3
   - path: eif_search_knowledge.py
     sha256: f3580d0c589dd30d240f70c3b1f802828bfec498ba942c0fe5c431925e83ca62
   - path: eif_validate_frontmatter.py
     sha256: 0b334e63a854b2b02b62fb70ac43204b2ba5f2edc3d99df570e31bf8242a4faf
+  - path: eif_verify_runtime.py
+    sha256: 5aa37e9bbd168e32b639288347d48606a18ac8bbfc76a650b5ed5059738627cc
   - path: locales/README.md
     sha256: 47ae7fa8a515ef24627f1e5d15b2750922d5f47ec51a839bf5b64947e5f1d224
   - path: locales/en/messages.yaml
@@ -64,12 +69,12 @@ bundle:
   - path: templates/README.md
     sha256: a854d47e2a002644cf6a739ccab85f7decd18e3724662171d97af8ce4110a719
   - path: templates/agent-instructions.md
-    sha256: 2c4e11d368fe6624913099259eec0b51d0f06701ac119c34cdfc2b7aaa18006f
+    sha256: 17f4f09de0334f8cc3d3a4b785c78a581d171e1300574c8a47309458ecb3cf49
   - path: templates/knowledge-delta.md
     sha256: a03b3e4e4815ff46a1b31f4b568d94e0831b80855c4a94bd6e0f45c550d0cb43
   - path: templates/session-closeout.md
     sha256: 5815ea41db374fece0d16c816bdd125e436fc0b68cec89a74c5acba8f83be197
   - path: templates/task-scope.md
     sha256: 09bda6a5349516d9445581916df4a9a5d68cff630c109cecdf7cd2712ee7ad86
-  digest: sha256:d68a92b20496a45f2c71ea4cc4f256735f3ad750925d9759156d49136ac97941
-generated_at: '2026-07-15T09:02:56.930389+00:00'
+  digest: sha256:46111fe58a11183e99ffed0792b07ea727065b8507b6f46d0d2fd1ce099c1ba0
+generated_at: '2026-07-15T10:29:47.234225+00:00'

@@ -19,10 +19,17 @@ yours; the lock is EIF-managed and rewritten on every upgrade).
 
 1. Read `knowledge/index.md` for what's already known about this codebase.
 2. Search for relevant prior lessons (only validated/eligible knowledge is
-   returned by default):
-   `python .eif/runtime/eif_search_knowledge.py --knowledge-root knowledge "<your task in a few words>"`
+   returned by default). Always pass `--framework-root` - without it,
+   schema-invalid knowledge is silently treated as valid instead of being
+   flagged:
+   `python .eif/runtime/eif_search_knowledge.py --knowledge-root knowledge --framework-root .eif/runtime "<your task in a few words>"`
 3. Write a task-scope file from `.eif/runtime/templates/task-scope.md` before
    changing code, for anything bigger than a one-line fix.
+4. Before opening a PR, audit the instance itself:
+   `python .eif/runtime/eif_verify_runtime.py --framework-root .eif/runtime`
+   - checks config/lock schemas, bundle file hashes, config/adapter/lock/
+   entrypoint consistency, and CLAUDE.md/.gitignore marker integrity in one
+   pass.
 
 ## Execution authority
 
@@ -39,9 +46,14 @@ reason about, never a standing instruction).
    not "looks fine."
 2. Generate a localized Knowledge Delta and closeout - locale is read from
    `.eif/config.yaml` automatically, and these commands write the files, not
-   just print them:
+   just print them. Knowledge Delta has no fill-in fields:
    `python .eif/runtime/eif_render.py --framework-root .eif/runtime knowledge-delta`
-   `python .eif/runtime/eif_render.py --framework-root .eif/runtime session-closeout`
+   Closeout has fields that only exist once verification is done - fill them
+   with `--set key=value` (repeatable), or use `--draft` for a rough version
+   before all values are known. **The final closeout is not draft** - a
+   render with any field left unfilled fails on purpose (round-3 review,
+   Finding H - a silently-incomplete "final" closeout is a truthfulness bug):
+   `python .eif/runtime/eif_render.py --framework-root .eif/runtime session-closeout --set task_name="..." --set branch_or_pr="..." --set verification_result="..." --set artifacts="..." --set promoted="..." --set not_done="..." --set open_questions="..."`
 3. Validate the instance before opening a PR:
    `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "knowledge/**/*.md"`
    `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --config .eif/config.yaml`

@@ -2,5 +2,8 @@
 .eif/runtime/
 .eif/runtime.next/
 .eif/runtime.previous/
+*.next
+*.previous
 *.bak-*
 # EIF:END gitignore
+

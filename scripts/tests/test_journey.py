@@ -825,6 +825,94 @@ def main() -> int:
         results.append(check("35b. successful reconfigure keeps a config backup (recovery artifact)",
                              len(list(inst.glob(".eif/config.yaml.bak-*"))) >= 1))
 
+    # --- 36. Config backup partial-write safety (independent-review): the
+    # --force backup must be collision-safe and never leave an orphaned
+    # partial `.bak-*` if the backup copy crashes mid-write. ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "inst"
+        inst.mkdir()
+        r0 = init(inst, "--project-name", "bkp", "--locale", "en")
+        results.append(check("36. baseline init succeeds", r0.returncode == 0, r0.stdout + r0.stderr))
+        r1 = init(inst, "--force", "--locale", "uk")
+        results.append(check("36. successful reconfigure #1 succeeds", r1.returncode == 0, r1.stdout + r1.stderr))
+        baks = sorted(inst.glob(".eif/config.yaml.bak-*"))
+        results.append(check("36. exactly one backup after the first reconfigure", len(baks) == 1, str(baks)))
+        b1 = baks[0]
+        b1_bytes = b1.read_bytes()
+        snap = tree_snapshot(inst)  # includes B1
+        r2 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", "--force", "--locale", "en"],
+                 env={"EIF_INIT_TEST_FAIL_PARTIAL": "backup"})
+        results.append(check("36. partial-backup fault fails the run", r2.returncode != 0, r2.stdout + r2.stderr))
+        results.append(check("36. failure names a partial backup write",
+                             "partial" in (r2.stdout + r2.stderr).lower() and "backup" in (r2.stdout + r2.stderr).lower(), r2.stdout + r2.stderr))
+        baks_after = sorted(inst.glob(".eif/config.yaml.bak-*"))
+        results.append(check("36. no NEW backup left by the failed partial (still exactly the prior one)", baks_after == [b1], str(baks_after)))
+        results.append(check("36. prior successful backup untouched byte-for-byte", b1.exists() and b1.read_bytes() == b1_bytes))
+        results.append(check("36. no orphaned .next/.previous", not any(inst.rglob("*.next")) and not any(inst.rglob("*.previous"))))
+        results.append(check("36. tree byte-for-byte unchanged (prior instance + B1 intact)", tree_snapshot(inst) == snap))
+        r3 = init(inst, "--force", "--locale", "en")
+        results.append(check("36. subsequent successful reconfigure works after the partial failure", r3.returncode == 0, r3.stdout + r3.stderr))
+        results.append(check("36. subsequent reconfigure adds a distinct new backup", len(sorted(inst.glob(".eif/config.yaml.bak-*"))) == 2))
+
+    # 36b. two rapid successful reconfigures produce two DISTINCT backups
+    # (collision-safe backup naming - a second-resolution timestamp would
+    # collide and overwrite; microseconds + a collision loop do not).
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "inst"
+        inst.mkdir()
+        init(inst, "--project-name", "bkp2", "--locale", "en")
+        ra = init(inst, "--force", "--locale", "uk")
+        rb = init(inst, "--force", "--locale", "en")
+        results.append(check("36b. both rapid reconfigures succeed", ra.returncode == 0 and rb.returncode == 0, ra.stdout + rb.stdout + ra.stderr + rb.stderr))
+        baks = list(inst.glob(".eif/config.yaml.bak-*"))
+        results.append(check("36b. two rapid reconfigures produce two distinct backups",
+                             len(baks) == 2 and len({b.name for b in baks}) == 2, str([b.name for b in baks])))
+
+    # --- 37. Nonexistent --instance-path contract (independent-review): a
+    # nonexistent instance path is supported; a failure removes exactly the
+    # directories THIS run created (deepest-first, only if empty) and never a
+    # pre-existing one; a successful init leaves the created directory. ---
+    for label, fault_env in [
+        ("before-staging", {"EIF_INIT_TEST_FAIL_BEFORE": "config"}),
+        ("partial-runtime", {"EIF_INIT_TEST_FAIL_PARTIAL": "runtime"}),
+        ("partial-file", {"EIF_INIT_TEST_FAIL_PARTIAL": "config"}),
+        ("after-commit", {"EIF_INIT_TEST_FAIL_AFTER": "runtime"}),
+    ]:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            before = tree_snapshot(base)  # empty base
+            inst = base / "created" / "nested" / "inst"  # none of these exist yet
+            r = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                     "--instance-path", str(inst), "--allow-dirty",
+                     "--project-name", f"nx-{label}", "--locale", "en"], env=fault_env)
+            results.append(check(f"37. [{label}] nonexistent-path init fails under fault", r.returncode != 0, r.stdout + r.stderr))
+            results.append(check(f"37. [{label}] the created instance dir is removed (no orphan)", not inst.exists()))
+            results.append(check(f"37. [{label}] the created parent dirs are removed too", not (base / "created").exists()))
+            results.append(check(f"37. [{label}] base restored to the exact pre-run snapshot", tree_snapshot(base) == before))
+
+    # 37e. successful init into a nonexistent (nested) path works and leaves it.
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        inst = base / "created-ok" / "inst"
+        r = init(inst, "--project-name", "nx-ok", "--locale", "en")
+        results.append(check("37e. successful init into a nonexistent path works", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("37e. successful init leaves the created instance dir + .eif", inst.is_dir() and (inst / ".eif" / "config.yaml").exists()))
+
+    # 37f. a PRE-EXISTING (empty) instance directory is never deleted on failure.
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        inst = base / "preexisting"
+        inst.mkdir()  # pre-existing empty instance dir
+        before = tree_snapshot(base)  # includes the empty inst dir
+        r = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                 "--instance-path", str(inst), "--allow-dirty",
+                 "--project-name", "nx-pre", "--locale", "en"],
+                env={"EIF_INIT_TEST_FAIL_BEFORE": "config"})
+        results.append(check("37f. pre-existing empty instance dir: init fails under fault", r.returncode != 0, r.stdout + r.stderr))
+        results.append(check("37f. pre-existing empty instance dir is NEVER deleted on failure", inst.is_dir()))
+        results.append(check("37f. pre-existing empty instance dir: base byte-for-byte unchanged", tree_snapshot(base) == before))
+
     passed = sum(results)
     print(f"\ntest_journey: {passed}/{len(results)} passed")
     return 0 if all(results) else 1

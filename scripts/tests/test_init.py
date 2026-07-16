@@ -322,6 +322,56 @@ def main() -> int:
         results.append(check("full rollback: no leftover .previous files",
                              not stages[0].previous_path.exists() and not stages[1].previous_path.exists()))
 
+    # --- Config backup: collision-safe destination + self-cleaning copy ---
+    import os
+    import datetime as _dt
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "config.yaml"
+        src.write_text("original config\n", encoding="utf-8")
+        d1 = eif_init._backup_dest(src)
+        results.append(check("_backup_dest returns a non-existing path", not d1.exists()))
+        d1.write_text("b1", encoding="utf-8")
+        d2 = eif_init._backup_dest(src)
+        results.append(check("_backup_dest: a second call avoids the existing backup", d2 != d1 and not d2.exists()))
+
+        # Force a FIXED timestamp so the collision loop (not the microsecond
+        # clock) is what guarantees distinctness - same-instant backups must
+        # still never collide or overwrite an existing recovery backup.
+        class _FixedDatetime:
+            @staticmethod
+            def now():
+                return _dt.datetime(2026, 7, 16, 12, 0, 0, 123456)
+
+        class _FixedModule:
+            datetime = _FixedDatetime
+
+        saved_dt = eif_init.datetime
+        try:
+            eif_init.datetime = _FixedModule
+            e1 = eif_init._backup_dest(src); e1.write_text("x", encoding="utf-8")
+            e2 = eif_init._backup_dest(src); e2.write_text("x", encoding="utf-8")
+            e3 = eif_init._backup_dest(src)
+            results.append(check("_backup_dest: same-instant calls never collide (collision loop)",
+                                 len({e1, e2, e3}) == 3 and not e3.exists()))
+        finally:
+            eif_init.datetime = saved_dt
+
+        # _backup_copy self-cleans a partial destination on the injected fault.
+        dest = eif_init._backup_dest(src)
+        os.environ[eif_init.FAULT_INJECT_PARTIAL_ENV] = "backup"
+        try:
+            eif_init._backup_copy(src, dest)
+            results.append(check("_backup_copy propagates the partial-backup fault", False))
+        except RuntimeError:
+            results.append(check("_backup_copy propagates the partial-backup fault", True))
+        finally:
+            os.environ.pop(eif_init.FAULT_INJECT_PARTIAL_ENV, None)
+        results.append(check("_backup_copy self-cleaned the partial backup (no orphan)", not dest.exists()))
+
+        good = eif_init._backup_dest(src)
+        eif_init._backup_copy(src, good)
+        results.append(check("_backup_copy makes a byte-for-byte copy", good.read_bytes() == src.read_bytes()))
+
     passed = sum(results)
     print(f"\ntest_init: {passed}/{len(results)} passed")
     return 0 if all(results) else 1

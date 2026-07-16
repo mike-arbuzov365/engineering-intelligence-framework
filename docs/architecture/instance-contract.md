@@ -97,10 +97,11 @@ Nothing is replaced in place. `eif_init`:
    place, and on any failure rolls back every already-committed stage to its
    exact prior bytes.
 
-Three failure windows are handled and separately tested (steps 16-35 of
+Three failure windows are handled and separately tested (steps 16-37 of
 `scripts/tests/test_journey.py`, with `EIF_INIT_TEST_FAIL_AFTER`,
 `EIF_INIT_TEST_FAIL_BEFORE`, and `EIF_INIT_TEST_FAIL_PARTIAL` fault
-injection at each stage):
+injection at each stage - the last also covers the `--force` config backup
+and a nonexistent instance path):
 
 - **After a commit** - `commit_transaction` rolls back every committed
   stage and removes its own uncommitted `.next` files.
@@ -111,23 +112,35 @@ injection at each stage):
 - **Partway through a stage's write/copy** (a mid-copy crash that leaves a
   genuinely PARTIAL `.next` on disk) - each `.next` path is registered for
   cleanup *before* the first byte is written to it, and the runtime bundle
-  additionally self-cleans a partial `runtime.next`, so a half-written
-  artifact is always removed too, never orphaned. This is the strongest of
+  additionally self-cleans a partial `runtime.next`. The `--force` config
+  backup is written the same way (its collision-safe destination is
+  registered for cleanup before the copy starts, and the copy self-cleans a
+  partial `.bak-*`), so a half-written artifact - including a half-written
+  backup - is always removed too, never orphaned. This is the strongest of
   the three claims and is proven against a real partial artifact on disk, not
   just a stage that never started.
 
 In all three windows the outcome is byte-for-byte tree equality: no `.next`/
-`.previous` files, no orphaned new directories (a first-ever init removes
-its own freshly-created `.eif/` if the run fails), no partial runtime
-directory, and no leftover config backup (see below). The instance's prior,
+`.previous` files, no orphaned new directories (a first-ever init removes its
+own freshly-created `.eif/` if the run fails; and a **nonexistent
+`--instance-path` is supported** - the run records which directories it
+creates and, on failure, removes exactly those, deepest-first and only if
+empty, never a directory that pre-existed the run), no partial runtime
+directory, and no leftover config backup (see below). A successful init
+leaves the instance directory it created in place. The instance's prior,
 working runtime survives a failed upgrade untouched and remains fully
 functional - not just "no crash," but "still works."
 
 ### Config-backup policy
 
 A `--force` reconfigure backs up the existing `.eif/config.yaml` to
-`.eif/config.yaml.bak-<timestamp>` before overwriting it. The backup is a
-transient artifact until the reconfigure commits:
+`.eif/config.yaml.bak-<timestamp>` before overwriting it. The timestamp is
+microsecond-resolution with a collision loop, so two reconfigures within the
+same second still produce distinct backups and an existing recovery backup is
+never overwritten. The backup destination is registered for cleanup before
+the copy starts and the copy self-cleans a partial `.bak-*`, so a crash
+mid-backup leaves no orphaned partial. The backup is a transient artifact
+until the reconfigure commits:
 
 - **Failed reconfigure** -> the backup is deleted, so the tree returns
   byte-for-byte to its prior state (the "no orphaned files / exact prior

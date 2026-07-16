@@ -599,7 +599,7 @@ formally ratified (the file is explicit about which is which).
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
 - [x] Demo workflow has executable evidence:
-      `scripts/tests/test_journey.py` (225 checks) drives a real subprocess
+      `scripts/tests/test_journey.py` (259 checks) drives a real subprocess
       journey against a fresh instance, and
       [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
       has real captured command output, both reproducible from a clean

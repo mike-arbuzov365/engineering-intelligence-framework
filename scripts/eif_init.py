@@ -487,11 +487,34 @@ def validate_in_memory(framework_root: Path, schema_rel: str, data: dict) -> lis
     return validate_one(data, schema, schema_rel)
 
 
-def _backup(path: Path) -> Path:
-    stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    dest = path.with_suffix(path.suffix + f".bak-{stamp}")
-    shutil.copyfile(path, dest)
+def _backup_dest(path: Path) -> Path:
+    """A collision-safe backup destination for `path`, computed WITHOUT
+    copying anything. Uses a microsecond-resolution timestamp plus a
+    collision loop, so two reconfigures within the same microsecond still get
+    distinct names and an existing recovery backup is never overwritten. The
+    caller registers this path for cleanup BEFORE starting the copy, so a
+    partial-write crash during the backup is unwound too."""
+    base = datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f")
+    dest = path.with_suffix(path.suffix + f".bak-{base}")
+    n = 0
+    while dest.exists():
+        n += 1
+        dest = path.with_suffix(path.suffix + f".bak-{base}-{n}")
     return dest
+
+
+def _backup_copy(src: Path, dest: Path) -> None:
+    """Copy src -> dest for a --force config backup, self-cleaning a partial
+    dest on ANY exception so a mid-copy crash never leaves an orphaned partial
+    `.bak-*` behind. `dest` must be a fresh path from _backup_dest (an
+    existing recovery backup is never touched). The caller ALSO registers
+    `dest` for cleanup before calling, as an independent second layer."""
+    try:
+        _maybe_fault_partial("backup", dest, src.read_bytes())
+        shutil.copyfile(src, dest)
+    except Exception:
+        dest.unlink(missing_ok=True)
+        raise
 
 
 @dataclass
@@ -1166,12 +1189,40 @@ def main() -> int:
     # every existing fault-injection test runs its second (faulted) attempt
     # against an instance a first, successful run already initialized -
     # .eif/ always already existed in those cases.
+    # Nonexistent --instance-path contract: a nonexistent instance path is
+    # supported (origin "empty" -> greenfield). Record which directories this
+    # run will create - from instance_path up to the first existing ancestor
+    # - BEFORE any mkdir, so a staging/transaction failure removes exactly
+    # those (if still empty), deepest-first, and NEVER a directory that
+    # pre-existed the run. A successful init leaves the created directory in
+    # place. (Previously mkdir(parents=True) could create a fresh instance
+    # root that a later failure's cleanup left behind as an orphaned empty
+    # directory - the same class of bug as the orphaned .eif/.)
+    run_created_dirs: list[Path] = []
+    _probe = instance_path
+    while not _probe.exists():
+        run_created_dirs.append(_probe)
+        if _probe.parent == _probe:
+            break
+        _probe = _probe.parent
+
     eif_dir_is_new = not eif_dir.exists()
-    eif_dir.mkdir(parents=True, exist_ok=True)
+    eif_dir.mkdir(parents=True, exist_ok=True)  # also creates instance_path + new parents
 
     def _cleanup_orphaned_eif_dir() -> None:
         if eif_dir_is_new and eif_dir.is_dir() and not any(eif_dir.iterdir()):
             eif_dir.rmdir()
+
+    def _cleanup_created_dirs() -> None:
+        # run_created_dirs is deepest-first (instance_path, then any new
+        # parents) - the correct removal order. Only remove a directory this
+        # run created AND that is now empty; never a pre-existing one.
+        for d in run_created_dirs:
+            try:
+                if d.is_dir() and not any(d.iterdir()):
+                    d.rmdir()
+            except OSError:
+                pass
 
     # --- Cleanup-safe staging boundary (independent-review fix) ---
     # Every artifact writes to a `.next` path first; the whole pre-commit
@@ -1203,6 +1254,7 @@ def main() -> int:
         if backup_path is not None and backup_path.exists():
             backup_path.unlink(missing_ok=True)
         _cleanup_orphaned_eif_dir()
+        _cleanup_created_dirs()
 
     # Partial-write fix (independent-review): each `.next` path is computed
     # and REGISTERED in staged_next_paths BEFORE any write/copy touches it, so
@@ -1213,7 +1265,12 @@ def main() -> int:
     try:
         if config_action != "keep":
             if config_action == "overwrite" and config_path.exists():
-                backup_path = _backup(config_path)
+                # Partial-backup safety: compute + register the (collision-safe)
+                # backup destination BEFORE the copy, so a crash partway
+                # through the copy is cleaned up by _cleanup_staging too, not
+                # only by _backup_copy's own self-clean.
+                backup_path = _backup_dest(config_path)
+                _backup_copy(config_path, backup_path)
             config_next = eif_dir / "config.yaml.next"
             staged_next_paths.append(config_next)
             _maybe_fault_before("config")

@@ -57,6 +57,36 @@ governance:
   # failure_policy for the actual per-integration behavior.
   degraded_mode_allowed: true
 
+knowledge:
+  # Where knowledge artifacts live, instance-relative. Defaults shown here
+  # are the greenfield defaults - an EXISTING repository being adopted can
+  # point these at wherever knowledge already lives (e.g. docs/knowledge/)
+  # instead of migrating content to match EIF's default layout. Generated
+  # instructions and the index/search commands read these values - they do
+  # not hardcode "knowledge" independently of this config.
+  root: knowledge
+  index_path: knowledge/index.md
+  # Whether eif_init.py may generate/regenerate the index file at all.
+  # Greenfield default: true. Coexist default: false (explicit opt-in via
+  # --manage-knowledge-index required - a coexisting project may already
+  # manage its own knowledge, and EIF must not start doing it unasked).
+  # Even when true, an existing file at index_path WITHOUT EIF's own
+  # generated-file marker is never overwritten (a hard refusal, not a
+  # silent skip) - this only opts into EIF managing the index going
+  # forward, it does not authorize taking over an existing project file.
+  managed: true
+
+adoption:
+  # greenfield (default): the generated block may present itself as this
+  # project's baseline authority. coexist: required when eif_init's
+  # adoption preflight (scripts/eif_preflight.py) detects pre-existing
+  # entrypoint content - the generated block will not declare itself sole
+  # authority, will not override existing governance, and will say
+  # explicitly that project-owned instructions outside the EIF markers
+  # stay canonical. See
+  # docs/architecture/instance-contract.md#adoption-existing-repositories.
+  mode: greenfield
+
 privacy:
   # Never read, index, or export paths matching these globs, regardless of
   # what any integration or skill would otherwise do.
@@ -69,6 +99,26 @@ privacy:
   # gitignored - never commit the actual file, only this pointer to it.
   # See scripts/README.md for the privacy scanner that reads it.
   local_denylist_file: ".eif/local-denylist.txt"
+  # Controlled exceptions to eif_privacy_scan.py findings - FINDING-
+  # specific (rule + exact path + a content fingerprint), never a whole
+  # rule+file. Never a way to weaken a detection pattern for everyone; a
+  # suppression that stops matching (its fingerprinted line changed or is
+  # gone), or whose expires date has passed, is itself reported as a
+  # finding (suppression hygiene). Get the exact fingerprint from the
+  # scanner's own output for the finding you are reviewing
+  # (`python scripts/eif_privacy_scan.py --json`) - never guess it by
+  # hand. Example:
+  # suppressions:
+  #   - rule: "secret_shaped:password_assignment"
+  #     path: "src/types/keytar.d.ts"
+  #     fingerprint: "a1b2c3d4e5f60718"
+  #     rationale: >-
+  #       TypeScript interface method signature for the keytar OS-keychain
+  #       module (setPassword(...): Promise<void>) - a type declaration,
+  #       not an assigned secret value.
+  #     reviewed: "2026-07-15"
+  #     expires: "2026-10-15"
+  suppressions: []
 
 # Optional integrations - each defaults to disabled. EIF's core governance
 # model works without any of them; see integrations/README.md for the

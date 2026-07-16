@@ -37,7 +37,8 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
 
 def _args(**overrides):
     base = dict(project_name=None, locale=None, adapter=None, migration_status=None,
-                framework_version=None, force=False)
+                framework_version=None, force=False, knowledge_root=None,
+                knowledge_index_path=None, adoption_mode=None, manage_knowledge_index=None)
     base.update(overrides)
     return SimpleNamespace(**base)
 
@@ -86,46 +87,149 @@ def main() -> int:
     except ValueError:
         results.append(check("init without --project-name raises", True))
 
-    mode, proj, loc, adapt, mig, fver, ignored = eif_init._resolve_mode_and_values(
+    r1 = eif_init._resolve_mode_and_values(
         _args(project_name="p", locale="uk", adapter="claude-code", migration_status="adopted"), None, None,
     )
-    results.append(check("init: mode is 'init'", mode == "init"))
-    results.append(check("init: values come from CLI args", (proj, loc, adapt, mig) == ("p", "uk", "claude-code", "adopted")))
+    results.append(check("init: mode is 'init'", r1.mode == "init"))
+    results.append(check("init: values come from CLI args", (r1.project_name, r1.locale, r1.adapter, r1.migration_status) == ("p", "uk", "claude-code", "adopted")))
 
-    mode2, proj2, loc2, adapt2, mig2, fver2, ignored2 = eif_init._resolve_mode_and_values(_args(project_name="p"), None, None)
-    results.append(check("init: unset flags fall back to sane defaults", (loc2, adapt2, mig2) == ("en", eif_init.DEFAULT_ADAPTER, "greenfield")))
+    r2 = eif_init._resolve_mode_and_values(_args(project_name="p"), None, None)
+    results.append(check("init: unset flags fall back to sane defaults", (r2.locale, r2.adapter, r2.migration_status) == ("en", eif_init.DEFAULT_ADAPTER, "greenfield")))
+    results.append(check("init: knowledge root/index default", (r2.knowledge_root, r2.knowledge_index_path) == ("knowledge", "knowledge/index.md")))
+    results.append(check("init: adoption mode defaults to greenfield", r2.adoption_mode == "greenfield"))
+
+    r2b = eif_init._resolve_mode_and_values(_args(project_name="p", knowledge_root="docs/knowledge", adoption_mode="coexist"), None, None)
+    results.append(check("init: explicit knowledge-root honored, index derived from it", r2b.knowledge_index_path == "docs/knowledge/index.md"))
+    results.append(check("init: explicit adoption-mode honored", r2b.adoption_mode == "coexist"))
 
     # upgrade: existing config present, no --force -> config/lock are the
     # sole source of truth; any CLI values passed anyway are reported as ignored.
     existing_config = {"project": {"name": "existing-proj"}, "adapter": {"name": "claude-code"},
-                       "localization": {"documentation_locale": "uk"}, "framework": {"version": "0.1.0-dev"}}
+                       "localization": {"documentation_locale": "uk"}, "framework": {"version": "0.1.0-dev"},
+                       "knowledge": {"root": "docs/knowledge", "index_path": "docs/knowledge/index.md"},
+                       "adoption": {"mode": "coexist"}}
     existing_lock = {"instance": {"migration_status": "adopted"}}
-    mode3, proj3, loc3, adapt3, mig3, fver3, ignored3 = eif_init._resolve_mode_and_values(_args(), existing_config, existing_lock)
-    results.append(check("upgrade: mode is 'upgrade'", mode3 == "upgrade"))
+    r3 = eif_init._resolve_mode_and_values(_args(), existing_config, existing_lock)
+    results.append(check("upgrade: mode is 'upgrade'", r3.mode == "upgrade"))
     results.append(check("upgrade: values derived from existing config/lock, not CLI defaults",
-                         (proj3, loc3, adapt3, mig3) == ("existing-proj", "uk", "claude-code", "adopted")))
-    results.append(check("upgrade: ignored list is empty when no conflicting flags were passed", ignored3 == []))
+                         (r3.project_name, r3.locale, r3.adapter, r3.migration_status) == ("existing-proj", "uk", "claude-code", "adopted")))
+    results.append(check("upgrade: knowledge root/adoption mode derived from existing config",
+                         (r3.knowledge_root, r3.knowledge_index_path, r3.adoption_mode) == ("docs/knowledge", "docs/knowledge/index.md", "coexist")))
+    results.append(check("upgrade: ignored list is empty when no conflicting flags were passed", r3.ignored == []))
 
-    mode4, proj4, loc4, adapt4, mig4, fver4, ignored4 = eif_init._resolve_mode_and_values(
-        _args(project_name="ignored-name", locale="en"), existing_config, existing_lock,
+    r4 = eif_init._resolve_mode_and_values(
+        _args(project_name="ignored-name", locale="en", knowledge_root="ignored-root", adoption_mode="greenfield"), existing_config, existing_lock,
     )
     results.append(check("upgrade: passing --project-name/--locale anyway does NOT change the derived values",
-                         (proj4, loc4) == ("existing-proj", "uk")))
+                         (r4.project_name, r4.locale) == ("existing-proj", "uk")))
+    results.append(check("upgrade: passing --knowledge-root/--adoption-mode anyway does NOT change derived values",
+                         (r4.knowledge_root, r4.adoption_mode) == ("docs/knowledge", "coexist")))
     results.append(check("upgrade: passed-but-ignored flags are reported for the caller to warn about",
-                         set(ignored4) == {"--project-name", "--locale"}, str(ignored4)))
+                         set(r4.ignored) == {"--project-name", "--locale", "--knowledge-root", "--adoption-mode"}, str(r4.ignored)))
 
     # reconfigure: --force -> only explicitly-passed values change; everything else keeps its prior value.
-    mode5, proj5, loc5, adapt5, mig5, fver5, ignored5 = eif_init._resolve_mode_and_values(
+    r5 = eif_init._resolve_mode_and_values(
         _args(force=True, locale="en"), existing_config, existing_lock,
     )
-    results.append(check("reconfigure: mode is 'reconfigure'", mode5 == "reconfigure"))
-    results.append(check("reconfigure: explicitly-passed --locale changes", loc5 == "en"))
+    results.append(check("reconfigure: mode is 'reconfigure'", r5.mode == "reconfigure"))
+    results.append(check("reconfigure: explicitly-passed --locale changes", r5.locale == "en"))
     results.append(check("reconfigure: un-passed project_name/adapter/migration_status keep their prior values",
-                         (proj5, adapt5, mig5) == ("existing-proj", "claude-code", "adopted")))
+                         (r5.project_name, r5.adapter, r5.migration_status) == ("existing-proj", "claude-code", "adopted")))
+    results.append(check("reconfigure: un-passed knowledge root/adoption mode keep their prior values",
+                         (r5.knowledge_root, r5.adoption_mode) == ("docs/knowledge", "coexist")))
+
+    # --- Migration provenance (independent-review): adoption.mode (current
+    # coexistence behavior) reconciled against migration_status (historical
+    # origin) via finalize_migration_status, driven by the REPOSITORY-ORIGIN
+    # classification ("empty" | "pre_existing" | "unknown") - NOT the
+    # entrypoint/governance preflight. (status, stop_reason) tuples. ---
+    def fin(*, mode, resolved, explicit, adoption_mode, origin):
+        return eif_init.finalize_migration_status(
+            mode=mode, resolved_status=resolved, explicit_status=explicit,
+            adoption_mode=adoption_mode, repository_origin=origin,
+        )
+
+    # init: genuinely empty greenfield repo stays greenfield
+    results.append(check("provenance init: empty greenfield -> greenfield",
+                         fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", origin="empty") == ("greenfield", None)))
+    # init: coexist mode implies adopted history even on an empty-looking dir
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="coexist", origin="empty")
+    results.append(check("provenance init: coexist -> adopted (no --migration-status needed)", (st, stop) == ("adopted", None)))
+    # init: pre-existing repo (files outside .git/.eif) -> adopted, even in greenfield
+    # AUTHORITY mode - the KEY fix: this used to depend on a CLAUDE.md existing.
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", origin="pre_existing")
+    results.append(check("provenance init: pre-existing repo (no CLAUDE.md needed) -> adopted history", (st, stop) == ("adopted", None)))
+    # init: explicit coexist + greenfield is the hard contradiction -> STOP
+    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="coexist", origin="empty")
+    results.append(check("provenance init: coexist + explicit greenfield -> STOP", st is None and stop is not None and "contradiction" in stop))
+    # init: explicit greenfield over a PRE-EXISTING repo -> STOP (false history)
+    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", origin="pre_existing")
+    results.append(check("provenance init: explicit greenfield over pre-existing repo -> STOP", st is None and stop is not None))
+    # init: explicit greenfield on a genuinely empty repo is fine
+    results.append(check("provenance init: explicit greenfield on empty repo -> greenfield",
+                         fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", origin="empty") == ("greenfield", None)))
+    # init: explicit adopted honored
+    results.append(check("provenance init: explicit adopted honored",
+                         fin(mode="init", resolved="greenfield", explicit="adopted", adoption_mode="coexist", origin="empty") == ("adopted", None)))
+    # init: UNKNOWN origin (unreadable dir) never silently becomes greenfield -> STOP
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", origin="unknown")
+    results.append(check("provenance init: unknown origin, no --migration-status -> STOP (fail closed)", st is None and stop is not None))
+    # init: UNKNOWN origin + an explicit historical decision is honored
+    results.append(check("provenance init: unknown origin + explicit greenfield honored",
+                         fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", origin="unknown") == ("greenfield", None)))
+    results.append(check("provenance init: unknown origin + explicit adopted honored",
+                         fin(mode="init", resolved="greenfield", explicit="adopted", adoption_mode="greenfield", origin="unknown") == ("adopted", None)))
+    # upgrade: persisted preserved verbatim, no contradiction logic, origin ignored
+    results.append(check("provenance upgrade: persisted adopted preserved",
+                         fin(mode="upgrade", resolved="adopted", explicit=None, adoption_mode="coexist", origin="pre_existing") == ("adopted", None)))
+    # reconfigure: switching to coexist under recorded greenfield -> STOP (do not silently rewrite)
+    st, stop = fin(mode="reconfigure", resolved="greenfield", explicit=None, adoption_mode="coexist", origin="pre_existing")
+    results.append(check("provenance reconfigure: coexist over recorded greenfield, no flag -> STOP", st is None and stop is not None))
+    # reconfigure: switching to coexist with explicit adopted is fine
+    results.append(check("provenance reconfigure: coexist + explicit adopted -> adopted",
+                         fin(mode="reconfigure", resolved="greenfield", explicit="adopted", adoption_mode="coexist", origin="pre_existing") == ("adopted", None)))
+    # reconfigure: coexist + explicit greenfield still a contradiction
+    st, stop = fin(mode="reconfigure", resolved="adopted", explicit="greenfield", adoption_mode="coexist", origin="pre_existing")
+    results.append(check("provenance reconfigure: coexist + explicit greenfield -> STOP", st is None and stop is not None))
+    # reconfigure: greenfield authority over recorded adopted history is allowed (preserve adopted)
+    results.append(check("provenance reconfigure: greenfield mode keeps recorded adopted history",
+                         fin(mode="reconfigure", resolved="adopted", explicit=None, adoption_mode="greenfield", origin="pre_existing") == ("adopted", None)))
+
+    # --- detect_repository_origin: read-only origin classification, distinct
+    # from governance detection (the entrypoint-only bug's real fix) ---
+    with tempfile.TemporaryDirectory() as tmp:
+        empty_dir = Path(tmp) / "empty"
+        empty_dir.mkdir()
+        results.append(check("origin: genuinely empty dir -> empty",
+                             eif_init.detect_repository_origin(empty_dir)[0] == "empty"))
+        git_only = Path(tmp) / "gitonly"
+        (git_only / ".git").mkdir(parents=True)
+        (git_only / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+        results.append(check("origin: only .git/ present -> empty (VCS metadata is not project content)",
+                             eif_init.detect_repository_origin(git_only)[0] == "empty"))
+        stray_eif = Path(tmp) / "strayeif"
+        (stray_eif / ".eif").mkdir(parents=True)
+        (stray_eif / ".eif" / "junk.txt").write_text("x", encoding="utf-8")
+        results.append(check("origin: only a stray .eif/ present -> empty (EIF namespace, documented policy)",
+                             eif_init.detect_repository_origin(stray_eif)[0] == "empty"))
+        readme_only = Path(tmp) / "readme"
+        readme_only.mkdir()
+        (readme_only / "README.md").write_text("# Project\n", encoding="utf-8")
+        results.append(check("origin: README-only repo (no CLAUDE.md) -> pre_existing",
+                             eif_init.detect_repository_origin(readme_only)[0] == "pre_existing"))
+        src_tree = Path(tmp) / "srctree"
+        (src_tree / "src").mkdir(parents=True)
+        (src_tree / "src" / "main.py").write_text("print(1)\n", encoding="utf-8")
+        (src_tree / ".git").mkdir()
+        results.append(check("origin: source tree beside .git/ (no CLAUDE.md) -> pre_existing",
+                             eif_init.detect_repository_origin(src_tree)[0] == "pre_existing"))
+        missing = Path(tmp) / "does-not-exist"
+        results.append(check("origin: non-existent dir -> empty (nothing there to adopt)",
+                             eif_init.detect_repository_origin(missing)[0] == "empty"))
 
     # --- Config/lock rendering + schema validation, safe YAML for special characters ---
     tricky_name = "weird: name, with \"quotes\" and a # hash"
-    data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev")
+    data = eif_init.render_config_data(tricky_name, "claude-code", "uk", "0.1.0-dev", "knowledge", "knowledge/index.md", "greenfield", True)
     errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "eif-config.schema.json", data)
     results.append(check("config with YAML-special characters validates", errors == [], str(errors)))
     content = eif_init._dump_yaml(eif_init.CONFIG_HEADER, data)
@@ -217,6 +321,56 @@ def main() -> int:
                              not a_next.exists() and not b_next.exists() and not c_next.exists()))
         results.append(check("full rollback: no leftover .previous files",
                              not stages[0].previous_path.exists() and not stages[1].previous_path.exists()))
+
+    # --- Config backup: collision-safe destination + self-cleaning copy ---
+    import os
+    import datetime as _dt
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "config.yaml"
+        src.write_text("original config\n", encoding="utf-8")
+        d1 = eif_init._backup_dest(src)
+        results.append(check("_backup_dest returns a non-existing path", not d1.exists()))
+        d1.write_text("b1", encoding="utf-8")
+        d2 = eif_init._backup_dest(src)
+        results.append(check("_backup_dest: a second call avoids the existing backup", d2 != d1 and not d2.exists()))
+
+        # Force a FIXED timestamp so the collision loop (not the microsecond
+        # clock) is what guarantees distinctness - same-instant backups must
+        # still never collide or overwrite an existing recovery backup.
+        class _FixedDatetime:
+            @staticmethod
+            def now():
+                return _dt.datetime(2026, 7, 16, 12, 0, 0, 123456)
+
+        class _FixedModule:
+            datetime = _FixedDatetime
+
+        saved_dt = eif_init.datetime
+        try:
+            eif_init.datetime = _FixedModule
+            e1 = eif_init._backup_dest(src); e1.write_text("x", encoding="utf-8")
+            e2 = eif_init._backup_dest(src); e2.write_text("x", encoding="utf-8")
+            e3 = eif_init._backup_dest(src)
+            results.append(check("_backup_dest: same-instant calls never collide (collision loop)",
+                                 len({e1, e2, e3}) == 3 and not e3.exists()))
+        finally:
+            eif_init.datetime = saved_dt
+
+        # _backup_copy self-cleans a partial destination on the injected fault.
+        dest = eif_init._backup_dest(src)
+        os.environ[eif_init.FAULT_INJECT_PARTIAL_ENV] = "backup"
+        try:
+            eif_init._backup_copy(src, dest)
+            results.append(check("_backup_copy propagates the partial-backup fault", False))
+        except RuntimeError:
+            results.append(check("_backup_copy propagates the partial-backup fault", True))
+        finally:
+            os.environ.pop(eif_init.FAULT_INJECT_PARTIAL_ENV, None)
+        results.append(check("_backup_copy self-cleaned the partial backup (no orphan)", not dest.exists()))
+
+        good = eif_init._backup_dest(src)
+        eif_init._backup_copy(src, good)
+        results.append(check("_backup_copy makes a byte-for-byte copy", good.read_bytes() == src.read_bytes()))
 
     passed = sum(results)
     print(f"\ntest_init: {passed}/{len(results)} passed")

@@ -122,10 +122,11 @@ The failing-before -> passing-after transition is reproduced
 **deterministically** by
 [`../../scripts/tests/test_journey.py`](../../scripts/tests/test_journey.py):
 in an isolated copy it resets the implementation to an unimplemented stub,
-asserts the test FAILS, applies the committed solution, asserts it PASSES -
-26 checks total, including a real subprocess `eif_init` run, config-driven
-Ukrainian rendering to files, a non-destructive re-init, and an injected
-upgrade failure with proven rollback (see step 16 there).
+asserts the test FAILS, applies the committed solution, asserts it PASSES.
+It is one part of a broader real-subprocess journey suite that also runs a
+real `eif_init` init, config-driven Ukrainian rendering to files, a
+non-destructive re-init, and an injected upgrade failure with proven
+rollback (see step 16 there).
 
 ```
 python examples/demo-workspace/tests/test_calendar_utils.py -v   # passes on the committed solution

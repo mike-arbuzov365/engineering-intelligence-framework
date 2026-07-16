@@ -16,6 +16,7 @@ from pathlib import Path
 
 TESTS_DIR = Path(__file__).resolve().parent
 SUITES = [
+    "test_paths.py",
     "test_validate.py",
     "test_privacy_scan.py",
     "test_knowledge_delta.py",
@@ -27,6 +28,7 @@ SUITES = [
     "test_verify_runtime.py",
     "test_init.py",
     "test_journey.py",
+    "test_adoption.py",
 ]
 
 

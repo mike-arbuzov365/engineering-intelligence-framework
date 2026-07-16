@@ -82,25 +82,134 @@ the bundle ever goes live.
 
 ## Transactional init/upgrade
 
-The bundle is never replaced in place. `eif_init`:
+Nothing is replaced in place. `eif_init`:
 
 1. resolves and validates provenance (dirty-check, mandatory-source check);
 2. renders config and lock **in memory** and validates both against their
    schemas *before writing anything*;
-3. stages the new bundle into `.eif/runtime.next`;
-4. re-hashes every staged file against the manifest computed from the
-   source, catching corruption;
-5. atomically swaps `.eif/runtime.next` into `.eif/runtime` (the previous
-   runtime is renamed aside first and only deleted once the swap succeeds -
-   if the swap itself fails, the previous runtime is restored, never left
-   half-written or missing);
-6. only then writes `.eif/framework.lock.yaml`;
-7. updates the `CLAUDE.md` managed block and the `.gitignore` managed block.
+3. **stages** every managed artifact to a `.next` path - config
+   (`.eif/config.yaml.next`), the runtime bundle (`.eif/runtime.next`, then
+   re-hashed against the manifest to catch corruption), the lock, the
+   `CLAUDE.md` and `.gitignore` managed blocks, and (when
+   `knowledge.managed`) the knowledge index;
+4. **commits** them as one ordered sequence of atomic renames - each stage
+   moves its prior live file aside to `.previous`, renames its `.next` into
+   place, and on any failure rolls back every already-committed stage to its
+   exact prior bytes.
 
-`scripts/tests/test_journey.py` exercises this against a deliberately broken
-framework copy (a mandatory bundle file removed mid-sequence) and confirms
-the instance's prior, working runtime survives the failed upgrade untouched
-and remains fully functional - not just "no crash," but "still works."
+Three failure windows are handled and separately tested (steps 16-37 of
+`scripts/tests/test_journey.py`, with `EIF_INIT_TEST_FAIL_AFTER`,
+`EIF_INIT_TEST_FAIL_BEFORE`, and `EIF_INIT_TEST_FAIL_PARTIAL` fault
+injection at each stage - the last also covers the `--force` config backup
+and a nonexistent instance path):
+
+- **After a commit** - `commit_transaction` rolls back every committed
+  stage and removes its own uncommitted `.next` files.
+- **Before a stage's write** (a fault while staging, before that stage has
+  written anything) - the whole staging phase is wrapped so every `.next` is
+  removed and the tree returns to its exact prior state; nothing already live
+  is touched.
+- **Partway through a stage's write/copy** (a mid-copy crash that leaves a
+  genuinely PARTIAL `.next` on disk) - each `.next` path is registered for
+  cleanup *before* the first byte is written to it, and the runtime bundle
+  additionally self-cleans a partial `runtime.next`. The `--force` config
+  backup is written the same way (its collision-safe destination is
+  registered for cleanup before the copy starts, and the copy self-cleans a
+  partial `.bak-*`), so a half-written artifact - including a half-written
+  backup - is always removed too, never orphaned. This is the strongest of
+  the three claims and is proven against a real partial artifact on disk, not
+  just a stage that never started.
+
+In all three windows the outcome is byte-for-byte tree equality: no `.next`/
+`.previous` files, no orphaned new directories (a first-ever init removes its
+own freshly-created `.eif/` if the run fails; and a **nonexistent
+`--instance-path` is supported** - the run records which directories it
+creates and, on failure, removes exactly those, deepest-first and only if
+empty, never a directory that pre-existed the run), no partial runtime
+directory, and no leftover config backup (see below). A successful init
+leaves the instance directory it created in place. The instance's prior,
+working runtime survives a failed upgrade untouched and remains fully
+functional - not just "no crash," but "still works."
+
+### Config-backup policy
+
+A `--force` reconfigure backs up the existing `.eif/config.yaml` to
+`.eif/config.yaml.bak-<timestamp>` before overwriting it. The timestamp is
+microsecond-resolution with a collision loop, so two reconfigures within the
+same second still produce distinct backups and an existing recovery backup is
+never overwritten. The backup destination is registered for cleanup before
+the copy starts and the copy self-cleans a partial `.bak-*`, so a crash
+mid-backup leaves no orphaned partial. The backup is a transient artifact
+until the reconfigure commits:
+
+- **Failed reconfigure** -> the backup is deleted, so the tree returns
+  byte-for-byte to its prior state (the "no orphaned files / exact prior
+  tree" guarantee above holds without exception).
+- **Successful reconfigure** -> the backup is kept, as the recovery copy of
+  the config that was just replaced.
+
+### Repository origin
+
+The *historical* `migration_status` is derived from a dedicated, read-only
+**repository-origin** check (`eif_init.detect_repository_origin`), run before
+any write. It is deliberately a **separate mechanism** from the
+governance/entrypoint preflight, which answers a different question ("is
+there pre-existing *governance* - a substantial `CLAUDE.md` - to coexist
+with?"). An existing code repository with a README, a package manifest, or a
+`src/` tree but no `CLAUDE.md` has no governance yet, but is still,
+historically, an **adopted** repository - never greenfield. Keying
+`migration_status` off the entrypoint file alone recorded such a repo as
+`greenfield`, which is simply false about how it came to exist; the two
+signals are kept apart.
+
+The origin check classifies the instance directory as one of:
+
+- **empty** - no project-owned entry outside `.git/` and `.eif/` (a
+  genuinely empty directory, a not-yet-created one, or one holding only
+  version-control / EIF metadata) -> `greenfield` history.
+- **pre_existing** - at least one project-owned file or directory outside
+  `.git/` and `.eif/` -> `adopted` history.
+- **unknown** - the directory could not be read (permissions / I/O). The tool
+  **fails closed**: it requires an explicit `--migration-status` and never
+  silently guesses `greenfield`.
+
+`.git/` (version-control metadata) and `.eif/` (EIF's own namespace) are
+ignored. A **stray or in-progress `.eif/`** left by a failed first init is
+therefore *not* evidence the repository pre-existed EIF; only genuine
+project-owned content is. On an upgrade/reconfigure the recorded history is
+preserved verbatim, so EIF's own generated files can never re-flip a repo's
+origin.
+
+### Migration provenance
+
+`.eif/config.yaml`'s `adoption.mode` (the *current* coexistence behavior)
+and `.eif/framework.lock.yaml`'s `instance.migration_status` (the
+*historical* origin, from the repository-origin check above) answer different
+questions but must not contradict the evidence. `migration_status` is
+**derived**, not defaulted:
+
+- a `pre_existing` repository, or `adoption.mode: coexist` ->
+  `migration_status: adopted`;
+- a greenfield **authority** override on a pre-existing repo still records
+  `adopted` (an override changes who the block claims authority for; it does
+  not rewrite how the repository came to be) - so `adoption.mode: greenfield`
+  with `migration_status: adopted` is a valid, expected pairing for an
+  existing repo that had no prior agent governance;
+- a genuinely `empty`-origin new repo -> `greenfield`;
+- an explicit `--adoption-mode coexist --migration-status greenfield`, or an
+  explicit `--migration-status greenfield` over a `pre_existing` repo, STOPs
+  before any write;
+- an `unknown` (unreadable) origin without an explicit `--migration-status`
+  STOPs - fail closed, never guessed as greenfield;
+- a routine upgrade preserves the persisted status; a reconfigure honors an
+  explicit `--migration-status` and otherwise preserves it, and refuses to
+  switch to `coexist` over a recorded `greenfield` without an explicit
+  `--migration-status adopted` (never silently rewriting history).
+
+`eif_verify_runtime.py` FAILs on the one impossible pairing (`coexist` +
+`greenfield`) with a concrete `--force` repair instruction, and never on a
+greenfield authority mode over an adopted history (that is the documented
+override case above).
 
 ## Compatibility
 
@@ -120,7 +229,8 @@ config-shape change is where that becomes necessary, not before.
 ## Adoption (existing repositories)
 
 `--migration-status adopted` marks an instance created on top of a
-pre-existing repository. Non-destructive defaults make this safe:
+pre-existing repository (recorded provenance, in the lock). Non-destructive
+defaults make bootstrapping onto one safe:
 
 - an existing `.eif/config.yaml` is **kept, unchanged** by default - this is
   now the *routine* upgrade path, not a special case; only explicit `--force`
@@ -132,9 +242,78 @@ pre-existing repository. Non-destructive defaults make this safe:
 - `--dry-run` reports exactly what would change (create/keep/overwrite,
   per file) before anything is written.
 
+**Adoption preflight and coexistence (adoption-hardening round).** Being
+non-destructive is not the same as being non-*competing*: a marker-safe
+append is still the wrong outcome if the appended block declares itself
+the project's authority into a `CLAUDE.md` that already has its own real
+governance. `scripts/eif_preflight.py` runs before any write and detects
+this case - substantial pre-existing entrypoint content, no EIF markers
+yet. On `init`, if that's detected and no `--adoption-mode` was passed,
+`eif_init.py` refuses to write anything at all (`--dry-run` shows the
+identical STOP a real run enforces - the two cannot drift, they call the
+same function). Resolving it is an explicit decision, not a default:
+
+- `--adoption-mode coexist` generates a block that says explicitly it is
+  **not** the project's sole or primary authority, that project-owned
+  instructions outside the `EIF:BEGIN`/`EIF:END` markers stay canonical,
+  and that only paths actually named in `.eif/config.yaml` are referenced
+  (see below) - it fills gaps, it does not compete.
+- `--adoption-mode greenfield` is an explicit, informed override if you
+  want the framework-authority framing anyway.
+
+`adoption.mode` lives in `.eif/config.yaml` (user-owned), deliberately not
+in `framework.lock.yaml` - it is a project decision about how EIF should
+present itself, not EIF-managed provenance, and a routine upgrade
+preserves it exactly like locale or adapter.
+
+**Configurable knowledge paths.** `knowledge.root` and
+`knowledge.index_path` in `.eif/config.yaml` control where
+`eif_generate_index.py`/`eif_search_knowledge.py` look and where the
+generated block's own example commands point - the greenfield default is
+`knowledge`/`knowledge/index.md`, but an adopted repository with existing
+knowledge at, say, `docs/knowledge/` does not have to migrate it to match
+the default. If the configured root does not exist, index generation
+stays inert - it is never created silently, so adoption never produces a
+second, parallel knowledge system next to whatever the project already
+has.
+
 This is the property the eventual migration of the private production
-instance depends on: bringing a real, populated repository under EIF without
-discarding its existing configuration, instructions, or knowledge.
+instance depends on: bringing a real, populated repository under EIF
+without discarding, or silently out-authoring, its existing configuration,
+governance, or knowledge. Tested against a realistic sanitized fixture,
+not a real repository, in `scripts/tests/test_adoption.py` - see
+[claims-evidence.md](../product/claims-evidence.md) for exactly what that
+proves and does not prove.
+
+## Uninstalling / rollback
+
+Not yet a dedicated command - `eif_init.py` has no `--rollback`/`--undo`
+flag (only within-transaction rollback if a single run fails partway, see
+above). To remove an EIF instance by hand:
+
+1. Delete `.eif/` (config, lock, and the runtime bundle all live there).
+2. Restore `CLAUDE.md` and `.gitignore` to their pre-EIF content. For a
+   git-tracked file this was never committed with the EIF block, `git
+   checkout -- CLAUDE.md .gitignore` is byte-exact by construction -
+   prefer it over hand-editing, which is exact-whitespace-sensitive (a
+   stray blank line at the removed block's former seam costs nothing
+   functionally but does break a literal byte-for-byte claim). For an
+   untracked file, or one where the EIF block was already committed,
+   manually delete everything between and including the
+   `<!-- EIF:BEGIN -->`/`<!-- EIF:END -->` (or `# EIF:BEGIN gitignore`/
+   `# EIF:END gitignore`) markers, then verify with `git diff`/`git
+   status`, not by eye.
+3. **If a knowledge index was ever generated** (`eif_generate_index.py`,
+   directly or via `eif_init.py`), delete the generated index file too -
+   it lives at the configured `knowledge.index_path`, which may be
+   outside `.eif/` (the common case for an adopted, not greenfield,
+   repository) and is therefore NOT removed by step 1. A real gap this
+   round's own adoption test caught: "delete `.eif/`, restore the two
+   managed files" looked complete and was not - the generated index was
+   left behind until the test's own byte-for-byte comparison against the
+   pre-install snapshot caught it.
+4. Verify: `git status`/`git diff` should show the tree back to its
+   pre-EIF state exactly, not "looks about right."
 
 ## Validation surface
 
@@ -151,9 +330,10 @@ checkout:
 | Knowledge frontmatter + schema-aware indexing | `eif_generate_index.py`, `eif_search_knowledge.py` | Distinguishes valid / schema-invalid / unparseable-YAML artifacts - see their own docstrings |
 | Config schema | `eif_validate_frontmatter.py --config` | `.eif/config.yaml` against `eif-config.schema.json` |
 | Lock schema | `eif_validate_frontmatter.py --lock` | `.eif/framework.lock.yaml` against `framework-lock.schema.json` |
-| Privacy scan | `eif_privacy_scan.py` | Absolute-path leaks, secret-shaped strings, denylisted tokens across the instance's own git-tracked files |
+| Privacy scan | `eif_privacy_scan.py` | Absolute-path leaks, secret-shaped strings, denylisted tokens across the instance's own git-tracked files - including finding-specific suppression validation |
 | Relative link check | `eif_check_links.py` | Markdown relative links resolve within the instance |
 | Localized rendering | `eif_render.py` | Not a validator, but writes real files - included here because "validate the instance" implies these files actually got generated, not just described |
+| Self-verification ("doctor") | `eif_verify_runtime.py` | Config/lock schema validity, manifest digest self-consistency, per-file bundle hash verification, missing/unexpected-file detection, config/adapter/lock/entrypoint consistency, provenance notes, marker integrity, and drift between `.eif/config.yaml` and the generated entrypoint block or knowledge index |
 
 What is **deliberately framework-maintainer-only**, not shipped in the
 bundle:
@@ -161,13 +341,16 @@ bundle:
 | Not bundled | Why |
 |---|---|
 | `eif_init.py` | You always run the *framework's* copy to init/upgrade an instance - an instance never re-inits itself from inside |
+| `eif_preflight.py` | `eif_init.py`'s own adoption-preflight helper - exclusively framework-side, same reasoning as `eif_init.py` itself |
+| `eif_paths.py` | `eif_init.py`'s own path-policy helper (validates `knowledge.root`/`knowledge.index_path` at init/upgrade time) - exclusively framework-side, same reasoning |
 | `eif_check_knowledge_delta.py` | Validates a *PR body* against this framework repository's own PR template - not applicable to a generic project instance's PR process |
 | `eif_merge_pr.py` | This framework repository's own merge-gate script, not a generic tool |
 
 An instance's own bundle validation surface is therefore: frontmatter/config/
-lock schema validation, privacy scanning, link checking, and localized
-rendering. It is not a claim that the bundle re-implements this framework
-repository's entire CI - PR-workflow-specific tooling stays in the framework.
+lock schema validation, privacy scanning, link checking, localized
+rendering, and self-verification. It is not a claim that the bundle
+re-implements this framework repository's entire CI - PR-workflow-specific
+tooling stays in the framework.
 
 ## What this is not
 

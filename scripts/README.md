@@ -6,10 +6,16 @@
 pip install -r scripts/requirements.txt
 ```
 
-Pinned exact versions (`PyYAML==6.0.2`, `jsonschema[format]==4.23.0`) - see
-[`requirements.txt`](requirements.txt). The `[format]` extra pulls in
-`rfc3339-validator`/`rfc3987` so `format: date`/`format: uri` in the JSON
-Schemas are actually enforced, not silently skipped.
+Pinned exact versions (`PyYAML==6.0.2`, `jsonschema[format-nongpl]==4.23.0`) -
+see [`requirements.txt`](requirements.txt). The `[format-nongpl]` extra pulls
+in `rfc3339-validator`/`rfc3986-validator` (both MIT) so `format: date`/
+`format: date-time`/`format: uri` in the JSON Schemas are actually enforced,
+not silently skipped - without the GPL-3.0-or-later `rfc3987` that the plain
+`[format]` extra would pull in for the same formats. See
+[`../THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md) and
+`scripts/tests/test_format_dependencies.py`, which enumerates the exact set
+of formats EIF's schemas declare and proves the installed dependency set
+covers all of them.
 
 ## Available
 

@@ -212,7 +212,10 @@ the file explains current status.
 
 ## License
 
-[Apache License 2.0](LICENSE).
+[Apache License 2.0](LICENSE). Third-party Python dependencies and their
+own licenses are listed in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
+and [`sbom.cdx.json`](sbom.cdx.json); `core/policies/license-policy.json`
+and `scripts/eif_check_licenses.py` enforce the policy on every CI run.
 
 ## FAQ
 

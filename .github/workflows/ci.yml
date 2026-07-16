@@ -181,6 +181,25 @@ jobs:
           PYEOF
         shell: bash
 
+  license-check:
+    name: Dependency license check (required by policy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies (the environment this check enforces policy against)
+        run: pip install -r scripts/requirements.txt
+      - name: Run license-checker unit tests
+        run: python scripts/tests/test_check_licenses.py
+      - name: Check every installed dependency's license against core/policies/license-policy.json
+        # A fresh runner + `pip install -r requirements.txt` as the only
+        # install step is exactly the trustworthy scope eif_check_licenses.py
+        # documents needing - unlike an ambient local dev machine, nothing
+        # unrelated is installed here to produce a false GPL/unknown finding.
+        run: python scripts/eif_check_licenses.py --framework-root .
+
   knowledge-delta-check:
     name: Knowledge Delta completeness (required by policy)
     runs-on: ubuntu-latest

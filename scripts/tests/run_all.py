@@ -57,6 +57,8 @@ SUITES = [
     "test_cursor_adapter.py",
     "test_parity_matrix.py",
     "test_merge_gate.py",
+    "test_format_dependencies.py",
+    "test_check_licenses.py",
 ]
 
 # One standardized line per suite. Anchored so a suite that changes its human

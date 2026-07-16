@@ -16,7 +16,7 @@ Three modes:
   the EIF-managed provenance record. See docs/architecture/instance-contract.md
   for why config and lock are separate files with separate schemas.
 
-Requires PyYAML and jsonschema[format] - see requirements.txt and
+Requires PyYAML and jsonschema[format-nongpl] - see requirements.txt and
 scripts/README.md#dependency-update-ownership for the pinned versions and
 install command.
 

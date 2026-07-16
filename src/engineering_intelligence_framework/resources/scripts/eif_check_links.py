@@ -20,12 +20,28 @@ LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 HEADING_RE = re.compile(r"^#{1,6}\s+(.*)$", re.M)
 
 
+# Byte-for-byte relocated copies (scripts/sync_package_sources.py --check
+# is what verifies these stay identical to their source), not files
+# authored at this path - their relative links are only meaningful
+# relative to the ORIGINAL tree location they were copied from, which is
+# a different question than "does this link resolve from where the file
+# now lives" that this checker asks everywhere else. A real bug this
+# check itself caught while building the package: the first sync produced
+# these copies with 7 now-broken relative links, invisible to a local
+# pre-`git add` run (git ls-files only sees tracked files) but caught by
+# CI running against the actual committed tree.
+RELOCATED_COPY_PREFIX = "src/engineering_intelligence_framework/resources/"
+
+
 def list_tracked_markdown(repo: Path) -> list[Path]:
     out = subprocess.run(
         ["git", "-C", str(repo), "ls-files", "*.md"],
         capture_output=True, text=True, encoding="utf-8", errors="replace",
     )
-    return [repo / line for line in out.stdout.splitlines() if line.strip()]
+    return [
+        repo / line for line in out.stdout.splitlines()
+        if line.strip() and not line.startswith(RELOCATED_COPY_PREFIX)
+    ]
 
 
 def slugify(heading: str) -> str:

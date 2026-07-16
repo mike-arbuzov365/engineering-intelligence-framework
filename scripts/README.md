@@ -49,11 +49,10 @@ Validation and CI-gate scripts:
 ## Development / testing
 
 19 suites under `scripts/tests/`, all self-contained (use
-`tempfile`/subprocess, don't touch this repository's own tracked files),
-all run in CI on every PR - see
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) and
-[`scripts/tests/run_all.py`](tests/run_all.py) (runs all of them locally,
-one process each, and reports a single ok/FAIL summary line per suite):
+`tempfile`/subprocess, don't touch this repository's own tracked files) -
+18 of them run via [`scripts/tests/run_all.py`](tests/run_all.py) (one
+process each, a single ok/FAIL summary line per suite), which needs only
+`scripts/requirements.txt` installed:
 
 ```bash
 python scripts/tests/run_all.py
@@ -67,15 +66,28 @@ negative), `test_privacy_scan.py`, `test_knowledge_delta.py`,
 fresh seed instance), `test_adoption.py` (adoption/coexistence against a
 realistic sanitized fixture), `test_cursor_adapter.py`,
 `test_parity_matrix.py`, `test_merge_gate.py`, `test_format_dependencies.py`,
-`test_check_licenses.py`, `test_package_build.py` (builds a real wheel,
-installs into a clean venv - path containing a space and non-ASCII text -
-and runs every `eifctl` subcommand end-to-end; noticeably slower than the
-others, since it genuinely builds and installs a package rather than
-calling functions in-process). Positive frontmatter/config fixtures live in
+`test_check_licenses.py`. Positive frontmatter/config fixtures live in
 `scripts/tests/fixtures/{frontmatter,config}/` and must pass; negative
 fixtures must fail. Run `python scripts/eif_privacy_scan.py --repo .`
 before committing anything that references a real project, path, or
 person.
+
+The 19th, `test_package_build.py`, is deliberately **not** in
+`run_all.py`'s list and needs its own extra tooling
+(`pip install build hatchling`) - it builds a real wheel, installs it into
+a clean venv (path containing a space and non-ASCII text), and runs every
+`eifctl` subcommand end-to-end (also against a project path containing a
+space and non-ASCII text). Putting `build`/`hatchling` in
+`scripts/requirements.txt` would misrepresent them as a runtime dependency
+of EIF itself, and would fail every *other* CI job that installs only
+`requirements.txt` and calls `run_all.py` - a mistake made and caught
+while building the package (see `.github/workflows/ci.yml`'s
+`package-build` job, which installs both and runs this suite directly):
+
+```bash
+pip install build hatchling
+python scripts/tests/test_package_build.py
+```
 
 ## Dependency update ownership
 

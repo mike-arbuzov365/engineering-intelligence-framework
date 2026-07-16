@@ -133,6 +133,13 @@ DEFAULT_SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "graphify-o
 SELF_EXCLUDE_FILES = {
     "scripts/eif_privacy_scan.py",
     "scripts/tests/test_privacy_scan.py",
+    # Byte-for-byte package copies of the line above (see
+    # scripts/sync_package_sources.py) - same self-referential
+    # pattern-definition match, same reason, a different path each. A
+    # real gap this scanner's own CI run caught: the first sync produced
+    # these copies and both immediately failed the privacy scan.
+    "src/engineering_intelligence_framework/_impl/eif_privacy_scan.py",
+    "src/engineering_intelligence_framework/resources/scripts/eif_privacy_scan.py",
 }
 
 

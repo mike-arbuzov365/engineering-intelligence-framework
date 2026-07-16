@@ -48,51 +48,95 @@ is a preliminary collision check, **not** trademark clearance - full legal
 clearance is still open, tracked in the public-readiness checklist in
 [`docs/architecture/HOW-EIF-WORKS.md`](../../docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready).
 
+### D-02: Descriptor
+**Status: ratified 2026-07-16 (owner decision).** "A quality-first control
+plane for governed AI-agent software development."
+**Evidence/rationale:** explicitly re-stated by the owner as the intended
+wording twice in direct instructions to this repository (2026-07-16), the
+second time as an explicit ratification instruction. This ledger's own
+rule for `ratified` is "went through an explicit owner ratification
+step" - it does not additionally require an alternatives-considered round;
+a prior revision of this entry incorrectly held it at `provisional`
+pending exactly such a round, a bar this document never actually stated.
+Corrected here rather than perpetuated.
+**Limitations:** none specific to the descriptor text itself; see D-01's
+trademark-clearance caveat, which applies to the product identity as a
+whole.
+
+### D-03: Public repository strategy
+**Status: ratified 2026-07-16 (owner decision).** Clean-room extraction
+into a new repository with fresh history remains the final strategy,
+rather than migrating the private instance's history or exporting its
+current tree as-is.
+**Evidence/rationale:** a privacy audit of the private instance's tracked
+files and git history found private-repository names and owner-identifying
+strings spread across more than 100 tracked files and referenced in dozens
+of commits - sanitizing that history after the fact was judged less
+reliable than starting clean. Explicitly re-confirmed by direct owner
+instruction (2026-07-16) as the final strategy, which is this ledger's own
+bar for `ratified` (see D-02's note above on the corrected reading of that
+bar).
+**Limitations (real, not resolved by this ratification):**
+- Trademark/domain clearance work is separate and still open (D-01).
+- **The clean-room strategy's own premise - that this repository's history
+  is free of the private instance's identifying content - has since been
+  found NOT fully true**: a privacy audit (Stage 5, prior round) found the
+  private pilot-target repository name leaked into four tracked files via
+  normal development (not migrated history - content added directly to
+  this repository's own history). The *strategy* (start clean, don't
+  migrate) is ratified; it does not by itself guarantee ongoing hygiene,
+  which failed at least once. **This repository's current OSS-facing tree
+  now requires renewed history/metadata sanitation** before any public
+  visibility change - see `PACKET-EIF-PUBLIC-HISTORY-AND-METADATA-SANITATION`
+  (private planning packet) for the full audit this finding triggered.
+
 ### D-04: License
 **Status: ratified.** Apache-2.0 for v0.1, see [`LICENSE`](../../LICENSE).
 
-## Provisional (strongly evidenced, not formally ratified)
+### D-06: Canonical framework language
+**Status: ratified 2026-07-16 (owner decision).** English is the canonical
+public framework language - ontology, schemas, code, commands, and file
+paths stay in English regardless of a project's `documentation_locale`.
+This was already the de facto design default (`locales/README.md`); this
+entry ratifies it explicitly rather than leaving it an assumption.
 
-### D-02: Descriptor
-**Status: provisional.** "A quality-first control plane for governed
-AI-agent software development." Adopted alongside D-01; not separately
-ratified through an explicit decision step. Low risk to revisit.
+### D-07: Ukrainian as a first-class supported project locale
+**Status: ratified 2026-07-16 (owner decision).** Ukrainian ships as a
+first-class supported project locale in v0.1: status messages, Knowledge
+Delta, closeout headings, and knowledge retrieval (`locales/uk/`,
+`scripts/tests/test_locale.py`, `test_journey.py`, `test_cursor_adapter.py`
+scenario 16). **Not yet closed, and explicitly flagged as a limitation
+rather than silently left out**: full agent-response localization and
+`locales/uk/terminology.yaml` are not populated - these remain open
+partial-locale-surface gaps to close (or explicitly re-scope out of v0.1)
+before release, tracked in `docs/architecture/HOW-EIF-WORKS.md`'s
+Definition of Public-Ready.
 
-### D-03: Public repository strategy
-**Status: provisional, strong evidence.** Clean-room extraction into a new
-repository with fresh history, rather than migrating the private
-instance's history or exporting its current tree as-is.
-**Evidence:** a privacy audit of the private instance's tracked files and
-git history found private-repository names and owner-identifying strings
-spread across more than 100 tracked files and referenced in dozens of
-commits. Sanitizing that history after the fact was judged less reliable
-than starting clean. This repository's own history starts from this
-decision - there is nothing to migrate.
-**Why still provisional:** this was a judgment call under time pressure,
-not a formal ratification round with alternatives considered. It should be
-explicitly ratified (or revisited) before claiming it as settled in
-external-facing material (website, articles).
+### D-10: Graphify/RTK as optional-only v0.1 integrations
+**Status: ratified 2026-07-16 (owner decision).** Graphify and RTK are
+official v0.1 integrations, but strictly optional: core EIF, the
+bootstrap (`eif_init.py`), both adapters, `eif_verify_runtime.py` (doctor),
+and degraded-mode operation must not depend on either. Verified true today
+- neither adapter's registry entry, transaction layer, or test suite
+references Graphify or RTK anywhere.
 
-## Open (not yet decided)
+### D-11: Website timing
+**Status: ratified 2026-07-16 (owner decision).** Website work follows
+technical-preview readiness and a first honest benchmark result, but
+precedes broad community launch - it is not gated on the full v0.1.0
+release. Not started this round, consistent with this decision (no
+benchmark result exists yet either).
 
-### D-05: CLI name
-**Status: open.** No CLI exists yet (`scripts/README.md`,
-`docs/guides/`). A name should be chosen alongside the first working
-bootstrap implementation, not before.
-
-### D-06/D-07: Canonical language / non-English locale timing
-**Status: open.** Current documents assume English-canonical framework
-docs with a config-driven project locale (see
-[`.eif/config.yaml.example`](../../.eif/config.yaml.example) and
-[`locales/README.md`](../../locales/README.md)) as a *design default*, not
-a ratified decision. Whether a Ukrainian locale pack ships in v0.1 or
-later is open.
-
-### D-08: Public/private dependency model
-**Status: open.** How a project instance actually consumes the framework
-(git submodule, vendored bundle, package/CLI installer, template
-repository) is undecided. `docs/architecture/HOW-EIF-WORKS.md`'s current
-text should not be read as having settled this.
+### D-12: v0.1 benchmark publication scope
+**Status: ratified 2026-07-16 (owner decision).** Synthetic fixtures only
+for v0.1 - no private repositories, no customer/internal artifacts; a
+public-repository corpus track is explicitly deferred, not part of v0.1.
+Raw transcripts are published only after a privacy scan. Failed attempts
+and harness errors are retained, never deleted from the record. No
+token-savings claim is published without an accompanying quality result.
+See `docs/benchmarks/README.md` and the (currently out-of-PR-scope, per
+Stage 1.9) benchmark corpus packet for the methodology this decision
+governs.
 
 ### D-09: Required v0.1 adapters
 **Status: ratified 2026-07-16 (owner decision).** Required tested adapters
@@ -104,24 +148,46 @@ this repository) that motivated Cursor as the second adapter; that evidence
 is about a different Cursor mechanism (tool-call hooks) than the Rules
 mechanism `adapters/cursor/README.md` documents and `eif_init.py` generates
 for - the two should not be conflated. Codex and Hermes remain deferred, not
-ratified as required.
+ratified as required. (Moved here from a misplaced position under "Open"
+in the prior revision of this file - its own status text already said
+ratified; only the section placement was wrong.)
 
-### D-10: Are structural-graph / shell-compression integrations in the official v0.1 integration catalog?
-**Status: open, design default exists.** Current documents treat them as
-optional, non-core capabilities (see
-[`integrations/README.md`](../../integrations/README.md)) - this is the
-working assumption, not a ratified decision.
+## Provisional (strongly evidenced, not formally ratified)
 
-### D-11: Website timing
-**Status: open.** Not started. Should follow, not precede, a working
-vertical slice and a real benchmark - see
-[`docs/guides/vertical-slice.md`](../../docs/guides/vertical-slice.md).
+### D-05/D-08: CLI name and distribution model
+**Status: provisional, strong evidence, not formally ratified - Ubuntu
+verification pending.** Preferred decision: CLI command `eifctl`;
+distribution as an installable Python package with a `console_scripts`
+entry point; an optional GitHub template/demo for onboarding, never the
+dependency mechanism itself; no git submodule as the v0.1 default; no
+copy-pasted standalone scripts as the primary public UX.
+**Evidence, 2026-07-16:** `eifctl` checked directly against PyPI's JSON API
+(`https://pypi.org/pypi/eifctl/json` - HTTP 404, no such package) and the
+npm registry (`https://registry.npmjs.org/eifctl` - HTTP 404) - no exact
+package-name collision on either registry. A general web search for
+"eifctl" as a command name found no existing tool using it (only
+unrelated fuzzy matches - `ifctool`, EF Core CLI tools, etc.). A real
+clean-venv packaging spike (`pyproject.toml` with `[project.scripts]
+eifctl = ...`, built to a wheel, installed into a fresh venv whose own
+path contained spaces) succeeded: the `eifctl` command resolved and ran
+correctly. Python support: this entire session's testing ran on Python
+3.11.15 (not just CI's pinned 3.12), so 3.11+ is empirically exercised,
+not just claimed.
+**Why still provisional, not ratified:** the pre-ratification checklist
+this round's instruction specified included Windows **and** Ubuntu
+verification. Windows is directly verified (above). Ubuntu was **not**
+independently verified this round - no local Linux environment was used
+for it (this repository's own CI already runs on Ubuntu 24.04 generally,
+so Stage 4's actual CI wiring, if that stage proceeds, is where real
+Ubuntu verification of the packaged CLI specifically would happen - not
+substituted for here). Move to `ratified` once that's closed, or revisit
+if it reveals a problem the Windows spike didn't.
 
-### D-12: Benchmark publication scope
-**Status: open.** No benchmark has been run - see
-[`docs/benchmarks/README.md`](../../docs/benchmarks/README.md). Which
-repositories/tasks can safely be used (without leaking private data) is
-undecided.
+## Open (not yet decided)
+
+*(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08
+provisional above; see "Provisional" for what's still short of a full
+ratification bar and why.)*
 
 ## How to ratify a decision
 

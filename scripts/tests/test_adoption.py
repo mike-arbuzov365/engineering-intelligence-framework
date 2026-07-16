@@ -8,9 +8,9 @@ section, an existing .gitignore, a nonstandard knowledge path
 (docs/knowledge/, not the greenfield default), protected-looking ADR/
 source files, a TypeScript OS-keychain interface that pattern-matches
 eif_privacy_scan.py's password_assignment rule (a real false positive
-found against wm-freelance-ops during the pilot round - see the private
-planning packet), and a genuinely secret-shaped fixture value that must
-NOT be suppressed by narrowly suppressing the keychain false positive.
+found against a private pilot target during the pilot round - see the
+private planning packet), and a genuinely secret-shaped fixture value that
+must NOT be suppressed by narrowly suppressing the keychain false positive.
 
 No content here is from any private/production repository - names,
 structure, and prose are original to this fixture.

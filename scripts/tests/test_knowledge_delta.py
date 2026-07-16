@@ -98,6 +98,7 @@ def main() -> int:
         if not ok:
             failures.append(name)
 
+    print(f"EIF-RESULT: passed={len(cases) - len(failures)} total={len(cases)}")
     print(f"\ntest_knowledge_delta: {len(cases) - len(failures)}/{len(cases)} passed")
     return 1 if failures else 0
 

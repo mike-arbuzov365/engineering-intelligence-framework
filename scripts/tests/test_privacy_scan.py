@@ -47,8 +47,10 @@ LEAK_PATH_FRAGMENT = "Test User"  # part of a C:\Users\Test User\... path
 
 def main() -> int:
     failures = []
+    ran = []
 
     def check(name: str, cond: bool, detail: str = "") -> None:
+        ran.append(name)
         status = "PASS" if cond else "FAIL"
         print(f"{status} {name}" + (f": {detail}" if detail and not cond else ""))
         if not cond:
@@ -434,7 +436,7 @@ def main() -> int:
         except eif_privacy_scan.SuppressionConfigError:
             check("whitespace-only config: load_suppressions raises SuppressionConfigError", True)
 
-    total_checks = failures
+    print(f"EIF-RESULT: passed={len(ran) - len(failures)} total={len(ran)}")
     print(f"\ntest_privacy_scan: {'ALL PASSED' if not failures else str(len(failures)) + ' FAILED'}")
     if failures:
         print("Failed checks:", ", ".join(failures))

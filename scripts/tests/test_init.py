@@ -373,6 +373,7 @@ def main() -> int:
         results.append(check("_backup_copy makes a byte-for-byte copy", good.read_bytes() == src.read_bytes()))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_init: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

@@ -365,6 +365,7 @@ def main() -> int:
                              "migration provenance" in output and "contradict" in output, output[-800:]))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_verify_runtime: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

@@ -562,6 +562,7 @@ def main() -> int:
         results.append(check("15b. config now says greenfield", "mode: greenfield" in (inst15 / ".eif" / "config.yaml").read_text(encoding="utf-8")))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_adoption: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

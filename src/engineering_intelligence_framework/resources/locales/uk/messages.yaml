@@ -1,0 +1,14 @@
+# Ukrainian status and CLI messages. Keys must match 1:1 with
+# locales/en/messages.yaml - see scripts/tests/test_locale.py.
+#
+# Technical terms preserved in English per the language contract in
+# docs/architecture/HOW-EIF-WORKS.md#language-configuration: "EIF",
+# "config.yaml", file paths, and command names are not translated.
+
+init_start: "Ініціалізація EIF project instance у {path}"
+config_created: "Створено .eif/config.yaml (locale: {locale})"
+instructions_generated: "Згенеровано agent instructions у {path}"
+index_generated: "Knowledge index згенеровано: {count} артефакт(ів)"
+init_complete: "EIF instance ініціалізовано у {path}"
+search_no_results: "Релевантного знання не знайдено для запиту: {query}"
+search_results_found: "Знайдено {count} релевантний(их) артефакт(и/ів) для запиту: {query}"

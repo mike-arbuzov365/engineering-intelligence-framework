@@ -181,6 +181,33 @@ jobs:
           PYEOF
         shell: bash
 
+  package-build:
+    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }}) (not yet required by policy)"
+    # Not yet in core/policies/merge-policy.json's required_check_contexts:
+    # the merge gate matches exact context-name strings and a matrix job's
+    # name is dynamic per combination - wiring 4 exact combinations in as
+    # required contexts is real, separately-scoped follow-up work, not
+    # silently skipped. This job still runs and reports on every PR/push;
+    # see scripts/eif_check_licenses.py's own required job for how a
+    # single-OS job is wired as required, for contrast.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned runtime dependencies + build tooling
+        run: |
+          pip install -r scripts/requirements.txt
+          pip install build hatchling
+      - name: Build the wheel/sdist, install into a clean venv, run every eifctl subcommand end-to-end
+        run: python scripts/tests/test_package_build.py
+
   license-check:
     name: Dependency license check (required by policy)
     runs-on: ubuntu-latest

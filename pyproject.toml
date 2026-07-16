@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "engineering-intelligence-framework"
+version = "0.1.0.dev0"
+description = "A quality-first control plane for governed AI-agent software development."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Mike Arbuzov" }]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "PyYAML==6.0.2",
+    "jsonschema[format-nongpl]==4.23.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+Repository = "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+
+[project.scripts]
+eifctl = "engineering_intelligence_framework.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/engineering_intelligence_framework"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/engineering_intelligence_framework",
+    "LICENSE",
+    "README.md",
+]

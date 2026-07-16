@@ -43,10 +43,12 @@ Validation and CI-gate scripts:
 | [`eif_check_links.py`](eif_check_links.py) | Checks relative Markdown links (and same-file/cross-file anchors) resolve | CI |
 | [`eif_check_knowledge_delta.py`](eif_check_knowledge_delta.py) | Classifies a PR body's Knowledge Delta section as `meaningful` / `mechanical` / `empty` - a bare "does the heading exist" check always passes because the PR template always has the heading | CI |
 | [`eif_merge_pr.py`](eif_merge_pr.py) | Controlled merge entrypoint - genericized port of the private instance's `merge-pr.ps1` pattern. Re-verifies all CI checks are green, Knowledge Delta is meaningful, and review state is clean, then merges pinned to the verified head SHA. Requires the `gh` CLI. | Manual (`python scripts/eif_merge_pr.py --pr N --dry-run` to check without merging); not wired into an agent-side hook guard yet - the one adapter that exists (Claude Code) ships no hook scripts, see [`adapters/README.md`](../adapters/README.md) |
+| [`eif_check_licenses.py`](eif_check_licenses.py) | Checks every installed dependency's license against [`core/policies/license-policy.json`](../core/policies/license-policy.json) - blocks GPL/AGPL-family and undeclared licenses, checks `requirements.txt` is fully pinned | CI |
+| [`sync_package_sources.py`](sync_package_sources.py) | Syncs the canonical `scripts/eif_*.py` implementation + framework resource trees into `src/engineering_intelligence_framework/` byte-for-byte, so the installable package's bundled copies never silently fork from their source of truth. `--check` verifies without writing. | Manual after any change to a synced file; CI (`package-build` job, via `test_package_build.py`) |
 
 ## Development / testing
 
-13 suites under `scripts/tests/`, all self-contained (use
+19 suites under `scripts/tests/`, all self-contained (use
 `tempfile`/subprocess, don't touch this repository's own tracked files),
 all run in CI on every PR - see
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) and
@@ -63,7 +65,13 @@ negative), `test_privacy_scan.py`, `test_knowledge_delta.py`,
 `test_generate_index.py`, `test_search_knowledge.py`, `test_locale.py`,
 `test_render.py`, `test_journey.py` (a real subprocess journey against a
 fresh seed instance), `test_adoption.py` (adoption/coexistence against a
-realistic sanitized fixture). Positive frontmatter/config fixtures live in
+realistic sanitized fixture), `test_cursor_adapter.py`,
+`test_parity_matrix.py`, `test_merge_gate.py`, `test_format_dependencies.py`,
+`test_check_licenses.py`, `test_package_build.py` (builds a real wheel,
+installs into a clean venv - path containing a space and non-ASCII text -
+and runs every `eifctl` subcommand end-to-end; noticeably slower than the
+others, since it genuinely builds and installs a package rather than
+calling functions in-process). Positive frontmatter/config fixtures live in
 `scripts/tests/fixtures/{frontmatter,config}/` and must pass; negative
 fixtures must fail. Run `python scripts/eif_privacy_scan.py --repo .`
 before committing anything that references a real project, path, or
@@ -88,13 +96,22 @@ bump by looking up the new tag's commit SHA (e.g. via `gh api
 repos/<owner>/<repo>/git/refs/tags/<tag>`), not by trusting a floating
 `@v4`-style reference.
 
+## Installable package (`eifctl`)
+
+`pyproject.toml` at the repo root builds a real, installable package
+(`pip install .`, not yet published to PyPI) with a console command
+`eifctl` - see the root [`README.md`](../README.md#current-capability)'s
+package row for the full picture. The package's own source lives under
+`src/engineering_intelligence_framework/` and is kept in sync with the
+scripts above by [`sync_package_sources.py`](sync_package_sources.py) -
+run it (and `--check` in CI) after changing any script or resource tree
+the package bundles. D-05/D-08 move to Ratified once the CI package-build
+matrix (Windows + Ubuntu, Python 3.11/3.12) is confirmed green.
+
 ## Not populated yet
 
 Graph-freshness checks (the private instance has a working, tested
 checker; porting requires removing private repo names and machine-specific
-paths from it and its default config) and a ratified, packaged CLI
-(`eifctl` or equivalent - D-05/D-08 remain open; today's `eif_init.py` /
-`eif_verify_runtime.py` are experimental scripts invoked directly, not a
-stable installed command). See
+paths from it and its default config). See
 [`docs/guides/vertical-slice.md`](../docs/guides/vertical-slice.md) for
 sequencing.

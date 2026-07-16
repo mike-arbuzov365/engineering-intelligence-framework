@@ -36,3 +36,9 @@ Desktop.ini
 # Generated/raw outputs
 graphify-out/
 __pycache__/
+
+# Python packaging build output (python -m build) - regenerate with
+# scripts/sync_package_sources.py + python -m build, never committed.
+dist/
+build/
+*.egg-info/

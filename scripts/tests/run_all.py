@@ -59,6 +59,7 @@ SUITES = [
     "test_merge_gate.py",
     "test_format_dependencies.py",
     "test_check_licenses.py",
+    "test_package_build.py",
 ]
 
 # One standardized line per suite. Anchored so a suite that changes its human

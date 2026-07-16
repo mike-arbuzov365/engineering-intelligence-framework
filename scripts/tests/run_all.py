@@ -8,13 +8,25 @@ standardized, machine-readable result line as part of its output:
 
 This runner subprocesses each suite, parses that line, and aggregates. The
 suite/check totals are DERIVED from what the suites actually report - they are
-not hand-summed anywhere. A suite that does not emit the line has an UNKNOWN
-check total: it is surfaced as `unknown` (in both plain-text and --json
-output) and is NEVER silently counted as zero.
+not hand-summed anywhere. A suite result is trusted only if all of the
+following hold, otherwise it is UNKNOWN (never silently counted as zero, and
+never guessed at):
+
+    - the suite emits EXACTLY ONE `EIF-RESULT` line (zero or several is a
+      parse error, not "pick the first/last one");
+    - passed <= total (passed > total is internally inconsistent - a parse
+      error, not a suite that somehow passed more than it ran).
+
+`--json` is the CI exact-inventory mode: it exits non-zero if ANY suite is
+unknown, exited non-zero, or exited 0 while reporting passed != total (a
+suite that claims success but its own count disagrees is an inventory
+failure, not a pass). Plain-text mode stays a diagnostic summary: it still
+surfaces unknown/mismatched suites for a human to read, but its pass/fail
+verdict is based on exit codes only, same as before.
 
 Usage:
     python scripts/tests/run_all.py                     # plain-text summary
-    python scripts/tests/run_all.py --json              # machine-readable inventory
+    python scripts/tests/run_all.py --json              # machine-readable inventory, CI exact mode
     python scripts/tests/run_all.py --only test_paths.py,test_locale.py
 """
 from __future__ import annotations
@@ -50,6 +62,21 @@ SUITES = [
 RESULT_RE = re.compile(r"^EIF-RESULT:\s*passed=(\d+)\s+total=(\d+)\s*$", re.M)
 
 
+def parse_result_line(stdout: str) -> tuple[int | None, int | None]:
+    """Parse the standardized EIF-RESULT line. Returns (passed, total), or
+    (None, None) - UNKNOWN - if the line is absent, appears more than once,
+    or is internally inconsistent (passed > total). All three cases are
+    treated identically: unparseable/untrusted, never resolved by guessing
+    (e.g. picking the first of several lines, or clamping passed to total)."""
+    matches = RESULT_RE.findall(stdout)
+    if len(matches) != 1:
+        return None, None
+    passed, total = int(matches[0][0]), int(matches[0][1])
+    if passed > total:
+        return None, None
+    return passed, total
+
+
 def run_suite(suite: str) -> dict:
     start = time.monotonic()
     proc = subprocess.run(
@@ -58,8 +85,7 @@ def run_suite(suite: str) -> dict:
     )
     duration = round(time.monotonic() - start, 3)
     lines = [ln for ln in proc.stdout.splitlines() if ln.strip()]
-    m = RESULT_RE.search(proc.stdout)
-    passed, total = (int(m.group(1)), int(m.group(2))) if m else (None, None)
+    passed, total = parse_result_line(proc.stdout)
     human = next((ln for ln in reversed(lines) if not ln.startswith("EIF-RESULT:")), "(no output)")
     return {
         "suite": suite,
@@ -75,9 +101,12 @@ def run_suite(suite: str) -> dict:
 def aggregate(results: list[dict]) -> dict:
     """Derive suite/check aggregates from per-suite results. Suites with an
     unknown (unparsed) total contribute to `unknown_suites` and flip
-    `checks_total_status` to "unknown" - never a silent zero."""
+    `checks_total_status` to "unknown" - never a silent zero. A suite that
+    exited 0 but reports passed != total (an internally inconsistent
+    "success") contributes to `mismatched_suites`."""
     known = [r for r in results if r["total"] is not None]
     unknown = [r["suite"] for r in results if r["total"] is None]
+    mismatched = [r["suite"] for r in results if r["total"] is not None and r["passed"] != r["total"]]
     return {
         "suites_passed": sum(1 for r in results if r["exit_code"] == 0),
         "suites_total": len(results),
@@ -85,14 +114,28 @@ def aggregate(results: list[dict]) -> dict:
         "checks_total": sum(r["total"] for r in known),
         "checks_total_status": "exact" if not unknown else "unknown",
         "unknown_suites": unknown,
+        "mismatched_suites": mismatched,
     }
 
 
-def main() -> int:
+def exact_inventory_ok(agg: dict) -> bool:
+    """CI exact-inventory verdict - used by --json only. Every suite must
+    exit 0, parse to exactly one internally-consistent EIF-RESULT line, and
+    report passed == total. Plain-text mode does not use this: it stays a
+    diagnostic summary based on exit codes, same as before this function
+    existed, and merely surfaces unknown/mismatched suites for a human."""
+    return (
+        agg["suites_passed"] == agg["suites_total"]
+        and not agg["unknown_suites"]
+        and not agg["mismatched_suites"]
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--json", action="store_true", help="Emit a machine-readable JSON inventory instead of the plain-text summary")
+    ap.add_argument("--json", action="store_true", help="Emit a machine-readable JSON inventory instead of the plain-text summary (CI exact-inventory mode)")
     ap.add_argument("--only", default=None, help="Comma-separated subset of suite filenames to run (for testing the runner itself)")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     suites = SUITES
     if args.only:
@@ -108,7 +151,7 @@ def main() -> int:
 
     if args.json:
         print(json.dumps({"suites": results, "aggregate": agg}, indent=2))
-        return 0 if agg["suites_passed"] == agg["suites_total"] else 1
+        return 0 if exact_inventory_ok(agg) else 1
 
     for r in results:
         status = "ok  " if r["exit_code"] == 0 else "FAIL"
@@ -123,6 +166,10 @@ def main() -> int:
     if agg["checks_total_status"] != "exact":
         ck += f" (+UNKNOWN suites, not counted: {', '.join(agg['unknown_suites'])})"
     print()
+    if agg["unknown_suites"]:
+        print(f"NOTE (diagnostic only - plain-text mode does not fail on this; --json does): no single parseable EIF-RESULT line from: {', '.join(agg['unknown_suites'])}")
+    if agg["mismatched_suites"]:
+        print(f"NOTE (diagnostic only - plain-text mode does not fail on this; --json does): suite(s) exited 0 but passed != total: {', '.join(agg['mismatched_suites'])}")
     if agg["suites_passed"] != agg["suites_total"]:
         failed = [r["suite"] for r in results if r["exit_code"] != 0]
         print(f"run_all: {agg['suites_passed']}/{agg['suites_total']} suites passed; {ck}; FAILED: {', '.join(failed)}")

@@ -1,0 +1,51 @@
+{
+  "$comment": "Machine-readable parity matrix across registered adapters (scripts/eif_adapters.py is the source of truth for which adapters exist). scripts/tests/test_parity_matrix.py is the drift test: it fails if any registered adapter is missing an entry here, or if any entry is missing a dimension - this file cannot silently go stale as adapters are added.",
+  "generated_by": "hand-authored from scripts/tests/test_cursor_adapter.py and scripts/tests/test_journey.py/test_init.py evidence, 2026-07-16",
+  "dimensions": [
+    "entrypoint",
+    "init",
+    "upgrade",
+    "reconfigure",
+    "coexist",
+    "knowledge_paths",
+    "search_validate_commands",
+    "locale_en_uk",
+    "doctor",
+    "rollback",
+    "privacy_behavior",
+    "adapter_switching",
+    "runtime_consumption_evidence"
+  ],
+  "adapters": {
+    "claude-code": {
+      "entrypoint": "CLAUDE.md, entry_strategy=marker-merge (project-owned content below EIF:END is preserved byte-for-byte)",
+      "init": "supported - eif_init.py --adapter claude-code; test_journey.py/test_init.py",
+      "upgrade": "supported - flagless upgrade preserves adapter and content outside markers; test_journey.py #15",
+      "reconfigure": "supported - --force --adapter claude-code; test_init.py reconfigure scenarios",
+      "coexist": "supported - adoption-mode coexist preserves pre-existing CLAUDE.md governance; test_adoption.py",
+      "knowledge_paths": "adapter-agnostic - config.yaml knowledge.root/index_path, unaffected by adapter choice",
+      "search_validate_commands": "generated commands in the entrypoint are executed and proven to work; test_journey.py #21",
+      "locale_en_uk": "supported - documentation_locale drives CLI/status messages; governance block content is English-invariant by template design; test_journey.py #18",
+      "doctor": "supported - eif_verify_runtime.py marker integrity + config/block drift; test_verify_runtime.py, test_journey.py #24-27",
+      "rollback": "supported - fault injection at every transaction stage incl. entrypoint; test_journey.py #16/28",
+      "privacy_behavior": "adapter-agnostic - eif_privacy_scan.py does not special-case any entrypoint",
+      "adapter_switching": "supported as the destination of a switch FROM cursor; test_cursor_adapter.py scenario 5",
+      "runtime_consumption_evidence": "OBSERVED live 2026-07-15: CLAUDE.md auto-loaded at session start (claude --version 2.1.169 + code.claude.com/docs/en/memory). See adapters/claude-code/README.md."
+    },
+    "cursor": {
+      "entrypoint": ".cursor/rules/eif/governance.mdc, entry_strategy=full-regen (dedicated EIF-owned file, no merge/preservation - regenerated wholesale every run)",
+      "init": "supported - eif_init.py --adapter cursor; nested .cursor/rules/eif/ created; test_cursor_adapter.py scenario 1",
+      "upgrade": "supported - flagless upgrade preserves adapter=cursor; test_cursor_adapter.py scenario 3",
+      "reconfigure": "supported - --force --adapter cursor; test_cursor_adapter.py",
+      "coexist": "supported (adapter-agnostic origin/adoption-mode logic) - not re-tested with a pre-existing Cursor-specific fixture this round; see Stage 3 acceptance gaps",
+      "knowledge_paths": "adapter-agnostic - identical to claude-code (see above)",
+      "search_validate_commands": "identical generated commands (same universal templates/agent-instructions.md content) - not independently re-run against a Cursor-specific fixture beyond test_cursor_adapter.py's frontmatter/content checks",
+      "locale_en_uk": "supported (adapter-agnostic locale mechanism) - governance content is English-invariant by template design, same as claude-code; not separately re-tested for Cursor beyond confirming content is present",
+      "doctor": "supported - eif_verify_runtime.py generalizes via the adapter registry with zero Cursor-specific code; test_cursor_adapter.py scenario 8 (clean pass + reversed-marker catch)",
+      "rollback": "supported - nested-entrypoint transaction generalization (create/register/rollback parent directories); test_cursor_adapter.py scenarios 2/2b (before/after fault points, pre-existing sibling directory preserved)",
+      "privacy_behavior": "adapter-agnostic - same as claude-code",
+      "adapter_switching": "supported both directions (claude-code<->cursor); old dedicated file deleted (not left as an empty husk), malformed old markers STOP before any write; test_cursor_adapter.py scenarios 4-6",
+      "runtime_consumption_evidence": "NOT YET CONFIRMED. Code/test-validated only (39/39 in test_cursor_adapter.py): file generation, frontmatter validity (parsed as YAML, alwaysApply:true confirmed), transactional rollback, adapter switching, doctor checks. Cursor 3.11.19 is installed and its Rules documentation was fetched and verified live 2026-07-16, but no live Cursor Agent session has been driven against the generated file to confirm it actually appears in the model context. See adapters/cursor/README.md 'Runtime-validation status' - this is the single manual acceptance gate remaining."
+    }
+  }
+}

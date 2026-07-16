@@ -7,7 +7,7 @@ and what its hook mechanism (if any) can and cannot do.
 |---|---|---|
 | `claude-code/` | evidence documented, no hook scripts | [`claude-code/README.md`](claude-code/README.md) - CLI `2.1.169` re-verified 2026-07-15; instructions/skill discovery OBSERVED live; hook behavior carried over from 2026-06-16 private evidence, not re-verified end-to-end this round |
 | `codex/` | not ported | AGENTS.md loading, `hooks.json` PreToolUse hooks - hook `updatedInput` rewrite support varies by version, verify before relying on it |
-| `cursor/` | not ported | `hooks.json` preToolUse + `updated_input` |
+| `cursor/` | **rules ported** (`eif_init` generates `.cursor/rules/eif/governance.mdc`), hooks not ported | [`cursor/README.md`](cursor/README.md) - Cursor CLI `3.11.19` re-verified live 2026-07-16 against the official docs (`.cursor/rules/*.mdc`, `.mdc` frontmatter: `description`/`globs`/`alwaysApply`); `.cursorrules` confirmed legacy/deprecated, not used. The `hooks.json`/`updated_input` claim below is about a DIFFERENT Cursor mechanism (tool-call hooks) than Rules, carried over from 2026-07-14/15 private evidence and NOT re-verified this round - do not read it as evidence for the Rules adapter. |
 | `hermes/` | not ported | skill mirrors; terminal-tool guard hooks support block-only, not rewrite |
 
 None of these are required - EIF's core (ontology, playbooks, templates) is
@@ -21,9 +21,12 @@ itself.
 2026-07-14/15 (dated, single-instance measurement - not an independent or
 multi-environment benchmark). -->
 
-Not yet ratified (see [`core/policies/decisions.md`](../core/policies/decisions.md)
-D-09) - a working recommendation based on the only reliability evidence
-that exists so far:
+**Ratified 2026-07-16** (see [`core/policies/decisions.md`](../core/policies/decisions.md)
+D-09) for the current v0.1 scope: Claude Code and Cursor are the required
+tested adapters. The ordering below predates ratification and is about
+**hook** reliability specifically (a different Cursor mechanism than the
+Rules adapter this repository actually ports) - kept for its original
+evidence value, not as the rationale for the ratified adapter list itself:
 
 1. **Claude Code first.** Its `PreToolUse` hook rewrite (`updatedInput`)
    was verified end-to-end and applied reliably across dozens of test

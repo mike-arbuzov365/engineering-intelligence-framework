@@ -54,6 +54,8 @@ SUITES = [
     "test_init.py",
     "test_journey.py",
     "test_adoption.py",
+    "test_cursor_adapter.py",
+    "test_parity_matrix.py",
     "test_merge_gate.py",
 ]
 

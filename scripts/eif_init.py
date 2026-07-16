@@ -79,8 +79,8 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from eif_locale import msg  # noqa: E402
-from eif_adapters import ADAPTERS, DEFAULT_ADAPTER, entrypoint_for  # noqa: E402
-from eif_markers import render_merged_content, MarkerConflict  # noqa: E402
+from eif_adapters import ADAPTERS, DEFAULT_ADAPTER, entrypoint_for, entry_strategy_for, entry_frontmatter_for  # noqa: E402
+from eif_markers import render_merged_content, find_managed_block, MarkerConflict  # noqa: E402
 from eif_validate_frontmatter import (  # noqa: E402
     validate_config_mode, validate_lock_mode, load_schema, validate_one,
 )
@@ -334,6 +334,51 @@ class _Stage:
         if self.live_path.exists():
             self._remove(self.live_path)
         if self._had_previous:
+            self.previous_path.rename(self.live_path)
+        self.committed = False
+
+    def cleanup(self) -> None:
+        if self.previous_path.exists():
+            self._remove(self.previous_path)
+
+
+class _DeleteStage:
+    """Removes a live file/dir as part of the same transaction as other
+    _Stage objects (same commit/rollback/cleanup interface, so it can share
+    `stages`/`commit_transaction` uniformly). Used for adapter switching: an
+    old entrypoint that is entirely EIF-owned (e.g. a dedicated
+    full-regen file with nothing left after its managed block is removed) is
+    deleted, not left behind as an empty husk. Commit renames the live path
+    aside rather than hard-deleting it, so rollback is an exact rename-back -
+    the same never-lose-data-mid-transaction guarantee _Stage gives new
+    content."""
+
+    def __init__(self, name: str, live_path: Path, is_dir: bool = False):
+        self.name = name
+        self.live_path = live_path
+        self.previous_path = live_path.with_name(live_path.name + ".removed")
+        self.is_dir = is_dir
+        self.committed = False
+
+    def _remove(self, path: Path) -> None:
+        if self.is_dir:
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+
+    def commit(self) -> None:
+        if self.previous_path.exists():
+            self._remove(self.previous_path)
+        if self.live_path.exists():
+            self.live_path.rename(self.previous_path)
+        self.committed = True
+
+    def rollback(self) -> None:
+        if not self.committed:
+            return
+        if self.previous_path.exists():
+            if self.live_path.exists():
+                self._remove(self.live_path)
             self.previous_path.rename(self.live_path)
         self.committed = False
 
@@ -993,6 +1038,59 @@ def main() -> int:
         print(f"eif-init: adapter {adapter!r} (from existing config) is not a registered adapter: {sorted(ADAPTERS)}", file=sys.stderr)
         return 1
     entrypoint = entrypoint_for(adapter)
+
+    # --- Adapter switching (Stage 3.4): detect a reconfigure that changes
+    # adapter, and decide - BEFORE any writes - what happens to the OLD
+    # entrypoint. A malformed old entrypoint STOPs the whole run (no writes
+    # at all); a well-formed one either has its EIF block stripped (project-
+    # owned content below the markers is preserved byte-for-byte) or, if
+    # nothing but the EIF block was ever there, is deleted outright rather
+    # than left behind as an empty husk. This check must run before the
+    # staging block below writes anything, and its result (old_entry_plan)
+    # is consumed there, in the SAME transaction as the new entrypoint.
+    old_adapter = (existing_config.get("adapter") or {}).get("name") if existing_config else None
+    adapter_switched = mode == "reconfigure" and old_adapter is not None and old_adapter != adapter
+    old_entry_path: Path | None = None
+    old_entry_plan: tuple[str, str] | None = None  # ("delete", "") | ("strip", remaining_text)
+    if adapter_switched:
+        if old_adapter not in ADAPTERS:
+            print(
+                f"eif-init: cannot switch away from adapter {old_adapter!r} (from existing config) - "
+                f"it is not a registered adapter, so its old entrypoint cannot be safely identified. "
+                f"STOP before any writes. Remove {old_adapter!r}'s entrypoint by hand if it still "
+                f"exists, then retry.",
+                file=sys.stderr,
+            )
+            return 1
+        old_entry_path = instance_path / entrypoint_for(old_adapter)
+        if old_entry_path.exists():
+            old_text = old_entry_path.read_text(encoding="utf-8")
+            try:
+                found = find_managed_block(old_text, EIF_BEGIN, EIF_END)
+            except MarkerConflict as e:
+                print(
+                    f"eif-init: switching adapter {old_adapter!r} -> {adapter!r}, but the old "
+                    f"entrypoint ({old_entry_path}) has malformed EIF markers - STOP, nothing "
+                    f"written: {e}",
+                    file=sys.stderr,
+                )
+                return 1
+            if found is not None:
+                begin_idx, end_idx = found
+                remaining = old_text[:begin_idx] + old_text[end_idx:]
+                # A "full-regen" old entrypoint (e.g. Cursor's dedicated
+                # .mdc) has frontmatter and a "do not hand-edit" footer
+                # OUTSIDE the markers too - that is still EIF's own
+                # scaffolding, never real project content, so it is always
+                # deleted outright, not stripped-and-kept. A "marker-merge"
+                # old entrypoint (e.g. CLAUDE.md) is only deleted if nothing
+                # but whitespace remains once the block itself is removed.
+                if entry_strategy_for(old_adapter) == "full-regen" or remaining.strip() == "":
+                    old_entry_plan = ("delete", "")
+                else:
+                    old_entry_plan = ("strip", remaining)
+            # found is None: no EIF markers in the old entrypoint at all -
+            # nothing of ours to remove; old_entry_plan stays None (leave it).
     if ignored:
         print(
             f"eif-init: NOTE - existing .eif/config.yaml found; {', '.join(ignored)} ignored on this "
@@ -1113,12 +1211,28 @@ def main() -> int:
     config_content = _dump_yaml(CONFIG_HEADER, config_data)
 
     # --- Entrypoint + .gitignore merge content (Finding G: marker-safe) ---
+    # The governance content itself (managed_block) is adapter-agnostic - the
+    # SAME template regardless of which entrypoint it ends up in. What
+    # differs per adapter is only how the entrypoint FILE is maintained:
+    # "marker-merge" (may coexist with project-authored content the same
+    # file already has, e.g. CLAUDE.md) vs "full-regen" (a dedicated,
+    # exclusively EIF-owned file - nothing to merge or preserve, so it is
+    # always written fresh, frontmatter included).
     try:
         managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode)
-        entry_new_text, entry_action = render_merged_content(
-            existing_entry_text, managed_block, EIF_BEGIN, EIF_END,
-            new_file_footer="\n\n# Project-specific rules\n\n<Add this project instance's own rules here.>\n",
-        )
+        if entry_strategy_for(adapter) == "full-regen":
+            entry_new_text = (
+                entry_frontmatter_for(adapter) + managed_block
+                + "\n\n<!-- EIF-MANAGED file. Do not hand-edit - fully regenerated by "
+                  "scripts/eif_init.py. For this project's own Cursor rules, add a "
+                  "separate file under .cursor/rules/ - do not edit this one. -->\n"
+            )
+            entry_action = "create" if existing_entry_text is None else "update"
+        else:
+            entry_new_text, entry_action = render_merged_content(
+                existing_entry_text, managed_block, EIF_BEGIN, EIF_END,
+                new_file_footer="\n\n# Project-specific rules\n\n<Add this project instance's own rules here.>\n",
+            )
     except MarkerConflict as e:
         print(f"eif-init: {entrypoint} has malformed EIF markers, refusing to write anything: {e}", file=sys.stderr)
         return 1
@@ -1168,6 +1282,10 @@ def main() -> int:
         print(f"{prefix}refresh .eif/runtime ({len(manifest)} file(s), {digest[:19]}...)")
         print(f"{prefix}write .eif/framework.lock.yaml (migration_status: {migration_status})")
         print(f"{prefix}{entry_action} {entrypoint} (EIF-managed block)")
+        if old_entry_plan is not None:
+            plan_kind, _ = old_entry_plan
+            verb = "delete" if plan_kind == "delete" else "strip EIF block from"
+            print(f"{prefix}{verb} old entrypoint {entrypoint_for(old_adapter)} (adapter switch {old_adapter!r} -> {adapter!r})")
         print(f"{prefix}{gi_action if gi_action != 'update-block' else 'update'} .gitignore (EIF-managed block)")
         print(f"{prefix}{index_action} knowledge index ({index_message})")
         print(msg(framework_root, locale, "init_complete", path=instance_path))
@@ -1224,6 +1342,38 @@ def main() -> int:
             except OSError:
                 pass
 
+    # Generalized nested-entrypoint support (Stage 3.3): an adapter's
+    # entrypoint may live several directories deep (e.g. Cursor's
+    # .cursor/rules/eif/*.mdc) where none of those directories exist yet on a
+    # fresh instance. Recorded and created the same way run_created_dirs
+    # handles instance_path itself - walk up from entry_path.parent to the
+    # first existing ancestor BEFORE creating anything, so a failure removes
+    # exactly what this run created (deepest-first) and never a pre-existing
+    # directory. This walk naturally stops at instance_path (already ensured
+    # to exist above), so it is a no-op list for a flat entrypoint like
+    # CLAUDE.md - zero behavior change for the existing adapter.
+    entry_parent_created_dirs: list[Path] = []
+    _entry_probe = entry_path.parent
+    while not _entry_probe.exists():
+        entry_parent_created_dirs.append(_entry_probe)
+        if _entry_probe.parent == _entry_probe:
+            break
+        _entry_probe = _entry_probe.parent
+    entry_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _cleanup_entry_parent_dirs() -> None:
+        # Must run BEFORE _cleanup_created_dirs: entry_parent_created_dirs is
+        # deepest-first and may share an ancestor (instance_path) with
+        # run_created_dirs - that ancestor must already be empty of the
+        # entrypoint's nested directories before ITS OWN rmdir is attempted,
+        # or it fails silently (caught OSError) and is left behind non-empty.
+        for d in entry_parent_created_dirs:
+            try:
+                if d.is_dir() and not any(d.iterdir()):
+                    d.rmdir()
+            except OSError:
+                pass
+
     # --- Cleanup-safe staging boundary (independent-review fix) ---
     # Every artifact writes to a `.next` path first; the whole pre-commit
     # phase is wrapped so ANY failure while staging - including an injected
@@ -1253,6 +1403,7 @@ def main() -> int:
         # docs/architecture/instance-contract.md#config-backup-policy.
         if backup_path is not None and backup_path.exists():
             backup_path.unlink(missing_ok=True)
+        _cleanup_entry_parent_dirs()
         _cleanup_orphaned_eif_dir()
         _cleanup_created_dirs()
 
@@ -1305,6 +1456,23 @@ def main() -> int:
         entry_next.write_text(entry_new_text, encoding="utf-8")
         stages.append(_Stage("entrypoint", entry_next, entry_path, is_dir=False))
 
+        # Adapter switching (Stage 3.4): the old entrypoint's fate was
+        # already decided (old_entry_plan) before any writes began, above.
+        # Staged into the SAME transaction as the new entrypoint - either
+        # both land or neither does.
+        if old_entry_plan is not None and old_entry_path is not None:
+            plan_kind, plan_text = old_entry_plan
+            if plan_kind == "delete":
+                _maybe_fault_before("old-entrypoint")
+                stages.append(_DeleteStage("old-entrypoint", old_entry_path, is_dir=False))
+            else:  # "strip"
+                old_entry_next = old_entry_path.with_name(old_entry_path.name + ".next")
+                staged_next_paths.append(old_entry_next)
+                _maybe_fault_before("old-entrypoint")
+                _maybe_fault_partial("old-entrypoint", old_entry_next, plan_text)
+                old_entry_next.write_text(plan_text, encoding="utf-8")
+                stages.append(_Stage("old-entrypoint", old_entry_next, old_entry_path, is_dir=False))
+
         gi_next = gi_path.with_name(gi_path.name + ".next")
         staged_next_paths.append(gi_next)
         _maybe_fault_before("gitignore")
@@ -1356,6 +1524,10 @@ def main() -> int:
     print(f"write .eif/framework.lock.yaml (migration_status: {migration_status})")
     print(f"{entry_action} {entrypoint} (EIF-managed block)")
     print(msg(framework_root, locale, "instructions_generated", path=entry_path))
+    if old_entry_plan is not None:
+        plan_kind, _ = old_entry_plan
+        verb = "deleted" if plan_kind == "delete" else "stripped EIF block from"
+        print(f"{verb} old entrypoint {entrypoint_for(old_adapter)} (adapter switch {old_adapter!r} -> {adapter!r})")
     print(f"{gi_action} .gitignore (EIF-managed block)")
 
     if index_content is not None:

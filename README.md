@@ -100,7 +100,7 @@ that isn't runnable is worse than not having the row. -->
 | Knowledge index / lifecycle + schema-aware retrieval | **Available (experimental)** | [`scripts/eif_generate_index.py`](scripts/eif_generate_index.py), [`scripts/eif_search_knowledge.py`](scripts/eif_search_knowledge.py) - offline, Unicode-aware keyword search that returns only eligible statuses by default (excludes rejected/superseded), and reports three honest outcomes for anything wrong: unparseable YAML, schema-invalid (parses fine, violates the ontology), or status-ineligible - never conflated with "no results." No embeddings; not tested at scale |
 | Locale layer (Ukrainian project docs + retrieval) | **Available (experimental)**, 4 surfaces | [`locales/`](locales/), [`scripts/eif_locale.py`](scripts/eif_locale.py), [`scripts/eif_render.py`](scripts/eif_render.py) - status messages, Knowledge Delta, closeout headings, and Ukrainian knowledge retrieval, with a real render command and English fallback; not full agent-response localization; D-06/D-07 remain open |
 | Playbooks, templates, skills | **Partial** | 4 templates built ([`templates/`](templates/)) - task-scope, Knowledge Delta, session closeout, agent instructions. No playbooks or skills ported yet |
-| Agent adapters | **1 of N (Claude Code), entrypoint generated** | [`adapters/claude-code/README.md`](adapters/claude-code/README.md) - `eif_init` generates the correct `CLAUDE.md` entrypoint (the file Claude Code loads, per official docs + CLI `2.1.169`); instruction/skill discovery verified live; hooks not re-verified this round; no hook scripts shipped. See [`adapters/README.md`](adapters/README.md) |
+| Agent adapters | **2 of 2 required for v0.1 (Claude Code, Cursor), entrypoints generated** | [`adapters/claude-code/README.md`](adapters/claude-code/README.md) - `eif_init` generates the correct `CLAUDE.md` entrypoint (the file Claude Code loads, per official docs + CLI `2.1.169`); instruction/skill discovery verified live; hooks not re-verified this round; no hook scripts shipped. [`adapters/cursor/README.md`](adapters/cursor/README.md) - `eif_init` generates `.cursor/rules/eif/governance.mdc` (Cursor's current Rules format, per official docs + installed `3.11.19`); code/test-validated (39 acceptance checks); real Cursor runtime consumption not yet manually confirmed - see that README's "Runtime-validation status". See [`adapters/README.md`](adapters/README.md) |
 | Structural-graph / shell-compression / vendor-docs integrations | **Not built** | optional either way, see [`integrations/README.md`](integrations/README.md) |
 | Demo workspace | **Built** | [`examples/demo-workspace/`](examples/demo-workspace/) - reproduced from a clean checkout, see its own README for captured command output |
 | Benchmark | **Not run** | see [`docs/benchmarks/README.md`](docs/benchmarks/README.md) |
@@ -125,14 +125,18 @@ this slice was scoped and what's deliberately excluded from it.
 | Decision ledger | Which brand/license/structure decisions are ratified vs. provisional vs. open | [`core/policies/decisions.md`](core/policies/decisions.md) |
 | Full architecture | End-to-end explanation of how it all fits together | [`docs/architecture/HOW-EIF-WORKS.md`](docs/architecture/HOW-EIF-WORKS.md) |
 
-## Planned agent adapters
+## Agent adapters
 
-One adapter is ported: Claude Code (`eif_init` generates its `CLAUDE.md`
-entrypoint; see the [Current capability table](#current-capability) above
-and [`adapters/claude-code/README.md`](adapters/claude-code/README.md)).
-No hook scripts ship with it yet, and no second adapter is ported. See
-[`adapters/README.md`](adapters/README.md#recommended-v01-priority) for an
-evidence-based (not yet ratified) priority order for what comes next.
+Two adapters are ported, the required set for v0.1 per ratified decision
+D-09 (`core/policies/decisions.md`): **Claude Code** (`eif_init` generates
+`CLAUDE.md`; see [`adapters/claude-code/README.md`](adapters/claude-code/README.md))
+and **Cursor** (`eif_init` generates `.cursor/rules/eif/governance.mdc`; see
+[`adapters/cursor/README.md`](adapters/cursor/README.md)). Neither requires
+Graphify or RTK - both remain optional integrations. No hook scripts ship
+with either adapter yet. Switching between the two (`--force --adapter
+<name>`) is supported and tested - see the Cursor README's "Adapter
+switching" section. See [`adapters/README.md`](adapters/README.md) for the
+full adapter registry and what's still deferred (Codex, Hermes).
 
 ## Optional integrations
 

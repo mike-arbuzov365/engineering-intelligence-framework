@@ -396,7 +396,7 @@ def main() -> int:
             print(f"  - {n}")
 
     entrypoint = (lock.get("adapter") or {}).get("entrypoint", "CLAUDE.md") if lock else "CLAUDE.md"
-    report.add("marker integrity (CLAUDE.md, .gitignore)", check_markers(instance_path, entrypoint))
+    report.add(f"marker integrity ({entrypoint}, .gitignore)", check_markers(instance_path, entrypoint))
     report.add("config/generated-block drift (adoption.mode, knowledge paths)", check_config_block_drift(config, instance_path, entrypoint))
     report.add("knowledge index drift (ownership marker, hash)", check_knowledge_index_drift(instance_path, lock))
 

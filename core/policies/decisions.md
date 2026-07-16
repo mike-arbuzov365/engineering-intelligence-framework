@@ -95,11 +95,16 @@ repository) is undecided. `docs/architecture/HOW-EIF-WORKS.md`'s current
 text should not be read as having settled this.
 
 ### D-09: Required v0.1 adapters
-**Status: open, recommendation exists.** See
+**Status: ratified 2026-07-16 (owner decision).** Required tested adapters
+for the current v0.1 scope: **Claude Code** and **Cursor**. Graphify and RTK
+remain optional integrations - neither adapter depends on them. See
 [`adapters/README.md`](../../adapters/README.md#recommended-v01-priority)
-for an evidence-based recommendation (Claude Code, then Cursor) based on
-hook-reliability testing done while building this repository. Not yet
-ratified.
+for the underlying evidence (hook-reliability testing done while building
+this repository) that motivated Cursor as the second adapter; that evidence
+is about a different Cursor mechanism (tool-call hooks) than the Rules
+mechanism `adapters/cursor/README.md` documents and `eif_init.py` generates
+for - the two should not be conflated. Codex and Hermes remain deferred, not
+ratified as required.
 
 ### D-10: Are structural-graph / shell-compression integrations in the official v0.1 integration catalog?
 **Status: open, design default exists.** Current documents treat them as

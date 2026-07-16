@@ -48,6 +48,48 @@ is a preliminary collision check, **not** trademark clearance - full legal
 clearance is still open, tracked in the public-readiness checklist in
 [`docs/architecture/HOW-EIF-WORKS.md`](../../docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready).
 
+### D-02: Descriptor
+**Status: ratified 2026-07-16 (owner decision).** "A quality-first control
+plane for governed AI-agent software development."
+**Evidence/rationale:** explicitly re-stated by the owner as the intended
+wording twice in direct instructions to this repository (2026-07-16), the
+second time as an explicit ratification instruction. This ledger's own
+rule for `ratified` is "went through an explicit owner ratification
+step" - it does not additionally require an alternatives-considered round;
+a prior revision of this entry incorrectly held it at `provisional`
+pending exactly such a round, a bar this document never actually stated.
+Corrected here rather than perpetuated.
+**Limitations:** none specific to the descriptor text itself; see D-01's
+trademark-clearance caveat, which applies to the product identity as a
+whole.
+
+### D-03: Public repository strategy
+**Status: ratified 2026-07-16 (owner decision).** Clean-room extraction
+into a new repository with fresh history remains the final strategy,
+rather than migrating the private instance's history or exporting its
+current tree as-is.
+**Evidence/rationale:** a privacy audit of the private instance's tracked
+files and git history found private-repository names and owner-identifying
+strings spread across more than 100 tracked files and referenced in dozens
+of commits - sanitizing that history after the fact was judged less
+reliable than starting clean. Explicitly re-confirmed by direct owner
+instruction (2026-07-16) as the final strategy, which is this ledger's own
+bar for `ratified` (see D-02's note above on the corrected reading of that
+bar).
+**Limitations (real, not resolved by this ratification):**
+- Trademark/domain clearance work is separate and still open (D-01).
+- **The clean-room strategy's own premise - that this repository's history
+  is free of the private instance's identifying content - has since been
+  found NOT fully true**: a privacy audit (Stage 5, prior round) found the
+  private pilot-target repository name leaked into four tracked files via
+  normal development (not migrated history - content added directly to
+  this repository's own history). The *strategy* (start clean, don't
+  migrate) is ratified; it does not by itself guarantee ongoing hygiene,
+  which failed at least once. **This repository's current OSS-facing tree
+  now requires renewed history/metadata sanitation** before any public
+  visibility change - see `PACKET-EIF-PUBLIC-HISTORY-AND-METADATA-SANITATION`
+  (private planning packet) for the full audit this finding triggered.
+
 ### D-04: License
 **Status: ratified.** Apache-2.0 for v0.1, see [`LICENSE`](../../LICENSE).
 
@@ -111,39 +153,6 @@ in the prior revision of this file - its own status text already said
 ratified; only the section placement was wrong.)
 
 ## Provisional (strongly evidenced, not formally ratified)
-
-### D-02: Descriptor
-**Status: provisional.** "A quality-first control plane for governed
-AI-agent software development." Adopted alongside D-01; not separately
-ratified through an explicit decision step. Low risk to revisit.
-
-**Re-affirmed 2026-07-16**: the owner's instruction for this round quoted
-this exact descriptor verbatim as the intended wording. Kept at
-`provisional` rather than moved to `ratified` because re-stating existing
-wording is not the same as a fresh ratification step with alternatives
-considered - the bar this ledger itself sets for `ratified` (see D-03's
-same reasoning below). Low risk to revisit either way.
-
-### D-03: Public repository strategy
-**Status: provisional, strong evidence.** Clean-room extraction into a new
-repository with fresh history, rather than migrating the private
-instance's history or exporting its current tree as-is.
-**Evidence:** a privacy audit of the private instance's tracked files and
-git history found private-repository names and owner-identifying strings
-spread across more than 100 tracked files and referenced in dozens of
-commits. Sanitizing that history after the fact was judged less reliable
-than starting clean. This repository's own history starts from this
-decision - there is nothing to migrate.
-**Why still provisional:** this was a judgment call under time pressure,
-not a formal ratification round with alternatives considered. It should be
-explicitly ratified (or revisited) before claiming it as settled in
-external-facing material (website, articles).
-
-**Re-affirmed 2026-07-16**: the owner's instruction for this round
-confirmed this remains the final strategy. Kept at `provisional` for the
-same reason as D-02 - confirmation of an existing choice is not the
-alternatives-considered ratification step this ledger requires for
-`ratified`, even though the choice itself is now doubly confirmed.
 
 ### D-05/D-08: CLI name and distribution model
 **Status: provisional, strong evidence, not formally ratified - Ubuntu

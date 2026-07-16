@@ -1,0 +1,11 @@
+{
+  "$comment": "Single machine-readable source of truth for the dependency license policy. Consumed by scripts/eif_check_licenses.py and scripts/tests/test_check_licenses.py. denied_license_families and exceptions are the ONLY switches that can relax enforcement, and only by editing this file - eif_check_licenses.py has no CLI flag that can override either.",
+  "policy_version": 1,
+  "denied_license_families": ["GPL", "AGPL"],
+  "allowed_licenses": [
+    "MIT", "BSD", "BSD-2-Clause", "BSD-3-Clause", "Apache-2.0", "Apache Software License",
+    "ISC", "PSF-2.0", "Python-2.0", "MPL-2.0", "Mozilla Public License 2.0 (MPL 2.0)", "LGPL"
+  ],
+  "exceptions": [],
+  "require_pinned_versions": true
+}

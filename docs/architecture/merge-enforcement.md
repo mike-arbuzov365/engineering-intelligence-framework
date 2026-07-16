@@ -68,7 +68,7 @@ Each pass verifies:
 
 A repo genuinely without CI expresses that via the policy file alone
 (`required_check_contexts: []` and `allow_no_checks: true`), never via how
-the script is invoked. The EIF policy has six required contexts and
+the script is invoked. The EIF policy has seven required contexts and
 `allow_no_checks: false`.
 
 The merge itself is pinned to the verified head

@@ -3,7 +3,7 @@
 <!-- Knowledge source: GENERALIZE of the private EI's
 knowledge-delta-template.md - section structure, the "escape hatch" for
 mechanical tasks, and the append-only rejected-hypothesis pattern are kept
-unchanged. The private "Promote to wm-engineering-intelligence?" section
+unchanged. The private "Promote to [private companion repository]?" section
 (private, multi-repo-specific) is replaced with a generic
 "Promote to shared knowledge base?" question so it makes sense for any
 project instance, not just the source private workspace. -->

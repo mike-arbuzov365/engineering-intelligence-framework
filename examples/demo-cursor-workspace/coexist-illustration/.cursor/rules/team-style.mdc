@@ -1,0 +1,4 @@
+﻿---
+alwaysApply: true
+---
+Use named exports, not default exports.

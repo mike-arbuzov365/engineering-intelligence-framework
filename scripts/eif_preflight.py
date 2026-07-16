@@ -134,6 +134,7 @@ def run_preflight(
     *,
     mode: str,
     entrypoint_name: str,
+    entry_strategy: str,
     existing_entry_text: str | None,
     existing_gitignore_text: str | None,
     knowledge_root_path: Path,
@@ -146,6 +147,7 @@ def run_preflight(
     end_marker: str,
     gitignore_begin: str,
     gitignore_end: str,
+    governance_surfaces: list[str] | None = None,
 ) -> PreflightReport:
     """Build the structured OK/WARN/STOP report. Read-only - never writes.
 
@@ -165,6 +167,18 @@ def run_preflight(
     this state (e.g. markers manually deleted after a prior install) fell
     through to a WARN instead. Governed uniformly by adoption_basis now,
     not by mode.
+
+    `entry_strategy` ("marker-merge" | "full-regen") branches the existing-
+    entrypoint-content check: a "shared"-ownership entrypoint (CLAUDE.md)
+    may legitimately already hold real project content, so the response is
+    adoption-mode-dependent (OK if coexist, WARN if an explicit greenfield
+    override, STOP if undecided). A "full-regen"/exclusive entrypoint
+    (Cursor's dedicated file) has NO legitimate "the project already put
+    real content here" case - existing content without a valid EIF block
+    always STOPs, regardless of adoption mode or content size, and the
+    message never claims the generated content will "defer to" what's
+    there, since full-regen replaces the whole file rather than preserving
+    anything outside markers.
     """
     report = PreflightReport()
 
@@ -176,37 +190,85 @@ def run_preflight(
         except MarkerConflict:
             has_existing_markers = True  # surfaced below as its own STOP
 
-        substantial = len(existing_entry_text.strip()) >= GOVERNANCE_CONTENT_THRESHOLD
-        if substantial and not has_existing_markers:
-            report.detected_pre_existing_entrypoint = True
-            if adoption_basis in ("explicit_coexist", "persisted_coexist"):
-                report.add(
-                    "OK",
-                    f"{entrypoint_name} has existing content; adoption mode is coexist "
-                    f"({adoption_basis}) - the generated block will defer to it, not compete with it.",
-                )
-            elif adoption_basis == "explicit_greenfield_override":
-                report.add(
-                    "WARN",
-                    f"{entrypoint_name} has existing content, but --adoption-mode greenfield "
-                    f"was explicitly passed this run - proceeding as an informed override, not a default.",
-                )
+        if entry_strategy == "full-regen":
+            if has_existing_markers:
+                report.add("OK", f"{entrypoint_name}: existing EIF-managed block found, will refresh in place.")
             else:
+                report.detected_pre_existing_entrypoint = True
                 report.add(
                     "STOP",
-                    f"{entrypoint_name} already has substantial content and no EIF markers yet, "
-                    f"and there is no adoption-mode decision on record (mode={mode}). Pass "
-                    f"--adoption-mode coexist (the generated block will not claim sole authority "
-                    f"and will defer to your existing rules) or --adoption-mode greenfield "
-                    f"(explicit override) before proceeding - refusing to append a competing "
-                    f"authority block silently.",
+                    f"{entrypoint_name} exists but has no EIF ownership markers. This path is "
+                    f"exclusively EIF-owned by contract - nothing else has a legitimate reason "
+                    f"to be there - so its ownership must be proven (a single well-formed EIF "
+                    f"block) before it can be regenerated. Refusing to overwrite unknown content, "
+                    f"regardless of adoption mode or file size. Move or rename the existing file "
+                    f"first if EIF should manage a fresh one at this path.",
                 )
-        elif substantial and has_existing_markers:
-            report.add("OK", f"{entrypoint_name}: existing EIF-managed block found, will refresh in place.")
-        elif not substantial:
-            report.add("OK", f"{entrypoint_name}: no substantial pre-existing content, safe to create/append.")
+        else:
+            substantial = len(existing_entry_text.strip()) >= GOVERNANCE_CONTENT_THRESHOLD
+            if substantial and not has_existing_markers:
+                report.detected_pre_existing_entrypoint = True
+                if adoption_basis in ("explicit_coexist", "persisted_coexist"):
+                    report.add(
+                        "OK",
+                        f"{entrypoint_name} has existing content; adoption mode is coexist "
+                        f"({adoption_basis}) - the generated block will defer to it, not compete with it.",
+                    )
+                elif adoption_basis == "explicit_greenfield_override":
+                    report.add(
+                        "WARN",
+                        f"{entrypoint_name} has existing content, but --adoption-mode greenfield "
+                        f"was explicitly passed this run - proceeding as an informed override, not a default.",
+                    )
+                else:
+                    report.add(
+                        "STOP",
+                        f"{entrypoint_name} already has substantial content and no EIF markers yet, "
+                        f"and there is no adoption-mode decision on record (mode={mode}). Pass "
+                        f"--adoption-mode coexist (the generated block will not claim sole authority "
+                        f"and will defer to your existing rules) or --adoption-mode greenfield "
+                        f"(explicit override) before proceeding - refusing to append a competing "
+                        f"authority block silently.",
+                    )
+            elif substantial and has_existing_markers:
+                report.add("OK", f"{entrypoint_name}: existing EIF-managed block found, will refresh in place.")
+            elif not substantial:
+                report.add("OK", f"{entrypoint_name}: no substantial pre-existing content, safe to create/append.")
     else:
         report.add("OK", f"{entrypoint_name}: does not exist yet, will be created.")
+
+    # --- Other governance surfaces this adapter's own contract reads
+    # (sibling project-owned rule files, legacy formats, other shared
+    # signals) - distinct from the entrypoint file itself. Detected
+    # read-only by eif_adapters.discover_governance_surfaces(); reported
+    # here by exact relative path so dry-run and a real run see the same
+    # list. Coexist preserves them untouched; undecided STOPs; explicit
+    # greenfield override proceeds but still never touches them (enforced
+    # by the caller, which is only ever supposed to write the adapter's own
+    # entrypoint - these paths are never staged for writing anywhere).
+    if governance_surfaces:
+        surfaces_str = ", ".join(governance_surfaces)
+        if adoption_basis in ("explicit_coexist", "persisted_coexist"):
+            report.add(
+                "OK",
+                f"existing governance surface(s) detected and will be left untouched "
+                f"(coexist, {adoption_basis}): {surfaces_str}",
+            )
+        elif adoption_basis == "explicit_greenfield_override":
+            report.add(
+                "WARN",
+                f"existing governance surface(s) detected, but --adoption-mode greenfield "
+                f"was explicitly passed this run - proceeding as an informed override; these "
+                f"are still never written to: {surfaces_str}",
+            )
+        else:
+            report.add(
+                "STOP",
+                f"existing governance surface(s) detected and there is no adoption-mode "
+                f"decision on record (mode={mode}): {surfaces_str}. Pass --adoption-mode "
+                f"coexist (these are preserved untouched either way) or --adoption-mode "
+                f"greenfield (explicit override) before proceeding.",
+            )
 
     # --- Malformed markers (surfaced here too, not only as eif_init's later hard failure) ---
     for label, text, begin, end in (

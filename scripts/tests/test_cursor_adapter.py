@@ -23,14 +23,38 @@ testing internals:
     fields.
  7. doctor (eif_verify_runtime.py) passes on a clean Cursor instance and
     catches a corrupted one (reversed markers).
+ 9. adapter-aware governance discovery: a sibling .cursor/rules/*.mdc file,
+    legacy .cursorrules, or AGENTS.md with no adoption decision -> STOP;
+    coexist preserves them untouched.
+13. the exact EIF target with foreign, unmarked content -> STOP under BOTH
+    coexist and explicit greenfield override (independent-review fix:
+    full-regen must never overwrite unproven ownership, regardless of mode).
+14. malformed EIF target on a plain upgrade (not just during switching).
+15-16. EN/UK generation.
+17. the generated search command is extracted and actually EXECUTED against
+    a seeded Cursor fixture, not just checked for presence in the text.
+18. privacy scan against a Cursor instance.
+19. Claude->Cursor->Claude: fault injected immediately after the
+    old-entrypoint stage commits on the switch back -> full rollback.
+20. exactly one active EIF block after a successful switch, either
+    direction (not just the individual old/new file assertions in 4/5).
 
 Usage:
     python scripts/tests/test_cursor_adapter.py
 """
 from __future__ import annotations
 
+import re
+import shlex
 import subprocess
 import sys
+
+# Same guard as eif_init.py's own top: a captured subprocess stdout can
+# contain Ukrainian (Cyrillic) content (scenario 16), and this script's own
+# print() of a failure detail must not crash on a non-UTF-8 console codepage.
+if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+    sys.stdout.reconfigure(encoding="utf-8")
+
 import tempfile
 from pathlib import Path
 
@@ -252,6 +276,202 @@ def main() -> int:
         entry8.write_text(reversed8, encoding="utf-8")
         r8bad = eif_verify(inst8)
         results.append(check("8. doctor catches reversed markers in the cursor entrypoint", r8bad.returncode != 0, r8bad.stdout + r8bad.stderr))
+
+        # -------------------------------------------------------------
+        # 9. existing sibling .cursor/rules/project.mdc, no adoption
+        #    decision -> STOP, tree unchanged.
+        # -------------------------------------------------------------
+        inst9 = tmp / "scenario-9-sibling-no-decision-stop"
+        init_git_repo(inst9)
+        (inst9 / ".cursor" / "rules").mkdir(parents=True)
+        (inst9 / ".cursor" / "rules" / "project.mdc").write_text("---\nalwaysApply: true\n---\nProject rule.\n", encoding="utf-8")
+        before9 = snapshot(inst9)
+        r9 = eif_init(inst9, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        results.append(check("9. sibling rule, no adoption decision -> STOP (non-zero exit)", r9.returncode != 0, r9.stdout + r9.stderr))
+        after9 = snapshot(inst9)
+        results.append(check("9. tree unchanged after STOP", after9 == before9))
+
+        # -------------------------------------------------------------
+        # 10. coexist: sibling rule byte-for-byte unchanged, EIF file created
+        #     (clean success path, not a fault-injection scenario).
+        # -------------------------------------------------------------
+        inst10 = tmp / "scenario-10-coexist-sibling-preserved"
+        init_git_repo(inst10)
+        (inst10 / ".cursor" / "rules").mkdir(parents=True)
+        sibling_content10 = "---\nalwaysApply: true\n---\nProject rule, do not touch.\n"
+        (inst10 / ".cursor" / "rules" / "project.mdc").write_text(sibling_content10, encoding="utf-8")
+        r10 = eif_init(inst10, "--project-name", "cursor-fixture", "--adapter", "cursor", "--adoption-mode", "coexist")
+        results.append(check("10. coexist init with sibling rule exits 0", r10.returncode == 0, r10.stdout + r10.stderr))
+        results.append(check("10. sibling rule preserved byte-for-byte", (inst10 / ".cursor" / "rules" / "project.mdc").read_text(encoding="utf-8") == sibling_content10))
+        results.append(check("10. EIF-owned governance.mdc was created", (inst10 / CURSOR_ENTRY).exists()))
+
+        # -------------------------------------------------------------
+        # 11. legacy .cursorrules, no adoption decision -> STOP.
+        # -------------------------------------------------------------
+        inst11 = tmp / "scenario-11-legacy-cursorrules-stop"
+        init_git_repo(inst11)
+        (inst11 / ".cursorrules").write_text("Legacy rule content.\n", encoding="utf-8")
+        before11 = snapshot(inst11)
+        r11 = eif_init(inst11, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        results.append(check("11. legacy .cursorrules, no adoption decision -> STOP", r11.returncode != 0, r11.stdout + r11.stderr))
+        after11 = snapshot(inst11)
+        results.append(check("11. tree unchanged after STOP", after11 == before11))
+
+        # -------------------------------------------------------------
+        # 12. AGENTS.md detection - confirmed live 2026-07-16 against the
+        #     official docs that Cursor reads AGENTS.md as project
+        #     instructions, so its presence is real existing governance.
+        # -------------------------------------------------------------
+        inst12 = tmp / "scenario-12-agents-md-detected"
+        init_git_repo(inst12)
+        agents_md_content = "# Project agent instructions\nDo X, not Y.\n"
+        (inst12 / "AGENTS.md").write_text(agents_md_content, encoding="utf-8")
+        before12 = snapshot(inst12)
+        r12 = eif_init(inst12, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        results.append(check("12. AGENTS.md present, no adoption decision -> STOP", r12.returncode != 0, r12.stdout + r12.stderr))
+        results.append(check("12. STOP output names AGENTS.md", "AGENTS.md" in (r12.stdout + r12.stderr), r12.stdout + r12.stderr))
+        after12 = snapshot(inst12)
+        results.append(check("12. tree unchanged after STOP", after12 == before12))
+        r12b = eif_init(inst12, "--project-name", "cursor-fixture", "--adapter", "cursor", "--adoption-mode", "coexist")
+        results.append(check("12b. coexist with existing AGENTS.md exits 0", r12b.returncode == 0, r12b.stdout + r12b.stderr))
+        results.append(check("12b. AGENTS.md untouched", (inst12 / "AGENTS.md").read_text(encoding="utf-8") == agents_md_content))
+
+        # -------------------------------------------------------------
+        # 13. the exact EIF target with foreign, unmarked content -> STOP,
+        #     under BOTH coexist and explicit greenfield override (the
+        #     independent-review fix: full-regen must never overwrite a
+        #     file whose ownership isn't proven, regardless of mode).
+        # -------------------------------------------------------------
+        for mode_label13 in ("coexist", "greenfield"):
+            inst13 = tmp / f"scenario-13-foreign-target-{mode_label13}-stop"
+            init_git_repo(inst13)
+            (inst13 / ".cursor" / "rules" / "eif").mkdir(parents=True)
+            foreign_content13 = "---\nalwaysApply: true\n---\nSomeone else's file, not EIF's.\n"
+            (inst13 / CURSOR_ENTRY).write_text(foreign_content13, encoding="utf-8")
+            before13 = snapshot(inst13)
+            r13 = eif_init(inst13, "--project-name", "cursor-fixture", "--adapter", "cursor", "--adoption-mode", mode_label13)
+            results.append(check(f"13. foreign unmarked content at the exact EIF target ({mode_label13}) -> STOP", r13.returncode != 0, r13.stdout + r13.stderr))
+            after13 = snapshot(inst13)
+            results.append(check(f"13. tree unchanged after STOP ({mode_label13})", after13 == before13))
+            results.append(check(f"13. foreign content at the EIF target itself untouched ({mode_label13})", (inst13 / CURSOR_ENTRY).read_text(encoding="utf-8") == foreign_content13))
+
+        # -------------------------------------------------------------
+        # 14. malformed EIF target on a plain upgrade (not during adapter
+        #     switching) -> STOP.
+        # -------------------------------------------------------------
+        inst14 = tmp / "scenario-14-malformed-target-stop"
+        init_git_repo(inst14)
+        eif_init(inst14, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        entry14 = inst14 / CURSOR_ENTRY
+        malformed14 = entry14.read_text(encoding="utf-8").replace("<!-- EIF:BEGIN", "<!-- EIF:BEGIN\n<!-- EIF:BEGIN", 1)
+        entry14.write_text(malformed14, encoding="utf-8")
+        r14 = eif_init(inst14)  # flagless upgrade, same adapter
+        results.append(check("14. malformed EIF target on a plain upgrade -> STOP", r14.returncode != 0, r14.stdout + r14.stderr))
+        results.append(check("14. STOP message mentions malformed markers", "malformed" in (r14.stdout + r14.stderr), r14.stdout + r14.stderr))
+
+        # -------------------------------------------------------------
+        # 15/16. EN and UK generation.
+        # -------------------------------------------------------------
+        inst15 = tmp / "scenario-15-en-generation"
+        init_git_repo(inst15)
+        r15 = eif_init(inst15, "--project-name", "cursor-fixture", "--adapter", "cursor", "--locale", "en")
+        results.append(check("15. EN cursor init exits 0", r15.returncode == 0, r15.stdout + r15.stderr))
+        results.append(check("15. governance content present (EN)", "Knowledge Delta" in (inst15 / CURSOR_ENTRY).read_text(encoding="utf-8")))
+
+        inst16 = tmp / "scenario-16-uk-generation"
+        init_git_repo(inst16)
+        r16 = eif_init(inst16, "--project-name", "cursor-fixture", "--adapter", "cursor", "--locale", "uk")
+        results.append(check("16. UK cursor init exits 0", r16.returncode == 0, r16.stdout + r16.stderr))
+        results.append(check("16. UK init-complete message present ('ініціалізовано')", "ініціалізовано" in r16.stdout, r16.stdout))
+
+        # -------------------------------------------------------------
+        # 17. generated search command actually executes on a Cursor
+        #     fixture (not just "text is present").
+        # -------------------------------------------------------------
+        inst17 = tmp / "scenario-17-search-command-runs"
+        init_git_repo(inst17)
+        eif_init(inst17, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        (inst17 / "knowledge").mkdir(parents=True, exist_ok=True)
+        (inst17 / "knowledge" / "fact-1.md").write_text(
+            "---\ntype: fact\nstatus: validated\nscope: local\ncreated: 2026-07-16\n---\n\n"
+            "Cursor search command works.\n",
+            encoding="utf-8",
+        )
+        text17 = (inst17 / CURSOR_ENTRY).read_text(encoding="utf-8")
+        m17 = re.search(r"`(python \.eif/runtime/eif_search_knowledge\.py[^`]*)`", text17)
+        results.append(check("17. generated governance content includes the exact search command", m17 is not None, text17))
+        if m17:
+            cmd17 = m17.group(1).replace('"<your task in a few words>"', '"search command works"')
+            args17 = shlex.split(cmd17)
+            args17[0] = sys.executable
+            proc17 = subprocess.run(args17, cwd=str(inst17), capture_output=True, text=True, encoding="utf-8")
+            results.append(check("17. generated search command actually executes (exit 0) on the Cursor fixture", proc17.returncode == 0, proc17.stdout + proc17.stderr))
+            results.append(check("17. search command finds the seeded fact", "fact-1" in proc17.stdout, proc17.stdout))
+
+        # -------------------------------------------------------------
+        # 18. privacy scan runs cleanly against a Cursor instance.
+        # -------------------------------------------------------------
+        inst18 = tmp / "scenario-18-privacy-scan"
+        init_git_repo(inst18)
+        eif_init(inst18, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        r18 = run([str(SCRIPTS / "eif_privacy_scan.py"), "--repo", str(inst18)])
+        results.append(check("18. privacy scan runs cleanly against a Cursor instance", r18.returncode == 0, r18.stdout + r18.stderr))
+
+        # -------------------------------------------------------------
+        # 19. Claude -> Cursor -> Claude: injected fault immediately AFTER
+        #     the old-entrypoint (cursor, on the switch back) stage commits
+        #     -> full rollback, zero dual-active governance.
+        # -------------------------------------------------------------
+        inst19 = tmp / "scenario-19-claude-cursor-claude-rollback"
+        init_git_repo(inst19)
+        eif_init(inst19, "--project-name", "cursor-fixture", "--adapter", "claude-code")
+        r19a = eif_init(inst19, "--force", "--adapter", "cursor")
+        results.append(check("19. claude -> cursor switch succeeds", r19a.returncode == 0, r19a.stdout + r19a.stderr))
+        before19 = snapshot(inst19)
+        env19 = {"PATH": __import__("os").environ.get("PATH", ""), "EIF_INIT_TEST_FAIL_AFTER": "old-entrypoint"}
+        proc19 = subprocess.run(
+            [sys.executable, str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+             "--instance-path", str(inst19), "--allow-dirty", "--force", "--adapter", "claude-code"],
+            capture_output=True, text=True, encoding="utf-8", env=env19,
+        )
+        results.append(check("19. injected fault right after old-entrypoint (cursor) commit fails the switch-back", proc19.returncode != 0, proc19.stdout + proc19.stderr))
+        after19 = snapshot(inst19)
+        results.append(check("19. tree fully restored to the pre-attempt state (cursor still active, byte-for-byte)", after19 == before19, f"keys differ: {sorted(set(before19) ^ set(after19))}"))
+        results.append(check("19. cursor governance.mdc still exists after rollback", (inst19 / CURSOR_ENTRY).exists()))
+        # Note: CLAUDE.md legitimately still exists at this point - it was
+        # already there (stripped to its unfilled placeholder footer, no EIF
+        # block) as part of the PRE-attempt state from the initial claude->
+        # cursor switch, since the default placeholder text is non-empty and
+        # so is not deleted (see the "strip, not delete" contract for a
+        # marker-merge old adapter). The full byte-for-byte snapshot
+        # equality above already proves it is untouched by the failed
+        # attempt; asserting its mere existence would test the wrong thing.
+        results.append(check("19. CLAUDE.md has no fresh EIF block (still just the pre-attempt placeholder, not partially rewritten)", "<!-- EIF:BEGIN" not in (inst19 / "CLAUDE.md").read_text(encoding="utf-8")))
+
+        # -------------------------------------------------------------
+        # 20. zero dual-active EIF rules after a SUCCESSFUL switch, checked
+        #     explicitly in both directions (scenario 4/5 already assert
+        #     the individual file states; this asserts the "at most one
+        #     active EIF block, anywhere" property directly).
+        # -------------------------------------------------------------
+        inst20a = tmp / "scenario-20a-claude-to-cursor-single-active"
+        init_git_repo(inst20a)
+        eif_init(inst20a, "--project-name", "cursor-fixture", "--adapter", "claude-code")
+        eif_init(inst20a, "--force", "--adapter", "cursor")
+        claude_after20a = (inst20a / "CLAUDE.md").read_text(encoding="utf-8") if (inst20a / "CLAUDE.md").exists() else ""
+        active_blocks_20a = sum([
+            1 if "<!-- EIF:BEGIN" in claude_after20a else 0,
+            1 if "<!-- EIF:BEGIN" in (inst20a / CURSOR_ENTRY).read_text(encoding="utf-8") else 0,
+        ])
+        results.append(check("20a. exactly one active EIF block after claude->cursor switch", active_blocks_20a == 1, active_blocks_20a))
+
+        inst20b = tmp / "scenario-20b-cursor-to-claude-single-active"
+        init_git_repo(inst20b)
+        eif_init(inst20b, "--project-name", "cursor-fixture", "--adapter", "cursor")
+        eif_init(inst20b, "--force", "--adapter", "claude-code")
+        cursor_has_block_20b = (inst20b / CURSOR_ENTRY).exists() and "<!-- EIF:BEGIN" in (inst20b / CURSOR_ENTRY).read_text(encoding="utf-8")
+        active_blocks_20b = (1 if cursor_has_block_20b else 0) + (1 if "<!-- EIF:BEGIN" in (inst20b / "CLAUDE.md").read_text(encoding="utf-8") else 0)
+        results.append(check("20b. exactly one active EIF block after cursor->claude switch", active_blocks_20b == 1, active_blocks_20b))
 
     passed = sum(results)
     print(f"EIF-RESULT: passed={passed} total={len(results)}")

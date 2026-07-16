@@ -558,13 +558,18 @@ formally ratified (the file is explicit about which is which).
       target (`wm-freelance-ops`) each round (private planning packet); the
       live repository is never opened for writing, and this is still only
       one real target - a second, different one is not yet exercised.
-- [x] At least two agent adapters tested against this repository: Claude
-      Code (`CLAUDE.md`, marker-merge) and Cursor (`.cursor/rules/eif/
+- [x] At least two agent adapters tested against this repository, **partially**:
+      Claude Code (`CLAUDE.md`, marker-merge) and Cursor (`.cursor/rules/eif/
       governance.mdc`, full-regen, nested-entrypoint transaction, adapter
-      switching both directions - `scripts/tests/test_cursor_adapter.py`,
-      39 checks). Cursor is code/test-validated; real Cursor Agent-chat
-      consumption is not yet manually confirmed - see
-      `adapters/cursor/README.md#runtime-validation-status`.
+      switching both directions, adapter-aware governance discovery -
+      `scripts/tests/test_cursor_adapter.py`, 74 checks) are both
+      code/test-validated. Cursor is NOT yet runtime-validated - no human
+      has confirmed a real Cursor Agent-chat response reflects the
+      generated rule's content - see
+      `adapters/cursor/README.md#runtime-validation-status` and
+      `examples/demo-cursor-workspace/MANUAL-RUNTIME-CHECK.md`. D-09
+      ratifies which two adapters are in v0.1 *scope*; it is a scope
+      decision, not a claim that runtime validation is complete for both.
 - [x] Structural-graph and shell-compression integrations documented as
       optional.
 - [x] Degraded mode documented.

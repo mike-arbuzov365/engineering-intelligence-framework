@@ -150,6 +150,7 @@ def main() -> int:
         results.append(check("unknown locale falls back to en template (exit 0)", r3.returncode == 0 and "Knowledge Delta" in r3.stdout))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_render: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

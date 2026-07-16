@@ -68,6 +68,7 @@ def main() -> int:
             failures.append(f"{f.name}: expected {'success' if expect_pass else 'failure'}, got exit {proc.returncode}\n{proc.stdout}\n{proc.stderr}")
 
     total = len(fm_files) + len(cfg_files)
+    print(f"EIF-RESULT: passed={total - len(failures)} total={total}")
     print(f"\ntest_validate: {total - len(failures)}/{total} fixture(s) behaved as expected")
     if failures:
         print("\nFailures:")

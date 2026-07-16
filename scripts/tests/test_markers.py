@@ -82,6 +82,7 @@ def main() -> int:
         results.append(check("render_merged_content propagates MarkerConflict on reversed markers", True))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_markers: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

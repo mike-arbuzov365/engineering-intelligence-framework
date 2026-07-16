@@ -143,6 +143,7 @@ def main() -> int:
         results.append(check("rendered index reports schema-invalid files under a DIFFERENT heading", "Excluded (schema-invalid frontmatter)" in rendered and "BAD-TYPE.md" in rendered))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_generate_index: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

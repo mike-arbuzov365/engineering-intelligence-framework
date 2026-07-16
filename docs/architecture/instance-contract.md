@@ -148,6 +148,21 @@ until the reconfigure commits:
 - **Successful reconfigure** -> the backup is kept, as the recovery copy of
   the config that was just replaced.
 
+### Concurrency (single writer)
+
+**Concurrent `eif_init` writers against the same instance are not supported.**
+The transactional and backup-collision guarantees above assume a **single
+writer**: the `.next` staging paths, the runtime staging directory, and the
+`.bak-<timestamp>` collision loop are safe against a mid-run crash of one
+process, but not against two `eif_init` processes racing on the same instance
+at the same time (two runs could interleave their staging/commit and defeat
+the exact-prior-tree guarantee). Run one `eif_init` at a time per instance.
+
+This is a stated, non-blocking limitation, not a fix. A future hardening
+(backlog, not implemented here) would add an instance lock file, an atomic
+exclusive backup creation, and stale-lock recovery. It is deliberately not
+implemented as part of the merge-enforcement work, which does not need it.
+
 ### Repository origin
 
 The *historical* `migration_status` is derived from a dedicated, read-only

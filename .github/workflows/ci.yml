@@ -81,24 +81,20 @@ jobs:
           python-version: "3.12"
       - name: Install pinned dependencies
         run: pip install -r scripts/requirements.txt
-      - name: Run runtime unit tests (paths, init, markers, verify-runtime, index, search, locale, render, journey, adoption)
-        # markers/verify-runtime/adoption additions are the same doc-vs-CI
-        # gap fix as the privacy-scan job above - these suites existed and
-        # passed locally but were never actually wired into a CI job.
-        # test_paths.py: independent-review addition (knowledge-path escape
-        # validation) - added here on the same day it was written, to avoid
-        # repeating that exact gap a second time.
+      - name: Run all runtime test suites via run_all.py and emit the machine-readable inventory
+        # run_all.py --json runs every suite (paths, validate, privacy-scan,
+        # knowledge-delta, index, search, locale, render, markers,
+        # verify-runtime, init, journey, adoption, merge-gate) once, parses
+        # each suite's standardized `EIF-RESULT: passed=P total=T` line, and
+        # emits a machine-readable inventory to the job log (evidence-freeze:
+        # the check total is DERIVED by the runner, never hand-summed in PR
+        # prose; a suite missing the line becomes `unknown`, not a silent 0).
+        # It exits non-zero if any suite fails. test_run_all_json.py then
+        # verifies the aggregation itself (a standalone suite so it does not
+        # recurse into run_all).
         run: |
-          python scripts/tests/test_paths.py
-          python scripts/tests/test_init.py
-          python scripts/tests/test_markers.py
-          python scripts/tests/test_verify_runtime.py
-          python scripts/tests/test_generate_index.py
-          python scripts/tests/test_search_knowledge.py
-          python scripts/tests/test_locale.py
-          python scripts/tests/test_render.py
-          python scripts/tests/test_journey.py
-          python scripts/tests/test_adoption.py
+          python scripts/tests/run_all.py --json
+          python scripts/tests/test_run_all_json.py
       - name: Validate the demo project instance's knowledge artifacts and config
         # framework-root stays the framework checkout; instance-root points
         # at the demo, which is not vendoring the framework - this is the

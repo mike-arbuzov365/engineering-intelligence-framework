@@ -914,6 +914,7 @@ def main() -> int:
         results.append(check("37f. pre-existing empty instance dir: base byte-for-byte unchanged", tree_snapshot(base) == before))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_journey: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

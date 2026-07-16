@@ -1,0 +1,23 @@
+{
+  "$comment": "Single machine-readable source of truth for the controlled-merge policy. Consumed by scripts/eif_merge_pr.py (the merge gate) and scripts/tests/test_merge_gate.py. Do not hardcode the required check contexts anywhere else - read them from here. The context names must match the job `name:` values in .github/workflows/ci.yml exactly (that is what GitHub's statusCheckRollup reports). required_check_contexts, allow_no_checks, and knowledge_delta_required are the ONLY switches that can relax enforcement, and only by editing this file - eif_merge_pr.py has no CLI flag that can override any of them.",
+  "policy_version": 2,
+  "base_branch": "main",
+  "merge_method": "merge",
+  "required_check_contexts": [
+    "Privacy scan (required by policy)",
+    "Frontmatter and config schema validation (required by policy)",
+    "Vertical slice - init, index, search, locale, demo test (required by policy)",
+    "Relative link check (required by policy)",
+    "YAML and JSON Schema syntax check (required by policy)",
+    "Knowledge Delta completeness (required by policy)"
+  ],
+  "acceptable_conclusions": ["SUCCESS"],
+  "block_unresolved_review_threads": true,
+  "allow_no_checks": false,
+  "knowledge_delta_required": true,
+  "platform_enforcement": {
+    "branch_protection_available": false,
+    "reason": "Private repository on the free plan: GitHub branch protection and rulesets return HTTP 403 (Upgrade to GitHub Pro or make this repository public). See docs/architecture/merge-enforcement.md.",
+    "enforcement_mode": "wrapper-only"
+  }
+}

@@ -68,6 +68,7 @@ def main() -> int:
     ))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_locale: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

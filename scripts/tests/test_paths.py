@@ -141,6 +141,7 @@ def main() -> int:
         results.append(check("index in a sibling dir with a shared prefix: rejected (not a substring match)", True))
 
     passed = sum(results)
+    print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_paths: {passed}/{len(results)} passed")
     return 0 if all(results) else 1
 

@@ -348,6 +348,24 @@ def main() -> int:
         proc = run(["--repo", str(tmp), "--json"])
         check("config valid (no privacy key): scan continues, exit 0", proc.returncode == 0, proc.stdout + proc.stderr)
 
+    # (ii-b) config EXISTS but is EMPTY (yaml.safe_load -> None) -> exit 1.
+    # An empty existing config is an anomaly (eif_init.py never writes one),
+    # NOT a valid suppression-free config - and it is a DIFFERENT case from
+    # the absent config in (i). Treating it as [] could silently let through
+    # a finding the operator believes is suppressed.
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        make_git_repo(tmp)
+        (tmp / "clean.md").write_text("Nothing sensitive.\n", encoding="utf-8")
+        os.makedirs(tmp / ".eif", exist_ok=True)
+        (tmp / ".eif" / "config.yaml").write_text("", encoding="utf-8")
+        git_add(tmp)
+        proc = run(["--repo", str(tmp), "--json"])
+        check("config empty (exists, no content): exits 1 (not a silent empty-suppressions pass)", proc.returncode == 1, proc.stdout + proc.stderr)
+        check("config empty: no JSON on stdout (refused before scanning)", proc.stdout.strip() == "")
+        check("config empty: stderr says it cannot load the suppression config", "cannot load suppression config" in proc.stderr, proc.stderr)
+        check("config empty: message distinguishes empty from absent", "empty" in proc.stderr, proc.stderr)
+
     # (iii) config exists + INVALID YAML -> exit 1, no JSON, clear message
     with tempfile.TemporaryDirectory() as td:
         tmp = Path(td)
@@ -393,6 +411,28 @@ def main() -> int:
                   eif_privacy_scan.load_suppressions(Path(td) / "does-not-exist.yaml") == [])
     finally:
         eif_privacy_scan.yaml = saved_yaml
+
+    # (vi) empty-vs-absent at the function level (with PyYAML restored): an
+    # EXISTING empty file raises; an ABSENT file returns [] - the regression
+    # test the independent review asked for, keeping the two distinct.
+    with tempfile.TemporaryDirectory() as td:
+        empty_cfg = Path(td) / "config.yaml"
+        empty_cfg.write_text("", encoding="utf-8")
+        try:
+            eif_privacy_scan.load_suppressions(empty_cfg)
+            check("empty existing config: load_suppressions raises (not silently [])", False)
+        except eif_privacy_scan.SuppressionConfigError:
+            check("empty existing config: load_suppressions raises SuppressionConfigError", True)
+        check("absent config: load_suppressions returns [] (contrast with empty)",
+              eif_privacy_scan.load_suppressions(Path(td) / "nope.yaml") == [])
+        # A whitespace-only file also parses to None -> same fail-loud path.
+        ws_cfg = Path(td) / "ws.yaml"
+        ws_cfg.write_text("   \n\n", encoding="utf-8")
+        try:
+            eif_privacy_scan.load_suppressions(ws_cfg)
+            check("whitespace-only config: load_suppressions raises (not silently [])", False)
+        except eif_privacy_scan.SuppressionConfigError:
+            check("whitespace-only config: load_suppressions raises SuppressionConfigError", True)
 
     total_checks = failures
     print(f"\ntest_privacy_scan: {'ALL PASSED' if not failures else str(len(failures)) + ' FAILED'}")

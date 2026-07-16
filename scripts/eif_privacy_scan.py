@@ -173,12 +173,19 @@ def load_suppressions(config_path: Path) -> list[dict]:
     """Read privacy.suppressions from .eif/config.yaml, UNvalidated - call
     validate_suppressions() on the result before trusting it.
 
-    Four states, deliberately distinguished (independent-review fix - the
-    previous version collapsed the last three into a silent empty list):
+    Five states, deliberately distinguished (independent-review fix - the
+    previous version collapsed the broken ones into a silent empty list,
+    and treated an EMPTY existing file as a valid suppression-free config):
       - config ABSENT            -> [] (no suppressions; scan continues
                                         exactly as for a repo with no
                                         .eif/config.yaml yet)
       - config exists + VALID    -> the suppressions list (possibly empty)
+      - config exists + EMPTY    -> SuppressionConfigError. eif_init.py never
+        (yaml.safe_load -> None)   writes an empty config, so an existing
+                                  empty one is a truncated/hand-cleared file,
+                                  not a legitimate "no suppressions" signal -
+                                  reading it as [] could silently let through
+                                  a finding the operator believes is suppressed.
       - config exists + invalid  -> SuppressionConfigError (bad YAML, not a
         YAML / not a mapping      mapping, or privacy/suppressions of the
                                   wrong type)
@@ -200,7 +207,19 @@ def load_suppressions(config_path: Path) -> list[dict]:
     except yaml.YAMLError as e:
         raise SuppressionConfigError(f"{config_path} is not valid YAML: {e}")
     if data is None:
-        return []  # an empty file is a valid, suppression-free config
+        # An EXISTING but empty config is NOT a valid suppression-free config
+        # (unlike an absent one, handled above). eif_init.py always writes a
+        # non-empty config (header + real data), so an empty existing file is
+        # an anomaly - a truncated or hand-cleared write - that must fail
+        # loudly, never be read as "no suppressions" (which could silently let
+        # through a finding the operator thinks is covered). This matches
+        # eif_init.py, which also refuses an empty existing config.
+        raise SuppressionConfigError(
+            f"{config_path} exists but is empty - refusing to treat an empty "
+            f"config as a valid suppression-free config (a truncated or "
+            f"hand-cleared file). Restore it from version control, or remove it "
+            f"entirely if this repo genuinely has no .eif/config.yaml."
+        )
     if not isinstance(data, dict):
         raise SuppressionConfigError(
             f"{config_path} does not contain a YAML mapping at the top level "

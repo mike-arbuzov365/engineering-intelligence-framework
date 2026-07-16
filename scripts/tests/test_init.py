@@ -140,50 +140,92 @@ def main() -> int:
 
     # --- Migration provenance (independent-review): adoption.mode (current
     # coexistence behavior) reconciled against migration_status (historical
-    # origin) via finalize_migration_status, using the preflight's
-    # pre-existing-state signal. (status, stop_reason) tuples. ---
-    def fin(*, mode, resolved, explicit, adoption_mode, detected):
+    # origin) via finalize_migration_status, driven by the REPOSITORY-ORIGIN
+    # classification ("empty" | "pre_existing" | "unknown") - NOT the
+    # entrypoint/governance preflight. (status, stop_reason) tuples. ---
+    def fin(*, mode, resolved, explicit, adoption_mode, origin):
         return eif_init.finalize_migration_status(
             mode=mode, resolved_status=resolved, explicit_status=explicit,
-            adoption_mode=adoption_mode, detected_pre_existing_state=detected,
+            adoption_mode=adoption_mode, repository_origin=origin,
         )
 
     # init: genuinely empty greenfield repo stays greenfield
     results.append(check("provenance init: empty greenfield -> greenfield",
-                         fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", detected=False) == ("greenfield", None)))
-    # init: coexist mode implies adopted history even with nothing detected yet
-    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="coexist", detected=False)
+                         fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", origin="empty") == ("greenfield", None)))
+    # init: coexist mode implies adopted history even on an empty-looking dir
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="coexist", origin="empty")
     results.append(check("provenance init: coexist -> adopted (no --migration-status needed)", (st, stop) == ("adopted", None)))
-    # init: greenfield AUTHORITY override on a repo with detected pre-existing state still records adopted
-    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", detected=True)
-    results.append(check("provenance init: greenfield override on existing repo -> adopted history", (st, stop) == ("adopted", None)))
+    # init: pre-existing repo (files outside .git/.eif) -> adopted, even in greenfield
+    # AUTHORITY mode - the KEY fix: this used to depend on a CLAUDE.md existing.
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", origin="pre_existing")
+    results.append(check("provenance init: pre-existing repo (no CLAUDE.md needed) -> adopted history", (st, stop) == ("adopted", None)))
     # init: explicit coexist + greenfield is the hard contradiction -> STOP
-    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="coexist", detected=False)
+    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="coexist", origin="empty")
     results.append(check("provenance init: coexist + explicit greenfield -> STOP", st is None and stop is not None and "contradiction" in stop))
-    # init: explicit greenfield over DETECTED pre-existing state -> STOP (false history)
-    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", detected=True)
-    results.append(check("provenance init: explicit greenfield over detected state -> STOP", st is None and stop is not None))
+    # init: explicit greenfield over a PRE-EXISTING repo -> STOP (false history)
+    st, stop = fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", origin="pre_existing")
+    results.append(check("provenance init: explicit greenfield over pre-existing repo -> STOP", st is None and stop is not None))
     # init: explicit greenfield on a genuinely empty repo is fine
     results.append(check("provenance init: explicit greenfield on empty repo -> greenfield",
-                         fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", detected=False) == ("greenfield", None)))
+                         fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", origin="empty") == ("greenfield", None)))
     # init: explicit adopted honored
     results.append(check("provenance init: explicit adopted honored",
-                         fin(mode="init", resolved="greenfield", explicit="adopted", adoption_mode="coexist", detected=False) == ("adopted", None)))
-    # upgrade: persisted preserved verbatim, no contradiction logic
+                         fin(mode="init", resolved="greenfield", explicit="adopted", adoption_mode="coexist", origin="empty") == ("adopted", None)))
+    # init: UNKNOWN origin (unreadable dir) never silently becomes greenfield -> STOP
+    st, stop = fin(mode="init", resolved="greenfield", explicit=None, adoption_mode="greenfield", origin="unknown")
+    results.append(check("provenance init: unknown origin, no --migration-status -> STOP (fail closed)", st is None and stop is not None))
+    # init: UNKNOWN origin + an explicit historical decision is honored
+    results.append(check("provenance init: unknown origin + explicit greenfield honored",
+                         fin(mode="init", resolved="greenfield", explicit="greenfield", adoption_mode="greenfield", origin="unknown") == ("greenfield", None)))
+    results.append(check("provenance init: unknown origin + explicit adopted honored",
+                         fin(mode="init", resolved="greenfield", explicit="adopted", adoption_mode="greenfield", origin="unknown") == ("adopted", None)))
+    # upgrade: persisted preserved verbatim, no contradiction logic, origin ignored
     results.append(check("provenance upgrade: persisted adopted preserved",
-                         fin(mode="upgrade", resolved="adopted", explicit=None, adoption_mode="coexist", detected=False) == ("adopted", None)))
+                         fin(mode="upgrade", resolved="adopted", explicit=None, adoption_mode="coexist", origin="pre_existing") == ("adopted", None)))
     # reconfigure: switching to coexist under recorded greenfield -> STOP (do not silently rewrite)
-    st, stop = fin(mode="reconfigure", resolved="greenfield", explicit=None, adoption_mode="coexist", detected=False)
+    st, stop = fin(mode="reconfigure", resolved="greenfield", explicit=None, adoption_mode="coexist", origin="pre_existing")
     results.append(check("provenance reconfigure: coexist over recorded greenfield, no flag -> STOP", st is None and stop is not None))
     # reconfigure: switching to coexist with explicit adopted is fine
     results.append(check("provenance reconfigure: coexist + explicit adopted -> adopted",
-                         fin(mode="reconfigure", resolved="greenfield", explicit="adopted", adoption_mode="coexist", detected=False) == ("adopted", None)))
+                         fin(mode="reconfigure", resolved="greenfield", explicit="adopted", adoption_mode="coexist", origin="pre_existing") == ("adopted", None)))
     # reconfigure: coexist + explicit greenfield still a contradiction
-    st, stop = fin(mode="reconfigure", resolved="adopted", explicit="greenfield", adoption_mode="coexist", detected=False)
+    st, stop = fin(mode="reconfigure", resolved="adopted", explicit="greenfield", adoption_mode="coexist", origin="pre_existing")
     results.append(check("provenance reconfigure: coexist + explicit greenfield -> STOP", st is None and stop is not None))
     # reconfigure: greenfield authority over recorded adopted history is allowed (preserve adopted)
     results.append(check("provenance reconfigure: greenfield mode keeps recorded adopted history",
-                         fin(mode="reconfigure", resolved="adopted", explicit=None, adoption_mode="greenfield", detected=False) == ("adopted", None)))
+                         fin(mode="reconfigure", resolved="adopted", explicit=None, adoption_mode="greenfield", origin="pre_existing") == ("adopted", None)))
+
+    # --- detect_repository_origin: read-only origin classification, distinct
+    # from governance detection (the entrypoint-only bug's real fix) ---
+    with tempfile.TemporaryDirectory() as tmp:
+        empty_dir = Path(tmp) / "empty"
+        empty_dir.mkdir()
+        results.append(check("origin: genuinely empty dir -> empty",
+                             eif_init.detect_repository_origin(empty_dir)[0] == "empty"))
+        git_only = Path(tmp) / "gitonly"
+        (git_only / ".git").mkdir(parents=True)
+        (git_only / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+        results.append(check("origin: only .git/ present -> empty (VCS metadata is not project content)",
+                             eif_init.detect_repository_origin(git_only)[0] == "empty"))
+        stray_eif = Path(tmp) / "strayeif"
+        (stray_eif / ".eif").mkdir(parents=True)
+        (stray_eif / ".eif" / "junk.txt").write_text("x", encoding="utf-8")
+        results.append(check("origin: only a stray .eif/ present -> empty (EIF namespace, documented policy)",
+                             eif_init.detect_repository_origin(stray_eif)[0] == "empty"))
+        readme_only = Path(tmp) / "readme"
+        readme_only.mkdir()
+        (readme_only / "README.md").write_text("# Project\n", encoding="utf-8")
+        results.append(check("origin: README-only repo (no CLAUDE.md) -> pre_existing",
+                             eif_init.detect_repository_origin(readme_only)[0] == "pre_existing"))
+        src_tree = Path(tmp) / "srctree"
+        (src_tree / "src").mkdir(parents=True)
+        (src_tree / "src" / "main.py").write_text("print(1)\n", encoding="utf-8")
+        (src_tree / ".git").mkdir()
+        results.append(check("origin: source tree beside .git/ (no CLAUDE.md) -> pre_existing",
+                             eif_init.detect_repository_origin(src_tree)[0] == "pre_existing"))
+        missing = Path(tmp) / "does-not-exist"
+        results.append(check("origin: non-existent dir -> empty (nothing there to adopt)",
+                             eif_init.detect_repository_origin(missing)[0] == "empty"))
 
     # --- Config/lock rendering + schema validation, safe YAML for special characters ---
     tricky_name = "weird: name, with \"quotes\" and a # hash"

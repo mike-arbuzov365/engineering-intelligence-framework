@@ -426,7 +426,14 @@ from the private production instance:
   content-*meaning* check. It can both over-trigger (a long file that
   isn't actually governance) and under-trigger (real but terse governance
   under the length threshold). Documented as a known limitation rather
-  than presented as understanding what the text says.
+  than presented as understanding what the text says. This governance
+  heuristic is decoupled from the repository's historical origin:
+  `migration_status` is derived by a *separate* read-only check for any
+  project-owned file outside `.git/` and `.eif/` (see
+  [`instance-contract.md#repository-origin`](instance-contract.md#repository-origin)),
+  so an existing code repo with no `CLAUDE.md` is still recorded `adopted`;
+  the heuristic's over/under-triggering affects only the coexistence STOP
+  decision, never the recorded origin.
 - **The first version of this repository's own ontology had the exact
   failure mode it warns against**: a single linear "vendor docs always
   outrank logs" authority ranking that conflated normative claims with
@@ -534,13 +541,18 @@ formally ratified (the file is explicit about which is which).
       knowledge paths are user-configured and validated against path
       escape (absolute, drive/UNC, `..` traversal, outside-instance) and
       shell metacharacters, with generated commands quoting the
-      configured path; the historical `migration_status` is derived so it
-      cannot contradict `adoption.mode`; an existing knowledge-index file
+      configured path; the historical `migration_status` is derived from a
+      separate read-only repository-origin check (any project-owned file
+      outside `.git/`/`.eif/`), so an existing repo with **no `CLAUDE.md`**
+      is still recorded `adopted`, an unreadable origin fails closed, and it
+      can never contradict `adoption.mode`; an existing knowledge-index file
       without EIF's own ownership marker is never overwritten;
       privacy-scan suppressions identify one exact finding (rule + path +
-      content fingerprint), never a whole rule+file; an existing but
-      broken `.eif/config.yaml` stops before any write rather than being
-      treated as absent. Tested against a realistic sanitized fixture
+      content fingerprint), never a whole rule+file, and the scanner fails
+      loudly on an existing but empty/malformed suppression config instead
+      of treating it as suppression-free; an existing but broken
+      `.eif/config.yaml` stops before any write rather than being treated
+      as absent. Tested against a realistic sanitized fixture
       (`scripts/tests/test_adoption.py`, 67 checks) AND re-validated by
       rerunning the full pilot against fresh disposable copies of the real
       target (`wm-freelance-ops`) each round (private planning packet); the
@@ -587,7 +599,7 @@ formally ratified (the file is explicit about which is which).
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
 - [x] Demo workflow has executable evidence:
-      `scripts/tests/test_journey.py` (153 checks) drives a real subprocess
+      `scripts/tests/test_journey.py` (225 checks) drives a real subprocess
       journey against a fresh instance, and
       [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
       has real captured command output, both reproducible from a clean

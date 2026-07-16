@@ -683,6 +683,148 @@ def main() -> int:
         results.append(check("33b. successful reconfigure keeps a config backup (recovery artifact)",
                              len(list(inst.glob(".eif/config.yaml.bak-*"))) >= 1))
 
+    # --- 34. Repository-origin detection (independent-review): historical
+    # migration_status is derived from the repository's ORIGIN (any
+    # project-owned files outside .git/ and .eif/), NOT from a CLAUDE.md
+    # existing. The bug this closes: an existing code repo with a README/src
+    # but no CLAUDE.md was recorded `greenfield`, which is false. End-to-end
+    # via the real CLI. ---
+    def _mig(inst: Path) -> str:
+        return yaml.safe_load((inst / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8"))["instance"]["migration_status"]
+
+    def _doctor(inst: Path) -> subprocess.CompletedProcess:
+        return run([str(inst / ".eif" / "runtime" / "eif_verify_runtime.py"),
+                    "--framework-root", str(inst / ".eif" / "runtime"), "--instance-path", str(inst)])
+
+    with tempfile.TemporaryDirectory() as tmp:
+        base = Path(tmp)
+
+        # 34a: genuinely empty dir -> greenfield.
+        a = base / "empty"; a.mkdir()
+        r = init(a, "--project-name", "o", "--locale", "en")
+        results.append(check("34a. empty dir init succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34a. empty dir -> migration_status greenfield", _mig(a) == "greenfield", _mig(a)))
+
+        # 34b: only .git/ present (no project files) -> greenfield.
+        b = base / "gitonly"; (b / ".git").mkdir(parents=True)
+        (b / ".git" / "HEAD").write_text("ref: refs/heads/main\n", encoding="utf-8")
+        r = init(b, "--project-name", "o", "--locale", "en")
+        results.append(check("34b. git-only dir init succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34b. git-only dir -> greenfield (VCS metadata is not project content)", _mig(b) == "greenfield", _mig(b)))
+
+        # 34c: README-only repo, NO CLAUDE.md -> adopted (the key fix). Also
+        # confirms it is NOT force-switched to coexist: adoption.mode stays
+        # greenfield while migration_status is adopted, and the doctor accepts
+        # that pairing.
+        c = base / "readme"; c.mkdir()
+        (c / "README.md").write_text("# Existing project\n\nHas real code, no agent governance yet.\n", encoding="utf-8")
+        r = init(c, "--project-name", "o", "--locale", "en")
+        results.append(check("34c. README-only (no CLAUDE.md) init succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34c. README-only repo -> migration_status ADOPTED (was wrongly greenfield before)", _mig(c) == "adopted", _mig(c)))
+        cfg_c = yaml.safe_load((c / ".eif" / "config.yaml").read_text(encoding="utf-8"))
+        results.append(check("34c. README-only repo is NOT force-switched to coexist (adoption.mode stays greenfield)",
+                             cfg_c["adoption"]["mode"] == "greenfield", str(cfg_c.get("adoption"))))
+        results.append(check("34c. doctor accepts greenfield mode + adopted history", _doctor(c).returncode == 0, _doctor(c).stdout))
+
+        # 34d: a source tree (src/main.py) beside .git/, no CLAUDE.md -> adopted.
+        d = base / "srctree"; (d / "src").mkdir(parents=True); (d / ".git").mkdir()
+        (d / "src" / "main.py").write_text("print('hi')\n", encoding="utf-8")
+        r = init(d, "--project-name", "o", "--locale", "en")
+        results.append(check("34d. source-tree (no CLAUDE.md) init succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34d. source-tree repo -> migration_status adopted", _mig(d) == "adopted", _mig(d)))
+
+        # 34e: existing repo + explicit --migration-status greenfield -> STOP,
+        # byte-for-byte unchanged.
+        e = base / "false-greenfield"; e.mkdir()
+        (e / "README.md").write_text("# Existing project\n", encoding="utf-8")
+        before_e = tree_snapshot(e)
+        r = init(e, "--project-name", "o", "--locale", "en", "--migration-status", "greenfield")
+        results.append(check("34e. pre-existing repo + explicit greenfield history STOPs", r.returncode != 0, r.stdout + r.stderr))
+        results.append(check("34e. STOP explains the contradiction", "contradiction" in (r.stdout + r.stderr)))
+        results.append(check("34e. no .eif written", not (e / ".eif").exists()))
+        results.append(check("34e. tree byte-for-byte unchanged", tree_snapshot(e) == before_e))
+
+        # 34f: existing repo + greenfield AUTHORITY override -> adopted history.
+        f = base / "override"; f.mkdir()
+        (f / "README.md").write_text("# Existing project\n", encoding="utf-8")
+        r = init(f, "--project-name", "o", "--locale", "en", "--adoption-mode", "greenfield")
+        results.append(check("34f. greenfield authority override on existing repo succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34f. greenfield authority override still records adopted history", _mig(f) == "adopted", _mig(f)))
+
+        # 34g: existing repo + coexist -> adopted history (README-only, no CLAUDE.md).
+        g = base / "coexist-readme"; g.mkdir()
+        (g / "README.md").write_text("# Existing project\n", encoding="utf-8")
+        r = init(g, "--project-name", "o", "--locale", "en", "--adoption-mode", "coexist")
+        results.append(check("34g. coexist on README-only repo succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34g. coexist on existing repo -> adopted history", _mig(g) == "adopted", _mig(g)))
+
+        # 34h: upgrade preserves the recorded status - EIF's own generated
+        # files (now present after the first init) must NOT flip origin.
+        r = init(c)  # routine upgrade of the 34c README-only instance, no flags
+        results.append(check("34h. routine upgrade of the adopted instance succeeds", r.returncode == 0, r.stdout + r.stderr))
+        results.append(check("34h. upgrade preserves adopted (generated EIF files do not re-flip origin)", _mig(c) == "adopted", _mig(c)))
+
+        # 34i: unknown/unreadable origin does not silently become greenfield.
+        # Portably exercise the OSError->"unknown" fail-closed branch by
+        # pointing --instance-path at a FILE (iterdir raises NotADirectoryError,
+        # an OSError) - a real permission-denied directory is platform-specific.
+        not_a_dir = base / "iam-a-file"
+        not_a_dir.write_text("x", encoding="utf-8")
+        r = init(not_a_dir, "--project-name", "o", "--locale", "en")
+        results.append(check("34i. unreadable/unknown origin without --migration-status STOPs (fail closed)", r.returncode != 0, r.stdout + r.stderr))
+        results.append(check("34i. STOP refuses to guess greenfield", "could not determine" in (r.stdout + r.stderr) or "greenfield history" in (r.stdout + r.stderr), r.stdout + r.stderr))
+        results.append(check("34i. the file instance-path was left untouched", not_a_dir.read_text(encoding="utf-8") == "x"))
+
+    # --- 35. Partial-write staging cleanup (independent-review): a crash
+    # AFTER a stage's .next is genuinely PART-WRITTEN on disk (not merely
+    # before the write starts, which step 33 covers) still unwinds to the
+    # exact prior tree. This is the stronger mid-copy guarantee - the fault
+    # leaves a real partial artifact, and the cleanup must still remove it,
+    # because each .next path is registered for cleanup BEFORE its write. ---
+    for stage in ["config", "runtime", "lock", "entrypoint", "gitignore", "knowledge_index"]:
+        with tempfile.TemporaryDirectory() as tmp:
+            inst = Path(tmp) / "inst"
+            inst.mkdir()
+            (inst / "knowledge" / "facts").mkdir(parents=True)
+            (inst / "knowledge" / "facts" / "FACT-0001.md").write_text(FACT_ARTIFACT, encoding="utf-8")
+            before = tree_snapshot(inst)
+            r = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                     "--instance-path", str(inst), "--allow-dirty",
+                     "--project-name", f"partial-{stage}", "--locale", "en"],
+                    env={"EIF_INIT_TEST_FAIL_PARTIAL": stage})
+            results.append(check(f"35. [{stage}] partial-write fault makes the run fail", r.returncode != 0, r.stdout + r.stderr))
+            results.append(check(f"35. [{stage}] failure is reported as a partial write", "partial" in (r.stdout + r.stderr).lower(), r.stdout + r.stderr))
+            results.append(check(f"35. [{stage}] no .eif left behind (fresh init)", not (inst / ".eif").exists(),
+                                 f"contents={list((inst / '.eif').rglob('*')) if (inst / '.eif').exists() else None}"))
+            results.append(check(f"35. [{stage}] no CLAUDE.md written", not (inst / "CLAUDE.md").exists()))
+            results.append(check(f"35. [{stage}] no orphaned .next/.previous/partial runtime dir anywhere",
+                                 not any(inst.rglob("*.next")) and not any(inst.rglob("*.previous"))))
+            results.append(check(f"35. [{stage}] no orphaned parent dir - knowledge/ (pre-existing) still intact",
+                                 (inst / "knowledge" / "facts" / "FACT-0001.md").exists()))
+            results.append(check(f"35. [{stage}] tree byte-for-byte unchanged", tree_snapshot(inst) == before))
+
+    # 35b. A failed --force reconfigure that dies with a PARTIAL artifact on
+    # disk still removes the config backup it made (byte-for-byte prior tree);
+    # a SUCCESSFUL reconfigure keeps the backup as the recovery artifact.
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "inst"
+        inst.mkdir()
+        r0 = init(inst, "--project-name", "recon", "--locale", "en")
+        results.append(check("35b. baseline init succeeds", r0.returncode == 0, r0.stdout + r0.stderr))
+        before = tree_snapshot(inst)
+        r1 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", "--force", "--locale", "uk"],
+                 env={"EIF_INIT_TEST_FAIL_PARTIAL": "lock"})
+        results.append(check("35b. failed --force reconfigure (partial) exits non-zero", r1.returncode != 0, r1.stdout + r1.stderr))
+        results.append(check("35b. no config backup left behind (deleted on failed partial reconfigure)",
+                             not any(inst.glob(".eif/config.yaml.bak-*")), str(list(inst.glob(".eif/config.yaml.bak-*")))))
+        results.append(check("35b. no orphaned .next anywhere", not any(inst.rglob("*.next"))))
+        results.append(check("35b. tree byte-for-byte unchanged (prior instance intact)", tree_snapshot(inst) == before))
+        r2 = init(inst, "--force", "--locale", "uk")
+        results.append(check("35b. successful reconfigure succeeds", r2.returncode == 0, r2.stdout + r2.stderr))
+        results.append(check("35b. successful reconfigure keeps a config backup (recovery artifact)",
+                             len(list(inst.glob(".eif/config.yaml.bak-*"))) >= 1))
+
     passed = sum(results)
     print(f"\ntest_journey: {passed}/{len(results)} passed")
     return 0 if all(results) else 1

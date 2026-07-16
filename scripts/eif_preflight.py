@@ -61,10 +61,14 @@ class PreflightReport:
     checks: list[PreflightCheck] = field(default_factory=list)
     # True when the entrypoint file already holds substantial project
     # content with no EIF markers yet - i.e. this instance is being created
-    # ON TOP OF a repository that already had its own governance. Exposed
-    # so the caller can derive the historical migration_status from the same
-    # single detection this preflight already performs, instead of a second,
-    # possibly-drifting copy of the "is there pre-existing state" logic.
+    # ON TOP OF a repository that already had its own GOVERNANCE. This is a
+    # governance-detection signal only. It is deliberately NOT the source of
+    # the historical migration_status any more: repository ORIGIN (was this
+    # an empty repo or a pre-existing one?) is a different question - an
+    # existing code repo with no CLAUDE.md has no governance here yet but is
+    # still historically `adopted` - and is detected separately by
+    # eif_init.detect_repository_origin(). Keeping the two apart is the fix
+    # for an existing repo without a CLAUDE.md being mis-recorded greenfield.
     detected_pre_existing_entrypoint: bool = False
 
     def add(self, level: str, message: str) -> None:

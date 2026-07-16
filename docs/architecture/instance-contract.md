@@ -97,22 +97,31 @@ Nothing is replaced in place. `eif_init`:
    place, and on any failure rolls back every already-committed stage to its
    exact prior bytes.
 
-Both failure windows are handled and separately tested (steps 16-33 of
-`scripts/tests/test_journey.py`, with `EIF_INIT_TEST_FAIL_AFTER`/
-`EIF_INIT_TEST_FAIL_BEFORE` fault injection at each stage):
+Three failure windows are handled and separately tested (steps 16-35 of
+`scripts/tests/test_journey.py`, with `EIF_INIT_TEST_FAIL_AFTER`,
+`EIF_INIT_TEST_FAIL_BEFORE`, and `EIF_INIT_TEST_FAIL_PARTIAL` fault
+injection at each stage):
 
 - **After a commit** - `commit_transaction` rolls back every committed
   stage and removes its own uncommitted `.next` files.
-- **Before the commit** (a fault while staging) - the whole staging phase
-  is wrapped so every `.next` is removed and the tree returns to its exact
-  prior state, nothing already live is touched.
+- **Before a stage's write** (a fault while staging, before that stage has
+  written anything) - the whole staging phase is wrapped so every `.next` is
+  removed and the tree returns to its exact prior state; nothing already live
+  is touched.
+- **Partway through a stage's write/copy** (a mid-copy crash that leaves a
+  genuinely PARTIAL `.next` on disk) - each `.next` path is registered for
+  cleanup *before* the first byte is written to it, and the runtime bundle
+  additionally self-cleans a partial `runtime.next`, so a half-written
+  artifact is always removed too, never orphaned. This is the strongest of
+  the three claims and is proven against a real partial artifact on disk, not
+  just a stage that never started.
 
-In both windows the outcome is byte-for-byte tree equality: no `.next`/
+In all three windows the outcome is byte-for-byte tree equality: no `.next`/
 `.previous` files, no orphaned new directories (a first-ever init removes
-its own freshly-created `.eif/` if the run fails), and no leftover config
-backup (see below). The instance's prior, working runtime survives a failed
-upgrade untouched and remains fully functional - not just "no crash," but
-"still works."
+its own freshly-created `.eif/` if the run fails), no partial runtime
+directory, and no leftover config backup (see below). The instance's prior,
+working runtime survives a failed upgrade untouched and remains fully
+functional - not just "no crash," but "still works."
 
 ### Config-backup policy
 
@@ -126,22 +135,59 @@ transient artifact until the reconfigure commits:
 - **Successful reconfigure** -> the backup is kept, as the recovery copy of
   the config that was just replaced.
 
+### Repository origin
+
+The *historical* `migration_status` is derived from a dedicated, read-only
+**repository-origin** check (`eif_init.detect_repository_origin`), run before
+any write. It is deliberately a **separate mechanism** from the
+governance/entrypoint preflight, which answers a different question ("is
+there pre-existing *governance* - a substantial `CLAUDE.md` - to coexist
+with?"). An existing code repository with a README, a package manifest, or a
+`src/` tree but no `CLAUDE.md` has no governance yet, but is still,
+historically, an **adopted** repository - never greenfield. Keying
+`migration_status` off the entrypoint file alone recorded such a repo as
+`greenfield`, which is simply false about how it came to exist; the two
+signals are kept apart.
+
+The origin check classifies the instance directory as one of:
+
+- **empty** - no project-owned entry outside `.git/` and `.eif/` (a
+  genuinely empty directory, a not-yet-created one, or one holding only
+  version-control / EIF metadata) -> `greenfield` history.
+- **pre_existing** - at least one project-owned file or directory outside
+  `.git/` and `.eif/` -> `adopted` history.
+- **unknown** - the directory could not be read (permissions / I/O). The tool
+  **fails closed**: it requires an explicit `--migration-status` and never
+  silently guesses `greenfield`.
+
+`.git/` (version-control metadata) and `.eif/` (EIF's own namespace) are
+ignored. A **stray or in-progress `.eif/`** left by a failed first init is
+therefore *not* evidence the repository pre-existed EIF; only genuine
+project-owned content is. On an upgrade/reconfigure the recorded history is
+preserved verbatim, so EIF's own generated files can never re-flip a repo's
+origin.
+
 ### Migration provenance
 
 `.eif/config.yaml`'s `adoption.mode` (the *current* coexistence behavior)
 and `.eif/framework.lock.yaml`'s `instance.migration_status` (the
-*historical* origin) answer different questions but must not contradict the
-evidence. `migration_status` is **derived**, not defaulted:
+*historical* origin, from the repository-origin check above) answer different
+questions but must not contradict the evidence. `migration_status` is
+**derived**, not defaulted:
 
-- adoption preflight detected pre-existing project state, or
-  `adoption.mode: coexist` -> `migration_status: adopted`;
-- a greenfield **authority** override on a repo that already had project
-  state still records `adopted` (an override changes who the block claims
-  authority for; it does not rewrite how the repository came to be);
-- a genuinely empty new repo -> `greenfield`;
+- a `pre_existing` repository, or `adoption.mode: coexist` ->
+  `migration_status: adopted`;
+- a greenfield **authority** override on a pre-existing repo still records
+  `adopted` (an override changes who the block claims authority for; it does
+  not rewrite how the repository came to be) - so `adoption.mode: greenfield`
+  with `migration_status: adopted` is a valid, expected pairing for an
+  existing repo that had no prior agent governance;
+- a genuinely `empty`-origin new repo -> `greenfield`;
 - an explicit `--adoption-mode coexist --migration-status greenfield`, or an
-  explicit greenfield migration status over detected pre-existing state,
-  STOPs before any write;
+  explicit `--migration-status greenfield` over a `pre_existing` repo, STOPs
+  before any write;
+- an `unknown` (unreadable) origin without an explicit `--migration-status`
+  STOPs - fail closed, never guessed as greenfield;
 - a routine upgrade preserves the persisted status; a reconfigure honors an
   explicit `--migration-status` and otherwise preserves it, and refuses to
   switch to `coexist` over a recorded `greenfield` without an explicit
@@ -150,7 +196,7 @@ evidence. `migration_status` is **derived**, not defaulted:
 `eif_verify_runtime.py` FAILs on the one impossible pairing (`coexist` +
 `greenfield`) with a concrete `--force` repair instruction, and never on a
 greenfield authority mode over an adopted history (that is the documented
-override case).
+override case above).
 
 ## Compatibility
 

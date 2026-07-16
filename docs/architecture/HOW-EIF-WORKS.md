@@ -558,7 +558,13 @@ formally ratified (the file is explicit about which is which).
       target (`wm-freelance-ops`) each round (private planning packet); the
       live repository is never opened for writing, and this is still only
       one real target - a second, different one is not yet exercised.
-- [ ] At least two agent adapters tested against this repository.
+- [x] At least two agent adapters tested against this repository: Claude
+      Code (`CLAUDE.md`, marker-merge) and Cursor (`.cursor/rules/eif/
+      governance.mdc`, full-regen, nested-entrypoint transaction, adapter
+      switching both directions - `scripts/tests/test_cursor_adapter.py`,
+      39 checks). Cursor is code/test-validated; real Cursor Agent-chat
+      consumption is not yet manually confirmed - see
+      `adapters/cursor/README.md#runtime-validation-status`.
 - [x] Structural-graph and shell-compression integrations documented as
       optional.
 - [x] Degraded mode documented.
@@ -575,9 +581,11 @@ formally ratified (the file is explicit about which is which).
 - [x] A controlled merge entrypoint exists
       ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py),
       genericized from the private instance's proven `merge-pr.ps1`
-      pattern) that re-verifies checks, Knowledge Delta, and review state,
-      then merges pinned to the verified head SHA. Live-tested with
-      `--dry-run` against this repository's real PR #1.
+      pattern) that re-verifies checks, Knowledge Delta, and review state
+      TWICE (once for evidence, once immediately pre-merge, re-derived not
+      re-read), paginates review threads, and merges pinned to the verified
+      head SHA. Live-used for real merges, not only `--dry-run` (PR #4 and
+      this repository's other merged PRs).
 - [ ] Those CI checks and the merge-gate script are not yet the *only*
       path to merge - nothing at the repository-settings level (required
       status checks / branch protection) or the agent-hook level (neither

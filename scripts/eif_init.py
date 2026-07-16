@@ -1332,8 +1332,8 @@ def main() -> int:
     # verification, or commit_transaction itself) rolls back every staged
     # file correctly but leaves a new, empty .eif/ behind - an orphaned
     # directory the same class of bug Item 1's transaction guarantee is
-    # supposed to rule out. Caught against a real adopted repository
-    # (wm-freelance-ops pilot copy), not by the synthetic fixtures, because
+    # supposed to rule out. Caught against a real adopted repository (a
+    # private pilot copy), not by the synthetic fixtures, because
     # every existing fault-injection test runs its second (faulted) attempt
     # against an instance a first, successful run already initialized -
     # .eif/ always already existed in those cases.

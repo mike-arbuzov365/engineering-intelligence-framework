@@ -554,8 +554,8 @@ formally ratified (the file is explicit about which is which).
       `.eif/config.yaml` stops before any write rather than being treated
       as absent. Tested against a realistic sanitized fixture
       (`scripts/tests/test_adoption.py`, 67 checks) AND re-validated by
-      rerunning the full pilot against fresh disposable copies of the real
-      target (`wm-freelance-ops`) each round (private planning packet); the
+      rerunning the full pilot against fresh disposable copies of one real
+      private pilot target each round (private planning packet); the
       live repository is never opened for writing, and this is still only
       one real target - a second, different one is not yet exercised.
 - [x] At least two agent adapters tested against this repository, **partially**:

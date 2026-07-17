@@ -324,6 +324,35 @@ def main() -> int:
             codex_cfg_text,
         ))
 
+        # --- package-wheel-metadata: eifctl init --adapter hermes also
+        # works from the installed wheel - proves the dynamic entrypoint
+        # resolver (eif_adapters.resolve_dynamic_entrypoint(), not a single
+        # static filename) round-trips through packaging correctly, not
+        # just from the dev checkout. ---
+        hermes_project_dir = tmp_root / "hermes-pkgtest"
+        hermes_init_proc = run(
+            [str(eifctl_exe), "init", "--project-name", "hermes-pkgtest", "--adapter", "hermes",
+             "--migration-status", "greenfield", "--instance-path", str(hermes_project_dir)],
+            cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl init --adapter hermes succeeds from the installed wheel",
+            hermes_init_proc.returncode == 0,
+            hermes_init_proc.stdout + hermes_init_proc.stderr,
+        ))
+        hermes_entry_text = (hermes_project_dir / ".hermes.md").read_text(encoding="utf-8") if (hermes_project_dir / ".hermes.md").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl's dynamic resolver defaults to .hermes.md and generates the EIF-managed block",
+            "<!-- EIF:BEGIN" in hermes_entry_text and "<!-- EIF:END -->" in hermes_entry_text,
+            hermes_entry_text,
+        ))
+        hermes_cfg_text = (hermes_project_dir / ".eif" / "config.yaml").read_text(encoding="utf-8") if (hermes_project_dir / ".eif" / "config.yaml").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl records adapter.name: hermes",
+            "hermes" in hermes_cfg_text,
+            hermes_cfg_text,
+        ))
+
         uninstall = run([str(venv_python), "-m", "pip", "uninstall", "-y", "-q", "engineering-intelligence-framework"])
         results.append(check("uninstall succeeds and removes the console-script entry point", uninstall.returncode == 0 and not eifctl_exe.exists()))
 

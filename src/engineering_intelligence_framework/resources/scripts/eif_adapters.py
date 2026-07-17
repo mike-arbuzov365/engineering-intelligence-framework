@@ -18,6 +18,24 @@ entry_strategy:
   "full-regen" - the entrypoint is a dedicated, exclusively EIF-owned file
     (never shared with project-authored content). The whole file is
     regenerated every init/upgrade; there is nothing to merge or preserve.
+  "dynamic-resolve" - there is no single fixed entrypoint filename; the
+    agent itself picks ONE of several candidate filenames per its own
+    first-match precedence (Hermes: .hermes.md/HERMES.md, then AGENTS.md,
+    then CLAUDE.md - see `entrypoint_candidates`). The actual filename to
+    write MUST be computed per-instance by resolve_dynamic_entrypoint()
+    below, never assumed to be entrypoint_for(adapter)'s static default
+    (that default is only the greenfield fallback, used when nothing at
+    all already exists). Marker-merge safety (find_managed_block(),
+    render_merged_content()) still applies to whichever file is resolved -
+    this is an orthogonal axis to entry_strategy's existing two values,
+    not a replacement for marker-merge semantics.
+
+entrypoint_candidates - for a "dynamic-resolve" adapter only: the ordered
+  list of filenames the agent itself checks, in its own first-match-wins
+  precedence (highest priority first). Some tiers may have a wider
+  discovery scope than others (e.g. Hermes's .hermes.md/HERMES.md walk up
+  to the git root; AGENTS.md/CLAUDE.md are checked at the instance root
+  only) - see resolve_dynamic_entrypoint()'s ANCESTOR_WALK_TIER.
 
 entry_ownership - the safety contract for what happens when the entrypoint
   path already has content with no EIF markers:
@@ -57,6 +75,7 @@ governance_discovery - read-only, deterministic, instance-relative
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from pathlib import Path
 
 ADAPTERS = {
@@ -197,6 +216,65 @@ ADAPTERS = {
             "Codex-specific integration."
         ),
     },
+    "hermes": {
+        # No single fixed entrypoint - see entry_strategy note above.
+        # "entrypoint" here is only the greenfield default (used when NO
+        # candidate already exists anywhere relevant); the actual per-
+        # instance target always comes from resolve_dynamic_entrypoint().
+        "entrypoint": ".hermes.md",
+        "entry_strategy": "dynamic-resolve",
+        "entry_ownership": "shared",
+        "entry_frontmatter": "",
+        # Verified live 2026-07-17 against `hermes --version` (Hermes Agent
+        # v0.18.2, 2026.7.7.2) and the official docs
+        # (hermes-agent.nousresearch.com/docs/user-guide/features/
+        # context-files): "Only one project context type is loaded per
+        # session (first match wins): .hermes.md -> AGENTS.md -> CLAUDE.md
+        # -> .cursorrules." .hermes.md and HERMES.md share the top tier (the
+        # docs do not define their relative order if BOTH exist in the same
+        # directory - an open, undocumented ambiguity, not assumed away).
+        # Runtime-verified via `hermes prompt-size` (offline, no API call)
+        # against a disposable probe project: confirmed the reported
+        # "context (AGENTS.md/cwd files)" byte count changes only when the
+        # HIGHEST-precedence candidate present actually gets picked up
+        # (never the byte count of a lower-tier file that also exists);
+        # confirmed a root .hermes.md is found from a NESTED cwd (walks to
+        # git root); and confirmed a root AGENTS.md is NOT found from that
+        # same nested cwd (0 bytes) - the "AGENTS.md cwd-only limitation" is
+        # real, not just documentation prose.
+        "entrypoint_candidates": [".hermes.md", "HERMES.md", "AGENTS.md", "CLAUDE.md"],
+        "governance_discovery": {
+            # .cursor/rules/*.mdc and legacy .cursorrules are read by Hermes
+            # too (the docs place .cursorrules as the last link in the SAME
+            # first-match chain above), but neither is a marker-merge target
+            # for this adapter: .cursor/rules/*.mdc is YAML-frontmattered,
+            # per-file granularity, structurally unlike a flat markdown
+            # context file; .cursorrules is Cursor's own already-deprecated
+            # legacy format (see adapters/cursor/README.md). Both are
+            # discovery-only signals - existing governance EIF must not
+            # silently write over, never a generation target.
+            "glob_patterns": [".cursor/rules/**/*.mdc"],
+            "legacy_signals": [".cursorrules"],
+            "shared_signals": [],
+            "same_dir_shadow_signals": [],
+        },
+        "verified_product_version": "0.18.2 (2026.7.7.2)",
+        "verified_date": "2026-07-17",
+        "capabilities": [
+            "persistent-instruction-autoload",
+            "skill-discovery",
+        ],
+        "unsupported": [
+            "soul-md-out-of-scope-per-instruction",
+            "hooks-not-verified",
+        ],
+        "fallback": (
+            "Whichever candidate file is actually resolved (.hermes.md, "
+            "HERMES.md, AGENTS.md, or CLAUDE.md) is read as plain context "
+            "by any agent pointed at it, even one with no Hermes-specific "
+            "integration."
+        ),
+    },
 }
 
 DEFAULT_ADAPTER = "claude-code"
@@ -323,3 +401,119 @@ def discover_shadow_signals(instance_path: Path, adapter: str) -> list[str]:
         if resolved.is_file():
             found.add(candidate.relative_to(instance_path).as_posix())
     return sorted(found)
+
+
+# entrypoint_candidates entries whose discovery scope is a hierarchical
+# parent-directory walk up to the git root (Hermes: .hermes.md/HERMES.md).
+# Anything in entrypoint_candidates but NOT in this set is checked at the
+# instance root only ("cwd-only": Hermes's own AGENTS.md/CLAUDE.md
+# behavior, confirmed empirically - see the "hermes" registry entry).
+ANCESTOR_WALK_TIER = {".hermes.md", "HERMES.md"}
+ANCESTOR_WALK_MAX_DEPTH = 5
+
+
+def _find_git_root(start: Path) -> Path | None:
+    current = start
+    while True:
+        if (current / ".git").exists():
+            return current
+        if current.parent == current:
+            return None
+        current = current.parent
+
+
+@dataclass
+class DynamicEntrypointResolution:
+    entrypoint: str
+    dynamic: bool
+    existing_at_root: bool
+    parent_shadow: str | None
+    rationale: str
+
+
+def resolve_dynamic_entrypoint(instance_path: Path, adapter: str) -> DynamicEntrypointResolution:
+    """Determine which file this adapter would actually treat as project
+    context, for adapters whose entry_strategy is "dynamic-resolve" (a
+    "marker-merge"/"full-regen" adapter gets its single static entrypoint
+    back unchanged, dynamic=False). Read-only - never writes anything.
+
+    Resolution order (mirrors the agent's OWN precedence, not an EIF
+    invention):
+      1. Walk instance_path and its ancestors (closest first, up to
+         ANCESTOR_WALK_MAX_DEPTH levels or the git root, whichever is
+         nearer) for each name in ANCESTOR_WALK_TIER, in
+         entrypoint_candidates order. The first match found ANYWHERE in
+         that walk is what the agent actually loads right now - whether
+         it sits at instance_path itself (existing_at_root=True, EIF
+         should marker-merge into it directly) or at a parent directory
+         above it (parent_shadow=<path>, EIF must not silently create an
+         ancestor-tier file at instance_path - that would immediately
+         start shadowing the parent's file for this whole subtree, a real
+         behavior change that needs an explicit decision, not a default).
+      2. Only if nothing in that tier was found anywhere in the walk:
+         check instance_path itself (cwd-only, no parent walk - this is
+         the empirically-confirmed limitation for Hermes's own AGENTS.md/
+         CLAUDE.md handling) for each remaining candidate in precedence
+         order. The first one present is adopted.
+      3. Only if nothing at all was found: default to the adapter's
+         registered fallback entrypoint (entrypoint_for(adapter) -
+         ".hermes.md" for Hermes) - the "greenfield, nothing exists yet"
+         case the round's instruction requires as the ONLY time a new,
+         higher-priority file gets created outright.
+    """
+    if entry_strategy_for(adapter) != "dynamic-resolve":
+        return DynamicEntrypointResolution(
+            entrypoint=entrypoint_for(adapter), dynamic=False, existing_at_root=True,
+            parent_shadow=None, rationale="static entrypoint, no resolution needed",
+        )
+
+    candidates: list[str] = ADAPTERS[adapter].get("entrypoint_candidates", [entrypoint_for(adapter)])
+    ancestor_tier = [c for c in candidates if c in ANCESTOR_WALK_TIER]
+    cwd_only_tier = [c for c in candidates if c not in ANCESTOR_WALK_TIER]
+
+    root = instance_path.resolve()
+    git_root = _find_git_root(root)
+
+    if ancestor_tier:
+        current = root
+        depth = 0
+        while True:
+            for name in ancestor_tier:
+                if (current / name).is_file():
+                    if current == root:
+                        return DynamicEntrypointResolution(
+                            entrypoint=name, dynamic=True, existing_at_root=True, parent_shadow=None,
+                            rationale=f"existing {name!r} found at the instance root - adopting it",
+                        )
+                    return DynamicEntrypointResolution(
+                        entrypoint=name, dynamic=True, existing_at_root=False,
+                        parent_shadow=str(current / name),
+                        rationale=(
+                            f"{name!r} found in a parent directory ({current}), not at the instance "
+                            f"root - this is what the agent actually loads right now for a session run "
+                            f"at the instance root; creating a new ancestor-tier file there would start "
+                            f"shadowing it for this whole subtree, so this is reported rather than acted "
+                            f"on by default"
+                        ),
+                    )
+            if git_root is not None and current == git_root:
+                break
+            if current.parent == current:
+                break
+            depth += 1
+            if depth > ANCESTOR_WALK_MAX_DEPTH:
+                break
+            current = current.parent
+
+    for name in cwd_only_tier:
+        if (root / name).is_file():
+            return DynamicEntrypointResolution(
+                entrypoint=name, dynamic=True, existing_at_root=True, parent_shadow=None,
+                rationale=f"existing {name!r} found at the instance root (cwd-only tier) - adopting it",
+            )
+
+    default = entrypoint_for(adapter)
+    return DynamicEntrypointResolution(
+        entrypoint=default, dynamic=True, existing_at_root=False, parent_shadow=None,
+        rationale=f"no existing candidate found anywhere - defaulting to {default!r} (greenfield)",
+    )

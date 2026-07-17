@@ -92,6 +92,7 @@ from eif_locale import msg  # noqa: E402
 from eif_adapters import (  # noqa: E402
     ADAPTERS, DEFAULT_ADAPTER, entrypoint_for, entry_strategy_for,
     entry_frontmatter_for, discover_governance_surfaces, discover_shadow_signals,
+    resolve_dynamic_entrypoint,
 )
 from eif_markers import render_merged_content, find_managed_block, MarkerConflict  # noqa: E402
 from eif_validate_frontmatter import (  # noqa: E402
@@ -1130,7 +1131,18 @@ def main(argv: list[str] | None = None) -> int:
     if adapter not in ADAPTERS:
         print(f"eif-init: adapter {adapter!r} (from existing config) is not a registered adapter: {sorted(ADAPTERS)}", file=sys.stderr)
         return 1
-    entrypoint = entrypoint_for(adapter)
+    # --- Dynamic entrypoint resolution (Hermes: no single fixed filename -
+    # the agent itself picks the first candidate it finds, per its own
+    # precedence, from a hierarchical scope that differs per candidate). A
+    # "marker-merge"/"full-regen" adapter gets its static entrypoint back
+    # unchanged (dynamic=False). A parent-directory ancestor-tier match
+    # (dynamic_parent_shadow below) is reported as a shadow signal rather
+    # than acted on silently - see resolve_dynamic_entrypoint()'s docstring. ---
+    dynamic_resolution = resolve_dynamic_entrypoint(instance_path, adapter)
+    entrypoint = dynamic_resolution.entrypoint
+    dynamic_parent_shadow = dynamic_resolution.parent_shadow
+    if dynamic_resolution.dynamic:
+        print(f"eif-init: dynamic entrypoint resolution for {adapter!r}: {dynamic_resolution.rationale}")
 
     # --- Adapter switching (Stage 3.4): detect a reconfigure that changes
     # adapter, and decide - BEFORE any writes - what happens to the OLD
@@ -1155,8 +1167,42 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 1
-        old_entry_path = instance_path / entrypoint_for(old_adapter)
-        if old_entry_path.exists():
+        if entry_strategy_for(old_adapter) == "dynamic-resolve":
+            # The OLD adapter's actual entrypoint may differ from run to
+            # run (project state can change between init and a later
+            # switch) - read what was ACTUALLY written last time from the
+            # existing lock, rather than re-resolving live, which could
+            # answer a different question than "which file did we
+            # actually write to before".
+            old_lock_entrypoint = ((existing_lock or {}).get("adapter") or {}).get("entrypoint")
+            if not old_lock_entrypoint:
+                print(
+                    f"eif-init: cannot switch away from adapter {old_adapter!r} - it has no single "
+                    f"fixed entrypoint, and the existing lock does not record which file was actually "
+                    f"used. STOP before any writes. Remove {old_adapter!r}'s entrypoint by hand first "
+                    f"if it still exists, then retry.",
+                    file=sys.stderr,
+                )
+                return 1
+            old_entry_path = instance_path / old_lock_entrypoint
+        else:
+            old_entry_path = instance_path / entrypoint_for(old_adapter)
+        # Both a dynamic-resolve adapter's resolution AND a plain adapter
+        # switch can land on the SAME target path (e.g. switching FROM
+        # claude-code TO hermes when hermes's own resolver finds and adopts
+        # the very CLAUDE.md that claude-code already owns - real, not
+        # hypothetical: reproduced while building this adapter). In that
+        # case there is only ONE file and ONE marker-merge operation to
+        # perform, not two - the "entrypoint" stage below already finds the
+        # existing (old adapter's) EIF block and replaces it with the new
+        # one, preserving project content outside the markers exactly like
+        # any other marker-merge. A separate "old-entrypoint" stage
+        # targeting the identical path would double-stage the same
+        # <path>.next file and the second stage to commit would find it
+        # already consumed by the first - old_entry_plan must stay None here.
+        if old_entry_path == instance_path / entrypoint:
+            old_entry_path = None
+        elif old_entry_path.exists():
             old_text = old_entry_path.read_text(encoding="utf-8")
             try:
                 found = find_managed_block(old_text, EIF_BEGIN, EIF_END)
@@ -1226,6 +1272,13 @@ def main(argv: list[str] | None = None) -> int:
     # name appears here.
     governance_surfaces = discover_governance_surfaces(instance_path, adapter)
     shadow_signals = discover_shadow_signals(instance_path, adapter)
+    # A dynamic-resolve adapter's parent-directory ancestor match (Hermes: a
+    # .hermes.md/HERMES.md above the instance root) is reported the exact
+    # same way as a same-directory shadow signal: writing our own entrypoint
+    # here is safe but will not be read while the parent file governs this
+    # subtree, independent of adoption mode - see resolve_dynamic_entrypoint().
+    if dynamic_parent_shadow:
+        shadow_signals = sorted({*shadow_signals, dynamic_parent_shadow})
 
     preflight = run_preflight(
         mode=mode,
@@ -1415,7 +1468,7 @@ def main(argv: list[str] | None = None) -> int:
         if old_entry_plan is not None:
             plan_kind, _ = old_entry_plan
             verb = "delete" if plan_kind == "delete" else "strip EIF block from"
-            print(f"{prefix}{verb} old entrypoint {entrypoint_for(old_adapter)} (adapter switch {old_adapter!r} -> {adapter!r})")
+            print(f"{prefix}{verb} old entrypoint {old_entry_path.name} (adapter switch {old_adapter!r} -> {adapter!r})")
         print(f"{prefix}{gi_action if gi_action != 'update-block' else 'update'} .gitignore (EIF-managed block)")
         print(f"{prefix}{index_action} knowledge index ({index_message})")
         print(msg(framework_root, locale, "init_complete", path=instance_path))
@@ -1657,7 +1710,7 @@ def main(argv: list[str] | None = None) -> int:
     if old_entry_plan is not None:
         plan_kind, _ = old_entry_plan
         verb = "deleted" if plan_kind == "delete" else "stripped EIF block from"
-        print(f"{verb} old entrypoint {entrypoint_for(old_adapter)} (adapter switch {old_adapter!r} -> {adapter!r})")
+        print(f"{verb} old entrypoint {old_entry_path.name} (adapter switch {old_adapter!r} -> {adapter!r})")
     print(f"{gi_action} .gitignore (EIF-managed block)")
 
     if index_content is not None:

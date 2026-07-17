@@ -54,7 +54,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from eif_adapters import ADAPTERS, entrypoint_for  # noqa: E402
+from eif_adapters import ADAPTERS, entrypoint_for, entry_strategy_for  # noqa: E402
 from eif_markers import check_marker_integrity  # noqa: E402
 from eif_validate_frontmatter import load_schema, validate_one, _normalize_yaml_scalars  # noqa: E402
 
@@ -202,8 +202,21 @@ def check_consistency(config: dict | None, lock: dict | None) -> list[str]:
         problems.append(f"config adapter.name {cfg_adapter!r} is not in the adapter registry (scripts/eif_adapters.py)")
     if cfg_adapter != lock_adapter:
         problems.append(f"config adapter.name ({cfg_adapter!r}) != lock adapter.name ({lock_adapter!r})")
-    if lock_adapter in ADAPTERS and lock_entrypoint != entrypoint_for(lock_adapter):
-        problems.append(f"lock adapter.entrypoint ({lock_entrypoint!r}) != the registered entrypoint for {lock_adapter!r} ({entrypoint_for(lock_adapter)!r})")
+    if lock_adapter in ADAPTERS:
+        if entry_strategy_for(lock_adapter) == "dynamic-resolve":
+            # No single fixed entrypoint - the lock's recorded value must be
+            # ONE of the adapter's registered candidates (whichever one was
+            # actually resolved and written at init/upgrade time), not
+            # necessarily the greenfield-default fallback entrypoint_for()
+            # returns.
+            candidates = ADAPTERS[lock_adapter].get("entrypoint_candidates", [entrypoint_for(lock_adapter)])
+            if lock_entrypoint not in candidates:
+                problems.append(
+                    f"lock adapter.entrypoint ({lock_entrypoint!r}) is not one of {lock_adapter!r}'s "
+                    f"registered candidates ({candidates!r})"
+                )
+        elif lock_entrypoint != entrypoint_for(lock_adapter):
+            problems.append(f"lock adapter.entrypoint ({lock_entrypoint!r}) != the registered entrypoint for {lock_adapter!r} ({entrypoint_for(lock_adapter)!r})")
 
     migration_status = (lock.get("instance") or {}).get("migration_status")
     if migration_status not in ("greenfield", "adopted"):

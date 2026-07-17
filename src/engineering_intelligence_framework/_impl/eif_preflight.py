@@ -148,7 +148,6 @@ def run_preflight(
     gitignore_begin: str,
     gitignore_end: str,
     governance_surfaces: list[str] | None = None,
-    shadow_signals: list[str] | None = None,
 ) -> PreflightReport:
     """Build the structured OK/WARN/STOP report. Read-only - never writes.
 
@@ -169,29 +168,32 @@ def run_preflight(
     through to a WARN instead. Governed uniformly by adoption_basis now,
     not by mode.
 
-    `entry_strategy` ("marker-merge" | "full-regen") branches the existing-
-    entrypoint-content check: a "shared"-ownership entrypoint (CLAUDE.md)
-    may legitimately already hold real project content, so the response is
-    adoption-mode-dependent (OK if coexist, WARN if an explicit greenfield
-    override, STOP if undecided). A "full-regen"/exclusive entrypoint
-    (Cursor's dedicated file) has NO legitimate "the project already put
-    real content here" case - existing content without a valid EIF block
-    always STOPs, regardless of adoption mode or content size, and the
-    message never claims the generated content will "defer to" what's
-    there, since full-regen replaces the whole file rather than preserving
-    anything outside markers.
+    `entry_strategy` ("marker-merge" | "full-regen" | "dynamic-resolve")
+    branches the existing-entrypoint-content check: a "shared"-ownership
+    entrypoint (CLAUDE.md, or whichever file a dynamic-resolve adapter
+    resolved to) may legitimately already hold real project content, so the
+    response is adoption-mode-dependent (OK if coexist, WARN if an explicit
+    greenfield override, STOP if undecided). A "full-regen"/exclusive
+    entrypoint (Cursor's dedicated file) has NO legitimate "the project
+    already put real content here" case - existing content without a valid
+    EIF block always STOPs, regardless of adoption mode or content size,
+    and the message never claims the generated content will "defer to"
+    what's there, since full-regen replaces the whole file rather than
+    preserving anything outside markers.
 
-    `shadow_signals` (from eif_adapters.discover_shadow_signals()) is
-    reported as an always-shown WARN, independent of adoption_basis: unlike
-    governance_surfaces (other content the agent ALSO reads, which coexist
-    mode can legitimately leave untouched), a shadow signal means the
-    entrypoint we are about to write would not be read by the agent AT ALL
-    while it is present (e.g. Codex's AGENTS.override.md next to AGENTS.md -
-    confirmed empirically to make the base file's content vanish from the
-    merged instruction chain, not merely add to it). Coexisting peacefully
-    with it does not fix that, so this is not gated by adoption mode; it is
-    a WARN rather than a STOP because the write itself is still safe (no
-    corruption, no data loss) - only pointless at that cwd until resolved.
+    A dynamic-resolve adapter's shadowing/unmanageable-active-source cases
+    (e.g. Codex's AGENTS.override.md taking precedence over a same-directory
+    AGENTS.md) are resolved BEFORE this function is ever called -
+    eif_adapters.resolve_active_entrypoint() either picks the real active
+    target (this function then runs the existing-content check above
+    against THAT file) or the caller (eif_init.py) already STOPped on an
+    unresolvable state. There is no separate always-shown shadow WARN here
+    any more: a shadow signal used to mean "the entrypoint we are about to
+    write would not be read by the agent at all while this other file is
+    present" - which is a defect in the SELECTED entrypoint, not a
+    pre-existing-content question, so it no longer belongs in this report at
+    all (round: Codex active-entrypoint correctness - the previous design
+    warned about exactly this while still writing the now-dead file).
     """
     report = PreflightReport()
 
@@ -282,19 +284,6 @@ def run_preflight(
                 f"coexist (these are preserved untouched either way) or --adoption-mode "
                 f"greenfield (explicit override) before proceeding.",
             )
-
-    # --- Shadowing signals: a file whose mere presence makes the entrypoint
-    # we are about to write invisible to the agent, regardless of adoption
-    # mode (see docstring above) ---
-    if shadow_signals:
-        signals_str = ", ".join(shadow_signals)
-        report.add(
-            "WARN",
-            f"{entrypoint_name} will be written, but {signals_str} is also present and "
-            f"takes precedence over it for this adapter - the generated content will not "
-            f"be read at this location until {signals_str} is removed, renamed, or updated "
-            f"to include it. This is independent of adoption mode.",
-        )
 
     # --- Malformed markers (surfaced here too, not only as eif_init's later hard failure) ---
     for label, text, begin, end in (

@@ -21,14 +21,18 @@ bundle:
     sha256: 588bd4eacfb2c0d327cfa86dc88d4244ffb674f74bbf51127367645cc2aa94ad
   - path: core/ontology/status-lifecycle.md
     sha256: 18ee456f191f4b2de048c7cca21f4480e7810f2705126eaa297eff1c00498c2b
+  - path: core/schemas/benchmark-fixture-manifest.schema.json
+    sha256: 71910139001e45f47e9855c79297cc594c3f6ceea93a2d9ee6a329411bb71c1c
+  - path: core/schemas/benchmark-result.schema.json
+    sha256: ffb267ade91126678e7123d25ec535a7f9609089cc29c264bacbbafeea464a69
   - path: core/schemas/eif-config.schema.json
     sha256: 3dba90641bbff7426b4845f9ebc020051c2c424b28e0e39c135e8334838ff654
   - path: core/schemas/framework-lock.schema.json
-    sha256: 4937edb4eb2d73485fdee5e680f97a2495e99a788870aaa6a37f04f129b1c97c
+    sha256: 907608a629ebf516aa36db5ccfc46b8e4b41deb3fc5e997b46e3456863dd5e72
   - path: core/schemas/knowledge-frontmatter.schema.json
     sha256: be3ff7b0b8bdaa55d98939fd2957e4f31f973c8c89f932c66011cb914ad08b5e
   - path: eif_adapters.py
-    sha256: 2f7afd74c52882f7b42c6a91d7c9729f7f2b3d5189b65717bfda219efaf313b3
+    sha256: 704ea32be7c78e3d0b37dfcd635fb6828f685f5bcda945455b44d17ddd4e24c7
   - path: eif_check_links.py
     sha256: 1b5aba3ed6792a345323e08c69b18059657ec53cd366b4f37b809badd2b3dc25
   - path: eif_generate_index.py
@@ -66,18 +70,18 @@ bundle:
   - path: templates/README.md
     sha256: 96af034eceae28aeefec8ef533bdb7f4351bf518a8d802822a0ffa1fdafa22ff
   - path: templates/agent-instructions.md
-    sha256: 04cef93c90ad795232580d8fffe3c4ee8572f88372bc262324ca0d8f7f7e5fe2
+    sha256: 4be26906973b2264f601641dcf410060329551a37aa5b39d234482663f8567f0
   - path: templates/knowledge-delta.md
     sha256: a3ab23101f97a60585ff51bd69eb927d70ec0ea4c6dfd72a782b23e7498cd7b2
   - path: templates/session-closeout.md
     sha256: 3e20360836c1d9cbf469300d704b1848b24011eeead43b755594be6b430971e0
   - path: templates/task-scope.md
     sha256: 66555e2692a6417bf8cbfa01bffdef5f218598b00d108eeccb42e01fa3ba9643
-  digest: sha256:f12d62e76bbfd660852bfb1ecc919e36bce626fe2ba6a695484724f436f015d8
-generated_at: '2026-07-17T13:00:26.177032+00:00'
+  digest: sha256:bda1ac5516044c4aab63ee026adb41ea334fdf686fe754756c15dc3b64e0207d
+generated_at: '2026-07-17T20:15:51.635664+00:00'
 git:
-  commit_sha: adc30c234003320d037e269077f92074d6d337cb
-  dirty: true
+  commit_sha: 226d9896db627170ed6c1b5d2a674cf312986878
+  dirty: false
 knowledge_index:
   path: docs/knowledge/index.md
   sha256: 5dabbae1996cf261bc040c90a3de647099982d0eec28485cea7bb985c2ac9b08

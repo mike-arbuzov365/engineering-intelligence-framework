@@ -128,7 +128,7 @@ def main() -> int:
         results.append(check("clean instance: no bundle file hash mismatches", hash_mismatches == []))
         results.append(check("clean instance: no missing managed files", missing == []))
         results.append(check("clean instance: no unexpected managed files (README.md/__pycache__ excluded correctly)", unexpected == []))
-        results.append(check("clean instance: config/adapter/lock/entrypoint consistent", verify.check_consistency(config, lock) == []))
+        results.append(check("clean instance: config/adapter/lock/entrypoint consistent", verify.check_consistency(config, lock, inst) == []))
         results.append(check("clean instance: marker integrity ok", verify.check_markers(inst, "CLAUDE.md") == []))
 
     # --- Corrupt runtime: a bundled file hand-edited after generation ---
@@ -182,17 +182,17 @@ def main() -> int:
         config = verify._load_yaml(inst / ".eif" / "config.yaml")
         lock = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
         lock["adapter"]["name"] = "not-a-real-adapter"
-        problems = verify.check_consistency(config, lock)
+        problems = verify.check_consistency(config, lock, inst)
         results.append(check("config/lock adapter name mismatch is caught", len(problems) > 0, str(problems)))
 
         lock2 = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
         lock2["adapter"]["entrypoint"] = "WRONG.md"
-        problems2 = verify.check_consistency(config, lock2)
+        problems2 = verify.check_consistency(config, lock2, inst)
         results.append(check("lock entrypoint not matching the registered entrypoint is caught", len(problems2) > 0, str(problems2)))
 
         lock3 = verify._load_yaml(inst / ".eif" / "framework.lock.yaml")
         lock3["instance"]["migration_status"] = "not-a-real-status"
-        problems3 = verify.check_consistency(config, lock3)
+        problems3 = verify.check_consistency(config, lock3, inst)
         results.append(check("invalid migration_status is caught", len(problems3) > 0, str(problems3)))
 
     # --- Marker integrity: corrupt CLAUDE.md with reversed markers ---

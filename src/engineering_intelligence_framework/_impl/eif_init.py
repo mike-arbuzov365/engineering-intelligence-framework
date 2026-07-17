@@ -91,7 +91,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from eif_locale import msg  # noqa: E402
 from eif_adapters import (  # noqa: E402
     ADAPTERS, DEFAULT_ADAPTER, entrypoint_for, entry_strategy_for,
-    entry_frontmatter_for, discover_governance_surfaces, discover_shadow_signals,
+    entry_frontmatter_for, discover_governance_surfaces,
+    resolve_active_entrypoint, check_size_budget, EntrypointState,
 )
 from eif_markers import render_merged_content, find_managed_block, MarkerConflict  # noqa: E402
 from eif_validate_frontmatter import (  # noqa: E402
@@ -1130,7 +1131,13 @@ def main(argv: list[str] | None = None) -> int:
     if adapter not in ADAPTERS:
         print(f"eif-init: adapter {adapter!r} (from existing config) is not a registered adapter: {sorted(ADAPTERS)}", file=sys.stderr)
         return 1
-    entrypoint = entrypoint_for(adapter)
+    # This adapter's own options sub-dict (.eif/config.yaml's
+    # adapter.options.<adapter> - see core/schemas/eif-config.schema.json),
+    # e.g. Codex's project_doc_fallback_filenames/project_doc_max_bytes.
+    # Absent on a fresh init (nothing configured yet); read from the
+    # existing config on upgrade/reconfigure, same as every other
+    # user-owned setting.
+    adapter_options = (((existing_config or {}).get("adapter") or {}).get("options") or {}).get(adapter) or {}
 
     # --- Adapter switching (Stage 3.4): detect a reconfigure that changes
     # adapter, and decide - BEFORE any writes - what happens to the OLD
@@ -1155,7 +1162,28 @@ def main(argv: list[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 1
-        old_entry_path = instance_path / entrypoint_for(old_adapter)
+        if entry_strategy_for(old_adapter) == "dynamic-resolve":
+            # The old adapter had no single fixed entrypoint (e.g. Codex:
+            # AGENTS.override.md vs AGENTS.md) - which file was ACTUALLY
+            # written last time can differ from run to run (project state
+            # changes between init and a later switch), so read it from the
+            # existing lock rather than re-deriving entrypoint_for()'s
+            # static greenfield default, which would silently target the
+            # wrong file (e.g. always "AGENTS.md" even when the prior write
+            # actually went to "AGENTS.override.md").
+            old_lock_entrypoint = ((existing_lock or {}).get("adapter") or {}).get("entrypoint")
+            if not old_lock_entrypoint:
+                print(
+                    f"eif-init: cannot switch away from adapter {old_adapter!r} - it has no single "
+                    f"fixed entrypoint, and the existing lock does not record which file was actually "
+                    f"used. STOP before any writes. Remove {old_adapter!r}'s entrypoint by hand first "
+                    f"if it still exists, then retry.",
+                    file=sys.stderr,
+                )
+                return 1
+            old_entry_path = instance_path / old_lock_entrypoint
+        else:
+            old_entry_path = instance_path / entrypoint_for(old_adapter)
         if old_entry_path.exists():
             old_text = old_entry_path.read_text(encoding="utf-8")
             try:
@@ -1195,15 +1223,40 @@ def main(argv: list[str] | None = None) -> int:
     # --- Path policy (independent-review fix): a JSON Schema pattern
     # cannot catch a resolved-path escape - this is the runtime check that
     # actually matters, run before anything else touches these paths. ---
+    fallback_key = ADAPTERS[adapter].get("fallback_option_key")
+    configured_fallbacks = adapter_options.get(fallback_key, []) if fallback_key else []
     try:
         knowledge_root_path = validate_instance_relative_path(knowledge_root, instance_path, "knowledge.root")
         knowledge_index_path_abs = validate_instance_relative_path(knowledge_index_path, instance_path, "knowledge.index_path")
         validate_index_inside_root(knowledge_index_path, knowledge_root)
+        for name in configured_fallbacks:
+            validate_instance_relative_path(name, instance_path, f"adapter.options.{adapter}.{fallback_key}")
     except PathPolicyError as e:
         print(f"eif-init: {e} - refusing to write anything.", file=sys.stderr)
         return 1
 
     print(msg(framework_root, locale, "init_start", path=instance_path))
+
+    # --- Active-entrypoint resolution (eif_adapters.resolve_active_entrypoint):
+    # for a "dynamic-resolve" adapter (Codex: AGENTS.override.md before
+    # AGENTS.md at the instance root, then any configured fallback filename),
+    # the file EIF must write is not a single static name - it is whichever
+    # candidate the agent's own contract would actually treat as active. A
+    # "marker-merge"/"full-regen" adapter gets its static entrypoint back
+    # unchanged (state=ACTIVE_MANAGEABLE, dynamic=False). Any state other
+    # than ACTIVE_MANAGEABLE/NOT_FOUND means there is nothing safe to write -
+    # STOP before any writes, never fall back to the greenfield default with
+    # only a warning (round: Codex active-entrypoint correctness - the
+    # previous design warned about a same-directory AGENTS.override.md
+    # while still writing a now-dead AGENTS.md alongside it). ---
+    resolution = resolve_active_entrypoint(instance_path, adapter, adapter_options)
+    if resolution.state not in (EntrypointState.ACTIVE_MANAGEABLE, EntrypointState.NOT_FOUND):
+        print(f"eif-init: active-entrypoint resolution for {adapter!r}: {resolution.rationale}", file=sys.stderr)
+        print(f"{prefix}refusing to write anything - resolve the conflict above, then re-run.", file=sys.stderr)
+        return 1
+    entrypoint = resolution.entrypoint
+    if resolution.dynamic:
+        print(f"eif-init: active-entrypoint resolution for {adapter!r}: {resolution.rationale}")
 
     # --- Adoption preflight (adoption-hardening round): read-only detection
     # of pre-existing project state, BEFORE any write and before rendering
@@ -1223,9 +1276,14 @@ def main(argv: list[str] | None = None) -> int:
     # files, legacy formats, other official signals) - distinct from the
     # entrypoint file above. Driven entirely by the registry
     # (eif_adapters.ADAPTERS[adapter]["governance_discovery"]); no adapter
-    # name appears here.
+    # name appears here. A same-directory sibling candidate that the active-
+    # entrypoint resolution above found shadowed (e.g. a base AGENTS.md next
+    # to a winning AGENTS.override.md) is excluded from this generic block -
+    # it is surfaced by resolution's own rationale instead, already printed
+    # above; reporting it again here would misleadingly imply an adoption-
+    # mode decision resolves it, the way it resolves everything else this
+    # block covers.
     governance_surfaces = discover_governance_surfaces(instance_path, adapter)
-    shadow_signals = discover_shadow_signals(instance_path, adapter)
 
     preflight = run_preflight(
         mode=mode,
@@ -1242,7 +1300,6 @@ def main(argv: list[str] | None = None) -> int:
         begin_marker=EIF_BEGIN, end_marker=EIF_END,
         gitignore_begin=GITIGNORE_MARKER, gitignore_end=GITIGNORE_END,
         governance_surfaces=governance_surfaces,
-        shadow_signals=shadow_signals,
     )
     print("eif-init: adoption preflight")
     for line in preflight.render(prefix="  "):
@@ -1359,6 +1416,22 @@ def main(argv: list[str] | None = None) -> int:
         print(f"eif-init: {entrypoint} has malformed EIF markers, refusing to write anything: {e}", file=sys.stderr)
         return 1
 
+    # --- Size budget (eif_adapters.check_size_budget): does this adapter's
+    # own documented content-size contract (Codex: project_doc_max_bytes, a
+    # COMBINED budget across the whole root-to-cwd chain, whole-file
+    # granularity - see the registry entry) actually include the file EIF is
+    # about to write? STOP rather than publish a write the agent's own
+    # contract would silently drop from its instruction chain with no
+    # warning of its own - a "successful" init that the agent never actually
+    # reads is worse than a refusal. An adapter with no registered size_limit
+    # (claude-code, cursor) always fits; nothing to check. ---
+    size_check = check_size_budget(instance_path, adapter, entry_new_text, adapter_options)
+    if not size_check.fits:
+        print(f"eif-init: {entrypoint} size budget: {size_check.rationale}", file=sys.stderr)
+        print(f"{prefix}refusing to write anything - reduce the content size, raise the configured "
+              f"limit, or split instructions across nested directories, then re-run.", file=sys.stderr)
+        return 1
+
     try:
         gi_new_text, gi_action = render_merged_content(existing_gi_text, GITIGNORE_BLOCK, GITIGNORE_MARKER, GITIGNORE_END)
     except MarkerConflict as e:
@@ -1412,10 +1485,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{prefix}refresh .eif/runtime ({len(manifest)} file(s), {digest[:19]}...)")
         print(f"{prefix}write .eif/framework.lock.yaml (migration_status: {migration_status})")
         print(f"{prefix}{entry_action} {entrypoint} (EIF-managed block)")
+        print(f"{prefix}{entrypoint} size budget: {size_check.rationale}")
         if old_entry_plan is not None:
             plan_kind, _ = old_entry_plan
             verb = "delete" if plan_kind == "delete" else "strip EIF block from"
-            print(f"{prefix}{verb} old entrypoint {entrypoint_for(old_adapter)} (adapter switch {old_adapter!r} -> {adapter!r})")
+            print(f"{prefix}{verb} old entrypoint {old_entry_path.name} (adapter switch {old_adapter!r} -> {adapter!r})")
         print(f"{prefix}{gi_action if gi_action != 'update-block' else 'update'} .gitignore (EIF-managed block)")
         print(f"{prefix}{index_action} knowledge index ({index_message})")
         print(msg(framework_root, locale, "init_complete", path=instance_path))
@@ -1582,8 +1656,18 @@ def main(argv: list[str] | None = None) -> int:
         entry_next = entry_path.with_name(entry_path.name + ".next")
         staged_next_paths.append(entry_next)
         _maybe_fault_before("entrypoint")
-        _maybe_fault_partial("entrypoint", entry_next, entry_new_text)
-        entry_next.write_text(entry_new_text, encoding="utf-8")
+        # write_bytes, not write_text: write_text's platform-default newline
+        # translation (LF -> CRLF on Windows) would make the on-disk byte
+        # count larger than check_size_budget() computed above from the
+        # in-memory string - the same class of bug already found and fixed
+        # for the knowledge index's sha256 below. A dynamic-resolve
+        # adapter's size contract (Codex: project_doc_max_bytes) is a real
+        # byte-count budget an actual agent enforces against the file it
+        # reads off disk, so the write must match what was measured, on
+        # every platform.
+        entry_bytes = entry_new_text.encode("utf-8")
+        _maybe_fault_partial("entrypoint", entry_next, entry_bytes)
+        entry_next.write_bytes(entry_bytes)
         stages.append(_Stage("entrypoint", entry_next, entry_path, is_dir=False))
 
         # Adapter switching (Stage 3.4): the old entrypoint's fate was
@@ -1657,7 +1741,7 @@ def main(argv: list[str] | None = None) -> int:
     if old_entry_plan is not None:
         plan_kind, _ = old_entry_plan
         verb = "deleted" if plan_kind == "delete" else "stripped EIF block from"
-        print(f"{verb} old entrypoint {entrypoint_for(old_adapter)} (adapter switch {old_adapter!r} -> {adapter!r})")
+        print(f"{verb} old entrypoint {old_entry_path.name} (adapter switch {old_adapter!r} -> {adapter!r})")
     print(f"{gi_action} .gitignore (EIF-managed block)")
 
     if index_content is not None:

@@ -81,17 +81,6 @@ jobs:
           python-version: "3.12"
       - name: Install pinned dependencies
         run: pip install -r scripts/requirements.txt
-      - name: TEMP DIAGNOSTIC - full test_benchmark.py output (remove before merge)
-        # run_all.py's own JSON report only carries each suite's last 8
-        # stdout lines by design (docstring: keeps the aggregate CI log
-        # compact) - a run on this workflow (29568820408) reported
-        # test_benchmark.py at 24/27 with no visibility into which 3 failed,
-        # since the failing checks were outside that 8-line tail. This step
-        # runs the suite directly so its full, untruncated output reaches
-        # the job log once. continue-on-error so it cannot itself block the
-        # gate - run_all.py below remains the actual required check.
-        run: python scripts/tests/test_benchmark.py
-        continue-on-error: true
       - name: Run all runtime test suites via run_all.py and emit the machine-readable inventory
         # run_all.py --json runs every suite (paths, validate, privacy-scan,
         # knowledge-delta, index, search, locale, render, markers,

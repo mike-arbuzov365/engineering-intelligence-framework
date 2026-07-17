@@ -84,12 +84,30 @@ def scan_transcript_for_privacy(transcript_path: Path) -> list[str]:
     return findings
 
 
+_DIGEST_SKIP_DIR_NAMES = {"__pycache__", ".git"}
+_DIGEST_SKIP_SUFFIXES = (".pyc", ".pyo")
+
+
 def compute_source_digest(source_dir: Path) -> str:
     """sha256 combined digest over every file's (relative path, sha256),
     sorted - same pattern as eif_init.py's combined_digest(), so a fixture
-    drifting since its manifest was written is always detectable."""
+    drifting since its manifest was written is always detectable.
+
+    Skips __pycache__/.pyc/.pyo: running a fixture's own test_command
+    directly against source_dir (e.g. to smoke-test it, as this round did
+    for all 3 pilot fixtures) generates local bytecode-cache artifacts
+    that git never tracks. Without this exclusion, the digest recorded in
+    manifest.json would depend on whether the fixture author happened to
+    have run the tests before computing it - and would then mismatch on
+    any environment (a fresh CI checkout, another contributor's machine)
+    that never generated that cache, exactly as manifest.json's recorded
+    digests did on this PR's first two CI runs."""
     entries = []
     for f in sorted(p for p in source_dir.rglob("*") if p.is_file()):
+        if any(part in _DIGEST_SKIP_DIR_NAMES for part in f.relative_to(source_dir).parts[:-1]):
+            continue
+        if f.suffix in _DIGEST_SKIP_SUFFIXES:
+            continue
         rel = f.relative_to(source_dir).as_posix()
         file_hash = hashlib.sha256(f.read_bytes()).hexdigest()
         entries.append((rel, file_hash))

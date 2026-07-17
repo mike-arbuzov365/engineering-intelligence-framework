@@ -6,7 +6,7 @@
   "supported_modes": ["A_baseline", "B_eif_governance"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
-  "source_digest": "sha256:e7c1fba4d3b8b29bad56492877eca8788e0f2ef83896c07a44f2b43debde2968",
+  "source_digest": "sha256:398ac588e79b931c54b23483583e7f15a1155c89eee7774afc8d1ae505befc9e",
   "test_command": ["python", "tests/test_file_reader.py"],
   "expected_output_contract": {
     "tests_total": 5,

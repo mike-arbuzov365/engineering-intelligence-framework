@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/benchmark-result.schema.json",
+  "title": "EIF quality-per-token benchmark result record",
+  "description": "One record = one attempt at (task, mode). The harness emits one of these per attempt - success, task failure, harness error, timeout, or abort - never omitted, never overwritten. A restarted attempt is a NEW record linked to the one it restarts via attempt_id/parent_attempt_id/attempt_kind, not a count folded into the record that preceded it - so the full retry history survives in the raw record stream, not just a tally. See docs/benchmarks/README.md for the corpus, modes, and methodology this schema serves. Validated with jsonschema's Draft202012Validator, same convention as every other EIF schema.",
+  "type": "object",
+  "required": [
+    "schema_version", "record_id", "attempt_id", "attempt_kind", "task_id",
+    "mode", "run_index", "model", "started_at", "inputs", "metrics", "outcome"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "minimum": 1 },
+    "record_id": {
+      "type": "string",
+      "description": "Unique per record, e.g. '<task_id>__<mode>__run<run_index>__<attempt_id>'."
+    },
+    "attempt_id": {
+      "type": "string",
+      "description": "Unique id for this specific attempt - never reused, including across a restart of the same (task_id, mode, run_index)."
+    },
+    "parent_attempt_id": {
+      "type": ["string", "null"],
+      "description": "The attempt_id this one restarts, if any. null for the first attempt at a given (task_id, mode, run_index). Following parent_attempt_id backward reconstructs the full retry chain - the raw record stream is append-only, so that chain is never lost the way a bare counter would lose it."
+    },
+    "attempt_kind": {
+      "type": "string",
+      "enum": ["initial", "retry_after_harness_error", "retry_after_timeout", "retry_after_task_failure"],
+      "description": "Why this attempt exists. 'initial' has parent_attempt_id: null; every 'retry_*' value requires a non-null parent_attempt_id (cross-checked, not just documented - see eif_benchmark.py's validate-result)."
+    },
+    "task_id": {
+      "type": "string",
+      "description": "References a task in the corpus (see docs/benchmarks/fixtures/)."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
+      "description": "A: no EIF, no Graphify, no RTK. B: EIF (eifctl), no Graphify, no RTK. C: EIF + Graphify, no RTK - schema-declared, operationally BLOCKED (see docs/benchmarks/README.md) until a reproducible Graphify install/version/config contract exists. D: EIF + Graphify + RTK - same block, plus RTK's own contract."
+    },
+    "run_index": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "0-based repeat index for this exact (task_id, mode) pair - repeated runs are required by methodology, not optional. Distinct from attempt lineage: run_index identifies WHICH of the planned repeats this is; attempt_id/parent_attempt_id identify whether THIS run_index needed a restart."
+    },
+    "randomized_order_seed": {
+      "type": ["integer", "null"],
+      "description": "Seed used to randomize mode order for this run batch, so mode order itself is not a confound. null only for a single manual/debug run, never for a real batch."
+    },
+    "model": {
+      "type": "object",
+      "required": ["name", "version_or_snapshot"],
+      "properties": {
+        "name": { "type": "string" },
+        "version_or_snapshot": { "type": "string" },
+        "settings": {
+          "type": "object",
+          "description": "Free-form: temperature, max_tokens, thinking/reasoning effort, etc. - whatever this run's harness actually configured, so a later reader can tell if two records are truly comparable."
+        }
+      }
+    },
+    "tool_versions": {
+      "type": "object",
+      "description": "Pinned versions of any tooling this run's mode depended on (e.g. eifctl for mode B) - required so mixed tool versions are never silently compared as equivalent. Absent only for mode A, which depends on none.",
+      "properties": {
+        "eifctl": { "type": ["string", "null"] },
+        "graphify": { "type": ["string", "null"] },
+        "rtk": { "type": ["string", "null"] }
+      }
+    },
+    "started_at": { "type": "string", "format": "date-time" },
+    "finished_at": { "type": ["string", "null"], "format": "date-time" },
+    "inputs": {
+      "type": "object",
+      "required": ["target_kind", "target_ref"],
+      "properties": {
+        "target_kind": { "type": "string", "enum": ["synthetic_fixture", "public_repository"] },
+        "target_ref": {
+          "type": "string",
+          "description": "For synthetic_fixture: the fixture's own id/path in the corpus. For public_repository: 'owner/name'."
+        },
+        "frozen_commit_sha": {
+          "type": "string",
+          "description": "Required for public_repository (reproducibility); a synthetic fixture instead pins a fixture-bundle digest in provenance.source_digest."
+        },
+        "provenance": {
+          "type": "object",
+          "description": "How this exact input state was materialized for this run.",
+          "properties": {
+            "source_digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "description": "Combined sha256 of the fixture's immutable source tree at materialize time - lets validate-result confirm the attempt actually ran against the fixture it claims to, not a hand-edited or drifted copy."
+            },
+            "materialize_method": { "type": "string" }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "input_tokens", "output_tokens", "tool_calls", "wall_time_seconds",
+        "completion_success", "tests_passed", "tests_total"
+      ],
+      "properties": {
+        "input_tokens": { "type": "integer", "minimum": 0 },
+        "output_tokens": { "type": "integer", "minimum": 0 },
+        "reasoning_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "tool_calls": { "type": "integer", "minimum": 0 },
+        "wall_time_seconds": { "type": "number", "minimum": 0 },
+        "completion_success": {
+          "type": "boolean",
+          "description": "Did the run reach a terminal state the harness recognizes as 'done', regardless of whether the result was CORRECT - see tests_passed for correctness."
+        },
+        "tests_passed": { "type": "integer", "minimum": 0 },
+        "tests_total": { "type": "integer", "minimum": 0 },
+        "mutation_check_passed": {
+          "type": ["boolean", "null"],
+          "description": "Anti-cheating signal: did reverting the produced fix (applying the fixture's known mutation) make tests_passed drop as expected? false or null is itself a finding (the test suite may not actually exercise the fix) - never silently omitted from aggregation."
+        },
+        "factual_errors": { "type": "integer", "minimum": 0, "description": "Count of claims made during the run that were checked and found false." },
+        "review_findings": { "type": "integer", "minimum": 0, "description": "Count of code-review-style findings against the produced change." },
+        "rework_loops": { "type": "integer", "minimum": 0, "description": "Count of times the run had to backtrack/redo prior work within the same attempt." },
+        "context_compactions": { "type": "integer", "minimum": 0 },
+        "setup_cost_seconds": { "type": "number", "minimum": 0, "description": "One-time cost to prepare the environment for this mode (e.g. installing eifctl), amortized or recorded per run per methodology." },
+        "index_or_graph_refresh_cost_seconds": { "type": ["number", "null"], "minimum": 0, "description": "Cost to (re)build the knowledge index (mode B+) or the structural graph (mode C+) for this input state - null for mode A." },
+        "maintenance_overhead_notes": { "type": "string", "description": "Free text: anything about keeping the mode's tooling current/working that a raw number doesn't capture." }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["success", "partial", "failure", "harness_error", "timeout", "aborted"],
+          "description": "success/partial/failure: the agent reached a terminal state, judged by test/review outcome. harness_error: the harness itself broke (not the agent's fault). timeout: the wall-time/tool budget was exceeded. aborted: stopped deliberately (e.g. operator-cancelled) before a terminal state."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "raw_log_ref": {
+      "type": "string",
+      "description": "Pointer (path or URL) to the full raw transcript/log for this run - the record itself stays a compact summary, never the full transcript inline. Any transcript this points at must pass a privacy scan before publication (see D-12)."
+    },
+    "harness_version": { "type": "string" }
+  }
+}

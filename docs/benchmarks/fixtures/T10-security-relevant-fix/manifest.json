@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T10",
+  "title": "Security-relevant fix",
+  "description": "A file-serving function has an unvalidated path-traversal vulnerability (relative '..' segments and absolute paths both escape the intended base directory). Requires a real containment check, not a superficial patch, verified by both normal-case and multiple escape-attempt tests.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:e7c1fba4d3b8b29bad56492877eca8788e0f2ef83896c07a44f2b43debde2968",
+  "test_command": ["python", "tests/test_file_reader.py"],
+  "expected_output_contract": {
+    "tests_total": 5,
+    "notes": "5 tests total; a correct fix makes all 5 pass: normal read, simple traversal blocked, nested traversal blocked, absolute-path escape blocked, and a legitimately-missing in-sandbox file still raises FileNotFoundError (not misclassified as a traversal attempt)."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/file_reader.py with the fixture's known-vulnerable reference implementation, regardless of how the agent structured its fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 2
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

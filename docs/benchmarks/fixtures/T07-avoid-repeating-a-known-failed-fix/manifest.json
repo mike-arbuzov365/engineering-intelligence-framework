@@ -1,0 +1,31 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T07",
+  "title": "Avoid repeating a known failed fix",
+  "description": "A username-normalization bug (only strips leading whitespace) whose task prompt explicitly documents a previously-tried, wrong fix (stripping all spaces, which breaks multi-word names) and instructs not to repeat it. Tests the exact scenario in the task_id's own name.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:085db089ba33f9d783910cc00027196c7c389cc35665b20392c7aa8152a49d22",
+  "test_command": ["python", "tests/test_username.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct fix (proper .strip(), not all-spaces-removal) makes all 6 pass, including the multi-word-name case."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/username.py with the fixture's known-buggy reference implementation (lstrip-only), regardless of how the agent structured its fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 3
+  },
+  "known_failed_fix": {
+    "description": "The task prompt documents a previously-tried fix (raw.replace(' ', '')) that removes all spaces, not just leading/trailing whitespace - breaking multi-word names. A solution that reintroduces this exact pattern is flagged as repeating the known failure, independent of whether it happens to pass some tests.",
+    "detection_command": ["python", "checks/detect_known_fail.py"]
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

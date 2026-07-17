@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/benchmark-fixture-manifest.schema.json",
+  "title": "EIF benchmark fixture manifest",
+  "description": "One manifest.json per fixture under docs/benchmarks/fixtures/<task_id>/. Declares everything eif_benchmark.py needs to materialize the fixture, run the deterministic test suite, verify the anti-cheating mutation check, and enforce budgets - without hand-reading the fixture's own source. validate-manifest checks a fixture directory against this schema plus structural checks (referenced files actually exist, digest actually matches).",
+  "type": "object",
+  "required": [
+    "manifest_schema_version", "task_id", "title", "supported_modes",
+    "task_prompt_path", "source_dir", "test_command", "expected_output_contract",
+    "mutation_check", "budget", "license", "no_private_content_confirmed"
+  ],
+  "properties": {
+    "manifest_schema_version": { "type": "integer", "minimum": 1 },
+    "task_id": {
+      "type": "string",
+      "pattern": "^T[0-9]{2}$",
+      "description": "Matches the corpus numbering in docs/benchmarks/README.md, e.g. 'T02'."
+    },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "supported_modes": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"] },
+      "minItems": 1,
+      "description": "Which modes this fixture can actually be run under this round. C/D are schema-declared across the corpus but operationally BLOCKED (see docs/benchmarks/README.md) - a fixture may list them here for future use, but eif_benchmark.py's `run` command refuses to execute C/D regardless."
+    },
+    "task_prompt_path": {
+      "type": "string",
+      "description": "Path, relative to the fixture directory, to the exact task prompt file given to the agent."
+    },
+    "source_dir": {
+      "type": "string",
+      "description": "Path, relative to the fixture directory, to the immutable source tree materialize copies into the work directory."
+    },
+    "source_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "Combined sha256 over the sorted (path, sha256) manifest of every file under source_dir - computed by eif_benchmark.py, not hand-typed. validate-manifest recomputes and compares; a mismatch is a hard failure (the fixture drifted since this manifest was written)."
+    },
+    "test_command": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Argv (not a shell string) to run the deterministic test suite against the materialized work directory, e.g. ['python', 'tests/test_fix.py']. Must be deterministic - same input tree, same result, every time."
+    },
+    "expected_output_contract": {
+      "type": "object",
+      "required": ["tests_total"],
+      "properties": {
+        "tests_total": { "type": "integer", "minimum": 1, "description": "Exact expected count from a correct fix - validate-result cross-checks the emitted record's metrics.tests_total against this." },
+        "notes": { "type": "string" }
+      }
+    },
+    "mutation_check": {
+      "type": "object",
+      "required": ["description", "mutation_command"],
+      "properties": {
+        "description": {
+          "type": "string",
+          "description": "What the mutation does in plain language, e.g. 'reverts the produced fix to the original buggy line'."
+        },
+        "mutation_command": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Argv that, run against a WORKING (tests-passing) solution, deliberately breaks it in the one specific way this fixture is designed to catch - proving the test suite actually exercises the fix rather than passing regardless (anti-cheating)."
+        },
+        "expected_tests_passed_after_mutation": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many tests should still pass after the mutation is applied to an otherwise-correct solution - normally less than expected_output_contract.tests_total, proving the mutated case is genuinely caught."
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "required": ["max_wall_time_seconds", "max_tool_calls"],
+      "properties": {
+        "max_wall_time_seconds": { "type": "number", "minimum": 1 },
+        "max_tool_calls": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "license": {
+      "type": "string",
+      "description": "License of the fixture's own source content (not EIF's license) - e.g. 'Apache-2.0' for originally-authored fixtures, or the upstream license if adapted from a public source (with provenance below naming that source)."
+    },
+    "provenance": {
+      "type": "string",
+      "description": "Where this fixture's scenario came from - 'originally authored for this benchmark' or a named public source. Never a private repository or customer artifact - see no_private_content_confirmed."
+    },
+    "no_private_content_confirmed": {
+      "type": "boolean",
+      "const": true,
+      "description": "Must be explicitly true - a fixture manifest without this (or with it false) fails validate-manifest outright. Exists so 'no private content' is a checked fact, not an assumption (see D-12)."
+    },
+    "known_failed_fix": {
+      "type": "object",
+      "description": "For a fixture whose task is specifically 'avoid repeating a known failed fix' (e.g. T07) - describes the documented prior wrong attempt and how to detect its recurrence. Absent for fixtures with no such history.",
+      "required": ["description", "detection_command"],
+      "properties": {
+        "description": { "type": "string" },
+        "detection_command": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Argv that exits non-zero if the produced solution repeats the documented known-failed approach - run by validate-result in addition to test_command."
+        }
+      }
+    }
+  }
+}

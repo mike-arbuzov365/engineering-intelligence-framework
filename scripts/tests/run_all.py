@@ -59,6 +59,7 @@ SUITES = [
     "test_merge_gate.py",
     "test_format_dependencies.py",
     "test_check_licenses.py",
+    "test_benchmark.py",
 ]
 # test_package_build.py is deliberately NOT in SUITES: it needs `build` +
 # `hatchling`, which are packaging-build tooling, not a runtime dependency

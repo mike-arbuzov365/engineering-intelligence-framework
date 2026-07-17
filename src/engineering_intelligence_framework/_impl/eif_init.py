@@ -91,7 +91,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from eif_locale import msg  # noqa: E402
 from eif_adapters import (  # noqa: E402
     ADAPTERS, DEFAULT_ADAPTER, entrypoint_for, entry_strategy_for,
-    entry_frontmatter_for, discover_governance_surfaces,
+    entry_frontmatter_for, discover_governance_surfaces, discover_shadow_signals,
 )
 from eif_markers import render_merged_content, find_managed_block, MarkerConflict  # noqa: E402
 from eif_validate_frontmatter import (  # noqa: E402
@@ -654,7 +654,7 @@ def _authority_section(adoption_mode: str) -> str:
 
 
 def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_path: str,
-                   adoption_mode: str) -> str:
+                   adoption_mode: str, entrypoint_name: str) -> str:
     template = (framework_root / "templates" / "agent-instructions.md").read_text(encoding="utf-8")
     begin = template.index(EIF_BEGIN)
     end = template.index(EIF_END) + len(EIF_END)
@@ -663,6 +663,7 @@ def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_pa
         knowledge_root=knowledge_root,
         knowledge_index_path=knowledge_index_path,
         authority_section=_authority_section(adoption_mode),
+        entrypoint_name=entrypoint_name,
     )
 
 
@@ -1224,6 +1225,7 @@ def main(argv: list[str] | None = None) -> int:
     # (eif_adapters.ADAPTERS[adapter]["governance_discovery"]); no adapter
     # name appears here.
     governance_surfaces = discover_governance_surfaces(instance_path, adapter)
+    shadow_signals = discover_shadow_signals(instance_path, adapter)
 
     preflight = run_preflight(
         mode=mode,
@@ -1240,6 +1242,7 @@ def main(argv: list[str] | None = None) -> int:
         begin_marker=EIF_BEGIN, end_marker=EIF_END,
         gitignore_begin=GITIGNORE_MARKER, gitignore_end=GITIGNORE_END,
         governance_surfaces=governance_surfaces,
+        shadow_signals=shadow_signals,
     )
     print("eif-init: adoption preflight")
     for line in preflight.render(prefix="  "):
@@ -1321,7 +1324,7 @@ def main(argv: list[str] | None = None) -> int:
     # exclusively EIF-owned file - nothing to merge or preserve, so it is
     # always written fresh, frontmatter included).
     try:
-        managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode)
+        managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode, entrypoint)
         if entry_strategy_for(adapter) == "full-regen":
             # This path is exclusively EIF-owned by contract (entry_ownership
             # "exclusive") - there is no legitimate "the project already put

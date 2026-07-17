@@ -50,7 +50,7 @@ def _init_real_instance(inst: Path) -> None:
     runtime = inst / ".eif" / "runtime"
     staging.rename(runtime)
 
-    block = eif_init._managed_block(FRAMEWORK_ROOT, "knowledge", "knowledge/index.md", "greenfield")
+    block = eif_init._managed_block(FRAMEWORK_ROOT, "knowledge", "knowledge/index.md", "greenfield", "CLAUDE.md")
     (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
     (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
 
@@ -91,7 +91,7 @@ def _init_real_instance_variant(
     runtime = inst / ".eif" / "runtime"
     staging.rename(runtime)
 
-    block = eif_init._managed_block(FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode)
+    block = eif_init._managed_block(FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode, "CLAUDE.md")
     (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
     (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
 

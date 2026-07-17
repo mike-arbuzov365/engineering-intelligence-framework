@@ -148,6 +148,7 @@ def run_preflight(
     gitignore_begin: str,
     gitignore_end: str,
     governance_surfaces: list[str] | None = None,
+    shadow_signals: list[str] | None = None,
 ) -> PreflightReport:
     """Build the structured OK/WARN/STOP report. Read-only - never writes.
 
@@ -179,6 +180,18 @@ def run_preflight(
     message never claims the generated content will "defer to" what's
     there, since full-regen replaces the whole file rather than preserving
     anything outside markers.
+
+    `shadow_signals` (from eif_adapters.discover_shadow_signals()) is
+    reported as an always-shown WARN, independent of adoption_basis: unlike
+    governance_surfaces (other content the agent ALSO reads, which coexist
+    mode can legitimately leave untouched), a shadow signal means the
+    entrypoint we are about to write would not be read by the agent AT ALL
+    while it is present (e.g. Codex's AGENTS.override.md next to AGENTS.md -
+    confirmed empirically to make the base file's content vanish from the
+    merged instruction chain, not merely add to it). Coexisting peacefully
+    with it does not fix that, so this is not gated by adoption mode; it is
+    a WARN rather than a STOP because the write itself is still safe (no
+    corruption, no data loss) - only pointless at that cwd until resolved.
     """
     report = PreflightReport()
 
@@ -269,6 +282,19 @@ def run_preflight(
                 f"coexist (these are preserved untouched either way) or --adoption-mode "
                 f"greenfield (explicit override) before proceeding.",
             )
+
+    # --- Shadowing signals: a file whose mere presence makes the entrypoint
+    # we are about to write invisible to the agent, regardless of adoption
+    # mode (see docstring above) ---
+    if shadow_signals:
+        signals_str = ", ".join(shadow_signals)
+        report.add(
+            "WARN",
+            f"{entrypoint_name} will be written, but {signals_str} is also present and "
+            f"takes precedence over it for this adapter - the generated content will not "
+            f"be read at this location until {signals_str} is removed, renamed, or updated "
+            f"to include it. This is independent of adoption mode.",
+        )
 
     # --- Malformed markers (surfaced here too, not only as eif_init's later hard failure) ---
     for label, text, begin, end in (

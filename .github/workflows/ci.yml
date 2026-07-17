@@ -182,14 +182,12 @@ jobs:
         shell: bash
 
   package-build:
-    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }}) (not yet required by policy)"
-    # Not yet in core/policies/merge-policy.json's required_check_contexts:
-    # the merge gate matches exact context-name strings and a matrix job's
-    # name is dynamic per combination - wiring 4 exact combinations in as
-    # required contexts is real, separately-scoped follow-up work, not
-    # silently skipped. This job still runs and reports on every PR/push;
-    # see scripts/eif_check_licenses.py's own required job for how a
-    # single-OS job is wired as required, for contrast.
+    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
+    # The dynamic per-combination name above is why THIS job itself cannot
+    # be a required check context (GitHub's statusCheckRollup would need 4
+    # exact, hardcoded combination strings, silently stale the moment the
+    # matrix changes). package-build-required below is the static aggregate
+    # that actually gets wired into merge-policy.json.
     strategy:
       fail-fast: false
       matrix:
@@ -207,6 +205,29 @@ jobs:
           pip install build hatchling
       - name: Build the wheel/sdist, install into a clean venv, run every eifctl subcommand end-to-end
         run: python scripts/tests/test_package_build.py
+
+  package-build-required:
+    name: "Package build required"
+    # Static aggregate over the package-build matrix (adoption-hardening
+    # round): needs: a matrix job resolves needs.package-build.result to
+    # success only when EVERY combination succeeded - failure or cancelled
+    # otherwise, GitHub's own semantics, not hand-enumerated here. if:
+    # always() so this job still runs (and correctly reports failure)
+    # even when a matrix leg failed, rather than being skipped - a required
+    # check that can be silently skipped is not actually required. This is
+    # the context name wired into core/policies/merge-policy.json, never
+    # the dynamic per-combination name above.
+    needs: package-build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify every package-build matrix combination succeeded
+        run: |
+          if [ "${{ needs.package-build.result }}" != "success" ]; then
+            echo "package-build matrix result: ${{ needs.package-build.result }} - at least one combination did not succeed"
+            exit 1
+          fi
+          echo "all package-build matrix combinations succeeded"
 
   license-check:
     name: Dependency license check (required by policy)

@@ -117,8 +117,9 @@ package row for the full picture. The package's own source lives under
 `src/engineering_intelligence_framework/` and is kept in sync with the
 scripts above by [`sync_package_sources.py`](sync_package_sources.py) -
 run it (and `--check` in CI) after changing any script or resource tree
-the package bundles. D-05/D-08 move to Ratified once the CI package-build
-matrix (Windows + Ubuntu, Python 3.11/3.12) is confirmed green.
+the package bundles. D-05/D-08 are now Ratified - the CI package-build
+matrix (Windows + Ubuntu, Python 3.11/3.12) confirmed green on all 4
+combinations, twice, across two separate commits.
 
 ## Not populated yet
 

@@ -529,11 +529,12 @@ formally ratified (the file is explicit about which is which).
       private repository - proven against a temp-directory instance and a
       disposable copy of a private repository (adoption pilot). A real,
       installable package (`eifctl`, `pyproject.toml` at the repo root) now
-      exists and is Windows-verified (a built wheel, installed into a
-      clean venv with a space-and-Unicode path, running every subcommand
-      end to end - `scripts/tests/test_package_build.py`); D-05/D-08 move
-      to Ratified once the Windows+Ubuntu CI package-build matrix is
-      confirmed green, not before.
+      exists - a built wheel, installed into a clean venv with a
+      space-and-Unicode path, running every subcommand end to end
+      (`scripts/tests/test_package_build.py`); the Windows+Ubuntu x Python
+      3.11/3.12 CI package-build matrix confirmed green on all 4
+      combinations, twice, so **D-05/D-08 are now Ratified** - see
+      `core/policies/decisions.md`.
 - [x] Existing-repository adoption does not silently override pre-existing
       project governance: an adoption preflight detects it and stops
       before any write when there is no adoption decision on record,

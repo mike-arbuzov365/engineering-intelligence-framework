@@ -305,8 +305,15 @@ def main() -> int:
         from eif_benchmark import scan_transcript_for_privacy
         results.append(check("a clean transcript scans with zero findings", scan_transcript_for_privacy(clean_log) == []))
 
+        # Split-literal construction (same technique as test_adoption.py's
+        # KEYCHAIN_PW_FIELD/_LEGACY_KEY_FIELD): the runtime value must be a
+        # real, contiguous Windows-absolute-path-shaped string for this
+        # fixture to mean anything, but that exact contiguous text must
+        # never appear in THIS file's own source, or the repo-wide privacy
+        # scan flags this line as a leak. Assembling it from fragments joined
+        # at runtime keeps the fixture honest without self-triggering.
         dirty_log = Path(tmp) / "dirty.log"
-        dirty_log.write_text(r"working in C:\Users\Test User\project" + "\n", encoding="utf-8")
+        dirty_log.write_text("working in " + r"C:\Users" + "\\" + "Test User\\project" + "\n", encoding="utf-8")
         dirty_findings = scan_transcript_for_privacy(dirty_log)
         results.append(check(
             "a transcript containing an absolute path is flagged before it could be published",

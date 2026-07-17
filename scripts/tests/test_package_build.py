@@ -353,6 +353,35 @@ def main() -> int:
             hermes_cfg_text,
         ))
 
+        # --- package-wheel-metadata: eifctl init --adapter cursor also
+        # works from the installed wheel (this check was missing until the
+        # Stage 5 parity-matrix pass named the gap - Cursor's own adapter
+        # predates the installable-package work, so it never got one). ---
+        cursor_project_dir = tmp_root / "cursor-pkgtest"
+        cursor_init_proc = run(
+            [str(eifctl_exe), "init", "--project-name", "cursor-pkgtest", "--adapter", "cursor",
+             "--migration-status", "greenfield", "--instance-path", str(cursor_project_dir)],
+            cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl init --adapter cursor succeeds from the installed wheel",
+            cursor_init_proc.returncode == 0,
+            cursor_init_proc.stdout + cursor_init_proc.stderr,
+        ))
+        cursor_entry_path = cursor_project_dir / ".cursor" / "rules" / "eif" / "governance.mdc"
+        cursor_entry_text = cursor_entry_path.read_text(encoding="utf-8") if cursor_entry_path.exists() else ""
+        results.append(check(
+            "wheel-installed eifctl generates the nested .cursor/rules/eif/governance.mdc with frontmatter and the EIF-managed block",
+            cursor_entry_text.startswith("---\n") and "<!-- EIF:BEGIN" in cursor_entry_text and "<!-- EIF:END -->" in cursor_entry_text,
+            cursor_entry_text,
+        ))
+        cursor_cfg_text = (cursor_project_dir / ".eif" / "config.yaml").read_text(encoding="utf-8") if (cursor_project_dir / ".eif" / "config.yaml").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl records adapter.name: cursor",
+            "cursor" in cursor_cfg_text,
+            cursor_cfg_text,
+        ))
+
         uninstall = run([str(venv_python), "-m", "pip", "uninstall", "-y", "-q", "engineering-intelligence-framework"])
         results.append(check("uninstall succeeds and removes the console-script entry point", uninstall.returncode == 0 and not eifctl_exe.exists()))
 

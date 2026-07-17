@@ -15,6 +15,14 @@ plain Markdown any agent can read if pointed at it. Adapters add
 enforcement (hooks) and ergonomics (skill loading), not the methodology
 itself.
 
+See [`parity-matrix.json`](parity-matrix.json) for the machine-checked,
+per-dimension evidence table across all four adapters (fails the test
+suite if any adapter or dimension goes missing), and
+[`compatibility-matrix.md`](compatibility-matrix.md) for the human-readable
+version: which files each agent actually reads, which one EIF manages,
+which other existing files could shadow EIF's write, and whether cwd
+changes any of it.
+
 ## Recommended v0.1 priority
 
 <!-- Knowledge source: hook-reliability testing on the private instance,

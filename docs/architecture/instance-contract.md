@@ -52,9 +52,17 @@ never a placeholder:
 ```yaml
 lock_schema_version: 1
 framework:
-  ref: <full 40-char SHA>       # git rev-parse HEAD of --framework-root
-  ref_short: <short SHA>
-  dirty: false                  # true if --framework-root had uncommitted changes
+  source_type: git               # git | installed-package | source-bundle - discriminates which of
+                                  # the sibling git/package/source_bundle blocks below is populated;
+                                  # never a fake stand-in for another kind (e.g. no synthetic git SHA
+                                  # for an installed-package source)
+git:                              # present only when source_type: git
+  commit_sha: <full 40-char SHA>  # git rev-parse HEAD of --framework-root
+  dirty: false                    # true if --framework-root had uncommitted changes
+# package: {...}                  # present only when source_type: installed-package - see
+                                  # core/schemas/framework-lock.schema.json
+# source_bundle: {...}            # present only when source_type: source-bundle (an asserted,
+                                  # non-git-verified --framework-ref) - same schema
 instance:
   eif_instance_version: 0.1.0
   migration_status: greenfield  # or: adopted
@@ -72,10 +80,14 @@ generated_at: "2026-07-15T12:34:56+00:00"
 ```
 
 `eif_init` refuses to materialize from a **dirty** framework checkout by
-default - if `--framework-root` has uncommitted changes, the bundle would not
-actually match the recorded `ref`, so the tool stops and asks for
-`--allow-dirty` (which proceeds and records `dirty: true`) rather than
-silently claiming a false provenance guarantee. Every bundled file is
+default (git and source-bundle sources only - an installed package has no
+working tree to be dirty) - if `--framework-root` has uncommitted changes,
+the bundle would not actually match the recorded commit, so the tool stops
+and asks for `--allow-dirty` (which proceeds and records `dirty: true`)
+rather than silently claiming a false provenance guarantee. A routine
+upgrade must also resolve to the same `framework.source_type` this instance
+was already generated from, or stop and require `--force` - never a silent
+installed-package/git/source-bundle migration. Every bundled file is
 sha256-hashed both from the source (building the manifest) and again after
 staging (`verify_staged_bundle`), so a copy-time corruption is caught before
 the bundle ever goes live.

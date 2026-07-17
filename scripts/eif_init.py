@@ -31,13 +31,23 @@ Design, all reversible, none ratified - see docs/architecture/instance-contract.
 1. Config/lock split. `.eif/config.yaml` is USER-OWNED. `.eif/framework.lock.yaml`
    is EIF-MANAGED provenance, fully regenerated on every init/upgrade.
 
-2. Exact provenance. Real `git rev-parse HEAD` of --framework-root, dirty-
-   checked. `--framework-ref` (for a non-git --framework-root) marks
-   `ref_verification: asserted` rather than forcing `dirty: false` - the
-   ACTUAL detected dirty state of the working tree is recorded either way
-   (round-3 review, Finding E - the previous version silently cleared a
-   real dirty flag whenever --framework-ref was passed at all). Every
-   bundled file is sha256-hashed into a manifest with a combined digest.
+2. Exact provenance, one of three discriminated kinds
+   (framework.source_type - see core/schemas/framework-lock.schema.json):
+   `git` (real `git rev-parse HEAD` of --framework-root, dirty-checked),
+   `installed-package` (the eifctl console-script's own distribution/
+   version/resource-manifest-digest - no git commit exists to report, so
+   none is fabricated), or `source-bundle` (--framework-ref explicitly
+   asserts an identifier for a non-git, non-package export - trustworthy
+   only as far as whoever passed that flag). The ACTUAL detected dirty
+   state of the working tree is recorded regardless of which kind is
+   asserted (round-3 review, Finding E - the previous version silently
+   cleared a real dirty flag whenever --framework-ref was passed at all).
+   A routine upgrade must resolve to the SAME source_type as the existing
+   lock, or STOP - `--force` is required to knowingly migrate between
+   kinds (adoption-hardening round, Finding: a silent installed-package ->
+   source-checkout migration would otherwise be indistinguishable from
+   provenance simply being wrong). Every bundled file is sha256-hashed
+   into a manifest with a combined digest.
 
 3. Full managed-state transaction (round-3 review, Finding B). Every managed
    artifact - config (when being written), runtime bundle, lock,
@@ -503,22 +513,31 @@ def render_config_data(project_name: str, adapter_name: str, locale: str,
     return data
 
 
-def render_lock_data(ref: str, ref_short: str, dirty: bool, ref_verification: str,
+def render_lock_data(source_type: str, git_prov: dict | None, package_prov: dict | None,
+                     source_bundle_prov: dict | None,
                      adapter_name: str, entrypoint: str, bundle_path: str,
                      manifest: list[dict], digest: str, migration_status: str,
                      instance_version: str, generated_at: str,
                      knowledge_index: dict | None = None) -> dict:
+    """Exactly one of git_prov/package_prov/source_bundle_prov is populated,
+    matching source_type - see core/schemas/framework-lock.schema.json's
+    discriminated `framework.source_type` contract. Never fabricates a
+    stand-in for a kind that isn't actually present (e.g. no synthetic
+    git-shaped SHA for an installed-package source)."""
     data = {
         "lock_schema_version": 1,
-        "framework": {
-            "ref": ref, "ref_short": ref_short, "dirty": dirty,
-            "ref_verification": ref_verification,
-        },
+        "framework": {"source_type": source_type},
         "instance": {"eif_instance_version": instance_version, "migration_status": migration_status},
         "adapter": {"name": adapter_name, "entrypoint": entrypoint},
         "bundle": {"path": bundle_path, "manifest": manifest, "digest": digest},
         "generated_at": generated_at,
     }
+    if git_prov is not None:
+        data["git"] = git_prov
+    if package_prov is not None:
+        data["package"] = package_prov
+    if source_bundle_prov is not None:
+        data["source_bundle"] = source_bundle_prov
     if knowledge_index is not None:
         # Present only when an index was actually created/regenerated this
         # run - absent means "not EIF-managed this run", not "empty index".
@@ -680,6 +699,30 @@ class ResolvedInit:
 
 def _default_index_path(knowledge_root: str) -> str:
     return f"{knowledge_root.rstrip('/')}/index.md"
+
+
+def check_source_type_consistency(source_type: str, existing_lock: dict | None, force: bool) -> str | None:
+    """A routine upgrade must resolve to the SAME framework.source_type this
+    instance was already generated from - never a silent installed-package
+    -> source-checkout migration (or any other kind change) just because
+    this invocation happens to look different from the last one. `force`
+    is the only way to knowingly cross this boundary - already an explicit
+    reconfigure for every other field, so making it explicit here too is
+    consistent, not a new bar. Returns an error message, or None if there
+    is no existing lock, no recorded source_type (a lock from before this
+    field existed), force was passed, or the kind matches."""
+    if existing_lock is None or force:
+        return None
+    existing_source_type = (existing_lock.get("framework") or {}).get("source_type")
+    if existing_source_type is None or existing_source_type == source_type:
+        return None
+    return (
+        f"this instance was previously generated from framework.source_type "
+        f"{existing_source_type!r}, but this invocation resolves to "
+        f"{source_type!r} - refusing to silently change provenance kind on "
+        f"a routine upgrade. Re-run with --force to explicitly migrate (e.g. "
+        f"installed-package -> source-checkout, or vice versa)."
+    )
 
 
 def _resolve_mode_and_values(args, existing_config: dict | None, existing_lock: dict | None) -> ResolvedInit:
@@ -941,7 +984,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--locale", default=None, help="Default 'en' for a new instance. Ignored on a routine upgrade; honored on --force reconfigure.")
     ap.add_argument("--adapter", default=None, choices=sorted(ADAPTERS), help="Restricted to registered adapters. Ignored on a routine upgrade; honored on --force reconfigure.")
     ap.add_argument("--framework-version", default=None)
-    ap.add_argument("--framework-ref", default=None, help="Assert the framework commit explicitly (for a non-git --framework-root). Marks ref_verification: asserted; does NOT clear a real detected dirty state.")
+    ap.add_argument("--framework-ref", default=None, help="Assert a source-bundle identifier explicitly (for a --framework-root that is neither a git checkout nor an installed eifctl package, e.g. a plain tarball/zip export). Marks framework.source_type: source-bundle; does NOT clear a real detected dirty state. Mutually exclusive with --package-distribution.")
+    ap.add_argument("--package-distribution", default=None, help="Installed-package source: the distribution name (importlib.metadata terms). Passing this marks framework.source_type: installed-package and requires --package-version, --package-python-version, --package-resource-manifest-digest. Mutually exclusive with --framework-ref.")
+    ap.add_argument("--package-version", default=None, help="The installed distribution's own version. Required with --package-distribution.")
+    ap.add_argument("--package-python-version", default=None, help="'major.minor.micro' of the interpreter running eifctl. Required with --package-distribution.")
+    ap.add_argument("--package-resource-manifest-digest", default=None, help="Combined digest of the packaged resources/ tree actually on disk right now (scripts/sync_package_sources.py). Required with --package-distribution.")
+    ap.add_argument("--package-wheel-sha256", default=None, help="sha256 of the actual installed wheel/archive file, if known (e.g. from direct_url.json's archive_info.hash). Omitted, never fabricated, when not available (e.g. an editable/local-dir install).")
     ap.add_argument("--allow-dirty", action="store_true", help="Proceed even if --framework-root has uncommitted changes (recorded as dirty: true)")
     ap.add_argument("--migration-status", default=None, choices=["greenfield", "adopted"], help="Ignored on a routine upgrade (preserved from the prior lock); honored on init/reconfigure.")
     ap.add_argument("--knowledge-root", default=None, help="Instance-relative path where knowledge artifacts live. Default 'knowledge' for a new instance. Ignored on a routine upgrade; honored on init/--force reconfigure. Rejected if absolute, a Windows drive/UNC path, contains '..', or resolves outside the instance.")
@@ -956,20 +1004,55 @@ def main(argv: list[str] | None = None) -> int:
     instance_path = Path(args.instance_path).resolve()
     prefix = "[dry-run] would " if args.dry_run else ""
 
-    # --- Provenance (Finding E) ---
-    detected_ref, detected_short, detected_dirty = resolve_framework_state(framework_root)
-    if args.framework_ref:
-        ref, ref_short, ref_verification = args.framework_ref, args.framework_ref[:12], "asserted"
-    else:
-        ref, ref_short, ref_verification = detected_ref, detected_short, "git-verified"
-    dirty = detected_dirty  # the REAL detected state, always - never forced False by an assertion
-    if not ref:
+    # --- Provenance (Finding E; adoption-hardening: discriminated source_type) ---
+    if args.package_distribution is not None and args.framework_ref is not None:
         print(
-            "eif-init: could not resolve the framework commit (framework-root is "
-            "not a git checkout). Pass --framework-ref <sha> explicitly.",
+            "eif-init: --package-distribution and --framework-ref are mutually "
+            "exclusive - a framework source is a git checkout, an installed "
+            "package, or an asserted source-bundle, never more than one at once.",
             file=sys.stderr,
         )
         return 1
+
+    detected_ref, detected_short, detected_dirty = resolve_framework_state(framework_root)
+    dirty = detected_dirty  # the REAL detected state, always - never forced False by an assertion
+
+    package_prov: dict | None = None
+    source_bundle_prov: dict | None = None
+    if args.package_distribution is not None:
+        missing = [
+            flag for flag, val in [
+                ("--package-version", args.package_version),
+                ("--package-python-version", args.package_python_version),
+                ("--package-resource-manifest-digest", args.package_resource_manifest_digest),
+            ] if val is None
+        ]
+        if missing:
+            print(f"eif-init: --package-distribution requires {', '.join(missing)} too.", file=sys.stderr)
+            return 1
+        source_type = "installed-package"
+        package_prov = {
+            "distribution": args.package_distribution,
+            "version": args.package_version,
+            "python_version": args.package_python_version,
+            "resource_manifest_digest": args.package_resource_manifest_digest,
+        }
+        if args.package_wheel_sha256 is not None:
+            package_prov["wheel_sha256"] = args.package_wheel_sha256
+    elif args.framework_ref:
+        source_type = "source-bundle"
+        source_bundle_prov = {"asserted_ref": args.framework_ref, "dirty": dirty}
+    else:
+        source_type = "git"
+        if not detected_ref:
+            print(
+                "eif-init: could not resolve the framework commit (framework-root is "
+                "not a git checkout). Pass --framework-ref <identifier> for a "
+                "source-bundle export, or run via the installed eifctl package.",
+                file=sys.stderr,
+            )
+            return 1
+        ref = detected_ref
     if dirty and not args.allow_dirty:
         print(
             f"eif-init: framework checkout at {framework_root} has uncommitted "
@@ -1024,6 +1107,12 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 1
         existing_lock = loaded_lock.data
+
+    # --- Source-type consistency (adoption-hardening round) ---
+    source_type_error = check_source_type_consistency(source_type, existing_lock, args.force)
+    if source_type_error:
+        print(f"eif-init: {source_type_error}", file=sys.stderr)
+        return 1
 
     # --- Init vs upgrade vs reconfigure (Finding A) ---
     try:
@@ -1291,8 +1380,16 @@ def main(argv: list[str] | None = None) -> int:
             "sha256": hashlib.sha256(index_content.encode("utf-8")).hexdigest(),
         }
 
+    git_prov = {"commit_sha": ref, "dirty": dirty} if source_type == "git" else None
+    if source_type == "git":
+        display_ref = ref[:12]
+    elif source_type == "installed-package":
+        display_ref = f"pkg:{package_prov['distribution']}@{package_prov['version']}"
+    else:
+        display_ref = source_bundle_prov["asserted_ref"]
+
     lock_data = render_lock_data(
-        ref, ref_short, dirty, ref_verification, adapter, entrypoint, ".eif/runtime",
+        source_type, git_prov, package_prov, source_bundle_prov, adapter, entrypoint, ".eif/runtime",
         manifest, digest, migration_status, "0.1.0",
         datetime.datetime.now(datetime.timezone.utc).isoformat(),
         knowledge_index=lock_knowledge_index,
@@ -1308,7 +1405,7 @@ def main(argv: list[str] | None = None) -> int:
     config_action = "create" if mode == "init" else ("overwrite" if mode == "reconfigure" else "keep")
 
     if args.dry_run:
-        print(f"{prefix}{config_action} .eif/config.yaml" + (f" (framework.ref {ref_short}, knowledge.root={knowledge_root}, adoption.mode={adoption_mode})" if config_action != "keep" else " (unchanged)"))
+        print(f"{prefix}{config_action} .eif/config.yaml" + (f" (framework.ref {display_ref}, knowledge.root={knowledge_root}, adoption.mode={adoption_mode})" if config_action != "keep" else " (unchanged)"))
         print(f"{prefix}refresh .eif/runtime ({len(manifest)} file(s), {digest[:19]}...)")
         print(f"{prefix}write .eif/framework.lock.yaml (migration_status: {migration_status})")
         print(f"{prefix}{entry_action} {entrypoint} (EIF-managed block)")
@@ -1547,7 +1644,7 @@ def main(argv: list[str] | None = None) -> int:
     if rc != 0:
         print(f"eif-init: WARNING - committed lock fails validation: {lock_path}", file=sys.stderr)
 
-    print(f"{config_action} .eif/config.yaml" + (f" (framework.ref {ref_short})" if config_action != "keep" else " (unchanged - routine upgrade)"))
+    print(f"{config_action} .eif/config.yaml" + (f" (framework.ref {display_ref})" if config_action != "keep" else " (unchanged - routine upgrade)"))
     if config_action != "keep":
         print(msg(framework_root, locale, "config_created", locale=locale))
     print(f"refresh .eif/runtime ({len(manifest)} file(s), {digest[:19]}...)")

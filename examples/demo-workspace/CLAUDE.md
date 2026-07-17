@@ -22,7 +22,7 @@ yours; the lock is EIF-managed and rewritten on every upgrade).
    returned by default). Always pass `--framework-root` - without it,
    schema-invalid knowledge is silently treated as valid instead of being
    flagged:
-   `python .eif/runtime/eif_search_knowledge.py --knowledge-root knowledge --framework-root .eif/runtime "<your task in a few words>"`
+   `python .eif/runtime/eif_search_knowledge.py --knowledge-root "knowledge" --framework-root .eif/runtime "<your task in a few words>"`
 3. Write a task-scope file from `.eif/runtime/templates/task-scope.md` before
    changing code, for anything bigger than a one-line fix.
 4. Before opening a PR, audit the instance itself:

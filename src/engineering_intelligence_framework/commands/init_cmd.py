@@ -1,16 +1,19 @@
-"""`eifctl init` - thin wrapper over _impl.eif_init.main(), plus one
-package-specific enrichment step eif_init.py itself has no reason to know
-about: recording installed-package provenance (distribution, version,
-source_type, python_version) into the lock file it just wrote. See
-core/schemas/framework-lock.schema.json's optional `package` object.
+"""`eifctl init` - thin wrapper over _impl.eif_init.main(). Its one real job
+beyond dispatch: compute this installed package's own provenance (real
+digests, never a fabricated stand-in for a git commit) and pass it to
+eif_init as CLI args, so eif_init writes it into the SAME transaction as
+config/runtime/lock/entrypoint/gitignore/index - never a second, unprotected
+read-modify-write of the lock file after the fact. See
+core/schemas/framework-lock.schema.json's discriminated `framework.source_type`
+contract.
 """
 from __future__ import annotations
 
 import hashlib
+import json
 import sys
+from importlib import metadata
 from pathlib import Path
-
-import yaml
 
 from .. import __version__
 from .._impl import eif_init  # noqa: E402  (import triggers _impl/__init__.py's sys.path bootstrap)
@@ -19,35 +22,65 @@ from ..resources import framework_root
 DISTRIBUTION_NAME = "engineering-intelligence-framework"
 
 
-def _synthetic_ref(version: str) -> str:
-    """A deterministic, schema-valid (40-hex, like a real git SHA-1) stand-in
-    for framework.ref when the source is an installed package, not a git
-    checkout - there is no real commit to report. Reproducible from the
-    version string alone, so the same release always asserts the same ref."""
-    return hashlib.sha1(f"eifctl-package:{version}".encode("utf-8")).hexdigest()
+def _installed_wheel_sha256(distribution_name: str) -> str | None:
+    """The real sha256 of the actual wheel/archive file this distribution was
+    installed from, read from PEP 610's direct_url.json - present when pip
+    installed from a local wheel path (the only way this project is
+    installed pre-PyPI). Returns None - never a fabricated value - when
+    direct_url.json is absent or lacks hash info (e.g. an editable/
+    local-directory install, which has no discrete archive file to hash)."""
+    try:
+        dist = metadata.distribution(distribution_name)
+        raw = dist.read_text("direct_url.json")
+    except (metadata.PackageNotFoundError, FileNotFoundError):
+        return None
+    if raw is None:
+        return None
+    try:
+        direct_url = json.loads(raw)
+    except json.JSONDecodeError:
+        return None
+    archive_info = direct_url.get("archive_info")
+    if not isinstance(archive_info, dict):
+        return None
+    hashes = archive_info.get("hashes")
+    if isinstance(hashes, dict) and "sha256" in hashes:
+        return hashes["sha256"]
+    hash_field = archive_info.get("hash")
+    if isinstance(hash_field, str) and hash_field.startswith("sha256="):
+        return hash_field.split("=", 1)[1]
+    return None
 
 
-def _enrich_lock_with_package_provenance(instance_path: Path) -> None:
-    lock_path = instance_path / ".eif" / "framework.lock.yaml"
-    if not lock_path.exists():
-        return  # --dry-run or a run that didn't reach the write step
-    data = yaml.safe_load(lock_path.read_text(encoding="utf-8"))
-    data["package"] = {
-        "distribution": DISTRIBUTION_NAME,
-        "version": __version__,
-        "source_type": "installed-package",
-        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-    }
-    lock_path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+def _resource_manifest_digest(resources_root: Path) -> str:
+    """Combined sha256 over every file actually present in the installed
+    package's bundled resources/ tree right now, sorted (relative path,
+    sha256) pairs - same combined-digest pattern as eif_init.py's own
+    bundle.digest. Always computable (unlike wheel_sha256): this is a
+    live filesystem read, not install-metadata that may be absent."""
+    entries = []
+    for f in sorted(p for p in resources_root.rglob("*") if p.is_file()):
+        rel = f.relative_to(resources_root).as_posix()
+        entries.append((rel, hashlib.sha256(f.read_bytes()).hexdigest()))
+    h = hashlib.sha256()
+    for rel, file_hash in entries:
+        h.update(f"{rel}:{file_hash}\n".encode("utf-8"))
+    return f"sha256:{h.hexdigest()}"
 
 
 def run(argv: list[str]) -> int:
     with framework_root() as root:
-        full_argv = ["--framework-root", str(root), "--framework-ref", _synthetic_ref(__version__), *argv]
+        package_args = [
+            "--package-distribution", DISTRIBUTION_NAME,
+            "--package-version", __version__,
+            "--package-python-version", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+            "--package-resource-manifest-digest", _resource_manifest_digest(root),
+        ]
+        wheel_sha256 = _installed_wheel_sha256(DISTRIBUTION_NAME)
+        if wheel_sha256 is not None:
+            package_args += ["--package-wheel-sha256", wheel_sha256]
+
+        full_argv = ["--framework-root", str(root), *package_args, *argv]
         if "--instance-path" not in full_argv:
             full_argv = [*full_argv, "--instance-path", "."]
-        rc = eif_init.main(full_argv)
-        if rc == 0:
-            instance_path_str = full_argv[full_argv.index("--instance-path") + 1]
-            _enrich_lock_with_package_provenance(Path(instance_path_str).resolve())
-        return rc
+        return eif_init.main(full_argv)

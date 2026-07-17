@@ -47,7 +47,7 @@ def main() -> int:
     results = []
 
     # --- Provenance (Finding E) ---
-    ref, short, dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
+    ref, _short, dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
     results.append(check("resolve_framework_state returns a real 40-hex SHA", bool(ref) and bool(SHA_RE.match(ref)), str(ref)))
     results.append(check("dirty flag is a real bool", isinstance(dirty, bool)))
     not_a_repo_ref, _, _ = eif_init.resolve_framework_state(Path(tempfile.gettempdir()) / "definitely-not-a-repo-xyz")
@@ -195,6 +195,41 @@ def main() -> int:
     results.append(check("provenance reconfigure: greenfield mode keeps recorded adopted history",
                          fin(mode="reconfigure", resolved="adopted", explicit=None, adoption_mode="greenfield", origin="pre_existing") == ("adopted", None)))
 
+    # --- Source-type consistency (adoption-hardening round): a routine
+    # upgrade must never silently cross installed-package <-> git <->
+    # source-bundle kinds; --force is the only way. ---
+    pkg_lock = {"framework": {"source_type": "installed-package"}}
+    git_lock_stub = {"framework": {"source_type": "git"}}
+    no_source_type_lock = {"framework": {}}
+    results.append(check(
+        "source-type consistency: no existing lock -> no error (fresh init)",
+        eif_init.check_source_type_consistency("git", None, force=False) is None,
+    ))
+    results.append(check(
+        "source-type consistency: same kind on routine upgrade -> no error",
+        eif_init.check_source_type_consistency("installed-package", pkg_lock, force=False) is None,
+    ))
+    results.append(check(
+        "source-type consistency: installed-package -> git on routine upgrade -> STOP",
+        eif_init.check_source_type_consistency("git", pkg_lock, force=False) is not None,
+    ))
+    results.append(check(
+        "source-type consistency: git -> installed-package on routine upgrade -> STOP",
+        eif_init.check_source_type_consistency("installed-package", git_lock_stub, force=False) is not None,
+    ))
+    results.append(check(
+        "source-type consistency: --force explicitly permits the same kind change -> no error",
+        eif_init.check_source_type_consistency("git", pkg_lock, force=True) is None,
+    ))
+    results.append(check(
+        "source-type consistency: a lock predating this field (no recorded source_type) -> no error",
+        eif_init.check_source_type_consistency("installed-package", no_source_type_lock, force=False) is None,
+    ))
+    results.append(check(
+        "source-type consistency: STOP message names --force as the concrete repair",
+        "--force" in (eif_init.check_source_type_consistency("git", pkg_lock, force=False) or ""),
+    ))
+
     # --- detect_repository_origin: read-only origin classification, distinct
     # from governance detection (the entrypoint-only bug's real fix) ---
     with tempfile.TemporaryDirectory() as tmp:
@@ -242,25 +277,52 @@ def main() -> int:
         cfg_path.write_text(content, encoding="utf-8")
         results.append(check("on-disk config validates via validate_config_mode", validate_config_mode(FRAMEWORK_ROOT, cfg_path) == 0))
 
-    # --- Lock rendering incl. ref_verification (Finding E) ---
-    lock_data = eif_init.render_lock_data(ref or "a" * 40, short or "aaaaaaa", True, "asserted",
-                                          "claude-code", "CLAUDE.md", ".eif/runtime",
-                                          [{"path": "x.py", "sha256": "a" * 64}], "sha256:" + "b" * 64,
-                                          "adopted", "0.1.0", "2026-07-15T00:00:00+00:00")
-    lock_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", lock_data)
-    results.append(check("lock with dirty=True + ref_verification=asserted validates", lock_errors == [], str(lock_errors)))
-    results.append(check("dirty=True is NOT silently cleared by asserted ref_verification", lock_data["framework"]["dirty"] is True))
+    # --- Lock rendering, discriminated framework.source_type (adoption-hardening) ---
+    common_lock_args = (
+        "claude-code", "CLAUDE.md", ".eif/runtime",
+        [{"path": "x.py", "sha256": "a" * 64}], "sha256:" + "b" * 64,
+        "adopted", "0.1.0", "2026-07-15T00:00:00+00:00",
+    )
+
+    git_lock = eif_init.render_lock_data(
+        "git", {"commit_sha": ref or "a" * 40, "dirty": True}, None, None, *common_lock_args,
+    )
+    git_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", git_lock)
+    results.append(check("git-source lock validates", git_errors == [], str(git_errors)))
+    results.append(check("dirty=True is NOT silently cleared for a git-source lock", git_lock["git"]["dirty"] is True))
     with tempfile.TemporaryDirectory() as tmp:
         lock_path = Path(tmp) / "framework.lock.yaml"
-        lock_path.write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, lock_data), encoding="utf-8")
-        results.append(check("on-disk lock validates via validate_lock_mode", validate_lock_mode(FRAMEWORK_ROOT, lock_path) == 0))
+        lock_path.write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, git_lock), encoding="utf-8")
+        results.append(check("on-disk git-source lock validates via validate_lock_mode", validate_lock_mode(FRAMEWORK_ROOT, lock_path) == 0))
 
-    bad_lock = dict(lock_data)
-    bad_lock["framework"] = dict(lock_data["framework"], ref_verification="not-a-real-value")
-    bad_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", bad_lock)
-    results.append(check("an invalid ref_verification value is rejected by the schema", len(bad_errors) > 0))
+    bundle_lock = eif_init.render_lock_data(
+        "source-bundle", None, None, {"asserted_ref": "export-2026-07-15", "dirty": True}, *common_lock_args,
+    )
+    bundle_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", bundle_lock)
+    results.append(check("source-bundle lock (asserted, not git-verified) validates", bundle_errors == [], str(bundle_errors)))
+    results.append(check("dirty=True is NOT silently cleared for an asserted source-bundle lock", bundle_lock["source_bundle"]["dirty"] is True))
 
-    missing_instance_lock = {k: v for k, v in lock_data.items() if k != "instance"}
+    package_lock = eif_init.render_lock_data(
+        "installed-package", None,
+        {"distribution": "engineering-intelligence-framework", "version": "0.1.0.dev0",
+         "python_version": "3.12.0", "resource_manifest_digest": "sha256:" + "c" * 64},
+        None, *common_lock_args,
+    )
+    package_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", package_lock)
+    results.append(check("installed-package lock validates, no fabricated git commit_sha", package_errors == [], str(package_errors)))
+    results.append(check("installed-package lock has no 'git' object at all", "git" not in package_lock))
+
+    mismatched_lock = dict(git_lock)
+    mismatched_lock["framework"] = dict(git_lock["framework"], source_type="installed-package")
+    mismatch_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", mismatched_lock)
+    results.append(check("source_type=installed-package with a 'git' object but no 'package' object is rejected", len(mismatch_errors) > 0))
+
+    bad_source_type_lock = dict(git_lock)
+    bad_source_type_lock["framework"] = dict(git_lock["framework"], source_type="not-a-real-value")
+    bad_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", bad_source_type_lock)
+    results.append(check("an invalid framework.source_type value is rejected by the schema", len(bad_errors) > 0))
+
+    missing_instance_lock = {k: v for k, v in git_lock.items() if k != "instance"}
     missing_errors = eif_init.validate_in_memory(FRAMEWORK_ROOT, "framework-lock.schema.json", missing_instance_lock)
     results.append(check("a lock missing the 'instance' block is rejected (now required)", len(missing_errors) > 0))
 

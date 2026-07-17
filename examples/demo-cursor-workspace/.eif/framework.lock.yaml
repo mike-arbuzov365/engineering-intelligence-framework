@@ -3,10 +3,7 @@
 
 lock_schema_version: 1
 framework:
-  ref: 77f742fd5738054278168dda928f8d045c28de5b
-  ref_short: 77f742f
-  dirty: true
-  ref_verification: git-verified
+  source_type: git
 instance:
   eif_instance_version: 0.1.0
   migration_status: greenfield
@@ -24,18 +21,16 @@ bundle:
     sha256: 588bd4eacfb2c0d327cfa86dc88d4244ffb674f74bbf51127367645cc2aa94ad
   - path: core/ontology/status-lifecycle.md
     sha256: 18ee456f191f4b2de048c7cca21f4480e7810f2705126eaa297eff1c00498c2b
-  - path: core/schemas/benchmark-result.schema.json
-    sha256: 7c7722f629afece17dc84a903cb9f904992cfcc74743ddd8961ff8bdaf36b443
   - path: core/schemas/eif-config.schema.json
     sha256: 3dba90641bbff7426b4845f9ebc020051c2c424b28e0e39c135e8334838ff654
   - path: core/schemas/framework-lock.schema.json
-    sha256: 1dabb635c348098d8d15ac631489fd9126a8daeab199f1745c44c852370fa39d
+    sha256: 4937edb4eb2d73485fdee5e680f97a2495e99a788870aaa6a37f04f129b1c97c
   - path: core/schemas/knowledge-frontmatter.schema.json
     sha256: be3ff7b0b8bdaa55d98939fd2957e4f31f973c8c89f932c66011cb914ad08b5e
   - path: eif_adapters.py
     sha256: 2f7afd74c52882f7b42c6a91d7c9729f7f2b3d5189b65717bfda219efaf313b3
   - path: eif_check_links.py
-    sha256: b43505b976f29efa78d88fced5214054082ef540a484a7249b9f7620836b3aba
+    sha256: 1b5aba3ed6792a345323e08c69b18059657ec53cd366b4f37b809badd2b3dc25
   - path: eif_generate_index.py
     sha256: fde36d7c595307a4698741c787f07ebce14b764356e85bb72119d3b7060edbbb
   - path: eif_locale.py
@@ -43,15 +38,15 @@ bundle:
   - path: eif_markers.py
     sha256: 676e31b9df8848887d5a707b08d24844d9349657bf7c34ed090ad429f6fbac70
   - path: eif_privacy_scan.py
-    sha256: aeca07d16757f506d30cf1a271e3bd8a3914c4efcf44f8aa53307cf901f8398d
+    sha256: 450ac1bc62473b5bce271c654f0fde1d868f7cc94571f566b27aef850a0bf639
   - path: eif_render.py
-    sha256: 92a1738f34acc906ba0c9a9a796670f6b22f28ea2ee997307af3def56b1ea8a8
+    sha256: 732f733e4c1ad847939c393af559d716aad88e73330019d82fcbed15de658933
   - path: eif_search_knowledge.py
-    sha256: 29951eb903b09f43eb66e1cdf32f6b3ee376fcaa5bff2716a12d07cf62a26b28
+    sha256: f9947ee083292cbad174c171e907f0085d637ae7899d0f3fe62ab84394dc97ee
   - path: eif_validate_frontmatter.py
-    sha256: 0b334e63a854b2b02b62fb70ac43204b2ba5f2edc3d99df570e31bf8242a4faf
+    sha256: 7f176aedb423943dc4f504eb78f017cae4ae441b6e3dd59672147ce2054da1d9
   - path: eif_verify_runtime.py
-    sha256: f0946478c06f7a4ea5ad48278ca9b1d70cdc2f3793edef86af846ed47b1048cc
+    sha256: 8e79b8b5559a1829805c801d8bc5683bdd3dc904c9a4b6ffe8a1fb19480d8737
   - path: locales/README.md
     sha256: 375a14313a4329137391b76fc53423e53fc8e5410f3e2aecd4ac9fbf326b8d00
   - path: locales/en/messages.yaml
@@ -67,19 +62,22 @@ bundle:
   - path: locales/uk/templates/session-closeout.md
     sha256: d32aa42909e511c3711582ea2f449bd2ea87efb52fad4cbbf9e2659297566549
   - path: requirements.txt
-    sha256: f816349f65bb845f70de93a4427aab06c1bea34051fcacb009a2e2b362f2ea3b
+    sha256: 1703de02d8ce47a319e3ea207d1b7af05ac451a02dac5705b67d55104b54abae
   - path: templates/README.md
     sha256: 96af034eceae28aeefec8ef533bdb7f4351bf518a8d802822a0ffa1fdafa22ff
   - path: templates/agent-instructions.md
     sha256: 04cef93c90ad795232580d8fffe3c4ee8572f88372bc262324ca0d8f7f7e5fe2
   - path: templates/knowledge-delta.md
-    sha256: ccb0d98010af90d2cf7077481a2697d5daba4039cf58d8e785c7d7780bb77227
+    sha256: a3ab23101f97a60585ff51bd69eb927d70ec0ea4c6dfd72a782b23e7498cd7b2
   - path: templates/session-closeout.md
     sha256: 3e20360836c1d9cbf469300d704b1848b24011eeead43b755594be6b430971e0
   - path: templates/task-scope.md
     sha256: 66555e2692a6417bf8cbfa01bffdef5f218598b00d108eeccb42e01fa3ba9643
-  digest: sha256:666fdc43d8bba121789263a7456d84d34daa47b1d23c5348b16c45ff55098f41
-generated_at: '2026-07-16T19:25:54.002109+00:00'
+  digest: sha256:f12d62e76bbfd660852bfb1ecc919e36bce626fe2ba6a695484724f436f015d8
+generated_at: '2026-07-17T13:00:26.177032+00:00'
+git:
+  commit_sha: adc30c234003320d037e269077f92074d6d337cb
+  dirty: true
 knowledge_index:
   path: docs/knowledge/index.md
   sha256: 5dabbae1996cf261bc040c90a3de647099982d0eec28485cea7bb985c2ac9b08

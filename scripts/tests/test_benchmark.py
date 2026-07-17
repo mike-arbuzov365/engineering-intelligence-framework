@@ -65,13 +65,35 @@ def main() -> int:
     results: list[bool] = []
 
     # --- seeded mode order reproducible ---
+    # Adoption-hardening round fix: the prior version of this check
+    # ("order1 != order3 or True") could never fail - two arbitrary seeds
+    # (42, 99) might coincidentally land on the same permutation of only
+    # 4 items (24 possible orders total), and "or True" papered over that
+    # instead of picking seeds known not to collide. Fixed two ways: (1)
+    # exact, hardcoded expected orders for two specific seeds, computed
+    # directly from randomize_mode_order itself and pinned here as a
+    # regression check (a change to the shuffle algorithm/seed handling
+    # would be caught, not silently accepted); (2) a real distinctness
+    # assertion across a deterministic seed set that CAN fail.
     modes = ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"]
     order1 = randomize_mode_order(modes, seed=42)
     order2 = randomize_mode_order(modes, seed=42)
-    order3 = randomize_mode_order(modes, seed=99)
     results.append(check("same seed produces the same mode order", order1 == order2, f"{order1} vs {order2}"))
-    results.append(check("different seed can produce a different order", order1 != order3 or True, "(non-fatal if they happen to coincide, just documenting)"))
     results.append(check("randomize_mode_order is an actual permutation, not a copy-through", sorted(order1) == sorted(modes)))
+
+    seed0_order = randomize_mode_order(modes, seed=0)
+    seed5_order = randomize_mode_order(modes, seed=5)
+    expected_seed0 = ["C_structural_navigation", "A_baseline", "B_eif_governance", "D_full_stack"]
+    expected_seed5 = ["A_baseline", "B_eif_governance", "D_full_stack", "C_structural_navigation"]
+    results.append(check("seed=0 produces its exact expected order (regression pin, not just 'a' permutation)", seed0_order == expected_seed0, str(seed0_order)))
+    results.append(check("seed=5 produces its exact expected order (regression pin, not just 'a' permutation)", seed5_order == expected_seed5, str(seed5_order)))
+    results.append(check("different seeds (0 vs 5) actually produce different orders - this assertion CAN fail", seed0_order != seed5_order, f"{seed0_order} vs {seed5_order}"))
+
+    distinct_orders = {tuple(randomize_mode_order(modes, seed=s)) for s in range(10)}
+    results.append(check(
+        "at least 5 distinct permutations across 10 deterministic seeds (0-9) - proves seeding actually varies the order, not a coincidence of 2 cherry-picked seeds",
+        len(distinct_orders) >= 5, f"{len(distinct_orders)} distinct order(s) across 10 seeds",
+    ))
 
     with tempfile.TemporaryDirectory(prefix="eif-benchmark-test-") as tmp:
         tmp_root = Path(tmp)
@@ -134,6 +156,10 @@ def main() -> int:
             len(records) == 1 and records[0]["outcome"]["status"] in ("failure", "partial"),
             str(records),
         ))
+        results.append(check(
+            "a non-success attempt exits 20 (EXIT_TASK_NOT_SUCCESS) - distinct from a written record, never inferred from it",
+            proc.returncode == 20, str(proc.returncode),
+        ))
 
         # --- harness crash retained ---
         work = tmp_root / "work-crash"
@@ -143,6 +169,62 @@ def main() -> int:
             "an agent-runner crash still produces a written record with status harness_error",
             len(records) == 1 and records[0]["outcome"]["status"] == "harness_error",
             str(records),
+        ))
+        results.append(check(
+            "a harness_error attempt exits 21 (EXIT_HARNESS_ERROR)",
+            proc.returncode == 21, str(proc.returncode),
+        ))
+
+        # --- a genuine success exits 0 ---
+        work = tmp_root / "work-success-exit-code"
+        proc, out_path = materialize_and_run(work_dir=work, fixture=T02, behavior="correct_fix")
+        records = [json.loads(l) for l in out_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+        results.append(check(
+            "a genuine success (T02, correct_fix) exits 0",
+            proc.returncode == 0 and records[0]["outcome"]["status"] == "success",
+            f"rc={proc.returncode} records={records}",
+        ))
+
+        # --- timeout retained, exits 22 ---
+        # A synthetic fixture with a 1-second budget (real fixtures use
+        # 300s, far too long for a test to actually wait) + the "hang"
+        # fake-agent behavior (sleeps 3600s) - proves the real
+        # subprocess.TimeoutExpired path, not a simulated shortcut.
+        timeout_fixture = tmp_root / "timeout-fixture"
+        (timeout_fixture / "source" / "src").mkdir(parents=True)
+        (timeout_fixture / "source" / "tests").mkdir(parents=True)
+        (timeout_fixture / "source" / "src" / "x.py").write_text("VALUE = 1\n", encoding="utf-8")
+        (timeout_fixture / "source" / "tests" / "test_x.py").write_text(
+            "print('EIF-BENCHMARK-RESULT: passed=1 total=1')\n", encoding="utf-8",
+        )
+        (timeout_fixture / "task.md").write_text("unused\n", encoding="utf-8")
+        (timeout_fixture / "manifest.json").write_text(json.dumps({
+            "manifest_schema_version": 1, "task_id": "T98", "title": "timeout test",
+            "supported_modes": ["A_baseline"], "task_prompt_path": "task.md",
+            "source_dir": "source",
+            "test_command": ["python", "tests/test_x.py"],
+            "expected_output_contract": {"tests_total": 1},
+            "budget": {"max_wall_time_seconds": 1, "max_tool_calls": 1},
+            "license": "Apache-2.0", "provenance": "test",
+            "no_private_content_confirmed": True,
+        }), encoding="utf-8")
+        work = tmp_root / "work-timeout"
+        run_benchmark("materialize", str(timeout_fixture), str(work), "--mode", "A_baseline")
+        timeout_out = tmp_root / "timeout-results.jsonl"
+        timeout_proc = run_benchmark(
+            "run", str(timeout_fixture), str(work), "--mode", "A_baseline",
+            "--agent-runner", sys.executable, str(FAKE_AGENT), "--out", str(timeout_out),
+            env={"EIF_FAKE_AGENT_BEHAVIOR": "hang"},
+        )
+        timeout_records = [json.loads(l) for l in timeout_out.read_text(encoding="utf-8").splitlines() if l.strip()] if timeout_out.exists() else []
+        results.append(check(
+            "a real timeout (1s budget, hanging agent) still produces exactly one written record",
+            len(timeout_records) == 1 and timeout_records[0]["outcome"]["status"] == "timeout",
+            str(timeout_records),
+        ))
+        results.append(check(
+            "a timeout attempt exits 22 (EXIT_TIMEOUT)",
+            timeout_proc.returncode == 22, str(timeout_proc.returncode),
         ))
 
         # --- raw JSONL append-only ---
@@ -275,6 +357,83 @@ def main() -> int:
             str(mixed_summary.get("tool_version_conflicts")),
         ))
 
+        # --- measurement provenance (adoption-hardening round): fake-runner
+        # cannot be blended with a real agent's measurements, estimated
+        # cannot be silently compared with exact, missing provenance blocks
+        # publication, and no quality-per-token claim survives from a
+        # fake-runner-only group. ---
+        fake_measurement = {"source": "fake-runner", "exact": True, "collector_version": "0.1.0"}
+        real_measurement = {"source": "provider-usage", "exact": True, "collector_version": "test"}
+        estimated_measurement = {"source": "provider-usage", "exact": False, "collector_version": "test"}
+
+        source_mixed_dir = tmp_root / "agg-measurement-source-mixed"
+        source_mixed_dir.mkdir()
+        rec_fake = _make_synthetic_record("T97", "A_baseline", 0, "success", 100, 50, measurement=fake_measurement)
+        rec_real = _make_synthetic_record("T97", "A_baseline", 1, "success", 100, 50, measurement=real_measurement)
+        (source_mixed_dir / "batch.jsonl").write_text(json.dumps(rec_fake) + "\n" + json.dumps(rec_real) + "\n", encoding="utf-8")
+        source_mixed_out = tmp_root / "measurement-source-mixed-summary.json"
+        run_benchmark("aggregate", str(source_mixed_dir), "--out", str(source_mixed_out))
+        source_mixed_summary = json.loads(source_mixed_out.read_text(encoding="utf-8"))
+        results.append(check(
+            "aggregate flags a group mixing fake-runner and real-agent (provider-usage) measurements, never silently blended",
+            "measurement_conflicts" in source_mixed_summary and len(source_mixed_summary["measurement_conflicts"]) == 1,
+            str(source_mixed_summary.get("measurement_conflicts")),
+        ))
+        source_mixed_group = source_mixed_summary["groups"][0]
+        results.append(check(
+            "the source-mixed group's token figures are suppressed (null), not silently averaged across incompatible sources",
+            source_mixed_group["mean_input_tokens"] is None and source_mixed_group["token_figures_suppressed_reason"] is not None,
+            str(source_mixed_group),
+        ))
+
+        exactness_mixed_dir = tmp_root / "agg-measurement-exactness-mixed"
+        exactness_mixed_dir.mkdir()
+        rec_exact = _make_synthetic_record("T96", "A_baseline", 0, "success", 100, 50, measurement=real_measurement)
+        rec_estimated = _make_synthetic_record("T96", "A_baseline", 1, "success", 100, 50, measurement=estimated_measurement)
+        (exactness_mixed_dir / "batch.jsonl").write_text(json.dumps(rec_exact) + "\n" + json.dumps(rec_estimated) + "\n", encoding="utf-8")
+        exactness_mixed_out = tmp_root / "measurement-exactness-mixed-summary.json"
+        run_benchmark("aggregate", str(exactness_mixed_dir), "--out", str(exactness_mixed_out))
+        exactness_mixed_summary = json.loads(exactness_mixed_out.read_text(encoding="utf-8"))
+        exactness_mixed_group = exactness_mixed_summary["groups"][0]
+        results.append(check(
+            "an estimated measurement is never silently compared/averaged with an exact one - token figures suppressed",
+            exactness_mixed_group["mean_input_tokens"] is None and "estimated vs exact" in (exactness_mixed_group["token_figures_suppressed_reason"] or ""),
+            str(exactness_mixed_group),
+        ))
+
+        missing_dir = tmp_root / "agg-measurement-missing"
+        missing_dir.mkdir()
+        rec_missing = _make_synthetic_record("T95", "A_baseline", 0, "success", 100, 50, measurement=real_measurement)
+        del rec_missing["measurement"]
+        (missing_dir / "batch.jsonl").write_text(json.dumps(rec_missing) + "\n", encoding="utf-8")
+        missing_out = tmp_root / "measurement-missing-summary.json"
+        run_benchmark("aggregate", str(missing_dir), "--out", str(missing_out))
+        missing_summary = json.loads(missing_out.read_text(encoding="utf-8"))
+        results.append(check(
+            "a record entirely missing measurement provenance blocks publication of that group's token figures",
+            "measurement_conflicts" in missing_summary and missing_summary["groups"][0]["mean_input_tokens"] is None,
+            str(missing_summary),
+        ))
+
+        fake_only_dir = tmp_root / "agg-fake-only"
+        fake_only_dir.mkdir()
+        rec_fake_only = _make_synthetic_record("T94", "A_baseline", 0, "success", 100, 50, measurement=fake_measurement)
+        (fake_only_dir / "batch.jsonl").write_text(json.dumps(rec_fake_only) + "\n", encoding="utf-8")
+        fake_only_out = tmp_root / "fake-only-summary.json"
+        run_benchmark("aggregate", str(fake_only_dir), "--out", str(fake_only_out))
+        fake_only_summary = json.loads(fake_only_out.read_text(encoding="utf-8"))
+        fake_only_group = fake_only_summary["groups"][0]
+        results.append(check(
+            "no quality-per-token claim (mean_input_tokens) is emitted for an all-fake-runner group, even with no conflict",
+            fake_only_group["mean_input_tokens"] is None and "fake-runner" in (fake_only_group["token_figures_suppressed_reason"] or ""),
+            str(fake_only_group),
+        ))
+        results.append(check(
+            "an all-fake-runner group's success_rate/outcome_breakdown are still reported (retention, just not a token-cost claim)",
+            fake_only_group["success_rate"] == 1.0 and fake_only_group["outcome_breakdown"] == {"success": 1},
+            str(fake_only_group),
+        ))
+
         # --- variance / confidence interval ---
         ci = _confidence_interval_95([100.0, 110.0, 90.0, 105.0, 95.0])
         results.append(check(
@@ -327,7 +486,7 @@ def main() -> int:
     return 0 if all(results) else 1
 
 
-def _make_synthetic_record(task_id: str, mode: str, run_index: int, status: str, input_tokens: int, output_tokens: int) -> dict:
+def _make_synthetic_record(task_id: str, mode: str, run_index: int, status: str, input_tokens: int, output_tokens: int, measurement: dict | None = None) -> dict:
     return {
         "schema_version": 1,
         "record_id": f"{task_id}__{mode}__run{run_index}__synthetic",
@@ -347,6 +506,7 @@ def _make_synthetic_record(task_id: str, mode: str, run_index: int, status: str,
             "wall_time_seconds": 1.0, "completion_success": True,
             "tests_passed": 6 if status == "success" else 3, "tests_total": 6,
         },
+        "measurement": measurement if measurement is not None else {"source": "provider-usage", "exact": True, "collector_version": "test"},
         "outcome": {"status": status},
         "harness_version": "0.1.0",
     }

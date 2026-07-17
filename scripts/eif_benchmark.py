@@ -36,11 +36,23 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+import yaml
+
 FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS_DIR = FRAMEWORK_ROOT / "core" / "schemas"
 BLOCKED_MODES = {"C_structural_navigation", "D_full_stack"}
 EXECUTABLE_MODES = {"A_baseline", "B_eif_governance"}
 HARNESS_VERSION = "0.1.0"
+
+# `run`'s exit codes (adoption-hardening round): distinct from whether a
+# result record was written, which happens on EVERY attempt regardless -
+# record retention must never be inferred from the process exit code. A
+# batch orchestrator may treat 20/21/22/23 as "continue to the next
+# attempt", but CI/shell callers must not mistake any of them for 0.
+EXIT_TASK_NOT_SUCCESS = 20  # outcome.status: failure or partial
+EXIT_HARNESS_ERROR = 21     # outcome.status: harness_error
+EXIT_TIMEOUT = 22           # outcome.status: timeout
+EXIT_ABORTED = 23           # outcome.status: aborted
 
 
 def _load_schema(name: str) -> dict:
@@ -210,15 +222,18 @@ def cmd_materialize(args: argparse.Namespace) -> int:
     print(f"materialize: copied {source_dir} -> {work_dir}")
 
     setup_cost_seconds = 0.0
+    eifctl_provenance = None
+    adapter_name = None
     if args.mode == "B_eif_governance":
         import time
-        start = time.monotonic()
-        eifctl = shutil.which("eifctl")
+        adapter_name = args.adapter
+        eifctl = args.eifctl_path or shutil.which("eifctl")
         if not eifctl:
             print("materialize: FAIL - mode B requires the 'eifctl' console command on PATH", file=sys.stderr)
             return 1
+        start = time.monotonic()
         proc = subprocess.run(
-            [eifctl, "init", "--project-name", manifest["task_id"], "--adapter", "claude-code",
+            [eifctl, "init", "--project-name", manifest["task_id"], "--adapter", adapter_name,
              "--instance-path", str(work_dir)],
             capture_output=True, text=True,
         )
@@ -228,12 +243,40 @@ def cmd_materialize(args: argparse.Namespace) -> int:
             return 1
         print(f"materialize: eifctl init succeeded in {setup_cost_seconds}s (mode B governance installed)")
 
+        # Read the eifctl provenance eifctl ITSELF just recorded (this exact
+        # venv's package/version/resource_manifest_digest/wheel_sha256) from
+        # the instance's own lock file - never re-derive it via a second
+        # `eifctl version` call or a fresh PATH lookup, either of which could
+        # silently resolve to a DIFFERENT install than the one that actually
+        # materialized this instance.
+        lock_path = work_dir / ".eif" / "framework.lock.yaml"
+        lock_data = yaml.safe_load(lock_path.read_text(encoding="utf-8"))
+        if (lock_data.get("framework") or {}).get("source_type") != "installed-package":
+            print(
+                "materialize: FAIL - mode B's eifctl init did not record "
+                "framework.source_type: installed-package in the instance lock "
+                "- cannot attribute this attempt to a specific eifctl install.",
+                file=sys.stderr,
+            )
+            return 1
+        pkg = lock_data["package"]
+        eifctl_provenance = {
+            "distribution": pkg["distribution"],
+            "version": pkg["version"],
+            "python_version": pkg["python_version"],
+            "resource_manifest_digest": pkg["resource_manifest_digest"],
+        }
+        if "wheel_sha256" in pkg:
+            eifctl_provenance["wheel_sha256"] = pkg["wheel_sha256"]
+
     (work_dir / ".benchmark-materialize.json").write_text(
         json.dumps({
             "task_id": manifest["task_id"],
             "mode": args.mode,
             "source_digest": compute_source_digest(source_dir),
             "setup_cost_seconds": setup_cost_seconds,
+            "adapter": adapter_name,
+            "eifctl": eifctl_provenance,
         }, indent=2),
         encoding="utf-8",
     )
@@ -258,6 +301,8 @@ def _run_test_command(test_command: list[str], cwd: Path) -> tuple[int, int, str
 
 
 def cmd_run(args: argparse.Namespace) -> int:
+    import platform
+
     fixture_dir = Path(args.fixture_dir).resolve()
     work_dir = Path(args.work_dir).resolve()
     manifest = json.loads((fixture_dir / "manifest.json").read_text(encoding="utf-8"))
@@ -265,6 +310,24 @@ def cmd_run(args: argparse.Namespace) -> int:
     if args.mode in BLOCKED_MODES:
         print(f"run: BLOCKED - mode {args.mode} is not operationally executable this round.")
         return 3
+
+    # materialize must have already run against this exact work_dir - its
+    # record of adapter/eifctl provenance is authoritative (this command
+    # never re-derives it via a fresh `eifctl version` call or a PATH
+    # lookup, either of which could silently resolve to a different
+    # install than the one that actually materialized the instance).
+    materialize_path = work_dir / ".benchmark-materialize.json"
+    if not materialize_path.is_file():
+        print(f"run: FAIL - {materialize_path} not found - run materialize first.", file=sys.stderr)
+        return 1
+    materialize_data = json.loads(materialize_path.read_text(encoding="utf-8"))
+    if materialize_data.get("mode") != args.mode:
+        print(
+            f"run: FAIL - {materialize_path} was materialized for mode "
+            f"{materialize_data.get('mode')!r}, but this run is for mode {args.mode!r}.",
+            file=sys.stderr,
+        )
+        return 1
 
     attempt_id = str(uuid.uuid4())
     started_at = datetime.now(timezone.utc).isoformat()
@@ -280,18 +343,28 @@ def cmd_run(args: argparse.Namespace) -> int:
         "run_index": args.run_index,
         "randomized_order_seed": args.order_seed,
         "model": {"name": args.model_name, "version_or_snapshot": args.model_version},
+        "tool_versions": {"eifctl": materialize_data.get("eifctl")},
+        "environment": {"os": platform.system()},
         "started_at": started_at,
         "finished_at": None,
         "inputs": {
             "target_kind": "synthetic_fixture",
             "target_ref": manifest["task_id"],
+            "adapter": materialize_data.get("adapter"),
             "provenance": {"source_digest": compute_source_digest(fixture_dir / manifest["source_dir"])},
         },
         "metrics": {
             "input_tokens": 0, "output_tokens": 0, "tool_calls": 0,
             "wall_time_seconds": 0.0, "completion_success": False,
             "tests_passed": 0, "tests_total": 0,
+            "setup_cost_seconds": materialize_data.get("setup_cost_seconds", 0.0),
         },
+        # Default for every early-exit path (timeout/harness_error/aborted,
+        # none of which ever reach the agent's own report) - overwritten
+        # with the agent-runner's actual measurement block once one is
+        # available. No tokens were meaningfully measured for these
+        # outcomes anyway (metrics.input_tokens/output_tokens stay 0).
+        "measurement": {"source": "estimated", "exact": False, "collector_version": None},
         "outcome": {"status": "harness_error", "notes": "run did not complete"},
         "harness_version": HARNESS_VERSION,
     }
@@ -309,7 +382,21 @@ def cmd_run(args: argparse.Namespace) -> int:
         record["finished_at"] = datetime.now(timezone.utc).isoformat()
         _write_record(args.out, record)
         print(f"run: TIMEOUT - {record['record_id']}")
-        return 0
+        return EXIT_TIMEOUT
+    except KeyboardInterrupt:
+        # Not exercised by an automated signal-based test: reliably
+        # delivering SIGINT/CTRL_C to a subprocess.run() child mid-flight
+        # is platform-fragile (Windows in particular does not support
+        # send_signal(SIGINT) the same way POSIX does for an arbitrary
+        # child), and a flaky test here would be worse than an honestly
+        # untested edge case. The record-writing/exit-code shape matches
+        # every other outcome branch, which IS covered.
+        record["metrics"]["wall_time_seconds"] = round(time.monotonic() - wall_start, 3)
+        record["outcome"] = {"status": "aborted", "notes": "operator-cancelled (KeyboardInterrupt)"}
+        record["finished_at"] = datetime.now(timezone.utc).isoformat()
+        _write_record(args.out, record)
+        print(f"run: ABORTED - {record['record_id']}")
+        return EXIT_ABORTED
 
     wall_time = round(time.monotonic() - wall_start, 3)
     record["metrics"]["wall_time_seconds"] = wall_time
@@ -319,7 +406,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         record["outcome"] = {"status": "harness_error", "notes": f"agent runner exited {agent_proc.returncode}: {agent_proc.stderr[:500]}"}
         _write_record(args.out, record)
         print(f"run: HARNESS_ERROR - {record['record_id']}")
-        return 0
+        return EXIT_HARNESS_ERROR
 
     try:
         agent_report = json.loads(agent_proc.stdout)
@@ -328,13 +415,22 @@ def cmd_run(args: argparse.Namespace) -> int:
     record["metrics"]["input_tokens"] = agent_report.get("input_tokens", 0)
     record["metrics"]["output_tokens"] = agent_report.get("output_tokens", 0)
     record["metrics"]["tool_calls"] = agent_report.get("tool_calls", 0)
+    # An agent-runner that doesn't report measurement provenance at all
+    # gets an honest "estimated, not exact" placeholder here - never
+    # silently assumed authoritative. This still lets the attempt be
+    # retained (per this harness's retention-first design); it is
+    # aggregate's job to refuse to publish a quality-per-token claim
+    # built on unverified measurement, not this command's.
+    record["measurement"] = agent_report.get("measurement") or {
+        "source": "estimated", "exact": False, "collector_version": None,
+    }
 
     passed, total, _ = _run_test_command(manifest["test_command"], cwd=work_dir)
     if passed is None:
         record["outcome"] = {"status": "harness_error", "notes": "test_command produced no parseable EIF-BENCHMARK-RESULT line"}
         _write_record(args.out, record)
         print(f"run: HARNESS_ERROR (bad test output) - {record['record_id']}")
-        return 0
+        return EXIT_HARNESS_ERROR
 
     record["metrics"]["tests_passed"] = passed
     record["metrics"]["tests_total"] = total
@@ -383,7 +479,7 @@ def cmd_run(args: argparse.Namespace) -> int:
 
     _write_record(args.out, record)
     print(f"run: {record['outcome']['status'].upper()} - {record['record_id']} ({passed}/{total} tests)")
-    return 0
+    return 0 if record["outcome"]["status"] == "success" else EXIT_TASK_NOT_SUCCESS
 
 
 def _write_record(out_path: str, record: dict) -> None:
@@ -451,11 +547,33 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
 
     summary = {"harness_version": HARNESS_VERSION, "total_records": len(records), "groups": []}
     tool_version_conflicts = []
+    measurement_conflicts = []
 
     for (task_id, mode), group in sorted(by_task_mode.items()):
         tool_versions_seen = {json.dumps(r.get("tool_versions"), sort_keys=True) for r in group}
         if len(tool_versions_seen) > 1:
             tool_version_conflicts.append(f"{task_id}/{mode}: {len(tool_versions_seen)} distinct tool_versions in this group")
+
+        # Measurement provenance (adoption-hardening round): a group must
+        # never silently blend fake-runner measurements with a real
+        # agent's, or an estimated figure with an exact one - either is
+        # reported as a named conflict, same treatment as tool_version_
+        # conflicts, never a silent average. A record missing measurement
+        # entirely (should not happen given cmd_run's default, but this
+        # command reads raw JSONL without re-validating against the
+        # schema first) is treated the same as "missing provenance".
+        measurements = [r.get("measurement") for r in group]
+        missing_measurement = any(m is None for m in measurements)
+        sources_seen = {m.get("source") for m in measurements if m is not None}
+        exactness_seen = {m.get("exact") for m in measurements if m is not None}
+        group_measurement_ok = not missing_measurement and len(sources_seen) <= 1 and len(exactness_seen) <= 1
+        if missing_measurement:
+            measurement_conflicts.append(f"{task_id}/{mode}: {sum(1 for m in measurements if m is None)} record(s) missing measurement provenance entirely - group excluded from publication")
+        elif len(sources_seen) > 1:
+            measurement_conflicts.append(f"{task_id}/{mode}: mixes measurement.source values {sorted(sources_seen)} - never silently blended")
+        elif len(exactness_seen) > 1:
+            measurement_conflicts.append(f"{task_id}/{mode}: mixes measurement.exact (estimated vs exact) - never silently compared")
+        is_fake_runner_group = group_measurement_ok and sources_seen == {"fake-runner"}
 
         # Only the terminal attempt per run_index counts toward outcome
         # stats (a retry chain's earlier attempts are diagnostic, not
@@ -468,6 +586,24 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
         output_tokens = [r["metrics"]["output_tokens"] for r in terminal]
         successes = sum(1 for r in terminal if r["outcome"]["status"] == "success")
 
+        # Token figures are never reported without a trustworthy,
+        # single-provenance measurement basis: suppressed (null, with a
+        # reason) rather than silently computed when measurement is
+        # missing/conflicting, OR when every record in the group is
+        # fake-runner-sourced (this round's only agent-runner, never real
+        # quality-per-token evidence) - success_rate/outcome_breakdown are
+        # still reported either way, since those don't depend on token
+        # measurement provenance at all.
+        suppress_reason = None
+        if missing_measurement:
+            suppress_reason = "measurement provenance missing on at least one record in this group"
+        elif len(sources_seen) > 1:
+            suppress_reason = f"mixed measurement.source values: {sorted(sources_seen)}"
+        elif len(exactness_seen) > 1:
+            suppress_reason = "mixed measurement.exact (estimated vs exact)"
+        elif is_fake_runner_group:
+            suppress_reason = "every record in this group is fake-runner-sourced - not real quality-per-token evidence"
+
         group_summary = {
             "task_id": task_id,
             "mode": mode,
@@ -475,9 +611,10 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
             "terminal_runs": len(terminal),
             "successes": successes,
             "success_rate": round(successes / len(terminal), 3) if terminal else None,
-            "mean_input_tokens": round(statistics.mean(input_tokens), 1) if input_tokens else None,
-            "mean_output_tokens": round(statistics.mean(output_tokens), 1) if output_tokens else None,
-            "input_tokens_95ci": _confidence_interval_95([float(x) for x in input_tokens]),
+            "mean_input_tokens": round(statistics.mean(input_tokens), 1) if input_tokens and not suppress_reason else None,
+            "mean_output_tokens": round(statistics.mean(output_tokens), 1) if output_tokens and not suppress_reason else None,
+            "input_tokens_95ci": _confidence_interval_95([float(x) for x in input_tokens]) if not suppress_reason else None,
+            "token_figures_suppressed_reason": suppress_reason,
             "outcome_breakdown": {
                 status: sum(1 for r in terminal if r["outcome"]["status"] == status)
                 for status in ("success", "partial", "failure", "harness_error", "timeout", "aborted")
@@ -490,6 +627,12 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
         summary["tool_version_conflicts"] = tool_version_conflicts
         print(f"aggregate: WARNING - {len(tool_version_conflicts)} group(s) mix tool versions, excluded from a single comparable figure:")
         for c in tool_version_conflicts:
+            print(f"  {c}")
+
+    if measurement_conflicts:
+        summary["measurement_conflicts"] = measurement_conflicts
+        print(f"aggregate: WARNING - {len(measurement_conflicts)} group(s) have a measurement-provenance conflict, token figures suppressed:")
+        for c in measurement_conflicts:
             print(f"  {c}")
 
     Path(args.out).write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -511,6 +654,8 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("fixture_dir")
     p.add_argument("work_dir")
     p.add_argument("--mode", required=True, choices=sorted(EXECUTABLE_MODES | BLOCKED_MODES))
+    p.add_argument("--adapter", default="claude-code", help="Adapter to configure for mode B (eifctl init --adapter); ignored for mode A.")
+    p.add_argument("--eifctl-path", default=None, help="Exact eifctl executable to use for mode B (e.g. a specific venv's Scripts/eifctl.exe) - overrides PATH lookup, so a test can pin exactly which install runs, not whichever eifctl happens to resolve first on PATH.")
     p.set_defaults(func=cmd_materialize)
 
     p = sub.add_parser("run")

@@ -3,10 +3,13 @@
 ## Status: harness executable, no runs published yet
 
 The quality-per-token benchmark harness (`scripts/eif_benchmark.py`) is
-real and executable for modes A and B, with 3 pilot fixtures. **No
-real-agent run has been executed or published** - only harness
+real and executable for modes A and B, with 3 pilot fixtures. Mode B is
+proven end-to-end against a real installed `eifctl` wheel, not just
+theoretically executable - see `scripts/tests/test_benchmark_mode_b.py`.
+**No real-agent run has been executed or published** - only harness
 self-tests against a fake, deterministic agent
-(`scripts/tests/test_benchmark.py`, 27/27 checks). Any claim of "N%
+(`scripts/tests/test_benchmark.py`, 41/41 checks;
+`scripts/tests/test_benchmark_mode_b.py`, 29/29 checks). Any claim of "N%
 token savings" without a real, published run should be treated as
 unverified.
 
@@ -56,6 +59,18 @@ to the attempt it restarts (`attempt_kind`:
 history; the raw record stream is the source of truth `aggregate` reads
 from, never a hand-summarized figure.
 
+`run`'s exit code is distinct from whether a record was written (which
+happens on every attempt, regardless): `0` a genuine success; `20` the
+task failed or partially succeeded; `21` a harness error (e.g. the agent
+runner crashed or produced unparseable output); `22` a timeout; `23` a
+deliberate abort. A batch orchestrator may continue past any non-zero
+code, but a CI/shell caller must not mistake 20-23 for success.
+
+Mode B's `materialize` accepts `--eifctl-path` to pin the exact eifctl
+executable to invoke (bypassing PATH lookup entirely) - the property this
+exists to prove is that mode B runs a SPECIFIC installed package, never
+whichever `eifctl` happens to resolve first on PATH.
+
 ## Pilot fixtures (3, per this round's scope)
 
 Each fixture under
@@ -101,6 +116,19 @@ mixes different tool versions (e.g. two different `eifctl` releases),
 surfacing it as a named conflict instead. A token-count figure is never
 reported without an accompanying quality figure (success rate) in the
 same group.
+
+Every record also carries `measurement` (`source`: `fake-runner` |
+`provider-usage` | `client-telemetry` | `estimated`; `exact`: bool) -
+provenance for the token/tool-call numbers themselves, since an
+agent-runner's self-reported JSON is not trusted as measured truth
+without labeling where it came from. `aggregate` refuses to blend a
+group whose records disagree on `source` or on `exact`, refuses to
+publish token figures for a group with any record missing `measurement`
+entirely, and suppresses token figures for a group that is entirely
+`fake-runner`-sourced (this round's only agent-runner, never real
+quality-per-token evidence) - success_rate/outcome_breakdown are still
+reported either way, since retention doesn't depend on measurement
+trustworthiness.
 
 A benchmark that only measures "tokens saved" without task success and
 rework rate is misleading - the private production instance this

@@ -205,6 +205,8 @@ jobs:
           pip install build hatchling
       - name: Build the wheel/sdist, install into a clean venv, run every eifctl subcommand end-to-end
         run: python scripts/tests/test_package_build.py
+      - name: Real end-to-end benchmark mode B against the installed package
+        run: python scripts/tests/test_benchmark_mode_b.py
 
   package-build-required:
     name: "Package build required"

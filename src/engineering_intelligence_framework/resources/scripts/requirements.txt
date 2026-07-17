@@ -1,0 +1,15 @@
+# Pinned dependencies for scripts/*.py. Update deliberately, not on drift -
+# see scripts/README.md#dependency-update-ownership for the process.
+#
+# jsonschema[format-nongpl] pulls in the format-validation extras needed
+# for every format EIF's schemas actually declare (date, date-time, uri -
+# see scripts/tests/test_format_dependencies.py, which enumerates the
+# exact set by reading core/schemas/*.schema.json rather than trusting
+# this comment): rfc3339-validator for date-time (stdlib covers date with
+# no extra package), rfc3986-validator for uri. `format` (not
+# `-nongpl`) additionally pulls in the GPL-3.0-or-later `rfc3987` package
+# for uri/iri - EIF does not use iri/iri-reference anywhere, so
+# format-nongpl's rfc3986-validator (MIT) is a strict, correctly-scoped
+# replacement, not a coverage reduction. See THIRD_PARTY_NOTICES.md.
+PyYAML==6.0.2
+jsonschema[format-nongpl]==4.23.0

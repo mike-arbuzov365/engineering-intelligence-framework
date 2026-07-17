@@ -913,6 +913,64 @@ def main() -> int:
         results.append(check("37f. pre-existing empty instance dir is NEVER deleted on failure", inst.is_dir()))
         results.append(check("37f. pre-existing empty instance dir: base byte-for-byte unchanged", tree_snapshot(base) == before))
 
+    # --- 38. Installed-package provenance is part of the SAME managed-state
+    # transaction as everything else (adoption-hardening round, Stage 1.1):
+    # package_prov lives in lock_data now, so a fault at the lock stage must
+    # roll back package provenance along with config/runtime/entrypoint -
+    # never a partially-committed lock with package data half-written. ---
+    package_args = [
+        "--package-distribution", "engineering-intelligence-framework",
+        "--package-version", "0.1.0.dev0",
+        "--package-python-version", "3.12.0",
+        "--package-resource-manifest-digest", "sha256:" + "a" * 64,
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "pkg-inst"
+        r0 = init(inst, "--project-name", "pkg-rollback-test", "--locale", "en", *package_args)
+        results.append(check("38. package-mode init succeeds", r0.returncode == 0, r0.stdout + r0.stderr))
+        lock_text_before = (inst / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8")
+        results.append(check("38. lock records installed-package provenance", "source_type: installed-package" in lock_text_before))
+        before = tree_snapshot(inst)
+
+        r1 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", *package_args],
+                 env={"EIF_INIT_TEST_FAIL_AFTER": "lock"})
+        results.append(check("38. injected failure at the lock stage (where package provenance lives) makes the run fail", r1.returncode != 0, r1.stdout + r1.stderr))
+        results.append(check("38. tree byte-for-byte unchanged after rollback (package provenance rolled back WITH everything else, not partially)", tree_snapshot(inst) == before))
+        lock_text_after = (inst / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8")
+        results.append(check("38. lock content itself is byte-for-byte the prior successful one (no partial package-provenance write survived)", lock_text_after == lock_text_before))
+
+        r2 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", *package_args],
+                 env={"EIF_INIT_TEST_FAIL_PARTIAL": "lock"})
+        results.append(check("38b. partial-write fault at the lock stage also fails the run", r2.returncode != 0, r2.stdout + r2.stderr))
+        results.append(check("38b. tree byte-for-byte unchanged after a partial-write fault too", tree_snapshot(inst) == before))
+
+        r3 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", *package_args])
+        results.append(check("38. a real re-run (no fault injection) succeeds after the failed attempts", r3.returncode == 0, r3.stdout + r3.stderr))
+
+    # --- 38c. A routine upgrade must resolve to the SAME framework.source_type
+    # already on record - a package-sourced instance cannot silently become
+    # a git-sourced one (or vice versa) without --force. ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "pkg-to-git"
+        r0 = init(inst, "--project-name", "source-type-switch-test", "--locale", "en", *package_args)
+        results.append(check("38c. package-mode init succeeds", r0.returncode == 0, r0.stdout + r0.stderr))
+        before = tree_snapshot(inst)
+
+        r1 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty"])
+        results.append(check("38c. routine upgrade WITHOUT package args (would resolve to git) STOPs, does not silently migrate", r1.returncode != 0, r1.stdout + r1.stderr))
+        results.append(check("38c. STOP message names --force as the repair", "--force" in (r1.stdout + r1.stderr)))
+        results.append(check("38c. tree byte-for-byte unchanged after the STOP", tree_snapshot(inst) == before))
+
+        r2 = run([str(SCRIPTS / "eif_init.py"), "--framework-root", str(FRAMEWORK_ROOT),
+                  "--instance-path", str(inst), "--allow-dirty", "--force"])
+        results.append(check("38c. --force explicitly permits the source_type migration", r2.returncode == 0, r2.stdout + r2.stderr))
+        lock_text = (inst / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8")
+        results.append(check("38c. lock now records source_type: git after the explicit --force migration", "source_type: git" in lock_text, lock_text))
+
     passed = sum(results)
     print(f"EIF-RESULT: passed={passed} total={len(results)}")
     print(f"\ntest_journey: {passed}/{len(results)} passed")

@@ -527,10 +527,14 @@ formally ratified (the file is explicit about which is which).
       agent-response localization and `terminology.yaml` are not covered.
 - [x] An **experimental** bootstrap (`eif_init.py`) works without any
       private repository - proven against a temp-directory instance and a
-      disposable copy of a private repository (adoption pilot). Not done:
-      a ratified, packaged CLI (`eifctl init` or equivalent - D-05/D-08
-      remain open); today it's an invoked script, not an installed
-      command.
+      disposable copy of a private repository (adoption pilot). A real,
+      installable package (`eifctl`, `pyproject.toml` at the repo root) now
+      exists - a built wheel, installed into a clean venv with a
+      space-and-Unicode path, running every subcommand end to end
+      (`scripts/tests/test_package_build.py`); the Windows+Ubuntu x Python
+      3.11/3.12 CI package-build matrix confirmed green on all 4
+      combinations, twice, so **D-05/D-08 are now Ratified** - see
+      `core/policies/decisions.md`.
 - [x] Existing-repository adoption does not silently override pre-existing
       project governance: an adoption preflight detects it and stops
       before any write when there is no adoption decision on record,

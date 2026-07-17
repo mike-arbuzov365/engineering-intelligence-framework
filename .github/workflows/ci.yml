@@ -181,6 +181,54 @@ jobs:
           PYEOF
         shell: bash
 
+  package-build:
+    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
+    # The dynamic per-combination name above is why THIS job itself cannot
+    # be a required check context (GitHub's statusCheckRollup would need 4
+    # exact, hardcoded combination strings, silently stale the moment the
+    # matrix changes). package-build-required below is the static aggregate
+    # that actually gets wired into merge-policy.json.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned runtime dependencies + build tooling
+        run: |
+          pip install -r scripts/requirements.txt
+          pip install build hatchling
+      - name: Build the wheel/sdist, install into a clean venv, run every eifctl subcommand end-to-end
+        run: python scripts/tests/test_package_build.py
+
+  package-build-required:
+    name: "Package build required"
+    # Static aggregate over the package-build matrix (adoption-hardening
+    # round): needs: a matrix job resolves needs.package-build.result to
+    # success only when EVERY combination succeeded - failure or cancelled
+    # otherwise, GitHub's own semantics, not hand-enumerated here. if:
+    # always() so this job still runs (and correctly reports failure)
+    # even when a matrix leg failed, rather than being skipped - a required
+    # check that can be silently skipped is not actually required. This is
+    # the context name wired into core/policies/merge-policy.json, never
+    # the dynamic per-combination name above.
+    needs: package-build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify every package-build matrix combination succeeded
+        run: |
+          if [ "${{ needs.package-build.result }}" != "success" ]; then
+            echo "package-build matrix result: ${{ needs.package-build.result }} - at least one combination did not succeed"
+            exit 1
+          fi
+          echo "all package-build matrix combinations succeeded"
+
   license-check:
     name: Dependency license check (required by policy)
     runs-on: ubuntu-latest

@@ -60,6 +60,17 @@ SUITES = [
     "test_format_dependencies.py",
     "test_check_licenses.py",
 ]
+# test_package_build.py is deliberately NOT in SUITES: it needs `build` +
+# `hatchling`, which are packaging-build tooling, not a runtime dependency
+# of EIF itself - they do not belong in scripts/requirements.txt (that
+# would misrepresent the dependency model this repo's own SBOM/license
+# policy scripts report on). Every OTHER CI job installs only
+# requirements.txt and calls run_all.py, so putting it in SUITES would
+# fail every one of those jobs with "No module named build" - a real
+# mistake made and caught here (the "vertical-slice" job failed exactly
+# this way the first time this suite was added). Run it directly:
+#     pip install build hatchling && python scripts/tests/test_package_build.py
+# - which is exactly what .github/workflows/ci.yml's package-build job does.
 
 # One standardized line per suite. Anchored so a suite that changes its human
 # summary text cannot be mis-parsed - a missing line becomes UNKNOWN, not 0.

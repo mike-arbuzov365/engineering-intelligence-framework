@@ -31,7 +31,7 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
 
 
 def _init_real_instance(inst: Path) -> None:
-    ref, ref_short, _ = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
+    ref, _short, _dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
     sources = eif_init.collect_bundle_sources(FRAMEWORK_ROOT)
     manifest = eif_init.build_manifest(sources)
     digest = eif_init.combined_digest(manifest)
@@ -41,7 +41,7 @@ def _init_real_instance(inst: Path) -> None:
     (inst / ".eif" / "config.yaml").write_text(eif_init._dump_yaml(eif_init.CONFIG_HEADER, config_data), encoding="utf-8")
 
     lock_data = eif_init.render_lock_data(
-        ref or "a" * 40, ref_short or "aaaaaaa", False, "git-verified", "claude-code", "CLAUDE.md",
+        "git", {"commit_sha": ref or "a" * 40, "dirty": False}, None, None, "claude-code", "CLAUDE.md",
         ".eif/runtime", manifest, digest, "greenfield", "0.1.0", "2026-07-15T00:00:00+00:00",
     )
     (inst / ".eif" / "framework.lock.yaml").write_text(eif_init._dump_yaml(eif_init.LOCK_HEADER, lock_data), encoding="utf-8")
@@ -67,7 +67,7 @@ def _init_real_instance_variant(
     drift-detection tests (Item 6): adoption mode, knowledge paths, and an
     optional lock.knowledge_index entry (present only when eif_init.py
     actually created/regenerated a managed index that run)."""
-    ref, ref_short, _ = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
+    ref, _short, _dirty = eif_init.resolve_framework_state(FRAMEWORK_ROOT)
     sources = eif_init.collect_bundle_sources(FRAMEWORK_ROOT)
     manifest = eif_init.build_manifest(sources)
     digest = eif_init.combined_digest(manifest)
@@ -81,7 +81,7 @@ def _init_real_instance_variant(
 
     migration_status = "adopted" if adoption_mode == "coexist" else "greenfield"
     lock_data = eif_init.render_lock_data(
-        ref or "a" * 40, ref_short or "aaaaaaa", False, "git-verified", "claude-code", "CLAUDE.md",
+        "git", {"commit_sha": ref or "a" * 40, "dirty": False}, None, None, "claude-code", "CLAUDE.md",
         ".eif/runtime", manifest, digest, migration_status, "0.1.0", "2026-07-15T00:00:00+00:00",
         knowledge_index=knowledge_index_lock,
     )
@@ -98,6 +98,20 @@ def _init_real_instance_variant(
 
 def main() -> int:
     results = []
+
+    # --- check_provenance: discriminated framework.source_type (adoption-
+    # hardening round) - each kind reports its own informational note,
+    # never fabricates a note that implies a different kind. ---
+    git_clean = verify.check_provenance({"framework": {"source_type": "git"}, "git": {"commit_sha": "a" * 40, "dirty": False}})
+    results.append(check("provenance: clean git source has no notes", git_clean == []))
+    git_dirty = verify.check_provenance({"framework": {"source_type": "git"}, "git": {"commit_sha": "a" * 40, "dirty": True}})
+    results.append(check("provenance: dirty git source is noted", len(git_dirty) == 1 and "DIRTY" in git_dirty[0]))
+    bundle_notes = verify.check_provenance({"framework": {"source_type": "source-bundle"}, "source_bundle": {"asserted_ref": "export-x", "dirty": False}})
+    results.append(check("provenance: source-bundle is ALWAYS noted as asserted, even when not dirty", len(bundle_notes) == 1 and "ASSERTED" in bundle_notes[0]))
+    bundle_dirty_notes = verify.check_provenance({"framework": {"source_type": "source-bundle"}, "source_bundle": {"asserted_ref": "export-x", "dirty": True}})
+    results.append(check("provenance: dirty source-bundle gets both the asserted note and a dirty note", len(bundle_dirty_notes) == 2))
+    pkg_notes = verify.check_provenance({"framework": {"source_type": "installed-package"}, "package": {"distribution": "engineering-intelligence-framework", "version": "0.1.0.dev0", "python_version": "3.12.0"}})
+    results.append(check("provenance: installed-package source is noted by distribution/version, not a fake ref", len(pkg_notes) == 1 and "engineering-intelligence-framework" in pkg_notes[0] and "0.1.0.dev0" in pkg_notes[0]))
 
     # --- Clean instance: everything passes ---
     with tempfile.TemporaryDirectory() as tmp:

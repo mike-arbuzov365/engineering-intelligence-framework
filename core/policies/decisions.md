@@ -152,42 +152,46 @@ ratified as required. (Moved here from a misplaced position under "Open"
 in the prior revision of this file - its own status text already said
 ratified; only the section placement was wrong.)
 
-## Provisional (strongly evidenced, not formally ratified)
-
 ### D-05/D-08: CLI name and distribution model
-**Status: provisional, strong evidence, not formally ratified - Ubuntu
-verification pending.** Preferred decision: CLI command `eifctl`;
-distribution as an installable Python package with a `console_scripts`
-entry point; an optional GitHub template/demo for onboarding, never the
+**Status: ratified 2026-07-16 (owner decision).** CLI command `eifctl`;
+distribution as an installable Python package
+(`engineering-intelligence-framework`) with a `console_scripts` entry
+point; an optional GitHub template/demo for onboarding, never the
 dependency mechanism itself; no git submodule as the v0.1 default; no
 copy-pasted standalone scripts as the primary public UX.
-**Evidence, 2026-07-16:** `eifctl` checked directly against PyPI's JSON API
-(`https://pypi.org/pypi/eifctl/json` - HTTP 404, no such package) and the
-npm registry (`https://registry.npmjs.org/eifctl` - HTTP 404) - no exact
-package-name collision on either registry. A general web search for
-"eifctl" as a command name found no existing tool using it (only
-unrelated fuzzy matches - `ifctool`, EF Core CLI tools, etc.). A real
-clean-venv packaging spike (`pyproject.toml` with `[project.scripts]
-eifctl = ...`, built to a wheel, installed into a fresh venv whose own
-path contained spaces) succeeded: the `eifctl` command resolved and ran
-correctly. Python support: this entire session's testing ran on Python
-3.11.15 (not just CI's pinned 3.12), so 3.11+ is empirically exercised,
-not just claimed.
-**Why still provisional, not ratified:** the pre-ratification checklist
-this round's instruction specified included Windows **and** Ubuntu
-verification. Windows is directly verified (above). Ubuntu was **not**
-independently verified this round - no local Linux environment was used
-for it (this repository's own CI already runs on Ubuntu 24.04 generally,
-so Stage 4's actual CI wiring, if that stage proceeds, is where real
-Ubuntu verification of the packaged CLI specifically would happen - not
-substituted for here). Move to `ratified` once that's closed, or revisit
-if it reveals a problem the Windows spike didn't.
+**Evidence:** `eifctl` checked directly against PyPI's JSON API (HTTP 404)
+and the npm registry (HTTP 404) - no exact package-name collision. A real
+package (`pyproject.toml`, `src/engineering_intelligence_framework/`, 7
+subcommands - `init`, `doctor`, `search`, `render`, `privacy-scan`,
+`validate`, `version` - each a thin wrapper over the exact same tested
+`scripts/eif_*.py` functions) was built to a wheel and installed into a
+clean venv whose own path contained a space and non-ASCII text, then
+exercised end to end against a project path also containing a space and
+non-ASCII text: init (fresh, routine upgrade, `--force` reconfigure with
+a locale switch), doctor, validate, render, privacy-scan, uninstall/
+reinstall - `scripts/tests/test_package_build.py`, 23/23 checks.
+**The specific condition that kept this provisional in the prior revision
+of this entry - independent Windows AND Ubuntu verification - is now
+closed**: the CI matrix added in this same PR
+(`.github/workflows/ci.yml`'s `package-build` job) ran this exact suite
+on Windows and Ubuntu, Python 3.11 and 3.12 (4 combinations), and all 4
+passed, confirmed twice across two separate commits/runs on this PR.
+**Limitations, real and not resolved by this ratification:** not published
+to PyPI (out of scope this round by explicit instruction); this PR itself
+is intentionally not merged this round (stops at a green,
+independently-reviewable state); one unrelated, pre-existing CI job on
+this PR (`Knowledge Delta completeness`) failed against an apparent
+external GitHub API disruption during this round (a raw `gh api` call
+returning GitHub's own HTML error page instead of JSON, reproduced
+directly outside CI too, on an unrelated PR number as well) - flagged as
+a separate, unrelated finding, not fixed here, and not a defect in the
+package this decision ratifies.
 
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08
-provisional above; see "Provisional" for what's still short of a full
-ratification bar and why.)*
+ratified 2026-07-16, see "Ratified" above for the CI evidence that closed
+the last open condition.)*
 
 ## How to ratify a decision
 

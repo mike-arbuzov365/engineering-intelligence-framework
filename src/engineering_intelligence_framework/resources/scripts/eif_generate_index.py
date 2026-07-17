@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""Generate a knowledge index for an EIF project instance.
+
+NEW-CORRECTION (see the private migration ledger, PACKET-2026-07-14-eif-
+public-productization/04-MIGRATION-LEDGER-001): the private EI's equivalent
+generator is PowerShell-only, which is not reproducible on a non-Windows
+clean checkout. This is a from-scratch Python implementation of the same
+concept (scan frontmatter, emit a table), not a port of the PowerShell
+script's code.
+
+Scans a directory for Markdown files with EIF frontmatter and writes a
+single index table (type/status/scope/review_after) plus a short excerpt of
+the first non-heading line of each file, for use by
+scripts/eif_search_knowledge.py and for human browsing.
+
+Three-way honesty, not just "parsed or not": an artifact whose frontmatter
+cannot even be parsed as YAML is different from one that parses fine but
+violates core/schemas/knowledge-frontmatter.schema.json (wrong type enum,
+missing a required field, `status: rejected` on a non-hypothesis, etc). The
+first is "unparseable YAML frontmatter", the second is "schema-invalid" -
+conflating them into one "malformed" bucket previously meant "the schema
+says this artifact is broken" produced no visible signal at all, since the
+indexer only checked "is this valid YAML", never "does it satisfy the
+schema." Schema checking only runs when --framework-root is given (it needs
+the schema file); without it this function cannot tell schema-invalid from
+valid, so it conservatively reports none as schema-invalid rather than
+guessing.
+
+Usage:
+    python scripts/eif_generate_index.py --knowledge-root PATH [--framework-root PATH] [--out PATH]
+"""
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    print(
+        "eif-generate-index: PyYAML is required. Install with: "
+        "pip install -r scripts/requirements.txt",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from eif_validate_frontmatter import load_schema, validate_one, _normalize_yaml_scalars  # noqa: E402
+
+FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)", re.S)
+
+
+def extract(path: Path) -> tuple[dict, str] | None:
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    m = FRONTMATTER_RE.match(text)
+    if not m:
+        return None
+    try:
+        fm = yaml.safe_load(m.group(1)) or {}
+    except yaml.YAMLError:
+        return None
+    if not isinstance(fm, dict):
+        return None
+    body = m.group(2)
+    excerpt = ""
+    for line in body.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#") and not stripped.startswith("<!--"):
+            excerpt = stripped[:80]
+            break
+    return fm, excerpt
+
+
+def _row(path: Path, knowledge_root: Path, fm: dict, excerpt: str) -> dict:
+    return {
+        "path": path.relative_to(knowledge_root).as_posix(),
+        "type": fm.get("type", ""),
+        "status": fm.get("status", ""),
+        "scope": fm.get("scope", ""),
+        "review_after": str(fm.get("review_after", "")),
+        # Carried for lifecycle-aware retrieval (eif_search_knowledge):
+        "evidence": fm.get("evidence", ""),
+        "confidence": fm.get("confidence", ""),
+        "source": fm.get("source", ""),
+        "excerpt": excerpt,
+    }
+
+
+def build_index(knowledge_root: Path, framework_root: Path | None = None) -> tuple[list[dict], list[Path], list[dict]]:
+    """Returns (valid_rows, yaml_malformed_paths, schema_invalid_rows).
+
+    schema_invalid_rows carries the same shape as valid_rows plus a
+    'schema_errors' list. Only populated when framework_root is given - see
+    module docstring for why "no schema check happened" is not conflated
+    with "everything validated."
+    """
+    rows: list[dict] = []
+    malformed: list[Path] = []
+    schema_invalid: list[dict] = []
+
+    schema = None
+    if framework_root is not None:
+        schema_path = framework_root / "core" / "schemas" / "knowledge-frontmatter.schema.json"
+        if schema_path.exists():
+            schema = load_schema(schema_path)
+
+    for path in sorted(knowledge_root.rglob("*.md")):
+        if path.name == "index.md":
+            continue
+        result = extract(path)
+        if result is None:
+            malformed.append(path)
+            continue
+        fm, excerpt = result
+        row = _row(path, knowledge_root, fm, excerpt)
+        if schema is not None:
+            errors = validate_one(_normalize_yaml_scalars(fm), schema, row["path"])
+            if errors:
+                row["schema_errors"] = errors
+                schema_invalid.append(row)
+                continue
+        rows.append(row)
+    return rows, malformed, schema_invalid
+
+
+def render(rows: list[dict], malformed: list[Path], schema_invalid: list[dict], knowledge_root: Path) -> str:
+    lines = [
+        "<!-- Auto-generated by scripts/eif_generate_index.py. Do not edit by hand. -->",
+        "",
+        "# Knowledge Index",
+        "",
+        "| File | Type | Status | Scope | Review After | Excerpt |",
+        "| --- | --- | --- | --- | --- | --- |",
+    ]
+    for row in rows:
+        lines.append(
+            f"| {row['path']} | {row['type']} | {row['status']} | {row['scope']} | "
+            f"{row['review_after']} | {row['excerpt']} |"
+        )
+    if schema_invalid:
+        lines.append("")
+        lines.append("## Excluded (schema-invalid frontmatter)")
+        lines.append("")
+        lines.append(
+            "Parsed as YAML but does not satisfy "
+            "`core/schemas/knowledge-frontmatter.schema.json`:"
+        )
+        lines.append("")
+        for row in schema_invalid:
+            lines.append(f"- {row['path']}")
+            for err in row.get("schema_errors", []):
+                lines.append(f"  - {err}")
+    if malformed:
+        lines.append("")
+        lines.append("## Excluded (unparseable YAML frontmatter)")
+        lines.append("")
+        for path in malformed:
+            lines.append(f"- {path.relative_to(knowledge_root).as_posix()}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--knowledge-root", required=True, help="Directory to scan for *.md knowledge artifacts")
+    ap.add_argument("--framework-root", default=None, help="Where core/schemas/ lives - enables schema-invalid detection, not just YAML-parse checking")
+    ap.add_argument("--out", default=None, help="Where to write index.md (default: <knowledge-root>/index.md)")
+    args = ap.parse_args()
+
+    knowledge_root = Path(args.knowledge_root).resolve()
+    if not knowledge_root.is_dir():
+        print(f"eif-generate-index: not a directory: {knowledge_root}", file=sys.stderr)
+        return 1
+    framework_root = Path(args.framework_root).resolve() if args.framework_root else None
+
+    rows, malformed, schema_invalid = build_index(knowledge_root, framework_root)
+    out_path = Path(args.out).resolve() if args.out else knowledge_root / "index.md"
+    out_path.write_text(render(rows, malformed, schema_invalid, knowledge_root), encoding="utf-8")
+
+    print(
+        f"eif-generate-index: {len(rows)} artifact(s), {len(schema_invalid)} schema-invalid, "
+        f"{len(malformed)} unparseable, wrote {out_path}"
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

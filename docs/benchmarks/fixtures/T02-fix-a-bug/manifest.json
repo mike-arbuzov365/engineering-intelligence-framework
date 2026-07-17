@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T02",
+  "title": "Fix a bug",
+  "description": "A bulk-discount pricing function has an off-by-one boundary bug at the 50-unit tier threshold. Requires finding and fixing the exact boundary condition without breaking the other tiers.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:f8c5b252af05b56356163c9f34d919230a2970ee874d54139d6d1e5364d0de0f",
+  "test_command": ["python", "tests/test_pricing.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct fix makes all 6 pass, including the exact-50-units boundary case."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/pricing.py with the fixture's known-buggy reference implementation, regardless of how the agent structured its fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 5
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

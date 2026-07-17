@@ -123,9 +123,11 @@ def main() -> int:
             sum(1 for n in names if "/_impl/eif_" in n and n.endswith(".py")) == 12,
             str([n for n in names if "/_impl/" in n]),
         ))
+        canonical_schema_count = len(list((clean_src / "core" / "schemas").glob("*.schema.json")))
         results.append(check(
-            "wheel contains the 3 canonical JSON schemas under resources/core/schemas",
-            sum(1 for n in names if "/resources/core/schemas/" in n and n.endswith(".schema.json")) == 3,
+            f"wheel contains all {canonical_schema_count} canonical JSON schemas under resources/core/schemas",
+            sum(1 for n in names if "/resources/core/schemas/" in n and n.endswith(".schema.json")) == canonical_schema_count,
+            str([n for n in names if "/resources/core/schemas/" in n]),
         ))
         results.append(check(
             "wheel contains resources/scripts/ (eif_init.py's own BUNDLE_SCRIPTS, for project-instance bundling)",

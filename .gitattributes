@@ -1,0 +1,10 @@
+# Benchmark fixtures record an immutable sha256 source_digest over their
+# exact bytes (core/schemas/benchmark-fixture-manifest.schema.json) - that
+# digest is only reproducible across machines if every checkout produces
+# identical bytes. Without this, core.autocrlf=true (a common Windows git
+# default) converts these files to CRLF on checkout while the git blob
+# itself stays LF, so a fresh Windows clone's source_digest would never
+# match what was recorded (Linux/CI checkouts never convert, so this
+# never surfaced there) - a real bug found via `eifctl_benchmark.py
+# validate-manifest` failing after a routine `git rebase` on Windows.
+docs/benchmarks/fixtures/** text eol=lf

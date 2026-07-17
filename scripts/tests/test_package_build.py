@@ -15,9 +15,11 @@ Usage:
 """
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 import venv
 import zipfile
@@ -31,10 +33,42 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
     return condition
 
 
-def run(cmd: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess:
+def run(cmd: list[str], cwd: Path | None = None, env: dict | None = None) -> subprocess.CompletedProcess:
+    full_env = {**os.environ, **env} if env else None
     return subprocess.run(
         cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True, encoding="utf-8", errors="replace",
+        env=full_env,
     )
+
+
+def clean_checkout_export(framework_root: Path, dest_dir: Path) -> None:
+    """Exports exactly the currently TRACKED file state (including any
+    staged/unstaged modifications to tracked files, but excluding untracked/
+    ignored files - a stray local __pycache__/ or similar) into dest_dir, so
+    building from it proves the package is never accidentally contaminated
+    by local-only cruft a real CI checkout would never have (exactly the
+    class of bug that broke the benchmark harness's fixture digests: local
+    testing regenerates files git never tracked). `git stash create` makes
+    a commit object capturing the current index+worktree diff vs HEAD
+    without touching the working directory or requiring anything to
+    already be committed; if the tree is already clean (nothing to stash),
+    HEAD itself is used directly."""
+    stash = subprocess.run(
+        ["git", "-C", str(framework_root), "stash", "create"],
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    tree_ish = stash or "HEAD"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    tar_path = dest_dir.parent / "clean-checkout.tar"
+    archive = subprocess.run(
+        ["git", "-C", str(framework_root), "archive", "--format=tar", f"--output={tar_path}", tree_ish],
+        capture_output=True, text=True,
+    )
+    if archive.returncode != 0:
+        raise RuntimeError(f"git archive failed: {archive.stdout}{archive.stderr}")
+    with tarfile.open(tar_path) as tf:
+        tf.extractall(dest_dir)  # noqa: S202 - own git archive output, not untrusted input
+    tar_path.unlink()
 
 
 def main() -> int:
@@ -56,9 +90,15 @@ def main() -> int:
             sync_check.stdout + sync_check.stderr,
         ))
 
-        # --- 1. build sdist and wheel ---
+        # --- 1. build sdist and wheel from a CLEAN CHECKOUT (git-tracked
+        # files only), not the live working tree - a stray untracked file
+        # (e.g. local __pycache__/ from manual testing) must never silently
+        # leak into the package just because it happens to be sitting in
+        # the dev machine's working directory right now. ---
+        clean_src = tmp_root / "clean-src"
+        clean_checkout_export(FRAMEWORK_ROOT, clean_src)
         dist_dir = tmp_root / "dist"
-        build = run([sys.executable, "-m", "build", "--wheel", "--sdist", "--outdir", str(dist_dir), str(FRAMEWORK_ROOT)])
+        build = run([sys.executable, "-m", "build", "--wheel", "--sdist", "--outdir", str(dist_dir), str(clean_src)])
         results.append(check("python -m build produces a wheel and sdist with no error", build.returncode == 0, build.stdout + build.stderr))
         if build.returncode != 0:
             print(f"EIF-RESULT: passed={sum(results)} total={len(results)}")
@@ -145,6 +185,16 @@ def main() -> int:
             "C:\\" not in lock_text and "/home/" not in lock_text and str(FRAMEWORK_ROOT) not in lock_text,
             lock_text,
         ))
+        results.append(check(
+            "framework.lock.yaml records a real resource_manifest_digest (sha256:<64-hex>), not omitted",
+            "resource_manifest_digest: sha256:" in lock_text,
+            lock_text,
+        ))
+        results.append(check(
+            "framework.lock.yaml records wheel_sha256 (installed from a local wheel path, direct_url.json has the hash)",
+            "wheel_sha256:" in lock_text,
+            lock_text,
+        ))
 
         doctor_proc = run([str(eifctl_exe), "doctor", "--instance-path", str(project_dir)], cwd=tmp_root)
         results.append(check(
@@ -152,6 +202,59 @@ def main() -> int:
             doctor_proc.returncode == 0 and "all checks passed" in doctor_proc.stdout,
             doctor_proc.stdout + doctor_proc.stderr,
         ))
+
+        # --- doctor detects a modified/corrupted packaged resource bundle:
+        # hand-corrupt a schema file INSIDE the venv's installed package
+        # (as if the install were tampered with or partially corrupted),
+        # then confirm doctor's package-provenance check (commands/doctor.py)
+        # flags the resource_manifest_digest mismatch, not a silent pass. ---
+        # PYTHONIOENCODING=utf-8: this tempdir's own prefix contains Cyrillic
+        # characters (by design - see the outer TemporaryDirectory above), and
+        # a child Python process's stdout defaults to the OS codepage (cp1252
+        # on Windows) when piped rather than attached to a console, which
+        # cannot encode them - a real UnicodeEncodeError this exact assertion
+        # caught once while building this suite, not merely a hypothetical.
+        find_resources = run(
+            [str(venv_python), "-c",
+             "import engineering_intelligence_framework.resources as r\n"
+             "with r.framework_root() as root:\n"
+             "    print(root)"],
+            env={"PYTHONIOENCODING": "utf-8"},
+        )
+        resources_root = Path(find_resources.stdout.strip()) if find_resources.returncode == 0 else None
+        if resources_root and resources_root.is_dir():
+            # A template file, not a *.schema.json: corrupting a JSON schema
+            # file here would ALSO be parsed by check_schema() for the
+            # config/lock validation checks that run first in
+            # eif_verify_runtime.main(), crashing doctor with an uncaught
+            # JSONDecodeError before this package-provenance check is ever
+            # reached - a real but separate robustness gap (schema loading
+            # isn't crash-safe against a malformed file), not what this
+            # assertion is testing. A template's content isn't parsed/
+            # validated by anything else doctor checks, so tampering with
+            # it exercises the resource_manifest_digest mismatch in
+            # isolation.
+            victim = next((p for p in resources_root.rglob("*.md") if "templates" in p.parts and p.is_file()), None)
+            if victim is not None:
+                original = victim.read_bytes()
+                victim.write_bytes(original + b"\n<!-- tampered for test -->\n")
+                try:
+                    doctor_after_tamper = run([str(eifctl_exe), "doctor", "--instance-path", str(project_dir)], cwd=tmp_root)
+                    results.append(check(
+                        "eifctl doctor detects a modified installed-package resource bundle (resource_manifest_digest mismatch)",
+                        doctor_after_tamper.returncode != 0 and "resources/ tree does not match its own recorded digest" in (doctor_after_tamper.stdout + doctor_after_tamper.stderr),
+                        doctor_after_tamper.stdout + doctor_after_tamper.stderr,
+                    ))
+                finally:
+                    victim.write_bytes(original)
+            else:
+                results.append(check("eifctl doctor detects a modified installed-package resource bundle", False, "no template file found under resources/templates/ to tamper with"))
+        else:
+            results.append(check(
+                "eifctl doctor detects a modified installed-package resource bundle", False,
+                f"could not resolve the installed package's resources/ root - "
+                f"find_resources: rc={find_resources.returncode} stdout={find_resources.stdout!r} stderr={find_resources.stderr!r}",
+            ))
 
         validate_proc = run(
             [str(eifctl_exe), "validate", "--config", str(project_dir / ".eif" / "config.yaml")], cwd=tmp_root,
@@ -191,6 +294,61 @@ def main() -> int:
 
         reinstall = run([str(venv_python), "-m", "pip", "install", "-q", str(wheel_path)])
         results.append(check("reinstall from the same wheel succeeds", reinstall.returncode == 0 and eifctl_exe.exists(), reinstall.stdout + reinstall.stderr))
+
+        # --- 5. No external scripts/ checkout, no decoy module accidentally
+        # satisfies imports: a cwd containing its own scripts/eif_init.py
+        # and a top-level eif_init.py, each rigged to raise loudly if ever
+        # imported, must NOT affect eifctl at all - a console-script entry
+        # point never puts cwd on sys.path the way `python script.py` does,
+        # but this proves it, rather than assuming it. ---
+        decoy_cwd = tmp_root / "decoy-cwd"
+        (decoy_cwd / "scripts").mkdir(parents=True)
+        decoy_text = "raise ImportError('decoy module was imported - sys.path isolation broken')\n"
+        (decoy_cwd / "scripts" / "eif_init.py").write_text(decoy_text, encoding="utf-8")
+        (decoy_cwd / "eif_init.py").write_text(decoy_text, encoding="utf-8")
+        (decoy_cwd / "engineering_intelligence_framework.py").write_text(decoy_text, encoding="utf-8")
+        decoy_version = run([str(eifctl_exe), "version"], cwd=decoy_cwd)
+        results.append(check(
+            "eifctl ignores a decoy scripts/eif_init.py + top-level eif_init.py/engineering_intelligence_framework.py in cwd",
+            decoy_version.returncode == 0 and "eifctl" in decoy_version.stdout and "decoy" not in (decoy_version.stdout + decoy_version.stderr),
+            decoy_version.stdout + decoy_version.stderr,
+        ))
+        decoy_project = decoy_cwd / "decoy-project"
+        decoy_init = run(
+            [str(eifctl_exe), "init", "--project-name", "decoy-test", "--adapter", "claude-code", "--instance-path", str(decoy_project)],
+            cwd=decoy_cwd,
+        )
+        results.append(check(
+            "eifctl init still works with a decoy scripts/ in cwd (never picks up the decoy code)",
+            decoy_init.returncode == 0,
+            decoy_init.stdout + decoy_init.stderr,
+        ))
+
+        # --- 6. sdist -> wheel rebuild in a SEPARATE clean venv - the sdist
+        # must be a self-sufficient source distribution on its own, not
+        # merely "whatever happened to already be next to the pre-built
+        # wheel this run". ---
+        sdist_path = sdists[0]
+        sdist_extract = tmp_root / "sdist-extract"
+        with tarfile.open(sdist_path) as tf:
+            tf.extractall(sdist_extract)  # noqa: S202 - our own just-built sdist, not untrusted input
+        sdist_src_dirs = [p for p in sdist_extract.iterdir() if p.is_dir()]
+        results.append(check("sdist extracts to exactly one top-level directory", len(sdist_src_dirs) == 1, str(sdist_src_dirs)))
+        if sdist_src_dirs:
+            sdist_src = sdist_src_dirs[0]
+            sdist_dist_dir = tmp_root / "sdist-dist"
+            sdist_build = run([sys.executable, "-m", "build", "--wheel", "--outdir", str(sdist_dist_dir), str(sdist_src)])
+            results.append(check("wheel rebuilds successfully from the extracted sdist alone", sdist_build.returncode == 0, sdist_build.stdout + sdist_build.stderr))
+            sdist_wheels = list(sdist_dist_dir.glob("*.whl"))
+            if sdist_wheels:
+                sdist_venv_dir = tmp_root / "sdist-venv"
+                venv.create(sdist_venv_dir, with_pip=True)
+                sdist_venv_python = sdist_venv_dir / ("Scripts" if sys.platform == "win32" else "bin") / ("python.exe" if sys.platform == "win32" else "python")
+                sdist_eifctl_exe = sdist_venv_dir / ("Scripts" if sys.platform == "win32" else "bin") / ("eifctl.exe" if sys.platform == "win32" else "eifctl")
+                sdist_install = run([str(sdist_venv_python), "-m", "pip", "install", "-q", str(sdist_wheels[0])])
+                results.append(check("the sdist-rebuilt wheel installs cleanly into its own fresh venv", sdist_install.returncode == 0, sdist_install.stdout + sdist_install.stderr))
+                sdist_version = run([str(sdist_eifctl_exe), "version"])
+                results.append(check("eifctl from the sdist-rebuilt wheel runs correctly", sdist_version.returncode == 0 and "eifctl" in sdist_version.stdout, sdist_version.stdout + sdist_version.stderr))
 
     passed = sum(results)
     print(f"EIF-RESULT: passed={passed} total={len(results)}")

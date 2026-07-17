@@ -32,8 +32,8 @@ yours; the lock is EIF-managed and rewritten on every upgrade).
 4. Before opening a PR, audit the instance itself:
    `python .eif/runtime/eif_verify_runtime.py --framework-root .eif/runtime`
    - checks config/lock schemas, bundle file hashes, config/adapter/lock/
-   entrypoint consistency, and CLAUDE.md/.gitignore marker integrity in one
-   pass.
+   entrypoint consistency, and .cursor/rules/eif/governance.mdc/.gitignore marker integrity
+   in one pass.
 
 ## Execution authority
 

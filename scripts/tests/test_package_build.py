@@ -291,6 +291,39 @@ def main() -> int:
             reconfigure_proc.stdout + reconfigure_proc.stderr,
         ))
 
+        # --- package-wheel-metadata: eifctl init --adapter codex also works
+        # from the INSTALLED wheel, not only the dev checkout - the wheel's
+        # bundled eif_adapters.py registry is what actually gets consulted,
+        # so this proves the registered adapter (and the new AGENTS.md
+        # marker-merge entrypoint template) round-trips through packaging. ---
+        codex_project_dir = tmp_root / "codex-pkgtest"
+        codex_init_proc = run(
+            [str(eifctl_exe), "init", "--project-name", "codex-pkgtest", "--adapter", "codex", "--instance-path", str(codex_project_dir)],
+            cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl init --adapter codex succeeds from the installed wheel",
+            codex_init_proc.returncode == 0,
+            codex_init_proc.stdout + codex_init_proc.stderr,
+        ))
+        codex_entry_text = (codex_project_dir / "AGENTS.md").read_text(encoding="utf-8") if (codex_project_dir / "AGENTS.md").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl generates a real AGENTS.md with the EIF-managed block",
+            "<!-- EIF:BEGIN" in codex_entry_text and "<!-- EIF:END -->" in codex_entry_text,
+            codex_entry_text,
+        ))
+        results.append(check(
+            "wheel-installed eifctl's generated AGENTS.md correctly names itself (not a stale 'CLAUDE.md' reference)",
+            "AGENTS.md/.gitignore marker integrity" in codex_entry_text,
+            codex_entry_text,
+        ))
+        codex_cfg_text = (codex_project_dir / ".eif" / "config.yaml").read_text(encoding="utf-8") if (codex_project_dir / ".eif" / "config.yaml").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl records adapter.name: codex",
+            "codex" in codex_cfg_text,
+            codex_cfg_text,
+        ))
+
         uninstall = run([str(venv_python), "-m", "pip", "uninstall", "-y", "-q", "engineering-intelligence-framework"])
         results.append(check("uninstall succeeds and removes the console-script entry point", uninstall.returncode == 0 and not eifctl_exe.exists()))
 

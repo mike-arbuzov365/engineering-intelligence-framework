@@ -20,7 +20,17 @@ Checks, each independently reported:
                             incidental output - see stage_bundle() in
                             eif_init.py) - anything else is flagged as a
                             real integrity concern, not silently ignored.
-  7. config/adapter/lock/entrypoint consistency (see check_consistency())
+  7. config/adapter/lock/entrypoint consistency (see check_consistency()) -
+                            for a "dynamic-resolve" adapter (Codex), this
+                            RECOMPUTES active-entrypoint resolution fresh
+                            (eif_adapters.resolve_active_entrypoint()) and
+                            fails if it no longer agrees with the lock, not
+                            merely "is the locked value one of the
+                            registered candidates" - a shadowing sibling
+                            candidate, a changed configured fallback list, or
+                            an unresolvable state are all real drift the
+                            lock's mere presence in a candidate list would
+                            miss.
   8. migration provenance - config.adoption.mode vs lock.migration_status
                             do not contradict (coexist + greenfield is
                             impossible - see
@@ -39,6 +49,16 @@ Checks, each independently reported:
                             ownership marker, and its hash still matches
                             what was generated (see
                             check_knowledge_index_drift())
+ 13. size budget          - for an adapter with a registered size_limit
+                            (Codex: project_doc_max_bytes), does the
+                            CURRENT on-disk entrypoint, combined with the
+                            CURRENT ancestor-chain content this instance
+                            does not control, still fit the CURRENT
+                            configured limit? Content grows, ancestor docs
+                            get added, and a project may lower its own
+                            configured limit after generation - none of
+                            that re-runs eif_init.py automatically (see
+                            check_size_budget_drift()).
 
 Usage:
     python eif_verify_runtime.py --framework-root PATH [--instance-path PATH]
@@ -54,7 +74,10 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
     sys.stdout.reconfigure(encoding="utf-8")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from eif_adapters import ADAPTERS, entrypoint_for  # noqa: E402
+from eif_adapters import (  # noqa: E402
+    ADAPTERS, entrypoint_for, entry_strategy_for,
+    resolve_active_entrypoint, check_size_budget, EntrypointState,
+)
 from eif_markers import check_marker_integrity  # noqa: E402
 from eif_validate_frontmatter import load_schema, validate_one, _normalize_yaml_scalars  # noqa: E402
 
@@ -187,9 +210,24 @@ def check_bundle_files(instance_path: Path, lock: dict) -> tuple[list[str], list
     return hash_mismatches, missing, unexpected
 
 
-def check_consistency(config: dict | None, lock: dict | None) -> list[str]:
+def check_consistency(config: dict | None, lock: dict | None, instance_path: Path) -> list[str]:
     """config <-> adapter registry <-> lock <-> entrypoint. See module
-    docstring item 7 / the round-3 review's Finding D."""
+    docstring item 7 / the round-3 review's Finding D.
+
+    For a "dynamic-resolve" adapter (Codex), the lock's recorded entrypoint
+    is not checked against a static expected value or mere membership in a
+    candidate list - it is checked against a FRESH recomputation of
+    resolve_active_entrypoint() run right now, against this instance's
+    actual current disk state and current config. This is deliberately a
+    stronger bar: "the locked value is A valid candidate" does not catch a
+    higher-priority sibling appearing later (a lock says AGENTS.md but
+    AGENTS.override.md now shadows it), a configured fallback list changing,
+    or the resolution becoming altogether unresolvable. Every failure
+    message below is written to distinguish FILE INTEGRITY (is the locked
+    file itself still present and well-formed on disk? - a separate
+    question, checked by check_markers()/check_bundle_files()) from AGENT
+    CONSUMPTION (would the agent actually still read that file as its
+    active source today, regardless of whether the file itself is fine)."""
     problems = []
     if config is None or lock is None:
         return ["cannot check consistency: config or lock missing/invalid"]
@@ -202,14 +240,68 @@ def check_consistency(config: dict | None, lock: dict | None) -> list[str]:
         problems.append(f"config adapter.name {cfg_adapter!r} is not in the adapter registry (scripts/eif_adapters.py)")
     if cfg_adapter != lock_adapter:
         problems.append(f"config adapter.name ({cfg_adapter!r}) != lock adapter.name ({lock_adapter!r})")
-    if lock_adapter in ADAPTERS and lock_entrypoint != entrypoint_for(lock_adapter):
-        problems.append(f"lock adapter.entrypoint ({lock_entrypoint!r}) != the registered entrypoint for {lock_adapter!r} ({entrypoint_for(lock_adapter)!r})")
+
+    if lock_adapter in ADAPTERS:
+        if entry_strategy_for(lock_adapter) == "dynamic-resolve":
+            adapter_options = (((config.get("adapter") or {}).get("options")) or {}).get(lock_adapter) or {}
+            resolution = resolve_active_entrypoint(instance_path, lock_adapter, adapter_options)
+            if resolution.state not in (EntrypointState.ACTIVE_MANAGEABLE, EntrypointState.NOT_FOUND):
+                problems.append(
+                    f"AGENT CONSUMPTION invalid for {lock_adapter!r}: the active-entrypoint resolution "
+                    f"that was safe when this instance was last generated (lock records "
+                    f"{lock_entrypoint!r}) is no longer safe today - {resolution.rationale}. This is "
+                    f"independent of whether {lock_entrypoint!r} itself is still well-formed on disk. "
+                    f"Resolve the conflict, then run eif_init.py again to re-resolve and regenerate."
+                )
+            elif resolution.entrypoint != lock_entrypoint:
+                problems.append(
+                    f"AGENT CONSUMPTION invalid for {lock_adapter!r}: lock adapter.entrypoint "
+                    f"({lock_entrypoint!r}) no longer matches the active entrypoint {lock_adapter!r} "
+                    f"would actually resolve to right now ({resolution.entrypoint!r}) - {resolution.rationale}. "
+                    f"{lock_entrypoint!r} may still be FILE INTEGRITY valid (present, well-formed) while "
+                    f"no longer being what the agent actually reads. Run eif_init.py again to re-resolve "
+                    f"and regenerate."
+                )
+        elif lock_entrypoint != entrypoint_for(lock_adapter):
+            problems.append(f"lock adapter.entrypoint ({lock_entrypoint!r}) != the registered entrypoint for {lock_adapter!r} ({entrypoint_for(lock_adapter)!r})")
 
     migration_status = (lock.get("instance") or {}).get("migration_status")
     if migration_status not in ("greenfield", "adopted"):
         problems.append(f"lock instance.migration_status is missing or invalid: {migration_status!r}")
 
     return problems
+
+
+def check_size_budget_drift(config: dict | None, lock: dict | None, instance_path: Path) -> list[str]:
+    """Independent-review addition: for an adapter with a registered
+    size_limit (Codex: project_doc_max_bytes - see eif_adapters.ADAPTERS),
+    recompute check_size_budget() against the CURRENT on-disk entrypoint
+    content and the CURRENT ancestor-chain state. Content grows after
+    generation, ancestor AGENTS.md/AGENTS.override.md files can appear
+    above the instance root, and a project may lower its own configured
+    limit - none of that re-runs eif_init.py automatically, so a doctor
+    run that only re-validated file integrity would miss a real, silent
+    "the agent no longer reads all of this" regression. Uses the file's
+    OWN current bytes directly (not a re-render from templates/ - that
+    rendering code is deliberately not bundled into instances, same
+    reasoning as check_config_block_drift())."""
+    if config is None or lock is None:
+        return []
+    lock_adapter = (lock.get("adapter") or {}).get("name")
+    lock_entrypoint = (lock.get("adapter") or {}).get("entrypoint")
+    if lock_adapter not in ADAPTERS or not lock_entrypoint:
+        return []
+    if ADAPTERS[lock_adapter].get("size_limit") is None:
+        return []
+    entry_path = instance_path / lock_entrypoint
+    if not entry_path.exists():
+        return []  # missing entrypoint is check_consistency's/check_markers' concern, not this one's
+    current_text = entry_path.read_text(encoding="utf-8", errors="replace")
+    adapter_options = (((config.get("adapter") or {}).get("options")) or {}).get(lock_adapter) or {}
+    budget = check_size_budget(instance_path, lock_adapter, current_text, adapter_options)
+    if budget.fits:
+        return []
+    return [f"{lock_entrypoint} size budget: {budget.rationale}"]
 
 
 def check_migration_provenance_consistency(config: dict | None, lock: dict | None) -> list[str]:
@@ -409,8 +501,9 @@ def main(argv: list[str] | None = None) -> int:
         report.add("missing managed files", [f"manifested but missing on disk: {p}" for p in missing])
         report.add("unexpected managed files (outside manifest, not README.md/__pycache__)", unexpected)
 
-    report.add("config/adapter/lock/entrypoint consistency", check_consistency(config, lock))
+    report.add("config/adapter/lock/entrypoint consistency", check_consistency(config, lock, instance_path))
     report.add("migration provenance consistency (adoption.mode vs migration_status)", check_migration_provenance_consistency(config, lock))
+    report.add("size budget (current content vs configured limit)", check_size_budget_drift(config, lock, instance_path))
 
     provenance_notes = check_provenance(lock)
     if provenance_notes:

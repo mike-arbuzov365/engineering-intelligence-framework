@@ -15,6 +15,14 @@ plain Markdown any agent can read if pointed at it. Adapters add
 enforcement (hooks) and ergonomics (skill loading), not the methodology
 itself.
 
+**Adapter scope is frozen as of this round** (2026-07-18): these four
+adapters (two required - Claude Code, Cursor; two experimental supported -
+Codex, Hermes) are the complete v0.1 set. See
+[`parity-matrix.json`](parity-matrix.json) for per-adapter capabilities and
+[`switch-matrix.json`](switch-matrix.json) for the full directed switching
+matrix (every ordered pair, 12 total) - both machine-readable and each
+backed by a drift test that fails loudly if either goes stale.
+
 ## Recommended v0.1 priority
 
 <!-- Knowledge source: hook-reliability testing on the private instance,

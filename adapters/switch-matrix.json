@@ -1,0 +1,50 @@
+{
+  "$comment": "Full directed adapter-switching matrix (parity round v2) - complements adapters/parity-matrix.json (per-adapter capabilities) with the cross-cutting, per-DIRECTED-PAIR properties Stage 2 of this round requires. scripts/tests/test_adapter_switch_matrix.py is the drift test: it fails if a 5th adapter is registered without updating ADAPTER_INFO there, and independently proves every cell's 'unit-tested' claim below (81/81 checks). Supersedes closed, stale PR #13 (stacked on the never-merged old Hermes branch) - not reused as evidence.",
+  "verification_levels": [
+    "implemented - code path exists and is exercised by at least one real run, but not independently proven for this exact pair",
+    "unit-tested - proven by a real subprocess-driven scenario in this round's own test suite, for this exact pair",
+    "package-tested - proven against an installed wheel (not a framework checkout)",
+    "CI-tested - proven on GitHub Actions (both Windows and Ubuntu runners in the package matrix)",
+    "runtime-verified - proven against the real installed third-party agent CLI, not just EIF's own simulation",
+    "default-config-only - only proven under each adapter's own documented default configuration, not exhaustively across every configurable option",
+    "known-limitation - not currently provable, or provable only with a caveat; see the pair's own note"
+  ],
+  "properties": [
+    "single_effective_block",
+    "correct_destination_source",
+    "project_content_preserved",
+    "exclusive_old_file_removed_when_owned",
+    "same_path_atomic",
+    "config_lock_agreement",
+    "doctor_success",
+    "malformed_marker_stop",
+    "destination_budget_survival",
+    "rollback",
+    "source_checkout_vs_installed_wheel"
+  ],
+  "evidence": {
+    "test_adapter_switch_matrix.py": "81/81 - all 12 directed pairs proven for single_effective_block, correct_destination_source, project_content_preserved (marker-merge FROM adapters only), config_lock_agreement, doctor_success; plus two representative deep-dive scenarios (malformed_marker_stop and rollback) on the two pairs no other adapter test file already covers (cursor<->hermes, codex<->hermes)",
+    "test_cursor_adapter.py": "exclusive_old_file_removed_when_owned for cursor as the FROM adapter (full-regen: old .cursor/rules/eif/governance.mdc always deleted outright on switch-away, never left as an empty husk)",
+    "test_codex_adapter.py / test_hermes_adapter.py": "malformed_marker_stop and rollback proven generically (adapter-agnostic transaction/marker-merge code) for claude-code<->codex, cursor<->codex, claude-code<->hermes; destination_budget_survival proven per-destination-adapter (not per switch pair - the budget check is the same function regardless of which adapter switched FROM)",
+    "test_package_build.py": "source_checkout_vs_installed_wheel: claude-code, codex, and hermes each have a dedicated installed-wheel init+doctor block; switching itself is adapter-agnostic code exercised identically from source checkout and from the wheel (not a separately re-implemented code path), so per-adapter wheel coverage transitively covers switching-from-the-wheel too"
+  },
+  "switches": {
+    "claude-code->cursor": { "unit_tested": true, "notes": "full-regen destination; old CLAUDE.md stripped (not deleted, marker-merge footer never empty)" },
+    "cursor->claude-code": { "unit_tested": true, "notes": "old .cursor/rules/eif/governance.mdc deleted outright (full-regen, no legitimate content outside the block)" },
+    "claude-code->codex": { "unit_tested": true, "notes": "codex resolves to its greenfield default AGENTS.md (CLAUDE.md is not one of its candidates); old CLAUDE.md stripped" },
+    "codex->claude-code": { "unit_tested": true, "notes": "old AGENTS.md stripped (not deleted)" },
+    "claude-code->hermes": { "unit_tested": true, "notes": "SAME-PATH CASE - CLAUDE.md is both claude-code's fixed entrypoint and Hermes's own tier-3 candidate; a real pre-existing transaction-collision defect here was found and fixed this round (see adapters/hermes/README.md) - same_path_atomic is proven specifically by this pair, not merely asserted" },
+    "hermes->claude-code": { "unit_tested": true, "notes": "reverse direction of the same-path pair; hermes's own greenfield default (.hermes.md) is a DIFFERENT path from CLAUDE.md when nothing else pre-exists, so this direction is NOT the same-path case - old .hermes.md stripped" },
+    "cursor->codex": { "unit_tested": true, "notes": "codex resolves to its greenfield default AGENTS.md; old .cursor/rules/eif/governance.mdc deleted outright" },
+    "codex->cursor": { "unit_tested": true, "notes": "Cursor's own registry declares AGENTS.md a real shared_signal (a separate mechanism Cursor also reads) - requires an explicit --adoption-mode decision on the switch itself, proven directly (matches the established claude-code<->cursor precedent, not a new gap)" },
+    "cursor->hermes": { "unit_tested": true, "notes": "hermes resolves to its greenfield default .hermes.md; old .cursor/rules/eif/governance.mdc deleted outright. malformed_marker_stop and rollback for this exact pair are the two representative deep-dive scenarios this round adds (previously unproven for any cursor<->hermes direction)" },
+    "hermes->cursor": { "unit_tested": true, "notes": "old .hermes.md stripped (not deleted)" },
+    "codex->hermes": { "unit_tested": true, "notes": "hermes resolves to its greenfield default .hermes.md (AGENTS.md is one of hermes's OWN tier-2 candidates, but codex's AGENTS.md is stripped of its EIF block first, so it is no longer a live candidate hermes would adopt); rollback for this exact pair is the other representative deep-dive scenario this round adds" },
+    "hermes->codex": { "unit_tested": true, "notes": "codex resolves to its greenfield default AGENTS.md; old .hermes.md stripped" }
+  },
+  "known_limitations": [
+    "destination_budget_survival and malformed_marker_stop/rollback are proven adapter-generically (the same shared code path regardless of which adapter switched FROM), not independently re-proven for all 12 directed pairs - re-testing an adapter-agnostic mechanism 12 times over would not add evidence, only runtime. The two pairs previously entirely untested by any suite (cursor<->hermes, codex<->hermes) each get one representative deep-dive proof instead of a full 12-way repeat.",
+    "source_checkout_vs_installed_wheel is proven per-DESTINATION-adapter (does eifctl init --adapter X work from the wheel), not per directed switch pair - switching is shared code, not reimplemented per adapter, so this is the meaningful sense of wheel parity for this property.",
+    "No directed pair exercises a non-default adoption.mode / adapter.options.* configuration in combination with switching (e.g. a configured Codex project_root_markers or Hermes parent_context_action active AT THE MOMENT of a switch) - each adapter's own test file covers its own options in isolation, not crossed with switching. default-config-only for that combination."
+  ]
+}

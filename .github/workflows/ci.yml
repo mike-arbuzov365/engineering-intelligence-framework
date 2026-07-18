@@ -1,11 +1,8 @@
 name: ci
 
-# Job display names say "(required by policy)", not "(blocking)" - these
-# checks run and report pass/fail, but nothing at the GitHub repository-
-# settings level currently prevents merging past a failure (required
-# status checks / branch protection are not configured). See
-# core/policies/decisions.md and docs/architecture/HOW-EIF-WORKS.md#quality
-# for why that distinction is stated explicitly rather than implied.
+# Branch protection is unavailable for this private repository. The controlled
+# merge wrapper consumes core/policies/merge-policy.json, so runner
+# consolidation must keep that file and these job names aligned.
 
 on:
   pull_request:
@@ -13,16 +10,45 @@ on:
   push:
     branches: [main]
 
-# Least-privilege default: none of these jobs push, comment, or otherwise
-# write back to the repository - they only read the checkout and report
-# pass/fail. Override per-job if a future job genuinely needs more.
 permissions:
   contents: read
+  pull-requests: read
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  privacy-scan:
-    name: Privacy scan (required by policy)
+  ci-evidence:
+    name: Reuse verified PR CI
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    outputs:
+      reuse-pr-ci: ${{ steps.evidence.outputs.reuse-pr-ci }}
+      reason: ${{ steps.evidence.outputs.reason }}
+      pr-number: ${{ steps.evidence.outputs.pr-number }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Verify exact merged PR and required checks
+        id: evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 scripts/eif_pr_ci_evidence.py
+          --repository "$GITHUB_REPOSITORY"
+          --commit-sha "$GITHUB_SHA"
+          --base-branch main
+          --workflow-name ci
+          --policy core/policies/merge-policy.json
+
+  policy-gate:
+    name: Policy checks (required by policy)
+    needs: ci-evidence
+    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -30,164 +56,85 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
-      - name: Install pinned dependencies
-        # Newly required by this job: eif_privacy_scan.py now imports
-        # PyYAML (privacy.suppressions support) - caught live by this same
-        # PR's own CI run, not by local testing, since the local machine
-        # already had PyYAML installed for other scripts. Without this
-        # step, the import fails, suppressions silently load as [], and
-        # every suppression-mechanism test fails on a clean runner.
+      - name: Install pinned dependencies once
         run: pip install -r scripts/requirements.txt
-      - name: Run privacy scan unit tests
-        # Adoption-hardening correction: this suite (detection, redaction,
-        # fail-closed, and the suppression/baseline mechanism) previously
-        # ran nowhere in CI despite claims-evidence.md counting it among
-        # the tested suites - a real doc-vs-CI gap, fixed here rather than
-        # just corrected in the doc.
-        run: python scripts/tests/test_privacy_scan.py
-      - name: Run privacy scan
-        run: python scripts/eif_privacy_scan.py --repo .
-
-  frontmatter-and-config-validation:
-    name: Frontmatter and config schema validation (required by policy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: "3.12"
-      - name: Install pinned dependencies
-        # scripts/requirements.txt pins exact versions (==), which is what
-        # keeps this from floating on latest - hash-pinning
-        # (--require-hashes) is a possible future hardening step, not
-        # implemented yet, see scripts/README.md#dependency-update-ownership.
-        run: pip install -r scripts/requirements.txt
-      - name: Validate ontology, policy, guide, and product-claims frontmatter
-        run: python scripts/eif_validate_frontmatter.py --framework-root . --instance-root . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md" "docs/product/*.md"
-      - name: Validate .eif/config.yaml.example against the config schema
-        run: python scripts/eif_validate_frontmatter.py --framework-root . --config .eif/config.yaml.example
-      - name: Validate .eif/framework.lock.yaml.example against the lock schema
-        run: python scripts/eif_validate_frontmatter.py --framework-root . --lock .eif/framework.lock.yaml.example
-      - name: Run validator fixture tests (positive + negative)
-        run: python scripts/tests/test_validate.py
-
-  vertical-slice:
-    name: Vertical slice - init, index, search, locale, demo test (required by policy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: "3.12"
-      - name: Install pinned dependencies
-        run: pip install -r scripts/requirements.txt
-      - name: Run all runtime test suites via run_all.py and emit the machine-readable inventory
-        # run_all.py --json runs every suite (paths, validate, privacy-scan,
-        # knowledge-delta, index, search, locale, render, markers,
-        # verify-runtime, init, journey, adoption, merge-gate) once, parses
-        # each suite's standardized `EIF-RESULT: passed=P total=T` line, and
-        # emits a machine-readable inventory to the job log (evidence-freeze:
-        # the check total is DERIVED by the runner, never hand-summed in PR
-        # prose; a suite missing the line becomes `unknown`, not a silent 0).
-        # It exits non-zero if any suite fails. test_run_all_json.py then
-        # verifies the aggregation itself (a standalone suite so it does not
-        # recurse into run_all).
+      - name: Run the complete unit and contract inventory
         run: |
           python scripts/tests/run_all.py --json
           python scripts/tests/test_run_all_json.py
-      - name: Validate the demo project instance's knowledge artifacts and config
-        # framework-root stays the framework checkout; instance-root points
-        # at the demo, which is not vendoring the framework - this is the
-        # same separation PR #1 introduced, exercised against a real
-        # second "instance" instead of only self-validating the framework
-        # repository against itself.
+      - name: Scan the repository for private data
+        run: python scripts/eif_privacy_scan.py --repo .
+      - name: Validate framework and demo frontmatter and configuration
         run: |
+          python scripts/eif_validate_frontmatter.py --framework-root . --instance-root . "core/ontology/*.md" "core/policies/*.md" "docs/guides/*.md" "docs/product/*.md"
+          python scripts/eif_validate_frontmatter.py --framework-root . --config .eif/config.yaml.example
+          python scripts/eif_validate_frontmatter.py --framework-root . --lock .eif/framework.lock.yaml.example
           python scripts/eif_validate_frontmatter.py --framework-root . --instance-root examples/demo-workspace "knowledge/**/*.md"
           python scripts/eif_validate_frontmatter.py --framework-root . --config examples/demo-workspace/.eif/config.yaml
           python scripts/eif_validate_frontmatter.py --framework-root . --lock examples/demo-workspace/.eif/framework.lock.yaml
-      - name: Run the demo's behavioral test (stdlib unittest, no extra dependency)
-        run: python examples/demo-workspace/tests/test_calendar_utils.py -v
-
-  link-check:
-    name: Relative link check (required by policy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: "3.12"
-      - name: Check relative Markdown links
-        run: python scripts/eif_check_links.py --repo .
-
-  yaml-and-json-schema-syntax:
-    name: YAML and JSON Schema syntax check (required by policy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: "3.12"
-      - name: Install pinned dependencies
-        # scripts/requirements.txt pins exact versions (==), which is what
-        # keeps this from floating on latest - hash-pinning
-        # (--require-hashes) is a possible future hardening step, not
-        # implemented yet, see scripts/README.md#dependency-update-ownership.
-        run: pip install -r scripts/requirements.txt
-      - name: Validate YAML files parse and JSON Schemas are well-formed + self-consistent
+      - name: Validate YAML files and JSON Schemas
+        shell: bash
         run: |
           python - <<'PYEOF'
-          import sys, os, json
+          import json
+          import os
+          import sys
+
           import yaml
           from jsonschema import Draft202012Validator
           from jsonschema.exceptions import SchemaError
 
-          # os.walk (not glob) so dot-directories like .eif/ are included -
-          # glob's ** silently skips them by default, which would leave
-          # .eif/config.yaml.example unchecked.
           yaml_suffixes = (".yaml", ".yml", ".yaml.example", ".yml.example")
           yaml_files = []
           for root, dirs, filenames in os.walk("."):
-              dirs[:] = [d for d in dirs if d != ".git"]
-              for fn in filenames:
-                  if fn.endswith(yaml_suffixes):
-                      yaml_files.append(os.path.join(root, fn))
+              dirs[:] = [directory for directory in dirs if directory != ".git"]
+              for filename in filenames:
+                  if filename.endswith(yaml_suffixes):
+                      yaml_files.append(os.path.join(root, filename))
 
-          failed = []
-          for f in yaml_files:
+          failures = []
+          for path in yaml_files:
               try:
-                  with open(f, encoding="utf-8") as fh:
-                      yaml.safe_load(fh)
-              except Exception as e:
-                  failed.append((f, str(e)))
+                  with open(path, encoding="utf-8") as stream:
+                      yaml.safe_load(stream)
+              except Exception as exc:
+                  failures.append((path, str(exc)))
 
           schema_files = []
-          for root, dirs, filenames in os.walk("core/schemas"):
-              for fn in filenames:
-                  if fn.endswith(".json"):
-                      schema_files.append(os.path.join(root, fn))
-          for f in schema_files:
+          for root, _dirs, filenames in os.walk("core/schemas"):
+              for filename in filenames:
+                  if filename.endswith(".json"):
+                      schema_files.append(os.path.join(root, filename))
+          for path in schema_files:
               try:
-                  with open(f, encoding="utf-8") as fh:
-                      schema = json.load(fh)
-                  Draft202012Validator.check_schema(schema)
-              except (json.JSONDecodeError, SchemaError) as e:
-                  failed.append((f, str(e)))
+                  with open(path, encoding="utf-8") as stream:
+                      Draft202012Validator.check_schema(json.load(stream))
+              except (json.JSONDecodeError, SchemaError) as exc:
+                  failures.append((path, str(exc)))
 
-          for f, e in failed:
-              print(f"FAIL {f}: {e}")
-          if failed:
+          for path, error in failures:
+              print(f"FAIL {path}: {error}")
+          if failures:
               sys.exit(1)
-          print(f"ok: {len(yaml_files)} yaml file(s), {len(schema_files)} schema file(s) - all valid and self-consistent")
+          print(f"ok: {len(yaml_files)} YAML files and {len(schema_files)} schemas")
           PYEOF
-        shell: bash
+      - name: Check relative Markdown links
+        run: python scripts/eif_check_links.py --repo .
+      - name: Run the demo behavioral test
+        run: python examples/demo-workspace/tests/test_calendar_utils.py -v
+      - name: Classify the live PR Knowledge Delta
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""' > pr_body.txt
+          python scripts/eif_check_knowledge_delta.py --body-file pr_body.txt
 
   package-build:
     name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
-    # The dynamic per-combination name above is why THIS job itself cannot
-    # be a required check context (GitHub's statusCheckRollup would need 4
-    # exact, hardcoded combination strings, silently stale the moment the
-    # matrix changes). package-build-required below is the static aggregate
-    # that actually gets wired into merge-policy.json.
+    needs: ci-evidence
+    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
     strategy:
       fail-fast: false
       matrix:
@@ -199,47 +146,33 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install pinned runtime dependencies + build tooling
+      - name: Install pinned runtime dependencies and build tooling
         run: |
           pip install -r scripts/requirements.txt
           pip install build hatchling
-      - name: Build the wheel/sdist, install into a clean venv, run every eifctl subcommand end-to-end
+      - name: Build and exercise the installed package
         run: python scripts/tests/test_package_build.py
-      - name: Real end-to-end benchmark mode B against the installed package
+      - name: Run benchmark mode B against the installed package
         run: python scripts/tests/test_benchmark_mode_b.py
 
   package-build-required:
-    name: "Package build required"
-    # Static aggregate over the package-build matrix (adoption-hardening
-    # round): needs: a matrix job resolves needs.package-build.result to
-    # success only when EVERY combination succeeded - failure or cancelled
-    # otherwise, GitHub's own semantics, not hand-enumerated here. if:
-    # always() so this job still runs (and correctly reports failure)
-    # even when a matrix leg failed, rather than being skipped - a required
-    # check that can be silently skipped is not actually required. This is
-    # the context name wired into core/policies/merge-policy.json, never
-    # the dynamic per-combination name above.
-    needs: package-build
-    if: always()
+    name: Package build required
+    needs: [ci-evidence, package-build]
+    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify every package-build matrix combination succeeded
+      - name: Verify every package-build combination succeeded
         run: |
           if [ "${{ needs.package-build.result }}" != "success" ]; then
-            echo "package-build matrix result: ${{ needs.package-build.result }} - at least one combination did not succeed"
+            echo "package-build matrix result: ${{ needs.package-build.result }}"
             exit 1
           fi
-          echo "all package-build matrix combinations succeeded"
+          echo "All package-build matrix combinations succeeded."
 
   license-check:
     name: "Dependency license check (${{ matrix.os }})"
-    # The dynamic per-OS name above is why THIS job itself cannot be a
-    # required check context (same reasoning as package-build) -
-    # license-check-required below is the static aggregate actually wired
-    # into merge-policy.json. Matrixed over both OSes deliberately: default
-    # mode reads only the committed sbom.cdx.json (adoption-hardening
-    # correction below), so identical classification output on both
-    # platforms is real cross-platform determinism evidence, not assumed.
+    needs: ci-evidence
+    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
     strategy:
       fail-fast: false
       matrix:
@@ -250,73 +183,23 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
-      - name: Install pinned dependencies (needed for this job's own unit tests; the license check itself needs none - see below)
+      - name: Install pinned dependencies
         run: pip install -r scripts/requirements.txt
-      - name: Run license-checker unit tests
+      - name: Run license checker unit tests
         run: python scripts/tests/test_check_licenses.py
-      - name: Check the SBOM-declared dependency closure's licenses against core/policies/license-policy.json
-        # Adoption-hardening correction: default mode now reads only the
-        # committed sbom.cdx.json, cross-checked against requirements.txt's
-        # pins (fails if stale) - not a live scan of whatever this
-        # interpreter happens to have installed. The old default (every
-        # package importlib.metadata reports installed) was only
-        # reproducible by the accident of CI always installing exactly
-        # requirements.txt; on an ambient dev machine with unrelated
-        # packages installed it produced false denied/unknown findings -
-        # confirmed directly while building this fix (137 packages found,
-        # 4 falsely denied, 6 falsely unknown, on a real dev machine).
-        # That ambient-scan behavior is now --environment, explicit opt-in,
-        # not used here.
+      - name: Check SBOM licenses against policy
         run: python scripts/eif_check_licenses.py --framework-root .
 
   license-check-required:
-    name: "Dependency license check (required by policy)"
-    # Static aggregate over the OS matrix above - same pattern as
-    # package-build-required: needs: a matrix job resolves
-    # needs.license-check.result to success only when EVERY combination
-    # succeeded - failure or cancelled otherwise, GitHub's own semantics,
-    # not hand-enumerated here. if: always() so this job still runs (and
-    # correctly reports failure) even when a matrix leg failed, rather than
-    # being skipped. This is the context name wired into
-    # core/policies/merge-policy.json, unchanged from before this matrix
-    # split - never the dynamic per-OS name above.
-    needs: license-check
-    if: always()
+    name: Dependency license check (required by policy)
+    needs: [ci-evidence, license-check]
+    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Verify every license-check matrix combination succeeded
+      - name: Verify every license-check combination succeeded
         run: |
           if [ "${{ needs.license-check.result }}" != "success" ]; then
-            echo "license-check matrix result: ${{ needs.license-check.result }} - at least one combination did not succeed"
+            echo "license-check matrix result: ${{ needs.license-check.result }}"
             exit 1
           fi
-          echo "all license-check matrix combinations succeeded"
-
-  knowledge-delta-check:
-    name: Knowledge Delta completeness (required by policy)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    # Needs pull-requests:read to fetch the live PR body via the API. A
-    # job-level permissions block replaces the top-level one, so contents:read
-    # (for checkout) is repeated here.
-    permissions:
-      contents: read
-      pull-requests: read
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: "3.12"
-      - name: Run Knowledge Delta classifier tests
-        run: python scripts/tests/test_knowledge_delta.py
-      - name: Classify this PR's Knowledge Delta (live body, not the frozen event payload)
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        # github.event.pull_request.body is frozen to the payload at trigger
-        # time: editing the PR body (or `gh run rerun`) does not refresh it, so
-        # a body-only fix could never turn the check green without a new commit.
-        # Fetching the body live via the API removes that trap entirely.
-        run: |
-          gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""' > pr_body.txt
-          python scripts/eif_check_knowledge_delta.py --body-file pr_body.txt
+          echo "All license-check matrix combinations succeeded."

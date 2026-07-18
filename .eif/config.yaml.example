@@ -40,6 +40,9 @@ adapter:
   #     project_doc_fallback_filenames: ["TEAM_GUIDE.md"]
   #     project_doc_max_bytes: 65536
   #     project_root_markers: [".git", ".hg"]  # empty [] disables root detection (cwd-only)
+  #   hermes:
+  #     parent_context_action: override-with-local  # only if a parent .hermes.md/HERMES.md should be shadowed by a new local one
+  #     context_file_max_chars: 65536  # EIF's own fallback default is the conservative 20000, not Hermes's dynamic model-scaled cap
 
 localization:
   # BCP-47 language tags (en, uk, en-US, ...).

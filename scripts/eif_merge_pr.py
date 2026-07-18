@@ -19,8 +19,8 @@ weaken it: no `--allow-missing-checks`, no `--skip-knowledge-delta`. What a
 policy requires is a property of `core/policies/merge-policy.json`, not of
 how this script is invoked. A repo genuinely without CI expresses that in its
 own policy file (`required_check_contexts: []` + `allow_no_checks: true`);
-the EIF policy has seven required contexts and `allow_no_checks: false`, so
-those seven are unconditionally enforced.
+the EIF policy has explicit required contexts and `allow_no_checks: false`,
+so every context declared there is unconditionally enforced.
 
 `evaluate_live_gate()` is the single live-evaluation entrypoint: it resolves
 the repo, fetches the live PR, paginates every review thread, reads the live

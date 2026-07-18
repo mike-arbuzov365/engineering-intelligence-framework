@@ -191,7 +191,7 @@ def main() -> int:
           gate(clean_pr(statusCheckRollup=clean_checks() + [{"name": "flaky", "status": "COMPLETED", "conclusion": "FAILURE"}])) != [])
 
     # 11. required contexts come from the single policy source (not hardcoded here).
-    check("11. policy provides exactly eight required contexts", len(REQUIRED) == 8, str(len(REQUIRED)))
+    check("11. policy provides exactly three consolidated required contexts", len(REQUIRED) == 3, str(len(REQUIRED)))
     # 12. platform enforcement honestly recorded as wrapper-only (branch protection unavailable).
     check("12. wrapper-only enforcement recorded (branch protection unavailable)",
           POLICY["platform_enforcement"]["branch_protection_available"] is False)

@@ -187,6 +187,17 @@ directly outside CI too, on an unrelated PR number as well) - flagged as
 a separate, unrelated finding, not fixed here, and not a defect in the
 package this decision ratifies.
 
+### D-13: Fail-closed CI runner consolidation
+**Status: ratified 2026-07-18 (owner-directed resource optimization).**
+Policy checks that share one Python environment run as sequential steps in
+one fail-closed job. The package contract continues to run on Ubuntu and
+Windows with Python 3.11 and 3.12. A post-merge push can reuse PR evidence
+only when the exact merge commit is associated with one merged PR to `main`
+and every context in `merge-policy.json` is successful; every lookup error,
+missing context, non-success result, or direct push falls back to full CI.
+This changes runner topology, not validation coverage, and keeps
+`merge-policy.json` as the only source of required context names.
+
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08

@@ -22,12 +22,17 @@ def pull_request(*, sha: str = SHA, base: str = "main", merged: bool = True) -> 
         "merged_at": "2026-07-18T12:00:00Z" if merged else None,
         "merge_commit_sha": sha,
         "base": {"ref": base},
+        "head": {"sha": "c" * 40},
     }
 
 
 def successful_checks() -> list[dict]:
     return [
-        {"name": name, "state": "SUCCESS", "workflow": "ci"}
+        {
+            "name": name,
+            "conclusion": "success",
+            "app": {"slug": "github-actions"},
+        }
         for name in REQUIRED
     ]
 
@@ -47,7 +52,6 @@ def main() -> int:
         successful_checks(),
         commit_sha=SHA,
         base_branch="main",
-        workflow_name="ci",
         required_contexts=REQUIRED,
     )
     assert success["reuse_pr_ci"] is True
@@ -63,7 +67,11 @@ def main() -> int:
             [pull_request()],
             [
                 *successful_checks()[:-1],
-                {"name": REQUIRED[-1], "state": "FAILURE", "workflow": "ci"},
+                {
+                    "name": REQUIRED[-1],
+                    "conclusion": "failure",
+                    "app": {"slug": "github-actions"},
+                },
             ],
         ),
     ]:
@@ -72,7 +80,6 @@ def main() -> int:
             checks,
             commit_sha=SHA,
             base_branch="main",
-            workflow_name="ci",
             required_contexts=REQUIRED,
         )
         assert decision["reuse_pr_ci"] is False

@@ -307,9 +307,9 @@ checks, Knowledge Delta, and review state before merging, pinned to the
 verified head SHA. What's *not* done: none of this is the only path to
 merge yet - required-status-checks/branch-protection are not configured
 at the repository-settings level, and no agent-hook guard blocks a direct
-`gh pr merge` (neither of the two adapters that exist, Claude Code and
-Cursor, ships hook scripts) - see [Limitations](#limitations) and the
-[Public-Ready checklist](#definition-of-public-ready).
+`gh pr merge` (none of the four adapters that exist - Claude Code, Cursor,
+Codex, Hermes - ships hook scripts) - see [Limitations](#limitations) and
+the [Public-Ready checklist](#definition-of-public-ready).
 
 ## Privacy and security
 
@@ -451,28 +451,40 @@ from the private production instance:
 ## Roadmap
 
 See the [public readiness backlog](#definition-of-public-ready) below.
-High-level sequence, updated after the 2026-07-15 review round:
+High-level sequence, updated after the 2026-07-18 adapter/license round:
 
 1. ~~Public/private security audit~~ -> ~~legal foundation~~ -> ~~ontology
    consistency, machine-readable schemas, decision ledger, self-governance
-   CI~~ (done, this round).
+   CI~~ (done).
 2. ~~Build the [vertical slice](../guides/vertical-slice.md): one
    synthetic demo, one adapter (Claude Code), end to end~~ (done) ->
    ~~existing-repository adoption hardening (preflight, coexistence mode,
    configurable knowledge paths, privacy-scan suppression baseline),
    driven directly by a real throwaway-copy pilot against a private
-   Tier-2 repository~~ (done, this round - see
-   [Limitations](#limitations) for what the pilot found and what remains
-   a heuristic, not a solved problem).
-3. Repeat the slice against a second adapter (Cursor) to prove the
-   framework/adapter boundary holds.
-4. Real merge-gate/CI enforcement wired up in repository settings, not just
+   Tier-2 repository~~ (done - see [Limitations](#limitations) for what
+   the pilot found and what remains a heuristic, not a solved problem).
+3. ~~Repeat the slice against a second adapter (Cursor) to prove the
+   framework/adapter boundary holds~~ (done) -> ~~two further,
+   experimental-supported (not required) adapters, Codex and Hermes,
+   each re-verified against its own primary/installed source rather than
+   documentation, with real installed-CLI runtime proof from an isolated
+   home directory~~ (done) -> ~~a full directed switching matrix across
+   all four adapters (12 ordered pairs)~~ (done) -> **adapter scope is
+   now frozen at these four** - no fifth adapter, no hooks-parity
+   rewrite, no new adapter abstraction. See
+   [`docs/product/claims-evidence.md`](../product/claims-evidence.md)
+   for exactly what is and is not verified per adapter.
+4. ~~Reproducible dependency/license checking~~ (done - default mode now
+   reads a committed SBOM instead of scanning whatever the invoking
+   interpreter happens to have installed, confirmed identical on Windows
+   and Ubuntu CI - see `scripts/eif_check_licenses.py`).
+5. Real merge-gate/CI enforcement wired up in repository settings, not just
    present as workflow files.
-5. Reproducible quality-per-token benchmark, run against the vertical
+6. Reproducible quality-per-token benchmark, run against the vertical
    slice.
-6. Broader playbook/template/skill porting - only after 2-5, and only as
+7. Broader playbook/template/skill porting - only after 5-6, and only as
    much as the vertical slice's lessons say is actually needed.
-7. `v0.1.0` release -> website and launch content.
+8. `v0.1.0` release -> website and launch content.
 
 ## Definition of Public-Ready
 
@@ -509,7 +521,15 @@ formally ratified (the file is explicit about which is which).
 
 ### Legal and community
 - [x] Open-source license added (Apache-2.0).
-- [ ] Third-party licenses audited.
+- [x] Third-party licenses audited: direct/transitive dependencies checked
+      against [`core/policies/license-policy.json`](../../core/policies/license-policy.json)
+      (see [`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md)); a real
+      GPL-3.0-or-later transitive dependency (`rfc3987`) was found and
+      remediated via a drop-in MIT-licensed swap (`jsonschema[format-nongpl]`),
+      not a legal exception. The check itself is now reproducible: default
+      mode reads the committed SBOM (`sbom.cdx.json`), not a live scan of
+      the invoking environment, confirmed identical on Windows and Ubuntu
+      CI - see `scripts/eif_check_licenses.py`.
 - [x] CONTRIBUTING added.
 - [x] CODE_OF_CONDUCT added.
 - [x] SECURITY added.
@@ -562,18 +582,28 @@ formally ratified (the file is explicit about which is which).
       private pilot target each round (private planning packet); the
       live repository is never opened for writing, and this is still only
       one real target - a second, different one is not yet exercised.
-- [x] At least two agent adapters tested against this repository, **partially**:
-      Claude Code (`CLAUDE.md`, marker-merge) and Cursor (`.cursor/rules/eif/
-      governance.mdc`, full-regen, nested-entrypoint transaction, adapter
-      switching both directions, adapter-aware governance discovery -
-      `scripts/tests/test_cursor_adapter.py`, 74 checks) are both
-      code/test-validated. Cursor is NOT yet runtime-validated - no human
-      has confirmed a real Cursor Agent-chat response reflects the
-      generated rule's content - see
+- [x] At least two agent adapters tested against this repository, **exceeded,
+      still partial on runtime validation**: four adapters now exist and are
+      each code/test-validated - Claude Code (`CLAUDE.md`, marker-merge),
+      Cursor (`.cursor/rules/eif/governance.mdc`, full-regen,
+      nested-entrypoint transaction - `scripts/tests/test_cursor_adapter.py`,
+      74 checks), Codex (dynamic active-entrypoint resolution, re-verified
+      against primary source - `test_codex_adapter.py`, 123 checks), and
+      Hermes (dynamic active-source resolution across a real four-tier
+      discovery chain, verified against installed source -
+      `test_hermes_adapter.py`, 77 checks). All 12 directed switching pairs
+      across the four are proven (`test_adapter_switch_matrix.py`, 81
+      checks; `adapters/switch-matrix.json`). Codex and Hermes had real
+      installed-CLI runtime proof from an isolated home directory
+      (`codex debug prompt-input`, `hermes prompt-size --json`) - Cursor
+      does NOT yet have this: no human has confirmed a real Cursor
+      Agent-chat response reflects the generated rule's content - see
       `adapters/cursor/README.md#runtime-validation-status` and
       `examples/demo-cursor-workspace/MANUAL-RUNTIME-CHECK.md`. D-09
-      ratifies which two adapters are in v0.1 *scope*; it is a scope
-      decision, not a claim that runtime validation is complete for both.
+      ratifies which two adapters (Claude Code, Cursor) are *required* for
+      v0.1 scope; Codex and Hermes are experimental-supported, not required
+      - none of this is a claim that all four are production-ready, or that
+      runtime validation is complete for all four.
 - [x] Structural-graph and shell-compression integrations documented as
       optional.
 - [x] Degraded mode documented.
@@ -597,28 +627,32 @@ formally ratified (the file is explicit about which is which).
       this repository's other merged PRs).
 - [ ] Those CI checks and the merge-gate script are not yet the *only*
       path to merge - nothing at the repository-settings level (required
-      status checks / branch protection) or the agent-hook level (neither
-      of the two adapters that exist, Claude Code and Cursor, ships hook
-      scripts, so there is no "deny direct `gh pr merge`" guard) technically
-      prevents bypassing them. Checks are labeled "required by policy," not
-      "blocking," for exactly this reason. This is the same gap the private
-      instance found and fixed in itself (see Limitations) - do not
-      consider this item done until it's closed the same way (repository
-      settings + a hook guard for each adapter).
+      status checks / branch protection) or the agent-hook level (none of
+      the four adapters that exist - Claude Code, Cursor, Codex, Hermes -
+      ships hook scripts, so there is no "deny direct `gh pr merge`" guard)
+      technically prevents bypassing them. Checks are labeled "required by
+      policy," not "blocking," for exactly this reason. This is the same
+      gap the private instance found and fixed in itself (see Limitations)
+      - do not consider this item done until it's closed the same way
+      (repository settings + a hook guard for each adapter).
 - [ ] Graph freshness derived from commit evidence (pattern exists in the
       private instance; not ported here).
 - [x] Generated adapters have a machine-readable parity matrix
       (`adapters/parity-matrix.json`, drift-tested by
       `scripts/tests/test_parity_matrix.py` against the live adapter
-      registry) covering both adapters across entrypoint/init/upgrade/
-      reconfigure/coexist/doctor/rollback/switching/runtime-evidence.
-      `eif_verify_runtime.py` catches config-vs-lock adapter mismatches and
-      config-vs-generated-block drift for whichever adapter is configured.
-      Not covered: drift in an adapter's *own* behavior across its product
-      versions (e.g. Cursor or Claude Code changing how they read the
-      entrypoint) - each adapter's README documents the version it was
-      verified against and says to re-verify on a material version change,
-      but nothing re-runs that check automatically.
+      registry) covering all four adapters across entrypoint/init/upgrade/
+      reconfigure/coexist/doctor/rollback/switching/runtime-evidence, plus a
+      separate directed switching matrix (`adapters/switch-matrix.json`,
+      `test_adapter_switch_matrix.py`) covering all 12 ordered pairs - the
+      two matrices answer different questions (per-adapter capability vs.
+      per-pair switching behavior) on purpose, cross-referenced rather than
+      merged. `eif_verify_runtime.py` catches config-vs-lock adapter
+      mismatches and config-vs-generated-block drift for whichever adapter
+      is configured. Not covered: drift in an adapter's *own* behavior
+      across its product versions (e.g. Cursor or Claude Code changing how
+      they read the entrypoint) - each adapter's README documents the
+      version it was verified against and says to re-verify on a material
+      version change, but nothing re-runs that check automatically.
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
 - [x] Demo workflow has executable evidence:
@@ -633,15 +667,24 @@ formally ratified (the file is explicit about which is which).
 ### Documentation
 - [x] This document exists and is the canonical source for README/website/
       FAQ content.
-- [ ] README explains EIF in 2-3 minutes (draft exists, not user-tested).
-- [ ] Quickstart completes in 10 minutes (the experimental bootstrap
-      exists and the demo README documents exact commands, but the
-      10-minute claim itself has not been user-timed outside this
-      session).
-- [ ] FAQ covers memory/RAG/structural-graph/shell-compression/privacy/
-      overhead questions (see [FAQ](#faq) below - partial).
+- [ ] README explains EIF in 2-3 minutes (corrected this round to fix
+      stale adapter-count claims; still not independently timed by a
+      human reading it for the first time).
+- [ ] Quickstart completes in 10 minutes: [`docs/guides/quickstart.md`](../guides/quickstart.md)
+      now exists as a dedicated entry point. Mechanical execution of the
+      full underlying command sequence (init, retrieval, test, both
+      renders, all five validation checks) was measured end to end at
+      **5.7 seconds** - real data, not a guess - but that is tool
+      execution time, not the human reading/typing/comprehension time a
+      "10-minute quickstart" claim is actually about, which remains
+      untimed by an independent human.
+- [x] FAQ covers memory/RAG/structural-graph/shell-compression/privacy/
+      overhead/adapter-support/tests-and-CI questions (see [FAQ](#faq)
+      below) - not claimed exhaustive, but no longer partial on the five
+      originally-named topics plus two more added this round.
 - [x] Limitations are explicit (see [Limitations](#limitations)).
-- [ ] Public roadmap published outside this document.
+- [x] Public roadmap published outside this document:
+      [`ROADMAP.md`](../../ROADMAP.md) at the repository root.
 
 ### Launch
 - [ ] `v0.1.0` tag exists.
@@ -706,3 +749,24 @@ Pre-v0.1. The methodology has run daily in a private instance since May
 2026, but this public extraction is new and incomplete - see
 [Definition of Public-Ready](#definition-of-public-ready) for exactly
 what's missing.
+
+**What coding agents does this support?**
+Four adapters exist and adapter scope is frozen at this set: Claude Code
+and Cursor are the two required v0.1 adapters; Codex and Hermes are
+experimental-supported, not required. All four generate the correct
+entrypoint for their agent and have been re-verified against that agent's
+own primary or installed source, not just documentation - see
+[Skills and agent adapters](#skills-and-agent-adapters) and
+[`docs/product/claims-evidence.md`](../product/claims-evidence.md) for
+exactly what's verified per adapter. "Supports agent X" here means an
+entrypoint is generated and code/test-validated, not that hook-based
+enforcement or every agent version has been checked - see
+[Limitations](#limitations).
+
+**Does EIF replace my tests, CI, or code review?**
+No - see [What EIF is not](../../README.md#what-eif-is-not). It adds a
+knowledge/authority layer and a governed workflow around implementation
+and evidence; the actual verification (tests passing, CI green, a human
+or agent reviewing the diff) still has to happen, the same way it would
+without EIF. A merged PR is explicitly not treated as proof of working
+behavior on its own - see [Knowledge Delta](#knowledge-delta).

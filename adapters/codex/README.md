@@ -367,7 +367,7 @@ truncating size-budget enforcement (exact managed-block boundary, a
 truncated trailing footer alone not failing, an ancestor chain alone
 exhausting the budget), and `eif_verify_runtime.py` doctor drift
 detection (entrypoint drift and root-marker drift, independently), all in
-`scripts/tests/test_codex_adapter.py` (121/121) plus the unchanged
+`scripts/tests/test_codex_adapter.py` (123/123) plus the unchanged
 existing suites (no regressions - `run_all.py` still green).
 
 **Beyond that**: the actual discovery/precedence/concatenation mechanism

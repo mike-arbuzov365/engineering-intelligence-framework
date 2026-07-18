@@ -76,7 +76,7 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from eif_adapters import (  # noqa: E402
     ADAPTERS, entrypoint_for, entry_strategy_for,
-    resolve_active_entrypoint, check_size_budget, EntrypointState,
+    resolve_active_entrypoint, resolve_hermes_active_source, check_size_budget, EntrypointState,
 )
 from eif_markers import check_marker_integrity  # noqa: E402
 from eif_validate_frontmatter import load_schema, validate_one, _normalize_yaml_scalars  # noqa: E402
@@ -244,7 +244,11 @@ def check_consistency(config: dict | None, lock: dict | None, instance_path: Pat
     if lock_adapter in ADAPTERS:
         if entry_strategy_for(lock_adapter) == "dynamic-resolve":
             adapter_options = (((config.get("adapter") or {}).get("options")) or {}).get(lock_adapter) or {}
-            resolution = resolve_active_entrypoint(instance_path, lock_adapter, adapter_options)
+            resolution = (
+                resolve_hermes_active_source(instance_path, adapter_options)
+                if lock_adapter == "hermes" else
+                resolve_active_entrypoint(instance_path, lock_adapter, adapter_options)
+            )
             if resolution.state not in (EntrypointState.ACTIVE_MANAGEABLE, EntrypointState.NOT_FOUND):
                 problems.append(
                     f"AGENT CONSUMPTION invalid for {lock_adapter!r}: the active-entrypoint resolution "

@@ -324,6 +324,40 @@ def main() -> int:
             codex_cfg_text,
         ))
 
+        # --- package-wheel-metadata: eifctl init --adapter hermes also
+        # works from the INSTALLED wheel - proves the wheel's bundled
+        # resolve_hermes_active_source()/simulate_hermes_context() (not
+        # just the registry entry) round-trip through packaging, same as
+        # Codex's own wheel proof above. ---
+        hermes_project_dir = tmp_root / "hermes-pkgtest"
+        hermes_init_proc = run(
+            [str(eifctl_exe), "init", "--project-name", "hermes-pkgtest", "--adapter", "hermes", "--instance-path", str(hermes_project_dir)],
+            cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl init --adapter hermes succeeds from the installed wheel",
+            hermes_init_proc.returncode == 0,
+            hermes_init_proc.stdout + hermes_init_proc.stderr,
+        ))
+        hermes_entry_text = (hermes_project_dir / ".hermes.md").read_text(encoding="utf-8") if (hermes_project_dir / ".hermes.md").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl generates a real .hermes.md with the EIF-managed block",
+            "<!-- EIF:BEGIN" in hermes_entry_text and "<!-- EIF:END -->" in hermes_entry_text,
+            hermes_entry_text,
+        ))
+        hermes_cfg_text = (hermes_project_dir / ".eif" / "config.yaml").read_text(encoding="utf-8") if (hermes_project_dir / ".eif" / "config.yaml").exists() else ""
+        results.append(check(
+            "wheel-installed eifctl records adapter.name: hermes",
+            "hermes" in hermes_cfg_text,
+            hermes_cfg_text,
+        ))
+        hermes_doctor_proc = run([str(eifctl_exe), "doctor", "--instance-path", str(hermes_project_dir)], cwd=tmp_root)
+        results.append(check(
+            "wheel-installed eifctl doctor passes on the generated hermes instance",
+            hermes_doctor_proc.returncode == 0,
+            hermes_doctor_proc.stdout + hermes_doctor_proc.stderr,
+        ))
+
         uninstall = run([str(venv_python), "-m", "pip", "uninstall", "-y", "-q", "engineering-intelligence-framework"])
         results.append(check("uninstall succeeds and removes the console-script entry point", uninstall.returncode == 0 and not eifctl_exe.exists()))
 

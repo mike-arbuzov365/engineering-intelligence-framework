@@ -92,7 +92,7 @@ from eif_locale import msg  # noqa: E402
 from eif_adapters import (  # noqa: E402
     ADAPTERS, DEFAULT_ADAPTER, entrypoint_for, entry_strategy_for,
     entry_frontmatter_for, discover_governance_surfaces,
-    resolve_active_entrypoint, check_size_budget, EntrypointState,
+    resolve_active_entrypoint, resolve_hermes_active_source, check_size_budget, EntrypointState,
 )
 from eif_markers import render_merged_content, find_managed_block, MarkerConflict  # noqa: E402
 from eif_validate_frontmatter import (  # noqa: E402
@@ -1264,7 +1264,11 @@ def main(argv: list[str] | None = None) -> int:
     # only a warning (round: Codex active-entrypoint correctness - the
     # previous design warned about a same-directory AGENTS.override.md
     # while still writing a now-dead AGENTS.md alongside it). ---
-    resolution = resolve_active_entrypoint(instance_path, adapter, adapter_options)
+    resolution = (
+        resolve_hermes_active_source(instance_path, adapter_options)
+        if adapter == "hermes" else
+        resolve_active_entrypoint(instance_path, adapter, adapter_options)
+    )
     if resolution.state not in (EntrypointState.ACTIVE_MANAGEABLE, EntrypointState.NOT_FOUND):
         print(f"eif-init: active-entrypoint resolution for {adapter!r}: {resolution.rationale}", file=sys.stderr)
         print(f"{prefix}refusing to write anything - resolve the conflict above, then re-run.", file=sys.stderr)
@@ -1283,6 +1287,28 @@ def main(argv: list[str] | None = None) -> int:
     # index handling used to be entirely invisible to --dry-run). ---
     entry_path = instance_path / entrypoint
     existing_entry_text = entry_path.read_text(encoding="utf-8") if entry_path.exists() else None
+
+    # Same-path adapter switch (real, not hypothetical - e.g. CLAUDE.md is
+    # BOTH claude-code's own fixed entrypoint AND one of Hermes's dynamic-
+    # resolve candidates): if the OLD entrypoint and the NEW entrypoint
+    # resolve to the identical path, old_entry_plan's "strip the old EIF
+    # block" is entirely subsumed by the new entrypoint's own marker-merge
+    # render below (existing_entry_text - the old file's CURRENT content,
+    # old block included - is exactly what that render reads and replaces
+    # the managed block within, preserving surrounding project content the
+    # same way a strip-then-append would have). Leaving old_entry_plan set
+    # would stage TWO separate transaction stages against the same
+    # "<path>.next" staging file - the entrypoint stage's commit (a
+    # rename) consumes it, so the old-entrypoint stage's commit then finds
+    # its own staged file already gone ("staged artifact missing"), and
+    # the whole transaction rolls back. Neutralizing it here, before
+    # anything downstream reads or stages it, makes the single entrypoint
+    # write authoritative for this path, exactly as if no separate old
+    # entrypoint had ever been tracked.
+    if old_entry_path is not None and old_entry_path == entry_path:
+        old_entry_plan = None
+        old_entry_path = None
+
     gi_path = instance_path / ".gitignore"
     existing_gi_text = gi_path.read_text(encoding="utf-8") if gi_path.exists() else None
 

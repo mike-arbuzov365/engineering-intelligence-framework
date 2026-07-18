@@ -35,6 +35,13 @@ def successful_checks() -> list[dict]:
 def main() -> int:
     cases = 0
 
+    workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(
+        encoding="utf-8"
+    )
+    evidence_job = workflow.split("  ci-evidence:", 1)[1].split("\n  policy-gate:", 1)[0]
+    assert "checks: read" in evidence_job
+    cases += 1
+
     success = decide_reuse(
         [pull_request()],
         successful_checks(),
@@ -78,4 +85,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

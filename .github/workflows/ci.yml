@@ -23,6 +23,10 @@ jobs:
     name: Reuse verified PR CI
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: read
     outputs:
       reuse-pr-ci: ${{ steps.evidence.outputs.reuse-pr-ci }}
       reason: ${{ steps.evidence.outputs.reason }}

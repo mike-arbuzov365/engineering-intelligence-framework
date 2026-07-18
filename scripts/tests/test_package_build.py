@@ -358,6 +358,109 @@ def main() -> int:
             hermes_doctor_proc.stdout + hermes_doctor_proc.stderr,
         ))
 
+        # --- 4b. Full synthetic-task journey from the INSTALLED WHEEL, not
+        # individual subcommands checked in isolation: a new task with
+        # pre-existing project files (src/tests/task-scope.md, no
+        # entrypoint yet) -> eifctl init bootstraps EIF onto it -> retrieval
+        # surfaces the seeded fact/failure-pattern WITH the authority
+        # metadata (status/evidence/confidence) an agent uses to resolve
+        # which source to trust -> the pre-authored implementation passes
+        # its real test -> Knowledge Delta and closeout (EIF's own
+        # promotion-decision and cleanup steps) render to real files in the
+        # instance's configured locale -> validation/privacy/doctor all
+        # pass. Reuses the demo-workspace's own fixture content (not a
+        # second, drifting copy of the same task) - same story as
+        # examples/demo-workspace/README.md, proven via `eifctl`, not
+        # `python scripts/eif_init.py`. ---
+        journey_dir = tmp_root / "journey-pkgtest"
+        demo_fixture = FRAMEWORK_ROOT / "examples" / "demo-workspace"
+        shutil.copytree(demo_fixture / "src", journey_dir / "src")
+        shutil.copytree(demo_fixture / "tests", journey_dir / "tests")
+        shutil.copytree(demo_fixture / "knowledge", journey_dir / "knowledge", ignore=shutil.ignore_patterns("index.md"))
+        shutil.copy2(demo_fixture / "task-scope.md", journey_dir / "task-scope.md")
+
+        journey_init = run(
+            [str(eifctl_exe), "init", "--project-name", "journey-pkgtest", "--adapter", "claude-code",
+             "--locale", "uk", "--instance-path", str(journey_dir)],
+            cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl init bootstraps EIF onto a pre-existing synthetic task (retrieval content already seeded)",
+            journey_init.returncode == 0,
+            journey_init.stdout + journey_init.stderr,
+        ))
+
+        journey_search = run([str(eifctl_exe), "search", "leap year"], cwd=journey_dir)
+        results.append(check(
+            "eifctl search retrieves the seeded fact and failure pattern, with the authority metadata "
+            "(status/evidence/confidence) a real retrieval-before-implementation step relies on",
+            journey_search.returncode == 0
+            and "FACT-0001" in journey_search.stdout
+            and "PATTERN-0001" in journey_search.stdout
+            and "status=validated" in journey_search.stdout
+            and "evidence=OBSERVED" in journey_search.stdout,
+            journey_search.stdout + journey_search.stderr,
+        ))
+
+        journey_test = run([str(venv_python), str(journey_dir / "tests" / "test_calendar_utils.py"), "-v"])
+        results.append(check(
+            "the pre-authored implementation passes its real test, run by the venv's own interpreter",
+            journey_test.returncode == 0,
+            journey_test.stdout + journey_test.stderr,
+        ))
+
+        journey_kd = run(
+            [str(eifctl_exe), "render", "knowledge-delta", "--instance-root", str(journey_dir)], cwd=tmp_root,
+        )
+        kd_path = journey_dir / "knowledge-delta.md"
+        results.append(check(
+            "eifctl render knowledge-delta writes a real file from the installed wheel",
+            journey_kd.returncode == 0 and kd_path.exists(),
+            journey_kd.stdout + journey_kd.stderr,
+        ))
+        kd_text = kd_path.read_text(encoding="utf-8") if kd_path.exists() else ""
+        results.append(check(
+            "the rendered Knowledge Delta is in the instance's configured locale (Ukrainian), "
+            "not a silent English fallback",
+            any("а" <= c <= "я" for c in kd_text.lower()),
+            kd_text,
+        ))
+
+        journey_closeout = run(
+            [str(eifctl_exe), "render", "session-closeout", "--instance-root", str(journey_dir), "--draft",
+             "--set", "task_name=implement is_leap_year", "--set", "branch_or_pr=wheel-journey-test"],
+            cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl render session-closeout (the journey's promotion-decision/cleanup step) "
+            "writes a real file from the installed wheel",
+            journey_closeout.returncode == 0 and (journey_dir / "session-closeout.md").exists(),
+            journey_closeout.stdout + journey_closeout.stderr,
+        ))
+
+        run(["git", "init", "-q"], cwd=journey_dir)
+        run(["git", "add", "-A"], cwd=journey_dir)
+        journey_validate = run(
+            [str(eifctl_exe), "validate", "--instance-root", str(journey_dir), "knowledge/**/*.md"], cwd=tmp_root,
+        )
+        results.append(check(
+            "eifctl validate accepts the seeded knowledge artifacts from the installed wheel",
+            journey_validate.returncode == 0,
+            journey_validate.stdout + journey_validate.stderr,
+        ))
+        journey_privacy = run([str(eifctl_exe), "privacy-scan", "--repo", str(journey_dir)], cwd=tmp_root)
+        results.append(check(
+            "eifctl privacy-scan runs clean against the full journey instance",
+            journey_privacy.returncode == 0,
+            journey_privacy.stdout + journey_privacy.stderr,
+        ))
+        journey_doctor = run([str(eifctl_exe), "doctor", "--instance-path", str(journey_dir)], cwd=tmp_root)
+        results.append(check(
+            "eifctl doctor passes on the full journey instance",
+            journey_doctor.returncode == 0 and "all checks passed" in journey_doctor.stdout,
+            journey_doctor.stdout + journey_doctor.stderr,
+        ))
+
         uninstall = run([str(venv_python), "-m", "pip", "uninstall", "-y", "-q", "engineering-intelligence-framework"])
         results.append(check("uninstall succeeds and removes the console-script entry point", uninstall.returncode == 0 and not eifctl_exe.exists()))
 

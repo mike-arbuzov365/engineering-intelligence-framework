@@ -42,7 +42,6 @@ jobs:
           --repository "$GITHUB_REPOSITORY"
           --commit-sha "$GITHUB_SHA"
           --base-branch main
-          --workflow-name ci
           --policy core/policies/merge-policy.json
 
   policy-gate:

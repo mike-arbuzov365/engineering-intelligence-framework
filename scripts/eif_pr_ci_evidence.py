@@ -20,7 +20,6 @@ def decide_reuse(
     *,
     commit_sha: str,
     base_branch: str,
-    workflow_name: str,
     required_contexts: list[str],
 ) -> dict[str, Any]:
     matching = [
@@ -41,8 +40,8 @@ def decide_reuse(
     successful = {
         check.get("name")
         for check in checks
-        if check.get("workflow") == workflow_name
-        and check.get("state") == "SUCCESS"
+        if (check.get("app") or {}).get("slug") == "github-actions"
+        and check.get("conclusion") == "success"
     }
     missing = [context for context in required_contexts if context not in successful]
     if missing:
@@ -85,7 +84,6 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--repository", required=True)
     parser.add_argument("--commit-sha", required=True)
     parser.add_argument("--base-branch", required=True)
-    parser.add_argument("--workflow-name", required=True)
     parser.add_argument("--policy", required=True)
     parser.add_argument("--github-output", default=os.environ.get("GITHUB_OUTPUT"))
     args = parser.parse_args(argv)
@@ -109,18 +107,19 @@ def main(argv: list[str] | None = None) -> int:
             and (pr.get("base") or {}).get("ref") == args.base_branch
         ]
         if len(candidates) == 1:
-            checks = run_json(
+            head_sha = (candidates[0].get("head") or {}).get("sha")
+            if not head_sha:
+                raise ValueError("merged PR evidence is missing the PR head SHA")
+            checks_response = run_json(
                 [
                     "gh",
-                    "pr",
-                    "checks",
-                    str(candidates[0]["number"]),
-                    "--repo",
-                    args.repository,
-                    "--json",
-                    "name,state,workflow",
+                    "api",
+                    "-H",
+                    "Accept: application/vnd.github+json",
+                    f"repos/{args.repository}/commits/{head_sha}/check-runs?filter=latest&per_page=100",
                 ]
             )
+            checks = checks_response["check_runs"]
         else:
             checks = []
         decision = decide_reuse(
@@ -128,7 +127,6 @@ def main(argv: list[str] | None = None) -> int:
             checks,
             commit_sha=args.commit_sha,
             base_branch=args.base_branch,
-            workflow_name=args.workflow_name,
             required_contexts=required_contexts,
         )
     except Exception as exc:  # noqa: BLE001 - every failure must fall back to full CI

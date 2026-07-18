@@ -96,7 +96,12 @@
       "required": ["name", "entrypoint"],
       "properties": {
         "name": { "type": "string" },
-        "entrypoint": { "type": "string" }
+        "entrypoint": { "type": "string" },
+        "effective_root_markers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "For an adapter with a registered root_marker_option_key (Codex: project_root_markers) - the exact marker list actually used to resolve the project root when this instance was last generated, whether that came from adapter.options.<adapter> or the adapter's own documented default. An empty array is a real, valid value (root detection explicitly disabled), distinct from the key being absent (no such adapter concept). eif_verify_runtime.py's doctor recomputes the CURRENT effective list and fails if it no longer matches - a hand-edited config.yaml changing this value with no re-run is exactly the kind of drift this is meant to catch."
+        }
       }
     },
     "bundle": {

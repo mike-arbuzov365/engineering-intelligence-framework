@@ -58,6 +58,8 @@ currently accepted and is the actual enforcement mechanism, re-checked on
 every CI run via `scripts/eif_check_licenses.py`.
 
 This file lists dependencies as of the commit that introduced it. Re-run
-the generation steps above (or `scripts/eif_check_licenses.py`, which
-reads the same live environment) after any dependency change rather than
-hand-editing stale entries.
+the generation steps above after any dependency change rather than
+hand-editing stale entries - and regenerate `sbom.cdx.json` too:
+`scripts/eif_check_licenses.py` checks that file by default (not this one,
+and not the live environment), and fails the build if it disagrees with
+`requirements.txt`'s pins.

@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T08",
+  "title": "Fix an inconsistency across two functions",
+  "description": "checkout.py's compute_single_item_price() has its own hardcoded discount rate that disagrees with the shared MEMBER_DISCOUNT_RATE in pricing_rules.py that compute_order_total() correctly uses - a real multi-file/multi-function coordination bug, not a single isolated line fix in one place.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:b475231bf21af204f8d758457c7fcea47e0ca60ab48e9e9196d7a6b9efcc38a3",
+  "test_command": ["python", "tests/test_checkout.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct fix makes all 6 pass, including the cross-function consistency check. The unfixed source already passes 4/6 (every case that doesn't exercise compute_single_item_price's member-discount path)."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/checkout.py with the fixture's known-buggy reference (the hardcoded, inconsistent 10% rate), regardless of how the agent structured its fix. Does not touch src/pricing_rules.py.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 4
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

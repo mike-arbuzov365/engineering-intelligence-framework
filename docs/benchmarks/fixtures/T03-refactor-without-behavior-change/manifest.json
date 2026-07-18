@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T03",
+  "title": "Refactor without changing behavior",
+  "description": "Two functions duplicate the same validate-and-compute-subtotal logic. Requires extracting a shared helper without changing either function's observable behavior (return values, exceptions).",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:57092791e87b8b69c2d219151ee4e82d3391c73ad749c0ec345267a633fdf8ae",
+  "test_command": ["python", "tests/test_inventory.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct refactor keeps all 6 passing, including both negative-quantity validation cases and the zero-tax-rate consistency check."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/inventory.py with the fixture's known-buggy 'refactor' (the extracted helper silently drops the negative-quantity validation), regardless of how the agent structured its own refactor.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 4
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

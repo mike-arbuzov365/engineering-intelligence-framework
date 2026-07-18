@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T09",
+  "title": "Add an optional parameter without breaking existing callers",
+  "description": "format_name(first, last) needs an optional middle-name parameter added without breaking any existing 2-argument call - a backward-compatibility/API-evolution task, not a bug fix in existing logic.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:27e6cff37ca7bad42896521c449b6a95e27bc0e4439cb9057e4d82bbef085430",
+  "test_command": ["python", "tests/test_greeting.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct implementation makes all 6 pass, including the empty-string-treated-as-omitted edge case. The unfixed source already passes 2/6 (the two existing 2-argument-call cases)."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/greeting.py with the fixture's known-buggy reference (checks 'middle is not None' instead of truthiness, so an explicit empty string is wrongly treated as a real middle name), regardless of how the agent structured its fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 5
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

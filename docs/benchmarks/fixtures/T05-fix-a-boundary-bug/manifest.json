@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T05",
+  "title": "Fix a boundary bug",
+  "description": "A pagination function has an off-by-one in its slice-index arithmetic that drops the last item of every page (a different boundary-bug flavor than T02's threshold-comparison bug - here the bug is in index arithmetic, not a comparison operator).",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:99f04bcc67bb6f0ec263d3ae625919fea3202718f6a00b1d94e43a32621f9d71",
+  "test_command": ["python", "tests/test_pagination.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct fix makes all 6 pass. The unfixed source already passes 2/6 (the two cases the off-by-one happens not to affect)."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/pagination.py with the fixture's known-buggy reference implementation, regardless of how the agent structured its fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 2
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

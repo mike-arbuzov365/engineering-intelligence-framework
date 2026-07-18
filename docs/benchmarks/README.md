@@ -3,7 +3,7 @@
 ## Status: harness executable, no runs published yet
 
 The quality-per-token benchmark harness (`scripts/eif_benchmark.py`) is
-real and executable for modes A and B, with 3 pilot fixtures. Mode B is
+real and executable for modes A and B, with a 10-fixture corpus. Mode B is
 proven end-to-end against a real installed `eifctl` wheel, not just
 theoretically executable - see `scripts/tests/test_benchmark_mode_b.py`.
 **No real-agent run has been executed or published** - only harness
@@ -71,7 +71,7 @@ executable to invoke (bypassing PATH lookup entirely) - the property this
 exists to prove is that mode B runs a SPECIFIC installed package, never
 whichever `eifctl` happens to resolve first on PATH.
 
-## Pilot fixtures (3, per this round's scope)
+## Fixture corpus (10, expanded from the original 3-fixture pilot)
 
 Each fixture under
 [`docs/benchmarks/fixtures/`](fixtures/) has a `manifest.json`
@@ -82,11 +82,43 @@ test command, an expected-output contract, an anti-cheating mutation
 check (overwrites the solution with a known-bad reference regardless of
 how the agent structured its fix, to prove the test suite actually
 distinguishes correct from broken), a wall-time/tool-call budget, and
-license/provenance/no-private-content confirmation.
+license/provenance/no-private-content confirmation. Every fixture below
+was verified directly against `scripts/eif_benchmark.py validate-manifest`
+and its own `test_command`/mutation pair (both the unfixed starting state's
+real pass count and, separately, a correct fix's 6/6) before being
+committed - none of the pass counts named here are estimated.
 
+Ten task categories, deliberately spanning different bug/change shapes so
+the corpus doesn't just repeat the same kind of fix ten times:
+
+- **T01 - implement a function from a written spec**: a compact
+  duration-string parser (`1d2h30m15s` -> total seconds), unimplemented
+  (raises `NotImplementedError`) rather than buggy - a from-scratch
+  implementation task, not a fix. 6 tests; unfixed source passes 0/6;
+  mutation check (a plausible reference that treats a day as 1 hour, not
+  24) expects 4/6.
 - **T02 - fix a bug**: an off-by-one boundary bug in a bulk-discount
   calculation (`pricing.py`). 6 tests; mutation check expects 5/6 after
   reverting to the known-buggy reference.
+- **T03 - refactor without changing behavior**: two functions duplicate
+  the same validate-and-compute logic; requires extracting a shared
+  helper without changing either function's observable behavior. 6 tests;
+  unfixed (already-correct, pre-refactor) source passes 6/6; mutation
+  check (a plausible "refactor" that silently drops the validation)
+  expects 4/6.
+- **T04 - add input validation**: a function's docstring promises a
+  `ValueError` for invalid input that the implementation doesn't actually
+  raise yet (crashes with an undocumented exception instead). 6 tests;
+  unfixed source passes 4/6; mutation check (a partial fix that only
+  handles the crash it happened to notice) expects 5/6.
+- **T05 - fix a boundary bug**: a pagination function's off-by-one is in
+  slice-index arithmetic, not a comparison operator - a different
+  boundary-bug shape than T02. 6 tests; unfixed source passes 2/6;
+  mutation check expects 2/6.
+- **T06 - fix a data-driven bug**: a shipping-rate lookup table has one
+  wrong constant; the calculation logic itself is correct - tests whether
+  the fix targets the data, not the algorithm. 6 tests; unfixed source
+  passes 4/6; mutation check expects 4/6.
 - **T07 - avoid repeating a known failed fix**: a whitespace-trimming bug
   whose task prompt explicitly documents a previously-tried, wrong fix
   (stripping all spaces, which breaks multi-word names) and instructs not
@@ -94,13 +126,24 @@ license/provenance/no-private-content confirmation.
   (`checks/detect_known_fail.py`) flags a solution that reintroduces the
   documented wrong pattern as a failure, independent of raw test-pass
   count. 6 tests; mutation check expects 3/6.
+- **T08 - fix an inconsistency across two functions**: a member-discount
+  rate is correctly defined once in a shared module but re-hardcoded,
+  differently, in a second function - a multi-file/multi-function
+  coordination bug, not a single isolated line. 6 tests; unfixed source
+  passes 4/6; mutation check expects 4/6.
+- **T09 - add an optional parameter without breaking existing callers**:
+  a name-formatting function needs an optional middle-name parameter
+  added without breaking any existing 2-argument call - a backward-
+  compatibility/API-evolution task. 6 tests; unfixed source passes 2/6;
+  mutation check (a plausible fix that checks `is not None` instead of
+  truthiness, mishandling an explicit empty string) expects 5/6.
 - **T10 - security-relevant fix**: an unvalidated path-traversal
   vulnerability in a file-serving function - both relative `..` escapes
   and absolute-path escapes must be rejected with the correct error type,
   without misclassifying a legitimately-missing in-sandbox file as an
   attack. 5 tests; mutation check expects 2/5.
 
-All three are originally-authored, synthetic, Apache-2.0-licensed, and
+All ten are originally-authored, synthetic, Apache-2.0-licensed, and
 contain no private repository content, per D-12.
 
 ## Metrics and methodology

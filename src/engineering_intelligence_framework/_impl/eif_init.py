@@ -92,7 +92,7 @@ from eif_locale import msg  # noqa: E402
 from eif_adapters import (  # noqa: E402
     ADAPTERS, DEFAULT_ADAPTER, entrypoint_for, entry_strategy_for,
     entry_frontmatter_for, discover_governance_surfaces,
-    resolve_active_entrypoint, check_size_budget, EntrypointState,
+    resolve_active_entrypoint, resolve_hermes_active_source, check_size_budget, EntrypointState,
 )
 from eif_markers import render_merged_content, find_managed_block, MarkerConflict  # noqa: E402
 from eif_validate_frontmatter import (  # noqa: E402
@@ -1264,7 +1264,11 @@ def main(argv: list[str] | None = None) -> int:
     # only a warning (round: Codex active-entrypoint correctness - the
     # previous design warned about a same-directory AGENTS.override.md
     # while still writing a now-dead AGENTS.md alongside it). ---
-    resolution = resolve_active_entrypoint(instance_path, adapter, adapter_options)
+    resolution = (
+        resolve_hermes_active_source(instance_path, adapter_options)
+        if adapter == "hermes" else
+        resolve_active_entrypoint(instance_path, adapter, adapter_options)
+    )
     if resolution.state not in (EntrypointState.ACTIVE_MANAGEABLE, EntrypointState.NOT_FOUND):
         print(f"eif-init: active-entrypoint resolution for {adapter!r}: {resolution.rationale}", file=sys.stderr)
         print(f"{prefix}refusing to write anything - resolve the conflict above, then re-run.", file=sys.stderr)

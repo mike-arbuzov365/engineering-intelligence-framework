@@ -128,6 +128,8 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
+from eif_markers import find_managed_block, MarkerConflict
+
 ADAPTERS = {
     "claude-code": {
         "entrypoint": "CLAUDE.md",
@@ -317,6 +319,172 @@ ADAPTERS = {
             "AI Foundation under the Linux Foundation) - it is read as plain "
             "context by any agent pointed at it, even one with no "
             "Codex-specific integration."
+        ),
+    },
+    "hermes": {
+        # Greenfield default only (used when NO candidate exists anywhere
+        # relevant - see resolve_hermes_active_source(), which this adapter
+        # uses INSTEAD of resolve_active_entrypoint() because its real
+        # precedence needs an ancestor walk for tier 1 before even
+        # considering tiers 2-4 at the instance root, a shape
+        # resolve_active_entrypoint()'s single-directory model cannot
+        # express).
+        "entrypoint": ".hermes.md",
+        "entry_strategy": "dynamic-resolve",
+        "entry_ownership": "shared",
+        "entry_frontmatter": "",
+        # Verified 2026-07-18 directly against the installed Hermes Agent's
+        # own Python source (git-installed, not a black-box wheel - local
+        # HEAD 6142203bd7, +1 carried commit over upstream d59b79fa,
+        # unrelated to context-file discovery). Primary files read:
+        # agent/prompt_builder.py (startup discovery + transformation +
+        # truncation), agent/subdirectory_hints.py (a SEPARATE, non-startup
+        # mechanism - see below), tools/threat_patterns.py (security
+        # scanning), agent/system_prompt.py (call-site/cache lifecycle).
+        #
+        # STARTUP discovery (agent/prompt_builder.py build_context_files_
+        # prompt(), first match wins across exactly 4 tiers, checked in
+        # this order):
+        #  1. .hermes.md, then HERMES.md - _find_hermes_md(): nearest
+        #     ancestor from cwd up to (and including) the git root, if a
+        #     git root exists; if NO git root exists anywhere, cwd ONLY
+        #     (deliberately, per the source's own comment: walking parents
+        #     with no git root "could pick up a .hermes.md planted in
+        #     /tmp, /home, etc."). NO depth cap of any kind - walks the
+        #     FULL distance to the git root, however many levels that is.
+        #  2. AGENTS.md, then agents.md - cwd only, no ancestor walk at all
+        #     (not even to the git root).
+        #  3. CLAUDE.md, then claude.md - cwd only, same as AGENTS.md.
+        #  4. .cursorrules AND every immediate (non-recursive)
+        #     .cursor/rules/*.mdc file, sorted by filename - cwd only.
+        #     Within this tier ALL matching files are concatenated
+        #     together (not first-match); the tier as a WHOLE is only
+        #     reached if tiers 1-3 all produced nothing.
+        # Only ONE tier's content is ever loaded per session - this is a
+        # true first-match chain across tiers, unlike Codex's own
+        # concatenating root-to-cwd chain.
+        #
+        # TRANSFORMATION (per file, in this exact order - see
+        # _load_hermes_md/_load_agents_md/_load_claude_md/_load_cursorrules):
+        #  tier 1 (.hermes.md/HERMES.md): read -> .strip() -> strip YAML
+        #    frontmatter (_strip_yaml_frontmatter - "---"-delimited,
+        #    stripped ONLY for this tier) -> security scan
+        #    (_scan_context_content, see below) -> prepend "## <relpath>"
+        #    heading -> truncate (see size_limit below).
+        #  tiers 2-3 (AGENTS/CLAUDE): read -> .strip() -> security scan ->
+        #    prepend "## <name>" heading -> truncate. NO frontmatter
+        #    stripping for these tiers (the source simply never calls
+        #    _strip_yaml_frontmatter for them) - if content here starts
+        #    with "---" it is injected as-is, frontmatter and all.
+        #  tier 4 (.cursorrules + *.mdc): each component (the flat
+        #    .cursorrules file, then every sorted .mdc file) is
+        #    independently read -> .strip() -> security-scanned -> given
+        #    its own "## <name>" heading -> concatenated together -> the
+        #    COMBINED tier is truncated ONCE at the end, not per
+        #    component. No frontmatter stripping here either, even though
+        #    real .mdc files normally have YAML frontmatter (description/
+        #    globs/alwaysApply) - it is injected raw.
+        #
+        # SECURITY SCANNING (tools/threat_patterns.py, scope="context"):
+        # every loaded file (all 4 tiers, plus subdirectory hints below) is
+        # regex-scanned for prompt-injection/promptware/role-hijack
+        # patterns BEFORE truncation. A match replaces the ENTIRE content
+        # with "[BLOCKED: <name> contained potential prompt injection
+        # (...)]." - not a partial redaction. EIF does not vendor this
+        # pattern library (would drift silently from the pinned version) -
+        # instead scripts/tests/test_hermes_adapter.py imports and calls
+        # the REAL installed function directly against EIF's actual
+        # generated EN/UK content, proving it is never blocked, plus one
+        # deliberately-unsafe synthetic fixture proving the probe itself
+        # can detect a real block (a control case, not just absence of
+        # failure).
+        #
+        # SIZE LIMIT (_get_context_file_max_chars/_truncate_content):
+        # per-tier, CHARACTER-based (not bytes - matters for non-ASCII
+        # content, e.g. this framework's own Ukrainian locale), head+tail
+        # preserving with the MIDDLE dropped (70% head / 20% tail of the
+        # limit, ~10% consumed by the inserted truncation marker) -
+        # fundamentally different from Codex's whole-chain running-budget
+        # truncation. Resolution order: (1) explicit
+        # adapter.options.hermes.context_file_max_chars if this instance's
+        # own config asserts one; (2) otherwise the documented default of
+        # 20,000 - the dynamic model-context-scaled cap
+        # (_dynamic_context_file_max_chars: clamp(context_length x 4 x
+        # 0.06, 20_000, 500_000)) requires knowing the live model's
+        # context_length, and no authless, machine-readable command was
+        # found that exposes the CURRENTLY EFFECTIVE value (`hermes config
+        # show` has no --json mode and does not print context_file_max_chars
+        # when unset; `hermes prompt-size --json` reports a "model" name
+        # string, not a token-count context_length) - EIF does not invent
+        # this value from a model-name lookup table, so the fallback used
+        # here is always the conservative 20,000 floor unless explicitly
+        # configured, and evidence is labeled accordingly (see
+        # check_size_budget()'s rationale text).
+        #
+        # PROGRESSIVE SUBDIRECTORY DISCOVERY (agent/subdirectory_hints.py) -
+        # explicitly NOT the same mechanism as the above, and not modeled
+        # or generated for by this adapter: as the agent explores
+        # subdirectories via tool calls (read_file/terminal/search_files),
+        # SubdirectoryHintTracker independently discovers AGENTS.md/
+        # agents.md/CLAUDE.md/claude.md/.cursorrules (NOT .hermes.md/
+        # HERMES.md, and NOT .cursor/rules/*.mdc) in each newly-visited
+        # directory and injects them into TOOL RESULTS (not the cached
+        # system prompt), first-match-per-directory, flat-truncated at
+        # 8,000 chars (no head/tail preservation), capped at 5 ancestor
+        # levels walked from the referenced path back toward the working
+        # directory (NOT toward a git root), and strictly confined inside
+        # the session's working-directory tree. This is a real, separate,
+        # always-on runtime behavior worth documenting honestly - EIF's own
+        # write target is never chosen based on it, and it is never
+        # described as "startup autoload" anywhere in this adapter's docs.
+        #
+        # PROMPT REBUILD/CACHE LIFECYCLE (agent/conversation_loop.py,
+        # agent/system_prompt.py): context files are discovered and loaded
+        # into the system prompt on the FIRST TURN of a NEW session only
+        # (agent._cached_system_prompt is then reused for later turns in
+        # that same session); a compression event can trigger a rebuild-
+        # and-compare against the cached value. "persistent-instruction-
+        # autoload" (this adapter's own capability tag, below) is accurate
+        # for a session's first turn - it is not a continuously-refreshing,
+        # every-turn re-scan of disk state.
+        "entrypoint_candidates": [".hermes.md", "HERMES.md", "AGENTS.md", "agents.md", "CLAUDE.md", "claude.md"],
+        "size_limit": {
+            "unit": "chars",
+            "default_limit": 20000,
+            "config_key": "context_file_max_chars",
+            "granularity": "per-tier independent head(70%)+tail(20%)-preserving truncation with the middle dropped, applied AFTER strip/frontmatter-strip/security-scan/heading-prepend - not a whole-chain running budget",
+        },
+        "governance_discovery": {
+            # Nested copies of Hermes's own startup-tier candidates below
+            # the instance root - genuinely different content from
+            # progressive subdirectory hints (which read the SAME
+            # filenames but are not something EIF writes for or tracks).
+            # .cursorrules/.cursor/rules/*.mdc are deliberately NOT listed
+            # here - resolve_hermes_active_source()'s own ACTIVE_UNMANAGEABLE
+            # state already reports an active Cursor-tier source precisely;
+            # listing it here too would double-report the same fact via the
+            # generic OK/WARN/STOP channel (the same redundancy Codex's own
+            # entry avoids for its same-directory candidates).
+            "glob_patterns": ["**/.hermes.md", "**/HERMES.md", "**/AGENTS.md", "**/agents.md", "**/CLAUDE.md", "**/claude.md"],
+            "legacy_signals": [],
+            "shared_signals": [],
+        },
+        "verified_product_version": "0.18.2 (2026.7.7.2)",
+        "verified_date": "2026-07-18",
+        "capabilities": [
+            "persistent-instruction-autoload",
+            "skill-discovery",
+        ],
+        "unsupported": [
+            "soul-md-out-of-scope-per-instruction",
+            "hooks-not-verified",
+            "progressive-subdirectory-hints-not-eif-managed",
+        ],
+        "fallback": (
+            "Whichever candidate file is actually resolved (.hermes.md, "
+            "HERMES.md, AGENTS.md/agents.md, or CLAUDE.md/claude.md) is "
+            "read as plain context by any agent pointed at it, even one "
+            "with no Hermes-specific integration."
         ),
     },
 }
@@ -552,6 +720,190 @@ def resolve_active_entrypoint(
     )
 
 
+_HERMES_TIER1_NAMES = [".hermes.md", "HERMES.md"]
+_HERMES_TIER2_NAMES = ["AGENTS.md", "agents.md"]
+_HERMES_TIER3_NAMES = ["CLAUDE.md", "claude.md"]
+
+
+def _find_git_root_upward(start: Path) -> Path | None:
+    """Mirrors Hermes's own agent/prompt_builder.py::_find_git_root() exactly:
+    the nearest ancestor of `start` (inclusive) containing `.git`, or None."""
+    current = start.resolve()
+    for candidate in [current, *current.parents]:
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+def _read_tier_candidate(path: Path) -> tuple[bool, bool, str | None]:
+    """Returns (exists, readable_and_nonempty, error_repr). Mirrors Hermes's
+    own two-phase discover-then-load split: existence alone terminates a
+    tier's SEARCH (matching _find_hermes_md's plain .is_file() check, no
+    content inspection), but an existing, empty (whitespace-only) file is
+    functionally invisible for content purposes - Hermes's own
+    _load_hermes_md/_load_agents_md/_load_claude_md return "" for it, and
+    the caller's `or`-chain falls through to the next tier. An unreadable
+    file (bad UTF-8) is a distinct, AMBIGUOUS-triggering outcome - never
+    silently treated as either empty or absent."""
+    if not path.is_file():
+        return False, False, None
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError) as e:
+        return True, False, f"{type(e).__name__}: {e}"
+    return True, bool(content.strip()), None
+
+
+def _resolve_hermes_tier1(root: Path, adapter_options: dict) -> EntrypointResolution | None:
+    """Tier 1 only: .hermes.md / HERMES.md, nearest ancestor from `root` up
+    to (and including) the git root; cwd-only if no git root exists anywhere
+    (mirrors _find_hermes_md() exactly - see the registry entry comment).
+    Returns None to mean "tier 1 found nothing usable - fall through to
+    tier 2", never a bare fall-through inside a shared loop."""
+    git_root = _find_git_root_upward(root)
+    search_dirs = [root]
+    if git_root:
+        cursor = root
+        while cursor != git_root:
+            cursor = cursor.parent
+            search_dirs.append(cursor)
+
+    for d in search_dirs:
+        for name in _HERMES_TIER1_NAMES:
+            exists, nonempty, err = _read_tier_candidate(d / name)
+            if not exists:
+                continue
+            if err is not None:
+                return EntrypointResolution(
+                    state=EntrypointState.AMBIGUOUS, entrypoint=None, dynamic=True,
+                    rationale=(
+                        f"{name!r} exists at {d} and would take precedence per Hermes's own tier-1 "
+                        f"(.hermes.md/HERMES.md) resolution, but could not be safely read as plain text "
+                        f"({err}) - refusing to guess whether it is the real active source or to silently "
+                        f"skip past it. Resolve the file by hand, then retry."
+                    ),
+                )
+            if not nonempty:
+                # Matches Hermes's own behavior: an existing-but-empty tier-1
+                # file still terminates _find_hermes_md's SEARCH (no farther
+                # ancestor is ever consulted), but _load_hermes_md then
+                # returns "" for it, so the real session falls through to
+                # tier 2 at cwd. Stop the whole tier-1 search here (not just
+                # this directory) - searching a farther ancestor would be
+                # wrong, since Hermes itself never gets that far either.
+                return None
+            if d == root:
+                return EntrypointResolution(
+                    state=EntrypointState.ACTIVE_MANAGEABLE, entrypoint=name, dynamic=True,
+                    rationale=f"existing {name!r} found at the instance root - adopting it as the active target (Hermes tier 1)",
+                )
+            # A real, non-empty tier-1 file in an ANCESTOR (not the instance
+            # root) is the actual active source today - EIF must not write
+            # outside instance_path, and creating a new LOCAL tier-1 file
+            # would immediately shadow the parent (nearest-wins), changing
+            # effective governance for the whole subtree - a real behavior
+            # change, never done silently.
+            override = adapter_options.get("parent_context_action") == "override-with-local"
+            if not override:
+                return EntrypointResolution(
+                    state=EntrypointState.SHADOWED, entrypoint=None, dynamic=True,
+                    rationale=(
+                        f"a parent directory ({d}) already has a non-empty {name!r} - per Hermes's own "
+                        f"ancestor walk (nearest match wins, no depth cap), that file is this instance's "
+                        f"REAL active source today, even though nothing exists locally. Creating a local "
+                        f".hermes.md would silently shadow it and change effective governance for the "
+                        f"whole subtree. STOPping - set adapter.options.hermes.parent_context_action: "
+                        f"override-with-local to explicitly create a local file instead (generic coexist "
+                        f"mode does not authorize this on its own)."
+                    ),
+                )
+            return EntrypointResolution(
+                state=EntrypointState.NOT_FOUND, entrypoint=".hermes.md", dynamic=True,
+                rationale=(
+                    f"parent_context_action=override-with-local is explicitly configured - ignoring the "
+                    f"parent {name!r} at {d} and creating a local .hermes.md at the instance root instead, "
+                    f"which will correctly take precedence over the parent (nearest-wins) from now on."
+                ),
+            )
+    return None
+
+
+def resolve_hermes_active_source(
+    instance_path: Path, adapter_options: dict | None = None,
+) -> EntrypointResolution:
+    """Hermes-specific replacement for resolve_active_entrypoint() - used
+    INSTEAD of it (never alongside) for adapter="hermes". Hermes's real
+    precedence needs an ancestor walk for tier 1 (.hermes.md/HERMES.md)
+    evaluated BEFORE tiers 2-4 are even considered at the instance root,
+    which resolve_active_entrypoint()'s single-directory-only model cannot
+    express - see the "hermes" registry entry's own evidence comment for
+    the full, primary-source-verified precedence/transformation contract.
+    Read-only - never writes anything.
+    """
+    adapter_options = adapter_options or {}
+    root = instance_path.resolve()
+    if not root.is_dir():
+        return EntrypointResolution(
+            state=EntrypointState.NOT_FOUND, entrypoint=".hermes.md", dynamic=True,
+            rationale="instance path does not exist yet - greenfield default '.hermes.md' will apply",
+        )
+
+    tier1 = _resolve_hermes_tier1(root, adapter_options)
+    if tier1 is not None:
+        return tier1
+
+    # --- Tiers 2-3: AGENTS.md/agents.md, then CLAUDE.md/claude.md - cwd
+    # (instance root) only, no ancestor walk at all for either tier.
+    for name in [*_HERMES_TIER2_NAMES, *_HERMES_TIER3_NAMES]:
+        exists, nonempty, err = _read_tier_candidate(root / name)
+        if not exists:
+            continue
+        if err is not None:
+            return EntrypointResolution(
+                state=EntrypointState.AMBIGUOUS, entrypoint=None, dynamic=True,
+                rationale=(
+                    f"{name!r} exists at the instance root and would take precedence per Hermes's own "
+                    f"tier ordering, but could not be safely read as plain text ({err}) - refusing to "
+                    f"guess whether it is the real active source or to silently skip past it. Resolve "
+                    f"the file by hand, then retry."
+                ),
+            )
+        if not nonempty:
+            continue
+        return EntrypointResolution(
+            state=EntrypointState.ACTIVE_MANAGEABLE, entrypoint=name, dynamic=True,
+            rationale=f"existing {name!r} found at the instance root - adopting it as the active target (Hermes tier {'2' if name in _HERMES_TIER2_NAMES else '3'})",
+        )
+
+    # --- Tier 4: .cursorrules and/or .cursor/rules/*.mdc - cwd only. Real
+    # active source if present, but EIF never marker-merges into either
+    # format for this adapter (no dedicated candidate, no override option
+    # exists yet) - ACTIVE_UNMANAGEABLE, unconditional STOP.
+    cursorrules_path = root / ".cursorrules"
+    mdc_dir = root / ".cursor" / "rules"
+    has_cursorrules = cursorrules_path.is_file()
+    has_mdc = mdc_dir.is_dir() and any(mdc_dir.glob("*.mdc"))
+    if has_cursorrules or has_mdc:
+        which = ", ".join(n for n, present in ((".cursorrules", has_cursorrules), (".cursor/rules/*.mdc", has_mdc)) if present)
+        return EntrypointResolution(
+            state=EntrypointState.ACTIVE_UNMANAGEABLE, entrypoint=None, dynamic=True,
+            rationale=(
+                f"{which} present at the instance root with no higher-precedence tier found - this IS "
+                f"Hermes's real active context source today (tier 4, Cursor-format fallback), and it is "
+                f"active and valid on its own terms. EIF cannot marker-merge this format (YAML-"
+                f"frontmattered, per-file granularity, structurally unlike a flat markdown context file), "
+                f"and creating a new .hermes.md here would change precedence rather than adopt what's "
+                f"already governing - no such semantic-override decision exists for this adapter. STOPping "
+                f"rather than either silently ignoring the active source or silently overriding it."
+            ),
+        )
+
+    return EntrypointResolution(
+        state=EntrypointState.NOT_FOUND, entrypoint=".hermes.md", dynamic=True,
+        rationale="no existing candidate found anywhere in Hermes's own precedence (tiers 1-4) - defaulting to '.hermes.md' (greenfield)",
+    )
+
+
 DEFAULT_CODEX_PROJECT_ROOT_MARKERS = [".git"]
 
 
@@ -764,10 +1116,182 @@ def simulate_codex_budget(
     return entries, active_index
 
 
+def _hermes_tier_for_name(name: str) -> int:
+    if name in _HERMES_TIER1_NAMES:
+        return 1
+    if name in _HERMES_TIER2_NAMES:
+        return 2
+    if name in _HERMES_TIER3_NAMES:
+        return 3
+    raise ValueError(f"_hermes_tier_for_name: {name!r} is not one of Hermes's registered entrypoint_candidates")
+
+
+@dataclass
+class HermesContextCheck:
+    """Result of simulating Hermes's own per-tier transformation + head/tail
+    truncation pipeline against the active tier's content - see
+    simulate_hermes_context()."""
+    fits: bool
+    tier: int | None  # 1-4, or None when no tier resolved (nothing to check)
+    source_chars: int
+    limit: int
+    limit_source: str  # "explicit-config" | "default-fallback"
+    frontmatter_stripped: bool
+    head_chars: int
+    tail_chars: int
+    transformed_chars: int
+    truncated: bool
+    begin_survives: bool
+    end_survives: bool
+    block_survives: bool
+    scanner_checked: bool
+    scanner_blocked: bool | None
+    rationale: str
+
+
+def _hermes_strip_yaml_frontmatter(content: str) -> str:
+    """Mirrors Hermes's own agent/prompt_builder.py::_strip_yaml_frontmatter()
+    exactly - used ONLY for tier-1 (.hermes.md/HERMES.md) content, per the
+    pinned source (AGENTS/CLAUDE/.cursorrules tiers never call this)."""
+    if content.startswith("---"):
+        end = content.find("\n---", 3)
+        if end != -1:
+            body = content[end + 4:].lstrip("\n")
+            return body if body else content
+    return content
+
+
+def simulate_hermes_context(
+    active_tier: int, rel_name: str, rendered_text: str, limit: int, limit_source: str,
+    begin_marker: str, end_marker: str, scan_fn=None,
+) -> HermesContextCheck:
+    """Simulate Hermes's own real transformation pipeline for the ACTIVE
+    tier's content (`rendered_text` - the full file EIF is about to write,
+    existing preserved content plus the managed block) and determine
+    whether the EIF-managed block survives, exactly as check_size_budget()
+    does for Codex, but against a completely different real algorithm (see
+    the "hermes" registry entry's evidence comment): per-file strip() ->
+    frontmatter-strip (tier 1 only) -> [security scan] -> "## <name>"
+    heading prepend -> head(70%)+tail(20%)-of-limit truncation with the
+    middle dropped, CHARACTER-counted throughout (not bytes).
+
+    `scan_fn`, when provided, must match tools.threat_patterns.
+    scan_for_threats's real (content, filename) -> sanitized_content
+    signature (imported from the actual installed Hermes source by the
+    caller - see scripts/tests/test_hermes_adapter.py). Left as None by
+    default so this function (and everything that calls it from
+    eif_init.py/eif_verify_runtime.py) never hard-depends on Hermes being
+    installed - the returned scanner_checked=False in that case is itself
+    part of the honest evidence, not a silent "assumed safe".
+
+    Safety rule (matches the Codex simulator's own rule, verified
+    separately for Hermes): `fits` requires the COMPLETE EIF-managed block
+    (EIF:BEGIN through EIF:END, contiguous) to survive in the FINAL
+    (post-transformation, post-truncation) text - checked by substring
+    containment of the exact managed-block text, not independent marker-
+    token presence (a head/tail split can keep both marker TOKENS while
+    dropping everything between them - "the block is split by truncation",
+    a real STOP condition, not proven safe just because both tokens
+    happen to survive on their own)."""
+    content = rendered_text.strip()
+    frontmatter_stripped = False
+    if active_tier == 1:
+        stripped = _hermes_strip_yaml_frontmatter(content)
+        frontmatter_stripped = stripped is not content
+        content = stripped
+
+    scanner_checked = scan_fn is not None
+    scanner_blocked = None
+    if scan_fn is not None:
+        scanned = scan_fn(content, rel_name)
+        scanner_blocked = scanned != content
+        content = scanned
+
+    source_chars = len(content)
+    transformed = f"## {rel_name}\n\n{content}"
+
+    try:
+        block_start, block_end = _find_managed_block_or_none(transformed, begin_marker, end_marker)
+    except MarkerConflict as e:
+        return HermesContextCheck(
+            fits=False, tier=active_tier, source_chars=source_chars, limit=limit, limit_source=limit_source,
+            frontmatter_stripped=frontmatter_stripped, head_chars=0, tail_chars=0,
+            transformed_chars=len(transformed), truncated=False,
+            begin_survives=False, end_survives=False, block_survives=False,
+            scanner_checked=scanner_checked, scanner_blocked=scanner_blocked,
+            rationale=f"malformed markers in the transformed content: {e}",
+        )
+    managed_block_text = transformed[block_start:block_end] if block_start is not None else None
+
+    if len(transformed) <= limit:
+        final_text = transformed
+        head_chars = tail_chars = 0
+        truncated = False
+    else:
+        truncated = True
+        head_chars = int(limit * 0.7)
+        tail_chars = int(limit * 0.2)
+        head = transformed[:head_chars]
+        tail = transformed[-tail_chars:] if tail_chars else ""
+        marker = f"\n\n[...truncated {rel_name}: kept {head_chars}+{tail_chars} of {len(transformed)} chars...]\n\n"
+        final_text = head + marker + tail
+
+    if scanner_blocked:
+        block_survives = False
+        rationale = (
+            f"Hermes's own security scanner replaced {rel_name}'s content with a [BLOCKED: ...] "
+            f"placeholder before it would ever reach the model - the generated EIF content itself "
+            f"triggered a prompt-injection/promptware pattern match. This is never safe to proceed "
+            f"past, regardless of size."
+        )
+    elif managed_block_text is None:
+        block_survives = False
+        rationale = "no EIF-managed block found in the transformed content (no EIF:BEGIN/EIF:END pair) - nothing to check"
+    else:
+        block_survives = managed_block_text in final_text
+        if block_survives:
+            rationale = (
+                f"the EIF-managed block ({len(managed_block_text)} chars) survives intact in the "
+                f"transformed{'  (truncated)' if truncated else ''} tier-{active_tier} content "
+                f"({len(final_text)} of {len(transformed)} transformed chars, limit={limit} "
+                f"chars, source={limit_source})"
+            )
+        else:
+            rationale = (
+                f"the EIF-managed block does NOT survive intact: the transformed tier-{active_tier} "
+                f"content is {len(transformed)} chars, exceeding the {limit}-char limit ({limit_source}), "
+                f"so Hermes truncates to head={head_chars}+tail={tail_chars} chars with the middle "
+                f"dropped - the managed block is truncated mid-content or falls entirely in the "
+                f"dropped middle. Raise context_file_max_chars, reduce content size, or split "
+                f"instructions."
+            )
+    if not scanner_checked:
+        rationale += " (security-scanner check not run in this pass - see test_hermes_adapter.py for the pinned-version proof against the real installed scanner)"
+
+    return HermesContextCheck(
+        fits=block_survives, tier=active_tier, source_chars=source_chars, limit=limit, limit_source=limit_source,
+        frontmatter_stripped=frontmatter_stripped, head_chars=head_chars, tail_chars=tail_chars,
+        transformed_chars=len(transformed), truncated=truncated,
+        begin_survives=(managed_block_text is not None and not scanner_blocked and (transformed[block_start:block_start + len(begin_marker)] in final_text)),
+        end_survives=(managed_block_text is not None and not scanner_blocked and (end_marker in final_text)),
+        block_survives=block_survives,
+        scanner_checked=scanner_checked, scanner_blocked=scanner_blocked,
+        rationale=rationale,
+    )
+
+
+def _find_managed_block_or_none(text: str, begin_marker: str, end_marker: str) -> tuple[int | None, int | None]:
+    result = find_managed_block(text, begin_marker, end_marker)
+    if result is None:
+        return None, None
+    return result
+
+
 def check_size_budget(
     instance_path: Path, adapter: str, active_entrypoint: str, rendered_text: str,
     begin_marker: str, end_marker: str, adapter_options: dict | None = None,
-) -> SizeBudgetCheck:
+    hermes_scan_fn=None,
+) -> SizeBudgetCheck | HermesContextCheck:
     """Would this adapter's own documented content-size contract actually
     load the EIF-managed block inside `rendered_text` (the full file EIF is
     about to write - existing preserved content plus the managed block)
@@ -795,9 +1319,24 @@ def check_size_budget(
     without this field; it is reported for transparency, not as a second
     gate.
 
-    Only Codex declares a size_limit today. An adapter with no registered
-    size_limit always fits trivially (fits=True, limit=-1, empty entries) -
+    Codex and Hermes each declare a size_limit today - via two DIFFERENT
+    real simulators (simulate_codex_budget() / simulate_hermes_context()),
+    since their actual algorithms share no common shape (byte-chain-with-
+    truncation vs. char-per-tier-head/tail-preserving). An adapter with no
+    registered size_limit always fits trivially (fits=True, limit=-1) -
     there is no documented contract to check it against.
+
+    For Hermes specifically: `hermes_scan_fn`, when the caller supplies one
+    (a best-effort optional import of the real installed
+    tools.threat_patterns.scan_for_threats-backed scanner - see
+    eif_init.py/eif_verify_runtime.py's _try_import_hermes_scanner()), is
+    passed straight through to simulate_hermes_context() so `fits` can
+    reflect a real scanner block, not just size. When no scanner function
+    is available (Hermes not installed in the current environment, or the
+    caller passed nothing), `HermesContextCheck.scanner_checked` is False -
+    an honest, reported limitation, never a silent "assumed safe". See
+    scripts/tests/test_hermes_adapter.py for the pinned-version proof
+    against the real installed scanner, which is the authoritative check.
     """
     adapter_options = adapter_options or {}
     limit_cfg = ADAPTERS[adapter].get("size_limit")
@@ -808,6 +1347,19 @@ def check_size_budget(
             begin_survives=True, end_survives=True, block_survives=True,
             truncation_boundary_valid_utf8=None,
             rationale=f"{adapter!r} declares no size_limit contract - nothing to check",
+        )
+    if adapter == "hermes":
+        limit_key = limit_cfg["config_key"]
+        if limit_key in adapter_options:
+            limit = int(adapter_options[limit_key])
+            limit_source = "explicit-config"
+        else:
+            limit = limit_cfg["default_limit"]
+            limit_source = "default-fallback"
+        tier = _hermes_tier_for_name(active_entrypoint)
+        return simulate_hermes_context(
+            tier, active_entrypoint, rendered_text, limit, limit_source, begin_marker, end_marker,
+            scan_fn=hermes_scan_fn,
         )
     if adapter != "codex":
         raise NotImplementedError(

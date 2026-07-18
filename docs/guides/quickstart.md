@@ -53,9 +53,14 @@ Two different numbers, deliberately not conflated:
 
 - **Mechanical execution**: running the full sequence above (init,
   retrieval, the demo's test suite, both renders, and all five validation
-  checks) as a scripted, back-to-back run measured **5.7 seconds** wall
-  clock, end to end, on the machine this was measured on. Commands are
-  fast; nothing here is computationally heavy.
+  checks, including staging the generated files so the privacy scan's
+  `git ls-files`-based check actually sees them - what a real user would
+  naturally do before a commit) as a scripted, back-to-back run measured
+  **6.3-7.0 seconds** wall clock across three separate runs (average
+  ~6.6s), end to end, on the machine this was measured on. Commands are
+  fast; nothing here is computationally heavy. Reported as a range from
+  repeated runs, not a single-run figure - an earlier single measurement
+  (5.7s) omitted the staging step and is superseded by this one.
 - **Reading, typing, and understanding time** - the number a "10-minute
   quickstart" claim is actually about - has **not** been independently
   timed by a human working through this page for the first time. Treat

@@ -674,10 +674,10 @@ formally ratified (the file is explicit about which is which).
       now exists as a dedicated entry point. Mechanical execution of the
       full underlying command sequence (init, retrieval, test, both
       renders, all five validation checks) was measured end to end at
-      **5.7 seconds** - real data, not a guess - but that is tool
-      execution time, not the human reading/typing/comprehension time a
-      "10-minute quickstart" claim is actually about, which remains
-      untimed by an independent human.
+      **6.3-7.0 seconds across three runs** - real data, not a guess -
+      but that is tool execution time, not the human reading/typing/
+      comprehension time a "10-minute quickstart" claim is actually
+      about, which remains untimed by an independent human.
 - [x] FAQ covers memory/RAG/structural-graph/shell-compression/privacy/
       overhead/adapter-support/tests-and-CI questions (see [FAQ](#faq)
       below) - not claimed exhaustive, but no longer partial on the five

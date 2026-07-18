@@ -1,5 +1,5 @@
 {
-  "$comment": "Machine-readable parity matrix across registered adapters (scripts/eif_adapters.py is the source of truth for which adapters exist). scripts/tests/test_parity_matrix.py is the drift test: it fails if any registered adapter is missing an entry here, or if any entry is missing a dimension - this file cannot silently go stale as adapters are added.",
+  "$comment": "Machine-readable parity matrix across registered adapters (scripts/eif_adapters.py is the source of truth for which adapters exist). scripts/tests/test_parity_matrix.py is the drift test: it fails if any registered adapter is missing an entry here, or if any entry is missing a dimension - this file cannot silently go stale as adapters are added. This file is PER-ADAPTER capabilities; see adapters/switch-matrix.json for the full directed switching matrix (every ordered pair of adapters, cross-cutting properties like same-path atomicity and rollback) - a related but distinct concern.",
   "generated_by": "hand-authored from scripts/tests/test_cursor_adapter.py and scripts/tests/test_journey.py/test_init.py evidence, 2026-07-16",
   "dimensions": [
     "entrypoint",

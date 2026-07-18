@@ -57,6 +57,7 @@ SUITES = [
     "test_cursor_adapter.py",
     "test_codex_adapter.py",
     "test_hermes_adapter.py",
+    "test_adapter_switch_matrix.py",
     "test_demo_fixtures_fresh.py",
     "test_parity_matrix.py",
     "test_merge_gate.py",

@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T01",
+  "title": "Implement a function from a written spec",
+  "description": "parse_duration(text) is unimplemented (raises NotImplementedError). Requires implementing a compact duration-string parser from its own docstring spec, including validation of malformed input.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:280eadcc27f943a7378bbec7c148d47d7e47d5321176b28779f17c9e7f56d94b",
+  "test_command": ["python", "tests/test_duration.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct implementation makes all 6 pass, including the day-unit boundary case and two malformed-input rejection cases."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/duration.py with the fixture's known-buggy reference implementation (day multiplier x3600 instead of x86400), regardless of how the agent structured its fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 4
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

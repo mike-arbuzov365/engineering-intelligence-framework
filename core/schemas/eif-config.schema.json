@@ -37,17 +37,22 @@
           "properties": {
             "codex": {
               "type": "object",
-              "description": "Mirrors Codex's own ~/.codex/config.toml keys of the same name (verified live 2026-07-17, learn.chatgpt.com/docs/agent-configuration/agents-md). EIF has no authless way to read that file's actual live values (no --json effective-config command exposes them as of codex-cli 0.144.5 - `codex doctor --json` was checked and does not) - these are the project's own asserted values, used only to compute EIF's own active-entrypoint resolution and size-budget checks. They do not change Codex's real configuration; keep them in sync with ~/.codex/config.toml by hand if it changes.",
+              "description": "Mirrors Codex's own ~/.codex/config.toml keys of the same name - re-verified 2026-07-18 directly against Codex's own Rust source (pinned commit 3a067484584861606ad842de5bc4ac735a865ddf on github.com/openai/codex: codex-rs/core/src/agents_md.rs, codex-rs/config/src/project_root_markers.rs, codex-rs/core/config.schema.json), not from a paraphrased secondary doc page as the first pass was. EIF has no authless way to read config.toml's actual live values (no --json effective-config command exposes them as of codex-cli 0.144.5 - `codex doctor --json` was checked and does not) - these are the project's own asserted values, used only to compute EIF's own active-entrypoint resolution and size-budget checks. They do not change Codex's real configuration; keep them in sync with ~/.codex/config.toml by hand if it changes.",
               "properties": {
                 "project_doc_fallback_filenames": {
                   "type": "array",
                   "items": { "type": "string", "minLength": 1 },
-                  "description": "Extra project-doc filenames Codex has been configured to also treat as an instructions file, checked (in the order given) after AGENTS.override.md/AGENTS.md at the instance root. Codex's own documented default is an empty list."
+                  "description": "Extra project-doc filenames Codex has been configured to also treat as an instructions file, checked (in the order given, de-duplicated, empty entries skipped) after AGENTS.override.md/AGENTS.md at the instance root. Codex's own documented default (and JSON-schema-declared default) is an empty list."
                 },
                 "project_doc_max_bytes": {
                   "type": "integer",
-                  "minimum": 1,
-                  "description": "Combined byte budget for the whole root-to-cwd project-doc chain (whole-file granularity - Codex includes or excludes an entire file, never truncates one mid-content, and emits no warning of its own when a file is dropped). Codex's own documented default is 32768 (32 KiB)."
+                  "minimum": 0,
+                  "description": "Combined byte budget for the whole root-to-cwd project-doc chain, processed in a single pass with a running remaining-budget counter: each file is included up to min(file_size, remaining) bytes - a file that would exceed what's left is TRUNCATED mid-content, not skipped whole, and Codex emits no warning of its own when this happens. 0 is a valid value and means Codex loads no project docs at all. Codex's own documented default is 32768 (32 KiB)."
+                },
+                "project_root_markers": {
+                  "type": "array",
+                  "items": { "type": "string", "minLength": 1 },
+                  "description": "Marker filenames used to find the project root by walking upward from the instance root (nearest ancestor containing ANY of these wins). Absent/unconfigured -> Codex's own default, ['.git']. An EXPLICITLY configured empty array is a real, valid value meaning root detection is disabled entirely (every session is treated as cwd-only, no ancestor project docs are ever read) - distinct from the key being absent. If no marker is found anywhere (even after searching to the real filesystem root), Codex also falls back to cwd-only - it never reads ancestor content 'just in case'."
                 }
               }
             }

@@ -87,6 +87,21 @@ def set_adapter_option(inst: Path, adapter: str, key: str, value) -> None:
     cfg_path.write_text(yaml.safe_dump(data, sort_keys=False, default_flow_style=False, allow_unicode=True), encoding="utf-8")
 
 
+EIF_END_MARKER = "<!-- EIF:END -->"
+
+
+def managed_block_end_offset(text: str) -> int:
+    """Byte offset immediately after the literal EIF:END marker within
+    `text`, encoded as UTF-8 - mirrors exactly what
+    eif_adapters.check_size_budget() computes internally, so tests can set
+    project_doc_max_bytes relative to the REAL block boundary (root-to-cwd
+    truncation is per-file and per-file granularity, verified against
+    Codex's own source, not the whole-file size that was this test suite's
+    - now corrected - original, wrong assumption)."""
+    end_idx = text.index(EIF_END_MARKER)
+    return len(text[:end_idx].encode("utf-8")) + len(EIF_END_MARKER.encode("utf-8"))
+
+
 def run(args: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess:
     return subprocess.run(
         [sys.executable, *args], cwd=str(cwd) if cwd else None,
@@ -508,24 +523,48 @@ def main() -> int:
         #     would silently stop testing the real boundary if the template
         #     text ever changes length.
         # -------------------------------------------------------------
+        # NOTE: these boundaries are set relative to the EIF:END marker's own
+        # byte offset (managed_block_end_offset), not the whole file's size -
+        # Codex truncates PER FILE at a byte position (see Stage 0 below),
+        # so a limit near the file's total size mostly cuts the trailing,
+        # project-owned "Project-specific rules" footer, which the safety
+        # rule correctly does not treat as a failure. Testing the real
+        # boundary requires targeting the block's own end.
         inst22 = tmp / "scenario-22-size-at-limit"
         init_git_repo(inst22)
         eif_init(inst22, "--project-name", "codex-fixture", "--adapter", "codex")
-        baseline_size22 = (inst22 / CODEX_ENTRY).stat().st_size
-        set_adapter_option(inst22, "codex", "project_doc_max_bytes", baseline_size22)
+        block_end22 = managed_block_end_offset((inst22 / CODEX_ENTRY).read_text(encoding="utf-8"))
+        set_adapter_option(inst22, "codex", "project_doc_max_bytes", block_end22)
         r22 = eif_init(inst22)  # flagless upgrade, re-reads the now-lowered limit
-        results.append(check("22. exactly-at-the-configured-limit upgrade exits 0 (fits)", r22.returncode == 0, r22.stdout + r22.stderr))
+        results.append(check("22. exactly-at-the-managed-block's-own-end upgrade exits 0 (block fully survives)", r22.returncode == 0, r22.stdout + r22.stderr))
 
-        inst23 = tmp / "scenario-23-size-one-byte-over-limit"
+        inst23 = tmp / "scenario-23-size-one-byte-short-of-block-end"
         init_git_repo(inst23)
         eif_init(inst23, "--project-name", "codex-fixture", "--adapter", "codex")
-        baseline_size23 = (inst23 / CODEX_ENTRY).stat().st_size
-        set_adapter_option(inst23, "codex", "project_doc_max_bytes", baseline_size23 - 1)
+        block_end23 = managed_block_end_offset((inst23 / CODEX_ENTRY).read_text(encoding="utf-8"))
+        set_adapter_option(inst23, "codex", "project_doc_max_bytes", block_end23 - 1)
         before23 = (inst23 / CODEX_ENTRY).read_bytes()
         r23 = eif_init(inst23)
-        results.append(check("23. one byte over the configured limit -> STOP (non-zero exit)", r23.returncode != 0, r23.stdout + r23.stderr))
+        results.append(check("23. one byte short of the managed block's own end -> STOP (non-zero exit)", r23.returncode != 0, r23.stdout + r23.stderr))
         results.append(check("23. STOP message names the size budget and project_doc_max_bytes", "size budget" in (r23.stdout + r23.stderr) and "project_doc_max_bytes" in (r23.stdout + r23.stderr), r23.stdout + r23.stderr))
         results.append(check("23. STOP wrote absolutely nothing (entrypoint byte-identical to before)", (inst23 / CODEX_ENTRY).read_bytes() == before23))
+
+        # -------------------------------------------------------------
+        # 23b. safety rule: a limit that fully includes the managed block
+        #     but truncates the trailing, PROJECT-OWNED footer must still
+        #     fit - EIF never requires the whole file, only its own block,
+        #     to survive.
+        # -------------------------------------------------------------
+        inst23b = tmp / "scenario-23b-tail-truncated-block-survives"
+        init_git_repo(inst23b)
+        eif_init(inst23b, "--project-name", "codex-fixture", "--adapter", "codex")
+        text23b = (inst23b / CODEX_ENTRY).read_text(encoding="utf-8")
+        block_end23b = managed_block_end_offset(text23b)
+        full_size23b = len(text23b.encode("utf-8"))
+        results.append(check("23b. precondition: this fixture actually has trailing content after the block", full_size23b > block_end23b, (full_size23b, block_end23b)))
+        set_adapter_option(inst23b, "codex", "project_doc_max_bytes", block_end23b)  # exactly the block, nothing more
+        r23b = eif_init(inst23b)
+        results.append(check("23b. limit covering only the block (footer truncated) still exits 0", r23b.returncode == 0, r23b.stdout + r23b.stderr))
 
         # -------------------------------------------------------------
         # 24. combined-chain pressure: an ancestor directory's OWN AGENTS.md
@@ -548,8 +587,31 @@ def main() -> int:
         before24 = (inst24 / CODEX_ENTRY).read_bytes()
         r24 = eif_init(inst24)
         results.append(check("24. ancestor chain alone at/over a lowered limit -> STOP (non-zero exit)", r24.returncode != 0, r24.stdout + r24.stderr))
-        results.append(check("24. STOP message explains the ancestor chain alone already exceeds the budget", "ancestor chain alone already totals" in (r24.stdout + r24.stderr), r24.stdout + r24.stderr))
+        results.append(check("24. STOP message explains the active file would never even be reached", "the write would never be loaded at all" in (r24.stdout + r24.stderr), r24.stdout + r24.stderr))
         results.append(check("24. STOP wrote absolutely nothing (entrypoint byte-identical to before)", (inst24 / CODEX_ENTRY).read_bytes() == before24))
+
+        # -------------------------------------------------------------
+        # 24b. multi-file chain: TWO real ancestor files (grandparent and
+        #     parent, both real git-root-to-cwd members) are each partially
+        #     counted against the SAME running budget before the active
+        #     file's own turn - proving the simulator processes the whole
+        #     chain, not just "one ancestor vs the active file".
+        # -------------------------------------------------------------
+        inst24b_root = tmp / "scenario-24b-multi-file-chain"
+        init_git_repo(inst24b_root)
+        grandparent_content = "Grandparent AGENTS.md.\n"
+        (inst24b_root / "AGENTS.md").write_text(grandparent_content, encoding="utf-8")
+        (inst24b_root / "mid").mkdir()
+        parent_content = "Parent-level AGENTS.md, one directory down.\n"
+        (inst24b_root / "mid" / "AGENTS.md").write_text(parent_content, encoding="utf-8")
+        inst24b = inst24b_root / "mid" / "leaf"
+        inst24b.mkdir()
+        combined_ancestor_bytes = len(grandparent_content.encode("utf-8")) + len(parent_content.encode("utf-8"))
+        r24b_init = eif_init(inst24b, "--project-name", "codex-fixture", "--adapter", "codex", "--allow-dirty")
+        results.append(check("24b. precondition: nested init under two real ancestor AGENTS.md files succeeds under the default limit", r24b_init.returncode == 0, r24b_init.stdout + r24b_init.stderr))
+        set_adapter_option(inst24b, "codex", "project_doc_max_bytes", max(1, combined_ancestor_bytes - 1))
+        r24b = eif_init(inst24b)
+        results.append(check("24b. two real ancestor files together exhaust a lowered limit -> STOP", r24b.returncode != 0, r24b.stdout + r24b.stderr))
 
         # -------------------------------------------------------------
         # 25. doctor: active-entrypoint drift - the lock says AGENTS.md, but
@@ -571,18 +633,261 @@ def main() -> int:
 
         # -------------------------------------------------------------
         # 26. doctor: size-budget drift - project_doc_max_bytes is lowered
-        #     (hand-edited config, no re-run) below the CURRENT on-disk
-        #     entrypoint's actual size - doctor must recompute against
-        #     current content and FAIL, not just re-validate file integrity.
+        #     (hand-edited config, no re-run) below the managed block's OWN
+        #     end offset - doctor must recompute against current content
+        #     and FAIL, not just re-validate file integrity. (Lowering it
+        #     below the whole file's size but still past the block's own
+        #     end must NOT fail - proven by 26b.)
         # -------------------------------------------------------------
         inst26 = tmp / "scenario-26-doctor-size-budget-drift"
         init_git_repo(inst26)
         eif_init(inst26, "--project-name", "codex-fixture", "--adapter", "codex")
-        current_size26 = (inst26 / CODEX_ENTRY).stat().st_size
-        set_adapter_option(inst26, "codex", "project_doc_max_bytes", current_size26 - 1)
+        block_end26 = managed_block_end_offset((inst26 / CODEX_ENTRY).read_text(encoding="utf-8"))
+        set_adapter_option(inst26, "codex", "project_doc_max_bytes", block_end26 - 1)
         r26 = eif_verify(inst26)
-        results.append(check("26. doctor FAILs once the configured limit drops below current on-disk size", r26.returncode != 0, r26.stdout + r26.stderr))
+        results.append(check("26. doctor FAILs once the configured limit drops below the block's own end", r26.returncode != 0, r26.stdout + r26.stderr))
         results.append(check("26. FAIL message names the size budget check", "size budget" in (r26.stdout + r26.stderr), r26.stdout + r26.stderr))
+
+        inst26b = tmp / "scenario-26b-doctor-size-budget-tail-only-ok"
+        init_git_repo(inst26b)
+        eif_init(inst26b, "--project-name", "codex-fixture", "--adapter", "codex")
+        block_end26b = managed_block_end_offset((inst26b / CODEX_ENTRY).read_text(encoding="utf-8"))
+        set_adapter_option(inst26b, "codex", "project_doc_max_bytes", block_end26b)  # covers the block exactly, footer truncated
+        r26b = eif_verify(inst26b)
+        results.append(check("26b. doctor still passes when only the trailing project-owned footer would be truncated", r26b.returncode == 0, r26b.stdout + r26b.stderr))
+
+        # -------------------------------------------------------------
+        # 26c. doctor: root-marker drift - project_root_markers changed by
+        #     hand since generation must be reported directly (AGENT
+        #     CONSUMPTION), even before considering whether the recomputed
+        #     budget happens to still fit.
+        # -------------------------------------------------------------
+        inst26c = tmp / "scenario-26c-doctor-root-marker-drift"
+        init_git_repo(inst26c)
+        eif_init(inst26c, "--project-name", "codex-fixture", "--adapter", "codex")
+        set_adapter_option(inst26c, "codex", "project_root_markers", [".hg"])
+        r26c = eif_verify(inst26c)
+        results.append(check("26c. doctor FAILs once effective project_root_markers changes since generation", r26c.returncode != 0, r26c.stdout + r26c.stderr))
+        results.append(check("26c. FAIL message names project_root_markers and AGENT CONSUMPTION", "project_root_markers" in (r26c.stdout + r26c.stderr) and "AGENT CONSUMPTION invalid" in (r26c.stdout + r26c.stderr), r26c.stdout + r26c.stderr))
+
+        # -------------------------------------------------------------
+        # 24g. THE core Stage 0 root-discovery fix, proven directly: no
+        #     git (or any marker) anywhere in the ancestry - a large PARENT
+        #     AGENTS.md (bigger than the default 32768-byte budget alone)
+        #     must NOT be read at all. Before the fix, resolution walked to
+        #     the filesystem root collecting every ancestor's AGENTS.md
+        #     whenever no .git existed anywhere, so this decoy would have
+        #     alone exhausted the budget and STOPped a plain greenfield
+        #     init; per Codex's own real contract ("if no marker is found,
+        #     only the current working directory is considered"), init
+        #     must succeed cleanly under the untouched default limit.
+        # -------------------------------------------------------------
+        inst24g_root = tmp / "scenario-24g-no-marker-anywhere-parent-not-read"
+        inst24g_root.mkdir(parents=True)  # deliberately NOT a git repo
+        (inst24g_root / "AGENTS.md").write_text("X" * 40000, encoding="utf-8")
+        inst24g = inst24g_root / "nested"
+        inst24g.mkdir()
+        r24g = eif_init(inst24g, "--project-name", "codex-fixture", "--adapter", "codex", "--allow-dirty")
+        results.append(check(
+            "24g. no marker anywhere in the ancestry: a 40000-byte parent AGENTS.md is NOT read "
+            "(init succeeds cleanly under the untouched default 32768-byte limit)",
+            r24g.returncode == 0, r24g.stdout + r24g.stderr,
+        ))
+
+        # -------------------------------------------------------------
+        # 24h. custom project_root_markers: a non-.git marker (e.g. `.hg`)
+        #     is honored, finding a root a plain .git-only search would miss.
+        # -------------------------------------------------------------
+        inst24h_root = tmp / "scenario-24h-custom-marker"
+        inst24h_root.mkdir(parents=True)
+        (inst24h_root / ".hg").mkdir()
+        ancestor24h = "Mercurial-root ancestor AGENTS.md.\n"
+        (inst24h_root / "AGENTS.md").write_text(ancestor24h, encoding="utf-8")
+        inst24h = inst24h_root / "nested"
+        inst24h.mkdir()
+        (inst24h / ".eif").mkdir()
+        (inst24h / ".eif" / "config.yaml").write_text(yaml.safe_dump({
+            "schema_version": 1,
+            "project": {"name": "codex-fixture"},
+            "adapter": {"name": "codex", "options": {"codex": {"project_root_markers": [".hg"]}}},
+            "localization": {"documentation_locale": "en"},
+        }, sort_keys=False), encoding="utf-8")
+        r24h_init = eif_init(inst24h, "--allow-dirty")  # upgrade: config.yaml already exists
+        results.append(check("24h. custom .hg root marker: precondition init succeeds", r24h_init.returncode == 0, r24h_init.stdout + r24h_init.stderr))
+        set_adapter_option(inst24h, "codex", "project_doc_max_bytes", max(1, len(ancestor24h.encode("utf-8")) - 1))
+        r24h = eif_init(inst24h)
+        results.append(check("24h. the .hg-rooted ancestor IS included in the budget (lowering the limit below its size -> STOP)", r24h.returncode != 0, r24h.stdout + r24h.stderr))
+
+        # -------------------------------------------------------------
+        # 24n. MULTIPLE configured markers together (not just one custom
+        #     marker replacing the default): [".git", ".hg"] must match on
+        #     whichever one is actually present at a given ancestor - here
+        #     only `.hg` exists (no `.git` anywhere), proving the any()-
+        #     over-the-full-list match, not just a single-marker rename.
+        # -------------------------------------------------------------
+        inst24n_root = tmp / "scenario-24n-multiple-markers-matches-second"
+        inst24n_root.mkdir(parents=True)
+        (inst24n_root / ".hg").mkdir()
+        ancestor24n = "Mercurial-root ancestor AGENTS.md (multi-marker list).\n"
+        (inst24n_root / "AGENTS.md").write_text(ancestor24n, encoding="utf-8")
+        inst24n = inst24n_root / "nested"
+        inst24n.mkdir()
+        (inst24n / ".eif").mkdir()
+        (inst24n / ".eif" / "config.yaml").write_text(yaml.safe_dump({
+            "schema_version": 1,
+            "project": {"name": "codex-fixture"},
+            "adapter": {"name": "codex", "options": {"codex": {"project_root_markers": [".git", ".hg"]}}},
+            "localization": {"documentation_locale": "en"},
+        }, sort_keys=False), encoding="utf-8")
+        r24n_init = eif_init(inst24n, "--allow-dirty")  # upgrade: config.yaml already exists
+        results.append(check("24n. multi-entry marker list [.git, .hg]: precondition init succeeds", r24n_init.returncode == 0, r24n_init.stdout + r24n_init.stderr))
+        set_adapter_option(inst24n, "codex", "project_doc_max_bytes", max(1, len(ancestor24n.encode("utf-8")) - 1))
+        r24n = eif_init(inst24n)
+        results.append(check(
+            "24n. the ancestor matched via the SECOND entry in a multi-entry marker list IS included "
+            "in the budget (lowering the limit below its size -> STOP)",
+            r24n.returncode != 0, r24n.stdout + r24n.stderr,
+        ))
+
+        # -------------------------------------------------------------
+        # 24i. an EXPLICITLY configured EMPTY project_root_markers list
+        #     disables root detection entirely, even with a real .git
+        #     directly above the instance - a real ancestor AGENTS.md there
+        #     must NOT be read.
+        # -------------------------------------------------------------
+        inst24i_root = tmp / "scenario-24i-empty-markers-disables-detection"
+        init_git_repo(inst24i_root)
+        (inst24i_root / "AGENTS.md").write_text("Ancestor content that must be ignored.\n", encoding="utf-8")
+        inst24i = inst24i_root / "nested"
+        inst24i.mkdir()
+        (inst24i / ".eif").mkdir()
+        (inst24i / ".eif" / "config.yaml").write_text(yaml.safe_dump({
+            "schema_version": 1,
+            "project": {"name": "codex-fixture"},
+            "adapter": {"name": "codex", "options": {"codex": {"project_root_markers": []}}},
+            "localization": {"documentation_locale": "en"},
+        }, sort_keys=False), encoding="utf-8")
+        r24i_init = eif_init(inst24i, "--allow-dirty")
+        results.append(check("24i. empty project_root_markers: precondition init succeeds", r24i_init.returncode == 0, r24i_init.stdout + r24i_init.stderr))
+        set_adapter_option(inst24i, "codex", "project_doc_max_bytes", 10)  # far below the ancestor's own size
+        r24i = eif_init(inst24i)
+        results.append(check(
+            "24i. with root detection disabled, the real ancestor .git/AGENTS.md is never even considered "
+            "(a tiny limit only has to fit THIS instance's own block, not the ignored ancestor)",
+            r24i.returncode != 0, r24i.stdout + r24i.stderr,
+        ))
+
+        # -------------------------------------------------------------
+        # 24j. nearest-ancestor-wins: two real git roots, one nested inside
+        #     the other - the NEARER one is the resolved project root, so
+        #     content above it is never part of the chain.
+        # -------------------------------------------------------------
+        inst24j_outer = tmp / "scenario-24j-nearest-marker-wins"
+        init_git_repo(inst24j_outer)
+        (inst24j_outer / "AGENTS.md").write_text("X" * 40000, encoding="utf-8")  # would blow the budget if ever reached
+        inst24j_inner_root = inst24j_outer / "inner"
+        init_git_repo(inst24j_inner_root)
+        inst24j = inst24j_inner_root / "nested"
+        inst24j.mkdir()
+        r24j = eif_init(inst24j, "--project-name", "codex-fixture", "--adapter", "codex", "--allow-dirty")
+        results.append(check(
+            "24j. the nearer (inner) git root wins - the outer root's 40000-byte AGENTS.md is never "
+            "reached, so init succeeds cleanly under the untouched default limit",
+            r24j.returncode == 0, r24j.stdout + r24j.stderr,
+        ))
+
+        # -------------------------------------------------------------
+        # 24k. project_root_markers path-policy validation: an absolute or
+        #     traversal-shaped marker name must STOP before any write - the
+        #     same runtime check already covering project_doc_fallback_
+        #     filenames and knowledge.root/index_path (a JSON Schema
+        #     pattern alone cannot catch a resolved-path escape; see
+        #     eif_init.py's validate_instance_relative_path() call for
+        #     configured_root_markers).
+        # -------------------------------------------------------------
+        inst24k_abs = tmp / "scenario-24k-root-marker-absolute-path-stop"
+        init_git_repo(inst24k_abs)
+        (inst24k_abs / ".eif").mkdir()
+        (inst24k_abs / ".eif" / "config.yaml").write_text(yaml.safe_dump({
+            "schema_version": 1,
+            "project": {"name": "codex-fixture"},
+            "adapter": {"name": "codex", "options": {"codex": {"project_root_markers": ["/etc/passwd"]}}},
+            "localization": {"documentation_locale": "en"},
+        }, sort_keys=False), encoding="utf-8")
+        before24k_abs = snapshot(inst24k_abs)
+        r24k_abs = eif_init(inst24k_abs)
+        results.append(check("24k. absolute-path project_root_markers entry exits non-zero (STOP)", r24k_abs.returncode != 0, r24k_abs.stdout + r24k_abs.stderr))
+        results.append(check(
+            "24k. STOP message names project_root_markers and rejects the absolute path",
+            "project_root_markers" in (r24k_abs.stdout + r24k_abs.stderr) and "absolute paths are not allowed" in (r24k_abs.stdout + r24k_abs.stderr),
+            r24k_abs.stdout + r24k_abs.stderr,
+        ))
+        after24k_abs = snapshot(inst24k_abs)
+        results.append(check("24k. absolute-path STOP wrote absolutely nothing", after24k_abs == before24k_abs))
+
+        inst24k_trav = tmp / "scenario-24k-root-marker-traversal-stop"
+        init_git_repo(inst24k_trav)
+        (inst24k_trav / ".eif").mkdir()
+        (inst24k_trav / ".eif" / "config.yaml").write_text(yaml.safe_dump({
+            "schema_version": 1,
+            "project": {"name": "codex-fixture"},
+            "adapter": {"name": "codex", "options": {"codex": {"project_root_markers": ["../escape"]}}},
+            "localization": {"documentation_locale": "en"},
+        }, sort_keys=False), encoding="utf-8")
+        before24k_trav = snapshot(inst24k_trav)
+        r24k_trav = eif_init(inst24k_trav)
+        results.append(check("24k. '..'-traversal project_root_markers entry exits non-zero (STOP)", r24k_trav.returncode != 0, r24k_trav.stdout + r24k_trav.stderr))
+        results.append(check(
+            "24k. STOP message names project_root_markers and rejects the traversal",
+            "project_root_markers" in (r24k_trav.stdout + r24k_trav.stderr) and "traversal is not allowed" in (r24k_trav.stdout + r24k_trav.stderr),
+            r24k_trav.stdout + r24k_trav.stderr,
+        ))
+        after24k_trav = snapshot(inst24k_trav)
+        results.append(check("24k. traversal STOP wrote absolutely nothing", after24k_trav == before24k_trav))
+
+        # -------------------------------------------------------------
+        # 24l. marker detection in EIF's own resolver is presence-only, not
+        #     directory-only: a `.git` FILE (the real shape of a git-
+        #     worktree child, e.g. `git worktree add`) at an ancestor level
+        #     must be honored as a project-root marker exactly like a
+        #     `.git` directory - _find_codex_project_root() only ever calls
+        #     Path.exists(), never Path.is_dir().
+        # -------------------------------------------------------------
+        inst24l_outer = tmp / "scenario-24l-dotgit-as-file-still-a-marker"
+        init_git_repo(inst24l_outer)
+        (inst24l_outer / "AGENTS.md").write_text("X" * 40000, encoding="utf-8")  # would blow the budget if ever reached
+        inst24l_mid = inst24l_outer / "mid"
+        inst24l_mid.mkdir()
+        (inst24l_mid / ".git").write_text("gitdir: ../.git/worktrees/mid\n", encoding="utf-8")  # worktree-style file, not a directory
+        inst24l = inst24l_mid / "nested"
+        inst24l.mkdir()
+        r24l = eif_init(inst24l, "--project-name", "codex-fixture", "--adapter", "codex")
+        results.append(check(
+            "24l. a `.git` FILE (worktree shape) at 'mid' is honored as the project root - the outer "
+            "40000-byte AGENTS.md is never reached, so init succeeds cleanly under the default limit",
+            r24l.returncode == 0, r24l.stdout + r24l.stderr,
+        ))
+
+        # -------------------------------------------------------------
+        # 24m. marker detection is presence-only, not content-based: an
+        #     EMPTY `.git` directory (zero entries inside, never actually
+        #     `git init`-ed) at an ancestor level still counts - the
+        #     resolver never inspects what's inside a marker, only whether
+        #     the path itself exists.
+        # -------------------------------------------------------------
+        inst24m_outer = tmp / "scenario-24m-empty-dotgit-dir-still-a-marker"
+        init_git_repo(inst24m_outer)
+        (inst24m_outer / "AGENTS.md").write_text("X" * 40000, encoding="utf-8")  # would blow the budget if ever reached
+        inst24m_mid = inst24m_outer / "mid"
+        (inst24m_mid / ".git").mkdir(parents=True)  # empty directory, deliberately NOT git-initialized
+        inst24m = inst24m_mid / "nested"
+        inst24m.mkdir()
+        r24m = eif_init(inst24m, "--project-name", "codex-fixture", "--adapter", "codex", "--allow-dirty")
+        results.append(check(
+            "24m. an EMPTY `.git` directory at 'mid' is honored as the project root (presence-only, "
+            "not content-based) - the outer 40000-byte AGENTS.md is never reached",
+            r24m.returncode == 0, r24m.stdout + r24m.stderr,
+        ))
 
         # -------------------------------------------------------------
         # 27/28. adapter switching both directions with Cursor (Stage 1.7:

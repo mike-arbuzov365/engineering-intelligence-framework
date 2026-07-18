@@ -34,11 +34,12 @@ adapter:
   # Optional, adapter-specific settings (scripts/eif_adapters.py declares
   # which keys each adapter supports). Omit entirely for the adapter's own
   # documented defaults - most projects never need this. Example, for an
-  # adopted repo whose Codex config.toml already customizes these two keys:
+  # adopted repo whose Codex config.toml already customizes these keys:
   # options:
   #   codex:
   #     project_doc_fallback_filenames: ["TEAM_GUIDE.md"]
   #     project_doc_max_bytes: 65536
+  #     project_root_markers: [".git", ".hg"]  # empty [] disables root detection (cwd-only)
 
 localization:
   # BCP-47 language tags (en, uk, en-US, ...).

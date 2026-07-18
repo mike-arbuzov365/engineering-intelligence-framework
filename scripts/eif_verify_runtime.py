@@ -276,15 +276,24 @@ def check_size_budget_drift(config: dict | None, lock: dict | None, instance_pat
     """Independent-review addition: for an adapter with a registered
     size_limit (Codex: project_doc_max_bytes - see eif_adapters.ADAPTERS),
     recompute check_size_budget() against the CURRENT on-disk entrypoint
-    content and the CURRENT ancestor-chain state. Content grows after
-    generation, ancestor AGENTS.md/AGENTS.override.md files can appear
-    above the instance root, and a project may lower its own configured
-    limit - none of that re-runs eif_init.py automatically, so a doctor
-    run that only re-validated file integrity would miss a real, silent
-    "the agent no longer reads all of this" regression. Uses the file's
-    OWN current bytes directly (not a re-render from templates/ - that
-    rendering code is deliberately not bundled into instances, same
-    reasoning as check_config_block_drift())."""
+    content, the CURRENT root-marker-resolved ancestor chain, and the
+    CURRENT configured limit. Content grows after generation, ancestor
+    AGENTS.md/AGENTS.override.md files can appear above the instance root,
+    a project may lower its own configured limit, and a project may change
+    project_root_markers (changing which directory the chain simulation
+    even starts from) - none of that re-runs eif_init.py automatically, so
+    a doctor run that only re-validated file integrity would miss a real,
+    silent "the agent no longer reads the whole governance block"
+    regression. Uses the file's OWN current bytes directly (not a
+    re-render from templates/ - that rendering code is deliberately not
+    bundled into instances, same reasoning as check_config_block_drift()).
+
+    Root-marker drift is checked FIRST and reported directly (AGENT
+    CONSUMPTION - a changed root marker list means the chain Codex would
+    actually simulate has changed, independent of whether it happens to
+    still fit today) before the fresh chain simulation runs, so a project
+    that hand-edited project_root_markers gets a message pointing at the
+    actual cause, not just a generic "budget failed" from the recompute."""
     if config is None or lock is None:
         return []
     lock_adapter = (lock.get("adapter") or {}).get("name")
@@ -298,10 +307,25 @@ def check_size_budget_drift(config: dict | None, lock: dict | None, instance_pat
         return []  # missing entrypoint is check_consistency's/check_markers' concern, not this one's
     current_text = entry_path.read_text(encoding="utf-8", errors="replace")
     adapter_options = (((config.get("adapter") or {}).get("options")) or {}).get(lock_adapter) or {}
-    budget = check_size_budget(instance_path, lock_adapter, current_text, adapter_options)
-    if budget.fits:
-        return []
-    return [f"{lock_entrypoint} size budget: {budget.rationale}"]
+
+    problems: list[str] = []
+    root_marker_key = ADAPTERS[lock_adapter].get("root_marker_option_key")
+    if root_marker_key:
+        locked_markers = (lock.get("adapter") or {}).get("effective_root_markers")
+        current_markers = list(adapter_options.get(root_marker_key, ADAPTERS[lock_adapter].get("default_root_markers", [])))
+        if locked_markers is not None and locked_markers != current_markers:
+            problems.append(
+                f"AGENT CONSUMPTION invalid for {lock_adapter!r}: effective {root_marker_key} changed "
+                f"since this instance was generated (locked: {locked_markers!r}, current: "
+                f"{current_markers!r}) - the project-root Codex resolves, and therefore the whole "
+                f"chain the size budget is computed against, may now differ. Run eif_init.py again to "
+                f"re-resolve and regenerate."
+            )
+
+    budget = check_size_budget(instance_path, lock_adapter, lock_entrypoint, current_text, EIF_BEGIN, EIF_END, adapter_options)
+    if not budget.fits:
+        problems.append(f"{lock_entrypoint} size budget: {budget.rationale}")
+    return problems
 
 
 def check_migration_provenance_consistency(config: dict | None, lock: dict | None) -> list[str]:

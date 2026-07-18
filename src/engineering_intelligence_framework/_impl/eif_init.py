@@ -519,12 +519,21 @@ def render_lock_data(source_type: str, git_prov: dict | None, package_prov: dict
                      adapter_name: str, entrypoint: str, bundle_path: str,
                      manifest: list[dict], digest: str, migration_status: str,
                      instance_version: str, generated_at: str,
-                     knowledge_index: dict | None = None) -> dict:
+                     knowledge_index: dict | None = None,
+                     effective_root_markers: list[str] | None = None) -> dict:
     """Exactly one of git_prov/package_prov/source_bundle_prov is populated,
     matching source_type - see core/schemas/framework-lock.schema.json's
     discriminated `framework.source_type` contract. Never fabricates a
     stand-in for a kind that isn't actually present (e.g. no synthetic
-    git-shaped SHA for an installed-package source)."""
+    git-shaped SHA for an installed-package source).
+
+    `effective_root_markers`: pass a list (possibly empty - a real,
+    deliberate value, not "unset") for an adapter with a registered
+    root_marker_option_key (Codex); pass None for one without (the field is
+    omitted entirely, not recorded as an empty list, so eif_verify_runtime.py
+    can distinguish "no such adapter concept" from "root detection is
+    disabled" the same way the option itself distinguishes absent from
+    empty)."""
     data = {
         "lock_schema_version": 1,
         "framework": {"source_type": source_type},
@@ -533,6 +542,8 @@ def render_lock_data(source_type: str, git_prov: dict | None, package_prov: dict
         "bundle": {"path": bundle_path, "manifest": manifest, "digest": digest},
         "generated_at": generated_at,
     }
+    if effective_root_markers is not None:
+        data["adapter"]["effective_root_markers"] = effective_root_markers
     if git_prov is not None:
         data["git"] = git_prov
     if package_prov is not None:
@@ -1225,12 +1236,16 @@ def main(argv: list[str] | None = None) -> int:
     # actually matters, run before anything else touches these paths. ---
     fallback_key = ADAPTERS[adapter].get("fallback_option_key")
     configured_fallbacks = adapter_options.get(fallback_key, []) if fallback_key else []
+    root_marker_key = ADAPTERS[adapter].get("root_marker_option_key")
+    configured_root_markers = adapter_options.get(root_marker_key, []) if root_marker_key else []
     try:
         knowledge_root_path = validate_instance_relative_path(knowledge_root, instance_path, "knowledge.root")
         knowledge_index_path_abs = validate_instance_relative_path(knowledge_index_path, instance_path, "knowledge.index_path")
         validate_index_inside_root(knowledge_index_path, knowledge_root)
         for name in configured_fallbacks:
             validate_instance_relative_path(name, instance_path, f"adapter.options.{adapter}.{fallback_key}")
+        for name in configured_root_markers:
+            validate_instance_relative_path(name, instance_path, f"adapter.options.{adapter}.{root_marker_key}")
     except PathPolicyError as e:
         print(f"eif-init: {e} - refusing to write anything.", file=sys.stderr)
         return 1
@@ -1418,14 +1433,15 @@ def main(argv: list[str] | None = None) -> int:
 
     # --- Size budget (eif_adapters.check_size_budget): does this adapter's
     # own documented content-size contract (Codex: project_doc_max_bytes, a
-    # COMBINED budget across the whole root-to-cwd chain, whole-file
-    # granularity - see the registry entry) actually include the file EIF is
-    # about to write? STOP rather than publish a write the agent's own
-    # contract would silently drop from its instruction chain with no
-    # warning of its own - a "successful" init that the agent never actually
-    # reads is worse than a refusal. An adapter with no registered size_limit
-    # (claude-code, cursor) always fits; nothing to check. ---
-    size_check = check_size_budget(instance_path, adapter, entry_new_text, adapter_options)
+    # COMBINED, per-file-TRUNCATING budget across the whole root-to-cwd
+    # chain - see the registry entry) guarantee the EIF-managed block
+    # itself is fully loaded once EIF writes this file? STOP rather than
+    # publish a write whose governance block the agent's own contract would
+    # truncate or drop with no warning of its own - a "successful" init
+    # whose block the agent never actually reads intact is worse than a
+    # refusal. An adapter with no registered size_limit (claude-code,
+    # cursor) always fits; nothing to check. ---
+    size_check = check_size_budget(instance_path, adapter, entrypoint, entry_new_text, EIF_BEGIN, EIF_END, adapter_options)
     if not size_check.fits:
         print(f"eif-init: {entrypoint} size budget: {size_check.rationale}", file=sys.stderr)
         print(f"{prefix}refusing to write anything - reduce the content size, raise the configured "
@@ -1464,11 +1480,17 @@ def main(argv: list[str] | None = None) -> int:
     else:
         display_ref = source_bundle_prov["asserted_ref"]
 
+    root_marker_key = ADAPTERS[adapter].get("root_marker_option_key")
+    effective_root_markers = (
+        list(adapter_options.get(root_marker_key, ADAPTERS[adapter].get("default_root_markers", [])))
+        if root_marker_key else None
+    )
     lock_data = render_lock_data(
         source_type, git_prov, package_prov, source_bundle_prov, adapter, entrypoint, ".eif/runtime",
         manifest, digest, migration_status, "0.1.0",
         datetime.datetime.now(datetime.timezone.utc).isoformat(),
         knowledge_index=lock_knowledge_index,
+        effective_root_markers=effective_root_markers,
     )
     lock_errors = validate_in_memory(framework_root, "framework-lock.schema.json", lock_data)
     if lock_errors:

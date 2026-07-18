@@ -15,11 +15,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from eif_check_licenses import (  # noqa: E402
+    _normalize_pkg_name,
     check_package_licenses,
     check_pinned_requirements,
+    check_sbom_freshness,
+    check_sbom_licenses,
     license_identifiers,
     load_policy,
+    load_sbom,
     matches_any,
+    parse_pinned_requirements,
+    sbom_component_license_identifiers,
 )
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
@@ -130,6 +136,145 @@ def main() -> int:
             unpinned == ["some-unpinned-package"],
             str(unpinned),
         ))
+
+    # --- parse_pinned_requirements: extras-marker stripping ---
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_root = Path(tmp)
+        (tmp_root / "scripts").mkdir()
+        (tmp_root / "scripts" / "requirements.txt").write_text(
+            "PyYAML==6.0.2\njsonschema[format-nongpl]==4.23.0\n# a comment\nsome-unpinned-package\n",
+            encoding="utf-8",
+        )
+        pins = parse_pinned_requirements(tmp_root)
+        results.append(check(
+            "parse_pinned_requirements: strips [extras], skips unpinned/comment lines",
+            pins == [("PyYAML", "6.0.2"), ("jsonschema", "4.23.0")],
+            str(pins),
+        ))
+
+    # --- _normalize_pkg_name: PEP 503 equivalence ---
+    results.append(check(
+        "_normalize_pkg_name: case and -/_/. runs collapse to the same key",
+        _normalize_pkg_name("Typing_Extensions") == _normalize_pkg_name("typing-extensions")
+        == _normalize_pkg_name("typing.extensions"),
+        f"{_normalize_pkg_name('Typing_Extensions')!r} vs {_normalize_pkg_name('typing-extensions')!r} "
+        f"vs {_normalize_pkg_name('typing.extensions')!r}",
+    ))
+
+    # --- check_sbom_freshness: fixture-controlled SBOM/requirements.txt pairs ---
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_root = Path(tmp)
+        (tmp_root / "scripts").mkdir()
+        (tmp_root / "scripts" / "requirements.txt").write_text("PyYAML==6.0.2\n", encoding="utf-8")
+
+        matching_sbom = {"components": [{"name": "PyYAML", "version": "6.0.2"}]}
+        results.append(check(
+            "check_sbom_freshness: matching name+version reports no problems",
+            check_sbom_freshness(tmp_root, matching_sbom) == [],
+            str(check_sbom_freshness(tmp_root, matching_sbom)),
+        ))
+
+        stale_sbom = {"components": [{"name": "PyYAML", "version": "6.0.1"}]}
+        stale_problems = check_sbom_freshness(tmp_root, stale_sbom)
+        results.append(check(
+            "check_sbom_freshness: a version mismatch is reported as one problem",
+            len(stale_problems) == 1 and "6.0.2" in stale_problems[0] and "6.0.1" in stale_problems[0],
+            str(stale_problems),
+        ))
+
+        missing_sbom = {"components": [{"name": "some-other-package", "version": "1.0.0"}]}
+        missing_problems = check_sbom_freshness(tmp_root, missing_sbom)
+        results.append(check(
+            "check_sbom_freshness: a pinned package absent from the SBOM is reported as one problem",
+            len(missing_problems) == 1 and "PyYAML" in missing_problems[0],
+            str(missing_problems),
+        ))
+
+    # --- sbom_component_license_identifiers: CycloneDX component shape ---
+    results.append(check(
+        "sbom_component_license_identifiers: reads licenses[].license.id",
+        sbom_component_license_identifiers({"licenses": [{"license": {"id": "MIT"}}]}) == ["MIT"],
+        str(sbom_component_license_identifiers({"licenses": [{"license": {"id": "MIT"}}]})),
+    ))
+    results.append(check(
+        "sbom_component_license_identifiers: reads licenses[].license.name when id is absent",
+        sbom_component_license_identifiers(
+            {"licenses": [{"license": {"name": "License :: OSI Approved :: Apache Software License"}}]}
+        ) == ["License :: OSI Approved :: Apache Software License"],
+        str(sbom_component_license_identifiers(
+            {"licenses": [{"license": {"name": "License :: OSI Approved :: Apache Software License"}}]}
+        )),
+    ))
+    results.append(check(
+        "sbom_component_license_identifiers: a component with no licenses[] key returns []",
+        sbom_component_license_identifiers({"name": "mystery-component"}) == [],
+        str(sbom_component_license_identifiers({"name": "mystery-component"})),
+    ))
+
+    # --- check_sbom_licenses: fixture-controlled component list, same three
+    # outcomes as check_package_licenses's fixture block below, sourced from
+    # plain dicts (an SBOM component) instead of FakeDistribution ---
+    clean_component = {"name": "clean-pkg", "licenses": [{"license": {"id": "MIT"}}]}
+    gpl_component = {
+        "name": "gpl-pkg",
+        "licenses": [{"license": {"name": "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"}}],
+    }
+    no_license_component = {"name": "mystery-pkg"}
+    bootstrap_component = {"name": "setuptools"}  # real sbom.cdx.json has no licenses[] for this one
+
+    denied_s, unknown_s, ok_s = check_sbom_licenses(
+        policy, [clean_component, gpl_component, no_license_component, bootstrap_component],
+    )
+    results.append(check(
+        "check_sbom_licenses: a clean MIT component is classified OK",
+        any("clean-pkg" in name for name in ok_s),
+        str(ok_s),
+    ))
+    results.append(check(
+        "check_sbom_licenses: a GPL component with no exception is DENIED",
+        any("gpl-pkg" in name for name in denied_s),
+        str(denied_s),
+    ))
+    results.append(check(
+        "check_sbom_licenses: a component with no licenses[] is UNKNOWN",
+        any("mystery-pkg" in name for name in unknown_s),
+        str(unknown_s),
+    ))
+    results.append(check(
+        "check_sbom_licenses: bootstrap tooling (setuptools) is excluded even with no licenses[] declared",
+        not any("setuptools" in name for name in unknown_s + denied_s + ok_s),
+        f"denied={denied_s} unknown={unknown_s} ok={ok_s}",
+    ))
+
+    policy_with_sbom_exception = dict(policy, exceptions=[{"package": "gpl-pkg", "reason": "test fixture"}])
+    denied_sex, _, ok_sex = check_sbom_licenses(policy_with_sbom_exception, [gpl_component])
+    results.append(check(
+        "check_sbom_licenses: a GPL component WITH a recorded policy exception is OK, not denied",
+        denied_sex == [] and any("gpl-pkg" in name for name in ok_sex),
+        f"denied={denied_sex} ok={ok_sex}",
+    ))
+
+    # --- this repo's real, current sbom.cdx.json - the default (non
+    # --environment) mode's actual scope, checked against the actual
+    # committed file rather than a fixture ---
+    real_sbom = load_sbom(FRAMEWORK_ROOT)
+    real_sbom_denied, real_sbom_unknown, real_sbom_ok = check_sbom_licenses(policy, real_sbom.get("components", []))
+    results.append(check(
+        "this repo's real sbom.cdx.json: no denied or unknown components",
+        real_sbom_denied == [] and real_sbom_unknown == [],
+        f"denied={real_sbom_denied} unknown={real_sbom_unknown}",
+    ))
+    results.append(check(
+        "this repo's real sbom.cdx.json: both direct dependencies (PyYAML, jsonschema) are classified OK",
+        any(name == "PyYAML" for name in real_sbom_ok) and any(name == "jsonschema" for name in real_sbom_ok),
+        str(real_sbom_ok),
+    ))
+    real_freshness_problems = check_sbom_freshness(FRAMEWORK_ROOT, real_sbom)
+    results.append(check(
+        "this repo's real sbom.cdx.json is not stale relative to requirements.txt",
+        real_freshness_problems == [],
+        str(real_freshness_problems),
+    ))
 
     # --- check_package_licenses: fixture-controlled, NOT the real ambient
     # environment - a dev machine can have unrelated packages installed for

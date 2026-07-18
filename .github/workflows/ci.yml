@@ -232,23 +232,65 @@ jobs:
           echo "all package-build matrix combinations succeeded"
 
   license-check:
-    name: Dependency license check (required by policy)
-    runs-on: ubuntu-latest
+    name: "Dependency license check (${{ matrix.os }})"
+    # The dynamic per-OS name above is why THIS job itself cannot be a
+    # required check context (same reasoning as package-build) -
+    # license-check-required below is the static aggregate actually wired
+    # into merge-policy.json. Matrixed over both OSes deliberately: default
+    # mode reads only the committed sbom.cdx.json (adoption-hardening
+    # correction below), so identical classification output on both
+    # platforms is real cross-platform determinism evidence, not assumed.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
-      - name: Install pinned dependencies (the environment this check enforces policy against)
+      - name: Install pinned dependencies (needed for this job's own unit tests; the license check itself needs none - see below)
         run: pip install -r scripts/requirements.txt
       - name: Run license-checker unit tests
         run: python scripts/tests/test_check_licenses.py
-      - name: Check every installed dependency's license against core/policies/license-policy.json
-        # A fresh runner + `pip install -r requirements.txt` as the only
-        # install step is exactly the trustworthy scope eif_check_licenses.py
-        # documents needing - unlike an ambient local dev machine, nothing
-        # unrelated is installed here to produce a false GPL/unknown finding.
+      - name: Check the SBOM-declared dependency closure's licenses against core/policies/license-policy.json
+        # Adoption-hardening correction: default mode now reads only the
+        # committed sbom.cdx.json, cross-checked against requirements.txt's
+        # pins (fails if stale) - not a live scan of whatever this
+        # interpreter happens to have installed. The old default (every
+        # package importlib.metadata reports installed) was only
+        # reproducible by the accident of CI always installing exactly
+        # requirements.txt; on an ambient dev machine with unrelated
+        # packages installed it produced false denied/unknown findings -
+        # confirmed directly while building this fix (137 packages found,
+        # 4 falsely denied, 6 falsely unknown, on a real dev machine).
+        # That ambient-scan behavior is now --environment, explicit opt-in,
+        # not used here.
         run: python scripts/eif_check_licenses.py --framework-root .
+
+  license-check-required:
+    name: "Dependency license check (required by policy)"
+    # Static aggregate over the OS matrix above - same pattern as
+    # package-build-required: needs: a matrix job resolves
+    # needs.license-check.result to success only when EVERY combination
+    # succeeded - failure or cancelled otherwise, GitHub's own semantics,
+    # not hand-enumerated here. if: always() so this job still runs (and
+    # correctly reports failure) even when a matrix leg failed, rather than
+    # being skipped. This is the context name wired into
+    # core/policies/merge-policy.json, unchanged from before this matrix
+    # split - never the dynamic per-OS name above.
+    needs: license-check
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify every license-check matrix combination succeeded
+        run: |
+          if [ "${{ needs.license-check.result }}" != "success" ]; then
+            echo "license-check matrix result: ${{ needs.license-check.result }} - at least one combination did not succeed"
+            exit 1
+          fi
+          echo "all license-check matrix combinations succeeded"
 
   knowledge-delta-check:
     name: Knowledge Delta completeness (required by policy)

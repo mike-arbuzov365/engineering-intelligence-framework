@@ -72,6 +72,7 @@ def main() -> int:
         knowledge = config.get("knowledge") or {}
         knowledge_root = knowledge.get("root", "knowledge")
         knowledge_index_path = knowledge.get("index_path") or _default_index_path(knowledge_root)
+        knowledge_managed = knowledge.get("managed", True)
         entrypoint = entrypoint_for(adapter)
         entry_path = fixture_dir / entrypoint
 
@@ -88,7 +89,7 @@ def main() -> int:
         ]
 
         fresh_block = eif_init._managed_block(
-            FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode, entrypoint,
+            FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode, entrypoint, knowledge_managed,
         )
 
         results.append(check(

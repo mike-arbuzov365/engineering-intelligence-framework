@@ -61,6 +61,8 @@ RESOURCE_TREES = [
     "core/ontology",
     "locales",
     "templates",
+    "playbooks",
+    "skills",
 ]
 
 

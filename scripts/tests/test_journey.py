@@ -366,6 +366,8 @@ def main() -> int:
             shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw / "core")
             shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw / "locales")
             shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw / "templates")
+            shutil.copytree(FRAMEWORK_ROOT / "playbooks", fake_fw / "playbooks")
+            shutil.copytree(FRAMEWORK_ROOT / "skills", fake_fw / "skills")
 
             inst3 = Path(tmp2) / "instance-3"
             inst3.mkdir()
@@ -429,6 +431,8 @@ def main() -> int:
         shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw / "core")
         shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw / "locales")
         shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw / "templates")
+        shutil.copytree(FRAMEWORK_ROOT / "playbooks", fake_fw / "playbooks")
+        shutil.copytree(FRAMEWORK_ROOT / "skills", fake_fw / "skills")
 
         inst4 = Path(tmp3) / "instance-4"
         inst4.mkdir()
@@ -512,6 +516,8 @@ def main() -> int:
         shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw2 / "core")
         shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw2 / "locales")
         shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw2 / "templates")
+        shutil.copytree(FRAMEWORK_ROOT / "playbooks", fake_fw2 / "playbooks")
+        shutil.copytree(FRAMEWORK_ROOT / "skills", fake_fw2 / "skills")
 
         inst5 = Path(tmp4) / "instance-5"
         inst5.mkdir()

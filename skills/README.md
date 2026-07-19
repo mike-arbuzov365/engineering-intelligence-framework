@@ -1,9 +1,18 @@
 # skills/
 
-Slash-command-style skills for AI coding agents: planning, execution,
-review, knowledge curation, retro, search.
+Slash-command-style skills for AI coding agents.
 
-Each skill in the private instance follows the pattern `<skill-name>/SKILL.md`
-plus optional `references/`. Porting requires stripping any private-instance
-specifics (repo names, examples, cross-repo registries) and keeping only the
-generic workflow. Not populated yet.
+| Skill | Playbook it wraps |
+|---|---|
+| [`plan-execution-packet/`](plan-execution-packet/SKILL.md) | `playbooks/execution-packet-planning.md` |
+| [`run-execution-packet/`](run-execution-packet/SKILL.md) | `playbooks/execution-packet-execution.md` |
+| [`review-execution-packet/`](review-execution-packet/SKILL.md) | `playbooks/execution-packet-review.md` |
+| [`knowledge-search/`](knowledge-search/SKILL.md) | `playbooks/knowledge-search.md` |
+| [`knowledge-ingest/`](knowledge-ingest/SKILL.md) | `playbooks/knowledge-ingest.md` |
+| [`knowledge-lint/`](knowledge-lint/SKILL.md) | `playbooks/knowledge-lint.md` |
+
+Each skill is a thin `<skill-name>/SKILL.md` pointer to its playbook (one
+canonical source per D-007, not a second copy of the workflow) with the
+native `name`/`description` skill-manifest frontmatter agent adapters
+expect. Not yet ported: curator, retro, and customer-facing skills - no
+equivalent need in a single-project-instance v0.1 adopter.

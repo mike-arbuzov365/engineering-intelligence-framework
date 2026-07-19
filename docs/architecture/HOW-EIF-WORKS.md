@@ -196,7 +196,10 @@ outside it), and an end (closeout: record what changed, what was learned,
 what's still open, and whether anything should be promoted from
 session-scoped state into durable Tier 2 knowledge).
 
-*(Playbook content not ported yet - see [`playbooks/README.md`](../../playbooks/README.md).)*
+See [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md),
+[`session-execution.md`](../../playbooks/session-execution.md), and
+[`session-closeout.md`](../../playbooks/session-closeout.md) for the
+step-by-step workflow.
 
 ## Execution packets
 
@@ -212,10 +215,12 @@ session) should be able to verify the claimed evidence against the actual
 repository state (merged PRs, passing CI, working code) rather than trust
 the closeout narrative at face value.
 
-*(Planning-packet templates specifically - charter, facts, decisions,
-roadmap - not ported yet. The task-scope, Knowledge Delta, and
-session-closeout templates used by a single-session task ARE built and in
-use - see [`templates/README.md`](../../templates/README.md).)*
+See [`playbooks/execution-packet-planning.md`](../../playbooks/execution-packet-planning.md)
+for the planning workflow and `templates/packet-*.md` for the charter,
+facts, decisions, roadmap, self-review, start, and closeout templates it
+uses. The task-scope, Knowledge Delta, and session-closeout templates
+used by a single-session task are a separate, simpler path - see
+[`templates/README.md`](../../templates/README.md).
 
 ## Knowledge Delta
 

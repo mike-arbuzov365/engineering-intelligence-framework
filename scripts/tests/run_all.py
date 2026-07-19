@@ -43,6 +43,7 @@ TESTS_DIR = Path(__file__).resolve().parent
 SUITES = [
     "test_paths.py",
     "test_validate.py",
+    "test_operating_layer.py",
     "test_privacy_scan.py",
     "test_knowledge_delta.py",
     "test_generate_index.py",

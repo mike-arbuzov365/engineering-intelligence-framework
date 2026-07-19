@@ -188,21 +188,55 @@ a separate, unrelated finding, not fixed here, and not a defect in the
 package this decision ratifies.
 
 ### D-13: Fail-closed CI runner consolidation
-**Status: ratified 2026-07-18 (owner-directed resource optimization).**
-Policy checks that share one Python environment run as sequential steps in
-one fail-closed job. The package contract continues to run on Ubuntu and
-Windows with Python 3.11 and 3.12. A post-merge push can reuse PR evidence
-only when the exact merge commit is associated with one merged PR to `main`
-and every context in `merge-policy.json` is successful; every lookup error,
-missing context, non-success result, or direct push falls back to full CI.
-This changes runner topology, not validation coverage, and keeps
-`merge-policy.json` as the only source of required context names.
+**Status: superseded by D-14 (2026-07-19).** Policy checks that share one
+Python environment ran as sequential steps in one fail-closed job. The
+package contract continued to run on Ubuntu and Windows with Python 3.11
+and 3.12 on every PR and push. A post-merge push could reuse PR evidence
+only when the exact merge commit was associated with one merged PR to
+`main` and every context in `merge-policy.json` was successful; every
+lookup error, missing context, non-success result, or direct push fell
+back to full CI. This changed runner topology, not validation coverage,
+and kept `merge-policy.json` as the only source of required context
+names. Superseded because the evidence-reuse mechanism still created a
+workflow run on every push (76 workflow runs across 2026-07-14 through
+2026-07-18: 55 `pull_request`, 21 `push`), and every PR still allocated
+nine hosted-runner jobs (one policy job, a four-combination package-build
+matrix, its aggregate gate, a two-combination license-check matrix, and
+its aggregate gate) - contributing to the GitHub Actions quota exhaustion
+XREPO-01 was opened to address.
+
+### D-14: Single required PR job, no push-triggered workflow
+**Status: ratified 2026-07-19 (XREPO-01 Session 002).** Routine PR
+validation runs as exactly one hosted job (`.github/workflows/ci.yml`,
+context `PR smoke checks (required by policy)`): the fast local smoke
+suite (`scripts/tests/smoke.py`) plus privacy scan, frontmatter/config
+validation, YAML/JSON-Schema validation, Markdown link check, and
+Knowledge Delta classification. Push to `main` triggers no workflow at
+all - a merged PR was already fully validated by this job, so D-13's
+evidence-reuse mechanism (`scripts/eif_pr_ci_evidence.py`, the
+`ci-evidence` job) is dead code once nothing runs on push, and both were
+removed rather than kept unused. The cross-platform package-build matrix
+(Ubuntu/Windows x Python 3.11/3.12), the license-check matrix
+(Ubuntu/Windows), and the full `scripts/tests/run_all.py` suite inventory
+(all adapter/package/benchmark/merge-gate suites) moved to
+`.github/workflows/release-check.yml`, triggered only by
+`workflow_dispatch` before a technical preview or release, or run locally
+with no Actions minutes spent (see that workflow's header comment for the
+exact local-equivalent commands). This is a routine-topology change only:
+no test was deleted without this disposition, and `merge-policy.json`
+remains the single source of required context names,
+`allow_no_checks: false`.
+**Evidence:** GitHub PR #24 (`feat/benchmark-corpus-expansion-2026-07-18`)
+showed all seven substantive D-13-era jobs pass while the two aggregate
+required jobs failed in ~2s with `runner_id: 0` (no runner allocated) -
+capacity evidence, not a product failure, and the immediate trigger for
+this consolidation.
 
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08
-ratified 2026-07-16, see "Ratified" above for the CI evidence that closed
-the last open condition.)*
+ratified 2026-07-16; D-14 ratified 2026-07-19, superseding D-13 - see
+"Ratified" above for the evidence that closed each open condition.)*
 
 ## How to ratify a decision
 

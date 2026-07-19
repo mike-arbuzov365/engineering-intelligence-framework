@@ -9,9 +9,9 @@ date: 2026-07-19
 ## SHA verification
 
 - `origin/main` (framework): `6fcb3439fba90efc0e43a2f83bf88dd19dce5f7e` — matches FACTS.
-- Clean worktree: `D:/Repos/04-work/.eif-clean-worktrees/framework-closure`.
+- Clean worktree: `.eif-clean-worktrees/framework-closure` (sibling to the repo root, outside version control).
 - Branch: `wm/eif-technical-preview-closure-2026-07-19`, based at `origin/main`.
-- Dirty root worktree (`D:/Repos/04-work/engineering-intelligence-framework`) and dirty hotfix worktree (`.eif-clean-worktrees/cursor-adapter`) untouched, read-only evidence per D-002.
+- Dirty root worktree (the repo's default checkout) and dirty hotfix worktree (`.eif-clean-worktrees/cursor-adapter`) untouched, read-only evidence per D-002.
 - Private repo (`wm-engineering-intelligence`) local `main` fast-forwarded `cefcac4..2d6e8b8` (zero unique local commits, safe) before this session started; the untracked XREPO-01 packet directory was then committed on top (`5b60142`, pure new documentation, no code). Seven files `git status` flagged "modified" (AGENTS.md, CLAUDE.md, RTK.md, HOW-TO-USE-SESSIONS.md, three planning docs) were confirmed via raw `git diff` to be pure pending CRLF normalization (zero real content) before being normalized with `checkout --`.
 
 ## PR #24 disposition

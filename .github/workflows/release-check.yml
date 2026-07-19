@@ -1,0 +1,94 @@
+name: release-check
+
+# Owner-triggered only, run before a technical preview or release - never
+# automatically. A regular PR triggers exactly one required job (see
+# .github/workflows/ci.yml); push to main triggers nothing. This workflow
+# is the exhaustive/cross-platform layer that moved off the routine PR
+# path under D-14: the full scripts/tests/run_all.py suite inventory, and
+# the cross-platform package-build/license-check matrices. See
+# docs/architecture/HOW-EIF-WORKS.md#ci-and-quality-gates.
+#
+# Local equivalent (no Actions minutes spent):
+#   pip install -r scripts/requirements.txt && pip install build hatchling
+#   python scripts/tests/run_all.py --json && python scripts/tests/test_run_all_json.py
+#   python scripts/tests/test_package_build.py
+#   python scripts/eif_privacy_scan.py --repo . && python scripts/eif_check_links.py --repo .
+#   python scripts/eif_check_licenses.py --framework-root . && python scripts/tests/test_check_licenses.py
+# Windows-specific coverage (paths/newlines/case-sensitivity/packaging) only
+# runs here, in the package-build and license-check matrices below.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-suite:
+    name: "Full test inventory (run_all.py, ubuntu-latest)"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        run: pip install -r scripts/requirements.txt
+      - name: Run the complete unit and contract inventory
+        run: |
+          python scripts/tests/run_all.py --json
+          python scripts/tests/test_run_all_json.py
+      - name: Scan the repository for private data
+        run: python scripts/eif_privacy_scan.py --repo .
+      - name: Check relative Markdown links
+        run: python scripts/eif_check_links.py --repo .
+      - name: Run the demo behavioral test
+        run: python examples/demo-workspace/tests/test_calendar_utils.py -v
+      - name: Validate benchmark fixture manifests
+        run: |
+          for fixture in docs/benchmarks/fixtures/*/; do
+            python scripts/eif_benchmark.py validate-manifest "$fixture"
+          done
+
+  package-build:
+    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11", "3.12"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned runtime dependencies and build tooling
+        run: |
+          pip install -r scripts/requirements.txt
+          pip install build hatchling
+      - name: Build and exercise the installed package
+        run: python scripts/tests/test_package_build.py
+      - name: Run benchmark mode B against the installed package
+        run: python scripts/tests/test_benchmark_mode_b.py
+
+  license-check:
+    name: "Dependency license check (${{ matrix.os }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
+        with:
+          python-version: "3.12"
+      - name: Install pinned dependencies
+        run: pip install -r scripts/requirements.txt
+      - name: Run license checker unit tests
+        run: python scripts/tests/test_check_licenses.py
+      - name: Check SBOM licenses against policy
+        run: python scripts/eif_check_licenses.py --framework-root .

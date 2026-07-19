@@ -1,13 +1,19 @@
 name: ci
 
-# Branch protection is unavailable for this private repository. The controlled
-# merge wrapper consumes core/policies/merge-policy.json, so runner
-# consolidation must keep that file and these job names aligned.
+# Routine PR validation only - see docs/architecture/HOW-EIF-WORKS.md#ci-and-quality-gates
+# and core/policies/decisions.md D-14. Exactly one hosted job runs per PR.
+# Push to main triggers no workflow: a merged PR was already fully
+# validated by this job, so re-running on push would only duplicate cost,
+# not add confidence (this supersedes D-13's push-side evidence-reuse
+# mechanism, which is no longer needed once push runs nothing). The
+# cross-platform package-build/license-check matrices and the full
+# scripts/tests/run_all.py suite inventory moved to the manual
+# .github/workflows/release-check.yml gate - see scripts/tests/smoke.py
+# for the fast local loop this job runs, equivalent to what a contributor
+# can run before pushing.
 
 on:
   pull_request:
-    branches: [main]
-  push:
     branches: [main]
 
 permissions:
@@ -15,43 +21,13 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-pr-${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
-  ci-evidence:
-    name: Reuse verified PR CI
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+  pr-smoke:
+    name: PR smoke checks (required by policy)
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
-      checks: read
-    outputs:
-      reuse-pr-ci: ${{ steps.evidence.outputs.reuse-pr-ci }}
-      reason: ${{ steps.evidence.outputs.reason }}
-      pr-number: ${{ steps.evidence.outputs.pr-number }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - name: Verify exact merged PR and required checks
-        id: evidence
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: >-
-          python3 scripts/eif_pr_ci_evidence.py
-          --repository "$GITHUB_REPOSITORY"
-          --commit-sha "$GITHUB_SHA"
-          --base-branch main
-          --policy core/policies/merge-policy.json
-
-  policy-gate:
-    name: Policy checks (required by policy)
-    needs: ci-evidence
-    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: read
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -59,12 +35,10 @@ jobs:
       - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
         with:
           python-version: "3.12"
-      - name: Install pinned dependencies once
+      - name: Install pinned dependencies
         run: pip install -r scripts/requirements.txt
-      - name: Run the complete unit and contract inventory
-        run: |
-          python scripts/tests/run_all.py --json
-          python scripts/tests/test_run_all_json.py
+      - name: Run the critical-path smoke suite (core sanity, both required adapters, one switch cycle)
+        run: python scripts/tests/smoke.py
       - name: Scan the repository for private data
         run: python scripts/eif_privacy_scan.py --repo .
       - name: Validate framework and demo frontmatter and configuration
@@ -123,86 +97,10 @@ jobs:
           PYEOF
       - name: Check relative Markdown links
         run: python scripts/eif_check_links.py --repo .
-      - name: Run the demo behavioral test
-        run: python examples/demo-workspace/tests/test_calendar_utils.py -v
       - name: Classify the live PR Knowledge Delta
-        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}" --jq '.body // ""' > pr_body.txt
           python scripts/eif_check_knowledge_delta.py --body-file pr_body.txt
-
-  package-build:
-    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
-    needs: ci-evidence
-    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ["3.11", "3.12"]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install pinned runtime dependencies and build tooling
-        run: |
-          pip install -r scripts/requirements.txt
-          pip install build hatchling
-      - name: Build and exercise the installed package
-        run: python scripts/tests/test_package_build.py
-      - name: Run benchmark mode B against the installed package
-        run: python scripts/tests/test_benchmark_mode_b.py
-
-  package-build-required:
-    name: Package build required
-    needs: [ci-evidence, package-build]
-    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify every package-build combination succeeded
-        run: |
-          if [ "${{ needs.package-build.result }}" != "success" ]; then
-            echo "package-build matrix result: ${{ needs.package-build.result }}"
-            exit 1
-          fi
-          echo "All package-build matrix combinations succeeded."
-
-  license-check:
-    name: "Dependency license check (${{ matrix.os }})"
-    needs: ci-evidence
-    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
-        with:
-          python-version: "3.12"
-      - name: Install pinned dependencies
-        run: pip install -r scripts/requirements.txt
-      - name: Run license checker unit tests
-        run: python scripts/tests/test_check_licenses.py
-      - name: Check SBOM licenses against policy
-        run: python scripts/eif_check_licenses.py --framework-root .
-
-  license-check-required:
-    name: Dependency license check (required by policy)
-    needs: [ci-evidence, license-check]
-    if: ${{ always() && (github.event_name != 'push' || needs.ci-evidence.outputs.reuse-pr-ci != 'true') }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify every license-check combination succeeded
-        run: |
-          if [ "${{ needs.license-check.result }}" != "success" ]; then
-            echo "license-check matrix result: ${{ needs.license-check.result }}"
-            exit 1
-          fi
-          echo "All license-check matrix combinations succeeded."

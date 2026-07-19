@@ -61,7 +61,6 @@ SUITES = [
     "test_demo_fixtures_fresh.py",
     "test_parity_matrix.py",
     "test_merge_gate.py",
-    "test_pr_ci_evidence.py",
     "test_format_dependencies.py",
     "test_check_licenses.py",
     "test_benchmark.py",

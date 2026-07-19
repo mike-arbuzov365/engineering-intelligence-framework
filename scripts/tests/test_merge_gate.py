@@ -33,6 +33,19 @@ FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 POLICY = G.load_policy(FRAMEWORK_ROOT / "core" / "policies" / "merge-policy.json")
 REQUIRED = POLICY["required_check_contexts"]
 
+# D-14 consolidated the real policy to exactly one required context, so it
+# can no longer exercise "one of several required contexts is missing/
+# duplicated while others are fine" - a genuinely distinct code path from
+# "the single required context is itself missing/duplicated". Scenarios
+# that need more than one required name use this synthetic policy instead
+# of assuming the real one has entries to spare.
+SYNTHETIC_POLICY = {**POLICY, "required_check_contexts": ["Check A", "Check B", "Check C"], "allow_no_checks": False}
+SYNTHETIC_REQUIRED = SYNTHETIC_POLICY["required_check_contexts"]
+
+
+def synthetic_clean_checks() -> list[dict]:
+    return [{"name": n, "status": "COMPLETED", "conclusion": "SUCCESS"} for n in SYNTHETIC_REQUIRED]
+
 
 # --------------------------------------------------------------- fake gh CLI
 class FakeGh:
@@ -130,17 +143,28 @@ def main() -> int:
         pr.update(over)
         return pr
 
-    def gate(pr, **kw):
+    def gate(pr, *, policy=POLICY, **kw):
         kw.setdefault("unresolved_threads", 0)
         kw.setdefault("knowledge_delta_ok", True)
-        return G.evaluate_gate(pr, POLICY, **kw)
+        return G.evaluate_gate(pr, policy, **kw)
+
+    def synthetic_pr(**over):
+        pr = {
+            "state": "OPEN", "isDraft": False, "headRefOid": "a" * 40,
+            "baseRefName": SYNTHETIC_POLICY["base_branch"], "headRefName": "feature/x",
+            "reviewDecision": "", "statusCheckRollup": synthetic_clean_checks(), "url": "https://x",
+        }
+        pr.update(over)
+        return pr
 
     # ----------------------------------------------------------- unit: core
     # 10. clean PR -> no blocks (a dry-run would proceed)
     check("10. clean PR passes the gate", gate(clean_pr()) == [], gate(clean_pr()))
 
-    # 1. missing required context -> blocked
-    b = gate(clean_pr(statusCheckRollup=clean_checks()[:-1]))
+    # 1. missing required context -> blocked (synthetic policy: the real
+    #    policy has only one required context to begin with - see "x. no
+    #    checks blocks" below for that case).
+    b = gate(synthetic_pr(statusCheckRollup=synthetic_clean_checks()[:-1]), policy=SYNTHETIC_POLICY)
     check("1. missing required context blocks", any("missing" in x for x in b), b)
 
     # 2. failed required context -> blocked
@@ -190,8 +214,9 @@ def main() -> int:
     check("x. a non-required failed check also blocks",
           gate(clean_pr(statusCheckRollup=clean_checks() + [{"name": "flaky", "status": "COMPLETED", "conclusion": "FAILURE"}])) != [])
 
-    # 11. required contexts come from the single policy source (not hardcoded here).
-    check("11. policy provides exactly three consolidated required contexts", len(REQUIRED) == 3, str(len(REQUIRED)))
+    # 11. required contexts come from the single policy source (not hardcoded
+    #     here) - D-14 consolidated routine PR CI to one hosted job.
+    check("11. policy provides exactly one consolidated required context", len(REQUIRED) == 1, str(len(REQUIRED)))
     # 12. platform enforcement honestly recorded as wrapper-only (branch protection unavailable).
     check("12. wrapper-only enforcement recorded (branch protection unavailable)",
           POLICY["platform_enforcement"]["branch_protection_available"] is False)

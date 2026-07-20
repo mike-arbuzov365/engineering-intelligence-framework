@@ -68,8 +68,9 @@ Each pass verifies:
 
 A repo genuinely without CI expresses that via the policy file alone
 (`required_check_contexts: []` and `allow_no_checks: true`), never via how
-the script is invoked. The EIF policy has seven required contexts and
-`allow_no_checks: false`.
+the script is invoked. As of D-14 (2026-07-19), the EIF policy has exactly
+one required context (`PR smoke checks (required by policy)`, the routine
+PR job) and `allow_no_checks: false`.
 
 The merge itself is pinned to the verified head
 (`gh pr merge --match-head-commit <sha>`). The required check contexts live in
@@ -108,9 +109,12 @@ non-zero if any suite is unknown, exited non-zero, or exited `0` while
 reporting `passed != total` (a suite that claims success but disagrees with
 its own count is an inventory failure, not a pass). Plain-text mode stays
 diagnostic-only - it surfaces the same unknown/mismatched suites for a human
-but does not fail the process on them. CI runs `run_all.py --json` and its
-output is stored in the job log; `scripts/tests/test_run_all_json.py` verifies
-the aggregation and the exact-inventory verdict.
+but does not fail the process on them. Under D-14, the routine PR job runs
+the faster `scripts/tests/smoke.py` critical-path suite instead; the full
+`run_all.py --json` inventory runs in the manual
+`.github/workflows/release-check.yml` gate (or locally, at no Actions cost)
+and its output is stored in that job's log; `scripts/tests/test_run_all_json.py`
+verifies the aggregation and the exact-inventory verdict.
 
 ## Proof matrix
 

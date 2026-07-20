@@ -173,6 +173,8 @@ BUNDLE_TREES = [
     "core/ontology",
     "locales",
     "templates",
+    "playbooks",
+    "skills",
 ]
 
 
@@ -665,17 +667,73 @@ def _authority_section(adoption_mode: str) -> str:
     return COEXIST_AUTHORITY_SECTION if adoption_mode == "coexist" else GREENFIELD_AUTHORITY_SECTION
 
 
+# Prior private-pilot finding: an earlier version of this block told the
+# agent to read/search {knowledge_index_path}/{knowledge_root}
+# unconditionally, even when knowledge.managed is false - pointing at a
+# managed index EIF never generates or keeps current for an unmanaged/
+# external knowledge setup (a project that keeps its knowledge in its own
+# existing system, not EIF's schema). The two variants below make that
+# conditional on config.yaml's `knowledge.managed`, matching
+# _authority_section()'s established pattern for adoption.mode.
+MANAGED_KNOWLEDGE_BEFORE_WORK = """1. Read `{knowledge_index_path}` for what's already known about this codebase.
+2. Search for relevant prior lessons (only validated/eligible knowledge is
+   returned by default). Always pass `--framework-root` - without it,
+   schema-invalid knowledge is silently treated as valid instead of being
+   flagged:
+   `python .eif/runtime/eif_search_knowledge.py --knowledge-root "{knowledge_root}" --framework-root .eif/runtime "<your task in a few words>"`"""
+
+UNMANAGED_KNOWLEDGE_BEFORE_WORK = """1. This project's knowledge is not managed by EIF (`knowledge.managed: false`
+   in `.eif/config.yaml`) - `{knowledge_root}` is not an EIF-schema
+   knowledge base, and EIF does not generate or keep `{knowledge_index_path}`
+   current.
+2. Before non-trivial work, use this project's own existing index/search
+   convention if it has one. If it does not, say explicitly that retrieval
+   is external rather than inventing an EIF-managed index that does not
+   exist."""
+
+MANAGED_KNOWLEDGE_VALIDATE_LINE = (
+    '   `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "{knowledge_root}/**/*.md"`\n'
+)
+
+# Empty, not omitted: an unmanaged knowledge_root is not expected to hold
+# EIF-schema frontmatter at all, so validating it here would be a false
+# check against files that were never meant to conform - not a stricter
+# check, a meaningless one.
+UNMANAGED_KNOWLEDGE_VALIDATE_LINE = ""
+
+
+def _knowledge_before_work(knowledge_managed: bool) -> str:
+    return MANAGED_KNOWLEDGE_BEFORE_WORK if knowledge_managed else UNMANAGED_KNOWLEDGE_BEFORE_WORK
+
+
+def _knowledge_validate_line(knowledge_managed: bool) -> str:
+    return MANAGED_KNOWLEDGE_VALIDATE_LINE if knowledge_managed else UNMANAGED_KNOWLEDGE_VALIDATE_LINE
+
+
 def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_path: str,
-                   adoption_mode: str, entrypoint_name: str) -> str:
+                   adoption_mode: str, entrypoint_name: str, knowledge_managed: bool) -> str:
     template = (framework_root / "templates" / "agent-instructions.md").read_text(encoding="utf-8")
     begin = template.index(EIF_BEGIN)
     end = template.index(EIF_END) + len(EIF_END)
     block = template[begin:end]
+    # Both knowledge_before_work and knowledge_validate_line carry their own
+    # {knowledge_root}/{knowledge_index_path} placeholders - str.format()
+    # does not recursively re-format a substituted value, so each is
+    # formatted on its own BEFORE being substituted into the outer block,
+    # not the literal unfilled text.
+    knowledge_before_work = _knowledge_before_work(knowledge_managed).format(
+        knowledge_root=knowledge_root, knowledge_index_path=knowledge_index_path,
+    )
+    knowledge_validate_line = _knowledge_validate_line(knowledge_managed).format(
+        knowledge_root=knowledge_root,
+    )
     return block.format(
         knowledge_root=knowledge_root,
         knowledge_index_path=knowledge_index_path,
         authority_section=_authority_section(adoption_mode),
         entrypoint_name=entrypoint_name,
+        knowledge_before_work=knowledge_before_work,
+        knowledge_validate_line=knowledge_validate_line,
     )
 
 
@@ -1422,7 +1480,7 @@ def main(argv: list[str] | None = None) -> int:
     # exclusively EIF-owned file - nothing to merge or preserve, so it is
     # always written fresh, frontmatter included).
     try:
-        managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode, entrypoint)
+        managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode, entrypoint, knowledge_managed)
         if entry_strategy_for(adapter) == "full-regen":
             # This path is exclusively EIF-owned by contract (entry_ownership
             # "exclusive") - there is no legitimate "the project already put

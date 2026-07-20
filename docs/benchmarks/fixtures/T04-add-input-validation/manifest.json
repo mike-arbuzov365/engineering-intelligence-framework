@@ -1,0 +1,27 @@
+{
+  "manifest_schema_version": 1,
+  "task_id": "T04",
+  "title": "Add input validation",
+  "description": "divide_evenly(total, parts)'s docstring promises a ValueError for a non-positive parts value, but the function does not validate this yet - parts=0 crashes with an undocumented ZeroDivisionError, and negative parts silently returns a wrong result.",
+  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "task_prompt_path": "task-prompt.md",
+  "source_dir": "source",
+  "source_digest": "sha256:9717ea3a110f32aba3b379be900905a67d8ef4d3dd7a5a80ff04b93d39a2ac52",
+  "test_command": ["python", "tests/test_division.py"],
+  "expected_output_contract": {
+    "tests_total": 6,
+    "notes": "6 tests total; a correct fix makes all 6 pass, including both the zero-parts and negative-parts validation cases. The unfixed source already passes 4/6 (the valid-input cases)."
+  },
+  "mutation_check": {
+    "description": "Overwrites src/division.py with the fixture's known-buggy reference (validates only the exactly-zero case, not negative values), regardless of how the agent structured its own fix.",
+    "mutation_command": ["python", "mutation/apply_mutation.py"],
+    "expected_tests_passed_after_mutation": 5
+  },
+  "budget": {
+    "max_wall_time_seconds": 300,
+    "max_tool_calls": 20
+  },
+  "license": "Apache-2.0",
+  "provenance": "originally authored for this benchmark",
+  "no_private_content_confirmed": true
+}

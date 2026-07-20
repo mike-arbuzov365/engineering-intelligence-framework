@@ -13,6 +13,8 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import io
+import os
+import stat
 import sys
 import tempfile
 from pathlib import Path
@@ -50,7 +52,7 @@ def _init_real_instance(inst: Path) -> None:
     runtime = inst / ".eif" / "runtime"
     staging.rename(runtime)
 
-    block = eif_init._managed_block(FRAMEWORK_ROOT, "knowledge", "knowledge/index.md", "greenfield", "CLAUDE.md")
+    block = eif_init._managed_block(FRAMEWORK_ROOT, "knowledge", "knowledge/index.md", "greenfield", "CLAUDE.md", True)
     (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
     (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
 
@@ -91,7 +93,7 @@ def _init_real_instance_variant(
     runtime = inst / ".eif" / "runtime"
     staging.rename(runtime)
 
-    block = eif_init._managed_block(FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode, "CLAUDE.md")
+    block = eif_init._managed_block(FRAMEWORK_ROOT, knowledge_root, knowledge_index_path, adoption_mode, "CLAUDE.md", True)
     (inst / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
     (inst / ".gitignore").write_text(eif_init.GITIGNORE_BLOCK, encoding="utf-8")
 
@@ -112,6 +114,73 @@ def main() -> int:
     results.append(check("provenance: dirty source-bundle gets both the asserted note and a dirty note", len(bundle_dirty_notes) == 2))
     pkg_notes = verify.check_provenance({"framework": {"source_type": "installed-package"}, "package": {"distribution": "engineering-intelligence-framework", "version": "0.1.0.dev0", "python_version": "3.12.0"}})
     results.append(check("provenance: installed-package source is noted by distribution/version, not a fake ref", len(pkg_notes) == 1 and "engineering-intelligence-framework" in pkg_notes[0] and "0.1.0.dev0" in pkg_notes[0]))
+
+    # --- check_integrations: D-008 optional-integration contract. Uses a
+    # local fake executable fixture (per this session's own scope: no real
+    # paid/network operations), not a real Graphify/RTK/vendor-doc tool. ---
+    def fake_executable(directory: Path, name: str) -> None:
+        if os.name == "nt":
+            (directory / f"{name}.bat").write_text("@echo off\r\necho fake %*\r\n", encoding="utf-8")
+        else:
+            script = directory / name
+            script.write_text("#!/bin/sh\necho fake \"$@\"\n", encoding="utf-8")
+            script.chmod(script.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
+
+    def with_fake_on_path(directory: Path, fn):
+        original_path = os.environ.get("PATH", "")
+        os.environ["PATH"] = str(directory) + os.pathsep + original_path
+        try:
+            return fn()
+        finally:
+            os.environ["PATH"] = original_path
+
+    results.append(check(
+        "integrations: disabled entry is never checked, even with a garbage provider",
+        verify.check_integrations({"integrations": {"structural_graph": {"enabled": False, "provider": "not-a-real-thing"}}}) == [],
+    ))
+    results.append(check(
+        "integrations: enabled + degrade + provider not on PATH -> no problem (absence is allowed)",
+        verify.check_integrations({"integrations": {"shell_output_compression": {
+            "enabled": True, "provider": "definitely-not-installed-xyz", "data_boundary": "local-only", "failure_policy": "degrade",
+        }}}) == [],
+    ))
+    results.append(check(
+        "integrations: enabled + fail-closed + provider not on PATH -> reported",
+        any("not-installed" in p or "no such executable" in p for p in verify.check_integrations({"integrations": {"shell_output_compression": {
+            "enabled": True, "provider": "definitely-not-installed-xyz", "data_boundary": "local-only", "failure_policy": "fail-closed",
+        }}})),
+    ))
+    with tempfile.TemporaryDirectory() as tmp:
+        fake_dir = Path(tmp)
+        fake_executable(fake_dir, "rtk")
+
+        def check_reachable():
+            return verify.check_integrations({"integrations": {"shell_output_compression": {
+                "enabled": True, "provider": "rtk", "data_boundary": "local-only", "failure_policy": "fail-closed",
+            }}})
+        results.append(check(
+            "integrations: enabled + fail-closed + provider reachable on PATH (fake fixture) -> no problem",
+            with_fake_on_path(fake_dir, check_reachable) == [],
+        ))
+
+        def check_boundary_mismatch():
+            return verify.check_integrations({"integrations": {"shell_output_compression": {
+                "enabled": True, "provider": "rtk", "data_boundary": "external-api", "failure_policy": "degrade",
+            }}})
+        mismatch = with_fake_on_path(fake_dir, check_boundary_mismatch)
+        results.append(check(
+            "integrations: known provider (rtk) declared with a boundary it doesn't support -> reported regardless of failure_policy",
+            len(mismatch) == 1 and "does not match what that provider is known to support" in mismatch[0], mismatch,
+        ))
+
+        def check_boundary_ok():
+            return verify.check_integrations({"integrations": {"shell_output_compression": {
+                "enabled": True, "provider": "rtk", "data_boundary": "local-only", "failure_policy": "degrade",
+            }}})
+        results.append(check(
+            "integrations: known provider (rtk) declared with its actually-supported boundary -> no problem",
+            with_fake_on_path(fake_dir, check_boundary_ok) == [],
+        ))
 
     # --- Clean instance: everything passes ---
     with tempfile.TemporaryDirectory() as tmp:
@@ -165,6 +234,36 @@ def main() -> int:
         _, _, unexpected2 = verify.check_bundle_files(inst, lock)
         results.append(check("README.md itself is NOT flagged as unexpected (known, by-design exclusion)",
                              "README.md" not in unexpected2))
+
+    # --- Runtime schema-loading crash safety: a corrupt/partially-staged
+    # bundle must fail this ONE check, not crash the whole doctor run before
+    # later checks get a chance to report. Simulates self-audit mode
+    # (--framework-root pointed at the instance's own bundled .eif/runtime,
+    # not a framework checkout) since that's the bundled copy this fix
+    # protects. ---
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "missing-schema"
+        _init_real_instance(inst)
+        bundled_root = inst / ".eif" / "runtime"
+        schema_path = bundled_root / "core" / "schemas" / "eif-config.schema.json"
+        schema_path.unlink()
+        errors = verify.check_schema(bundled_root, inst / ".eif" / "config.yaml", "eif-config.schema.json", "config")
+        results.append(check(
+            "missing bundled schema is reported as this check's problem, not a crash",
+            len(errors) == 1 and "missing" in errors[0], str(errors),
+        ))
+
+    with tempfile.TemporaryDirectory() as tmp:
+        inst = Path(tmp) / "corrupt-schema"
+        _init_real_instance(inst)
+        bundled_root = inst / ".eif" / "runtime"
+        schema_path = bundled_root / "core" / "schemas" / "eif-config.schema.json"
+        schema_path.write_text("{ not valid json", encoding="utf-8")
+        errors = verify.check_schema(bundled_root, inst / ".eif" / "config.yaml", "eif-config.schema.json", "config")
+        results.append(check(
+            "corrupt (invalid JSON) bundled schema is reported as this check's problem, not a crash",
+            len(errors) == 1 and "not valid JSON" in errors[0], str(errors),
+        ))
 
     # --- Corrupted lock: manifest digest doesn't match its own manifest ---
     with tempfile.TemporaryDirectory() as tmp:

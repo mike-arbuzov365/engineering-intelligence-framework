@@ -196,7 +196,10 @@ outside it), and an end (closeout: record what changed, what was learned,
 what's still open, and whether anything should be promoted from
 session-scoped state into durable Tier 2 knowledge).
 
-*(Playbook content not ported yet - see [`playbooks/README.md`](../../playbooks/README.md).)*
+See [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md),
+[`session-execution.md`](../../playbooks/session-execution.md), and
+[`session-closeout.md`](../../playbooks/session-closeout.md) for the
+step-by-step workflow.
 
 ## Execution packets
 
@@ -212,10 +215,12 @@ session) should be able to verify the claimed evidence against the actual
 repository state (merged PRs, passing CI, working code) rather than trust
 the closeout narrative at face value.
 
-*(Planning-packet templates specifically - charter, facts, decisions,
-roadmap - not ported yet. The task-scope, Knowledge Delta, and
-session-closeout templates used by a single-session task ARE built and in
-use - see [`templates/README.md`](../../templates/README.md).)*
+See [`playbooks/execution-packet-planning.md`](../../playbooks/execution-packet-planning.md)
+for the planning workflow and `templates/packet-*.md` for the charter,
+facts, decisions, roadmap, self-review, start, and closeout templates it
+uses. The task-scope, Knowledge Delta, and session-closeout templates
+used by a single-session task are a separate, simpler path - see
+[`templates/README.md`](../../templates/README.md).
 
 ## Knowledge Delta
 
@@ -296,10 +301,17 @@ required-status-check enforcement natively, the merge path itself (not
 just documentation) needs to check status before allowing a merge.
 
 Built: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) runs
-privacy scanning, frontmatter/config/lock schema validation, link
-checking, a YAML/JSON-Schema self-consistency check, and Knowledge Delta
-completeness (fetched from the live PR body, not the frozen trigger
-payload) on every PR, plus the full runtime test suite - see
+exactly one hosted job per PR (D-14, 2026-07-19): the critical-path
+[`scripts/tests/smoke.py`](../../scripts/tests/smoke.py) suite, privacy
+scanning, frontmatter/config/lock schema validation, link checking, a
+YAML/JSON-Schema self-consistency check, and Knowledge Delta completeness
+(fetched from the live PR body, not the frozen trigger payload). Push to
+`main` triggers no workflow at all - a merged PR was already fully
+validated by this job. The full runtime test suite
+(`scripts/tests/run_all.py`, 24 suites) and the cross-platform package-
+build/license-check matrices run on a manual release gate
+([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml),
+`workflow_dispatch`-only) or locally at no Actions cost - see
 [`scripts/README.md`](../../scripts/README.md) for what each gate script
 does. A controlled merge entrypoint
 ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py)) re-verifies
@@ -363,10 +375,13 @@ scenario, and a second adapter.
 
 ## Metrics and benchmark methodology
 
-See [`docs/benchmarks/README.md`](../benchmarks/README.md). No benchmark has
-been run yet; any token-savings number quoted before that benchmark exists
-should be treated as unverified and non-representative of overall task
-quality.
+See [`docs/benchmarks/README.md`](../benchmarks/README.md). A first bounded
+real-agent pilot exists (2026-07-20): one model, three of ten fixtures, one
+attempt per mode, six attempts total, 100% task success. Real, provider-
+reported token counts are published alongside it, but n=1 per (task, mode)
+cell does not support a general efficiency claim - any "N% token savings"
+figure not tied to that specific, bounded result should still be treated as
+unverified and non-representative of overall task quality.
 
 ## Limitations
 
@@ -480,8 +495,12 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    and Ubuntu CI - see `scripts/eif_check_licenses.py`).
 5. Real merge-gate/CI enforcement wired up in repository settings, not just
    present as workflow files.
-6. Reproducible quality-per-token benchmark, run against the vertical
-   slice.
+6. ~~Reproducible quality-per-token benchmark, run against the vertical
+   slice~~ (first bounded pilot done - one model, three of ten fixtures,
+   one attempt per mode, 2026-07-20, see
+   [`docs/benchmarks/README.md`](../benchmarks/README.md); the remaining
+   seven fixtures, additional models, and repeated trials for a real
+   confidence interval remain open).
 7. Broader playbook/template/skill porting - only after 5-6, and only as
    much as the vertical slice's lessons say is actually needed.
 8. `v0.1.0` release -> website and launch content.
@@ -609,14 +628,18 @@ formally ratified (the file is explicit about which is which).
 - [x] Degraded mode documented.
 
 ### Quality
-- [x] CI runs on every PR: privacy scan, frontmatter/config schema
-      validation (real `jsonschema` Draft202012Validator, not a hand-rolled
-      parser), link check, YAML/JSON Schema syntax check, Knowledge Delta
-      completeness (three-way meaningful/mechanical/empty classification,
-      not a bare heading check) - see
-      [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml). Every
-      script has its own test suite (positive + negative fixtures) that
-      also runs in CI.
+- [x] CI runs on every PR (one hosted job, D-14): privacy scan,
+      frontmatter/config schema validation (real `jsonschema`
+      Draft202012Validator, not a hand-rolled parser), link check,
+      YAML/JSON Schema syntax check, Knowledge Delta completeness
+      (three-way meaningful/mechanical/empty classification, not a bare
+      heading check), and the critical-path `scripts/tests/smoke.py`
+      suite - see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
+      Every script's own full test suite (positive + negative fixtures,
+      24 suites, ~990 checks) runs on the manual release gate
+      ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml))
+      or locally, not on every routine PR - moved there under D-14 to
+      keep routine PR cost to one job, not removed.
 - [x] A controlled merge entrypoint exists
       ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py),
       genericized from the private instance's proven `merge-pr.ps1`
@@ -662,7 +685,11 @@ formally ratified (the file is explicit about which is which).
       has real captured command output, both reproducible from a clean
       checkout - see
       [`docs/guides/vertical-slice.md`](../guides/vertical-slice.md).
-- [ ] Benchmark measures quality together with tokens (not run).
+- [x] Benchmark measures quality together with tokens - one bounded real-
+      agent pilot run (2026-07-20): 100% task success in both modes,
+      real provider-reported token counts, n=1 per cell (not a
+      statistically powered claim) - see
+      [`docs/benchmarks/README.md`](../benchmarks/README.md).
 
 ### Documentation
 - [x] This document exists and is the canonical source for README/website/
@@ -733,10 +760,14 @@ presence heuristic - and is not - semantic understanding of your existing
 rules.
 
 **What's the overhead of adopting this?**
-Not yet measured end to end - see
-[Metrics and benchmark methodology](#metrics-and-benchmark-methodology).
-Expect nonzero setup and maintenance cost; this document will be updated
-with real numbers once the benchmark exists.
+Not yet measured end to end. The one real-agent benchmark pilot that
+exists (see
+[Metrics and benchmark methodology](#metrics-and-benchmark-methodology))
+measures task-fixing quality and tokens against small synthetic fixtures,
+not the ongoing setup/maintenance cost of adopting EIF into a real
+project - that specific question remains open. Expect nonzero setup and
+maintenance cost; this document will be updated with real numbers once
+that's measured.
 
 **Can I write my project documentation in a language other than English?**
 Yes, that's a first-class design goal - see

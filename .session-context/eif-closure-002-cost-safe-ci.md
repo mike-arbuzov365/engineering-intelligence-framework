@@ -1,6 +1,6 @@
 ---
 session_id: eif-closure-002-cost-safe-ci
-status: in-progress
+status: completed
 date: 2026-07-19
 depends_on: eif-closure-001-baseline-wip
 ---

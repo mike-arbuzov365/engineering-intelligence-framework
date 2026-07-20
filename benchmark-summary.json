@@ -1,0 +1,96 @@
+{
+  "harness_version": "0.1.0",
+  "total_records": 6,
+  "groups": [
+    {
+      "task_id": "T02",
+      "mode": "A_baseline",
+      "total_attempts_including_retries": 1,
+      "terminal_runs": 1,
+      "successes": 1,
+      "success_rate": 1.0,
+      "mean_input_tokens": 732,
+      "mean_output_tokens": 384,
+      "input_tokens_95ci": null,
+      "token_figures_suppressed_reason": null,
+      "outcome_breakdown": {
+        "success": 1
+      }
+    },
+    {
+      "task_id": "T02",
+      "mode": "B_eif_governance",
+      "total_attempts_including_retries": 1,
+      "terminal_runs": 1,
+      "successes": 1,
+      "success_rate": 1.0,
+      "mean_input_tokens": 1743,
+      "mean_output_tokens": 188,
+      "input_tokens_95ci": null,
+      "token_figures_suppressed_reason": null,
+      "outcome_breakdown": {
+        "success": 1
+      }
+    },
+    {
+      "task_id": "T07",
+      "mode": "A_baseline",
+      "total_attempts_including_retries": 1,
+      "terminal_runs": 1,
+      "successes": 1,
+      "success_rate": 1.0,
+      "mean_input_tokens": 727,
+      "mean_output_tokens": 256,
+      "input_tokens_95ci": null,
+      "token_figures_suppressed_reason": null,
+      "outcome_breakdown": {
+        "success": 1
+      }
+    },
+    {
+      "task_id": "T07",
+      "mode": "B_eif_governance",
+      "total_attempts_including_retries": 1,
+      "terminal_runs": 1,
+      "successes": 1,
+      "success_rate": 1.0,
+      "mean_input_tokens": 1738,
+      "mean_output_tokens": 120,
+      "input_tokens_95ci": null,
+      "token_figures_suppressed_reason": null,
+      "outcome_breakdown": {
+        "success": 1
+      }
+    },
+    {
+      "task_id": "T10",
+      "mode": "A_baseline",
+      "total_attempts_including_retries": 1,
+      "terminal_runs": 1,
+      "successes": 1,
+      "success_rate": 1.0,
+      "mean_input_tokens": 948,
+      "mean_output_tokens": 1538,
+      "input_tokens_95ci": null,
+      "token_figures_suppressed_reason": null,
+      "outcome_breakdown": {
+        "success": 1
+      }
+    },
+    {
+      "task_id": "T10",
+      "mode": "B_eif_governance",
+      "total_attempts_including_retries": 1,
+      "terminal_runs": 1,
+      "successes": 1,
+      "success_rate": 1.0,
+      "mean_input_tokens": 1959,
+      "mean_output_tokens": 876,
+      "input_tokens_95ci": null,
+      "token_figures_suppressed_reason": null,
+      "outcome_breakdown": {
+        "success": 1
+      }
+    }
+  ]
+}

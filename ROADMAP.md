@@ -26,32 +26,43 @@ this project applies to every other claim it makes about itself - see
 - Reproducible dependency/license checking - default mode reads a
   committed SBOM instead of scanning the invoking environment, confirmed
   identical on Windows and Ubuntu CI.
-- An installable `eifctl` package (not yet published to a package index).
+- An installable `eifctl` package (not yet published to a package index),
+  including an installed-wheel synthetic journey and behavioral integration
+  states.
+- A first bounded real-agent benchmark pilot: one model, three fixtures, six
+  attempts, one attempt per cell. It proves the harness/pilot, not a
+  quality/token advantage.
+- Optional RTK and Graphify behavioral adapters with version probes, bounded
+  canaries, explicit degraded modes and local/no-paid defaults.
+- A bounded evidence-loop operating contract with explicit evaluator,
+  iteration/remote budgets, adaptation and closeout states.
+- Public documentation reconciliation across README, architecture,
+  integrations, claims and roadmap.
 
 ## In progress
 
-- Public documentation closure: this page, the quickstart, the config
-  reference, and a documentation-accuracy pass across the existing docs
-  set (adapter counts, roadmap staleness, and similar drift, corrected as
-  found rather than assumed absent).
-- An executable synthetic demo proven from the installed package (not
-  just a framework checkout) on both Windows and Ubuntu.
+- Final local release gate and a refreshed fresh-history candidate after the
+  last documentation changes.
+- Owner review of launch source, repository-history choice, domain/social
+  strategy and the exact candidate digest.
 
 ## Not started
 
 - Real merge-gate/CI enforcement wired into repository settings (required
   status checks, branch protection), not just present as workflow files
   re-verified by a wrapper script.
-- A reproducible quality-per-token benchmark, run against the vertical
-  slice, comparing baseline / EIF / EIF+Graphify / EIF+Graphify+RTK
-  strategies - schema and harness exist; no run has happened yet, and the
-  approval packet for a first real run (models, cost, stopping rules) is
-  prepared separately from actually running it.
+- Repeated comparative quality-per-token trials across more fixtures/models.
+  Modes C/D remain blocked until a real agent runner consumes Graphify
+  evidence and RTK passes the required behavioral/telemetry contract; fake
+  integration results are not accepted.
+- A provider-specific vendor-documentation adapter; its generic declaration
+  exists, but behavioral retrieval/health is not yet implemented.
 - Broader playbook/template/skill porting - deliberately sequenced after
   the items above, and only as much as their own lessons say is actually
   needed.
-- `v0.1.0` release, package-index publication, and launch content
-  (website, article, announcement).
+- `v0.1.0` tag/release, package-index publication, website implementation and
+  hosting, article/LinkedIn publication and feedback intake. These are
+  separate owner-gated launch packets, not side effects of technical review.
 
 ## Explicit non-goals for v0.1
 

@@ -104,6 +104,7 @@ def _base_result(
     *,
     version: dict | None = None,
     capabilities: list[dict] | None = None,
+    freshness: dict | None = None,
     remediation: list[str] | None = None,
 ) -> dict:
     return {
@@ -115,7 +116,7 @@ def _base_result(
         "data_boundary": data_boundary,
         "version": version or {"detected": None, "compatible": None, "constraint": None},
         "capabilities": capabilities or [],
-        "freshness": _freshness_not_applicable(),
+        "freshness": freshness or _freshness_not_applicable(),
         "remediation": remediation or [],
     }
 
@@ -362,6 +363,306 @@ def evaluate_rtk(
     )
 
 
+_FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
+
+
+def classify_graph_freshness(
+    baseline_commit: str | None,
+    current_commit: str | None,
+    merge_base: str | None,
+) -> str:
+    """Classify a graph baseline without file-count or wall-clock heuristics."""
+    if not baseline_commit or not current_commit:
+        return "unknown"
+    if not _FULL_SHA.fullmatch(baseline_commit) or not _FULL_SHA.fullmatch(current_commit):
+        return "unknown"
+    if baseline_commit == current_commit:
+        return "fresh"
+    if merge_base == baseline_commit:
+        return "stale"
+    return "diverged"
+
+
+def _graphify_freshness(instance_path: Path, baseline_commit: str | None) -> dict:
+    result = {
+        "state": "unknown",
+        "baseline_commit": baseline_commit if baseline_commit and _FULL_SHA.fullmatch(baseline_commit) else None,
+        "current_commit": None,
+        "merge_base": None,
+    }
+    if result["baseline_commit"] is None:
+        return result
+
+    current_result = _run(["git", "-C", str(instance_path), "rev-parse", "HEAD"], timeout=10.0)
+    current = current_result.stdout.strip().lower()
+    if current_result.returncode != 0 or not _FULL_SHA.fullmatch(current):
+        return result
+    result["current_commit"] = current
+    if current == result["baseline_commit"]:
+        result["merge_base"] = current
+        result["state"] = "fresh"
+        return result
+
+    exists = _run(
+        ["git", "-C", str(instance_path), "cat-file", "-e", f"{result['baseline_commit']}^{{commit}}"],
+        timeout=10.0,
+    )
+    if exists.returncode != 0:
+        return result
+    merge_result = _run(
+        ["git", "-C", str(instance_path), "merge-base", result["baseline_commit"], current],
+        timeout=10.0,
+    )
+    merge_base = merge_result.stdout.strip().lower()
+    if merge_result.returncode == 0 and _FULL_SHA.fullmatch(merge_base):
+        result["merge_base"] = merge_base
+    elif merge_result.returncode == 1:
+        result["state"] = "diverged"
+        return result
+    else:
+        return result
+    result["state"] = classify_graph_freshness(result["baseline_commit"], current, result["merge_base"])
+    return result
+
+
+def _graphify_semantic_gate(entry: dict) -> tuple[bool, str]:
+    mode = entry.get("mode", "structural")
+    processing = entry.get("processing", "local")
+    boundary = entry.get("data_boundary", "local-only")
+    cost_cap = entry.get("cost_cap_usd", 0)
+    if mode == "structural":
+        passed = processing == "local" and boundary == "local-only" and cost_cap == 0
+        return (
+            passed,
+            "structural mode is local-only with a zero cost cap"
+            if passed
+            else "structural mode requires local processing, local-only boundary and zero cost cap",
+        )
+    if mode not in {"semantic", "deep"}:
+        return False, "mode must be structural, semantic or deep"
+    semantic_provider = entry.get("semantic_provider")
+    passed = (
+        processing == "external"
+        and boundary == "external-api"
+        and isinstance(semantic_provider, str)
+        and bool(semantic_provider.strip())
+        and isinstance(cost_cap, (int, float))
+        and not isinstance(cost_cap, bool)
+        and cost_cap > 0
+    )
+    return (
+        passed,
+        "semantic/deep mode has an explicit provider, external boundary and positive cost cap"
+        if passed
+        else "semantic/deep mode requires external processing, external-api boundary, an explicit semantic_provider and a positive cost cap",
+    )
+
+
+def _graphify_artifact(instance_path: Path, entry: dict) -> tuple[bool, str, str | None, str]:
+    configured = entry.get("artifact_path", "graphify-out/graph.json")
+    if not isinstance(configured, str) or not configured.strip():
+        return False, "artifact_path must be a non-empty instance-relative path", None, "config"
+    relative = Path(configured)
+    if relative.is_absolute() or ".." in relative.parts or not relative.parts or relative.parts[0] != "graphify-out":
+        return False, "raw graph path must stay below instance-local graphify-out/", None, "config"
+    root = instance_path.resolve()
+    artifact = (root / relative).resolve()
+    try:
+        artifact.relative_to(root)
+    except ValueError:
+        return False, "raw graph path escapes the project instance", None, "config"
+    if not artifact.is_file():
+        return False, "instance-local raw graph artifact is missing", None, "missing"
+    try:
+        graph = _read_json(artifact)
+    except (OSError, json.JSONDecodeError):
+        return False, "raw graph artifact is unreadable or invalid JSON", None, "invalid"
+    links = graph.get("links", graph.get("edges"))
+    if not isinstance(graph.get("nodes"), list) or not isinstance(links, list):
+        return False, "raw graph artifact lacks nodes and links/edges arrays", None, "invalid"
+    baseline = entry.get("baseline_commit")
+    if not (isinstance(baseline, str) and _FULL_SHA.fullmatch(baseline)):
+        built_at = graph.get("built_at_commit")
+        baseline = built_at if isinstance(built_at, str) and _FULL_SHA.fullmatch(built_at) and set(built_at) != {"0"} else None
+    return True, f"instance-local raw graph parsed ({len(graph['nodes'])} nodes, {len(links)} links)", baseline, "ok"
+
+
+def _graphify_canaries(
+    executable: str,
+    framework_root: Path,
+    runner: CommandRunner,
+) -> dict[str, tuple[bool, str]]:
+    fixture = framework_root / "integrations" / "graphify" / "fixtures" / "structural-canary"
+    query = runner([executable, "query", "PaymentService"], fixture, 15.0)
+    query_ok = query.returncode == 0 and "PaymentService" in query.stdout and "InvoiceRepository" in query.stdout
+    path = runner([executable, "path", "CheckoutController", "InvoiceRepository"], fixture, 15.0)
+    path_ok = (
+        path.returncode == 0
+        and "CheckoutController" in path.stdout
+        and "PaymentService" in path.stdout
+        and "InvoiceRepository" in path.stdout
+    )
+    explain = runner([executable, "explain", "PaymentService"], fixture, 15.0)
+    explain_ok = explain.returncode == 0 and "PaymentService" in explain.stdout and "CALLS" in explain.stdout
+    return {
+        "query-canary": (
+            query_ok,
+            "synthetic query returned the expected service and repository" if query_ok else f"synthetic query failed with exit {query.returncode}",
+        ),
+        "path-canary": (
+            path_ok,
+            "synthetic path returned the expected two-hop relationship" if path_ok else f"synthetic path failed with exit {path.returncode}",
+        ),
+        "explain-canary": (
+            explain_ok,
+            "synthetic explain returned the expected node relationship" if explain_ok else f"synthetic explain failed with exit {explain.returncode}",
+        ),
+    }
+
+
+def evaluate_graphify(
+    integration: str,
+    entry: dict,
+    framework_root: Path,
+    instance_path: Path,
+    *,
+    checked_at: str,
+    which: Callable[[str], str | None] = shutil.which,
+    runner: CommandRunner = _run,
+) -> dict:
+    provider = entry.get("provider")
+    boundary = entry.get("data_boundary", "local-only")
+    if provider != "graphify":
+        return _base_result(
+            integration,
+            provider,
+            "misconfigured",
+            boundary,
+            checked_at,
+            remediation=["Set provider to 'graphify' or disable this integration."],
+        )
+
+    manifest, manifest_errors = _manifest(framework_root, "graphify")
+    if manifest is None or manifest_errors:
+        return _base_result(
+            integration,
+            provider,
+            "misconfigured",
+            boundary,
+            checked_at,
+            remediation=["Restore and validate integrations/graphify/manifest.json."],
+        )
+
+    gate_ok, gate_summary = _graphify_semantic_gate(entry)
+    artifact_ok, artifact_summary, baseline, artifact_issue = _graphify_artifact(instance_path, entry)
+    freshness = _graphify_freshness(instance_path, baseline)
+    capabilities = [
+        _capability("artifact-policy", True, "pass" if artifact_ok else "fail", "config", artifact_summary),
+        _capability("semantic-gate", True, "pass" if gate_ok else "fail", "config", gate_summary),
+        _capability(
+            "git-freshness",
+            True,
+            "pass" if freshness["state"] == "fresh" else "fail",
+            "git",
+            f"commit-derived graph freshness is {freshness['state']}",
+        ),
+    ]
+    if boundary not in manifest["data_boundaries"] or not gate_ok or artifact_issue == "config":
+        return _base_result(
+            integration,
+            provider,
+            "misconfigured",
+            boundary,
+            checked_at,
+            capabilities=capabilities,
+            freshness=freshness,
+            remediation=["Correct the Graphify mode, data boundary, cost gate and instance-local artifact path."],
+        )
+
+    executable = entry.get("executable_path") or which(manifest["executable"])
+    if not executable:
+        return _base_result(
+            integration,
+            provider,
+            "unavailable",
+            boundary,
+            checked_at,
+            version={"detected": None, "compatible": None, "constraint": _constraint(manifest)},
+            capabilities=capabilities,
+            freshness=freshness,
+            remediation=["Install a compatible graphifyy CLI or disable the integration."],
+        )
+
+    version_result = runner([executable, *manifest["compatibility"]["version_command"][1:]], None, 10.0)
+    match = re.search(manifest["compatibility"]["version_pattern"], version_result.stdout.strip())
+    detected = match.group(1) if version_result.returncode == 0 and match else None
+    version_ok = bool(detected and _compatible(detected, manifest))
+    capabilities.insert(
+        0,
+        _capability(
+            "version-probe",
+            True,
+            "pass" if version_ok else "fail",
+            "probe",
+            f"compatible version detected: {detected}" if version_ok else "version was absent, unparseable or outside the compatible range",
+        ),
+    )
+    version = {"detected": detected, "compatible": version_ok, "constraint": _constraint(manifest)}
+    if not version_ok:
+        for capability_id in ("query-canary", "path-canary", "explain-canary"):
+            capabilities.append(_capability(capability_id, True, "skipped", "fallback", "skipped because version compatibility failed"))
+        return _base_result(
+            integration,
+            provider,
+            "misconfigured",
+            boundary,
+            checked_at,
+            version=version,
+            capabilities=capabilities,
+            freshness=freshness,
+            remediation=["Install a Graphify version in the declared compatible range, then rerun doctor."],
+        )
+
+    canaries = _graphify_canaries(executable, framework_root, runner)
+    for capability_id in ("query-canary", "path-canary", "explain-canary"):
+        passed, summary = canaries[capability_id]
+        capabilities.append(_capability(capability_id, True, "pass" if passed else "fail", "canary", summary))
+
+    failed_canary = any(item["id"].endswith("-canary") and item["status"] != "pass" for item in capabilities)
+    remediation: list[str] = []
+    if not artifact_ok:
+        state = "degraded"
+        remediation.append("Restore or generate an instance-local graphify-out/graph.json and record its build commit.")
+    elif freshness["state"] == "stale":
+        state = "stale"
+        remediation.append("Refresh the graph from the current source revision, then record the new baseline commit.")
+    elif freshness["state"] == "diverged":
+        state = "misconfigured"
+        remediation.append("Rebuild the graph on the current history; its recorded baseline is not an ancestor of HEAD.")
+    elif freshness["state"] == "unknown":
+        state = "degraded"
+        remediation.append("Record a reachable 40-character graph baseline commit to make freshness reproducible.")
+    elif failed_canary:
+        state = "degraded"
+        remediation.append("Use source search/manual navigation and inspect the failing structural canary.")
+    elif entry.get("mode", "structural") in {"semantic", "deep"}:
+        state = "degraded"
+        remediation.append("Doctor validates but never executes paid semantic/deep scans; attach separately approved provider evidence.")
+    else:
+        state = "healthy"
+    return _base_result(
+        integration,
+        provider,
+        state,
+        boundary,
+        checked_at,
+        version=version,
+        capabilities=capabilities,
+        freshness=freshness,
+        remediation=remediation,
+    )
+
+
 def evaluate_integrations(
     config: dict | None,
     framework_root: Path,
@@ -371,7 +672,6 @@ def evaluate_integrations(
     which: Callable[[str], str | None] = shutil.which,
     runner: CommandRunner = _run,
 ) -> list[dict]:
-    del instance_path  # reserved for Graphify freshness and project-local artifact checks
     timestamp = checked_at or _utc_now()
     integrations = (config or {}).get("integrations") or {}
     if not isinstance(integrations, dict):
@@ -388,6 +688,18 @@ def evaluate_integrations(
         provider = entry.get("provider")
         if provider == "rtk" or integration == "shell_output_compression":
             results.append(evaluate_rtk(integration, entry, framework_root, checked_at=timestamp, which=which, runner=runner))
+        elif provider == "graphify" or integration == "structural_graph":
+            results.append(
+                evaluate_graphify(
+                    integration,
+                    entry,
+                    framework_root,
+                    instance_path,
+                    checked_at=timestamp,
+                    which=which,
+                    runner=runner,
+                )
+            )
         else:
             results.append(_base_result(integration, provider, "misconfigured", boundary, timestamp, remediation=["No behavioral adapter exists for the configured provider."]))
     return results

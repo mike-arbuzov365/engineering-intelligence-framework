@@ -1,0 +1,63 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": []
+  },
+  "nodes": [
+    {
+      "id": "canary.py::CheckoutController",
+      "label": "CheckoutController",
+      "norm_label": "checkoutcontroller",
+      "file_type": "python",
+      "source_file": "canary.py",
+      "source_location": "L1",
+      "community": 0,
+      "_origin": "structural-canary"
+    },
+    {
+      "id": "canary.py::PaymentService",
+      "label": "PaymentService",
+      "norm_label": "paymentservice",
+      "file_type": "python",
+      "source_file": "canary.py",
+      "source_location": "L10",
+      "community": 0,
+      "_origin": "structural-canary"
+    },
+    {
+      "id": "canary.py::InvoiceRepository",
+      "label": "InvoiceRepository",
+      "norm_label": "invoicerepository",
+      "file_type": "python",
+      "source_file": "canary.py",
+      "source_location": "L20",
+      "community": 1,
+      "_origin": "structural-canary"
+    }
+  ],
+  "links": [
+    {
+      "source": "canary.py::CheckoutController",
+      "target": "canary.py::PaymentService",
+      "relation": "CALLS",
+      "weight": 1.0,
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "canary.py",
+      "source_location": "L5"
+    },
+    {
+      "source": "canary.py::PaymentService",
+      "target": "canary.py::InvoiceRepository",
+      "relation": "CALLS",
+      "weight": 1.0,
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "canary.py",
+      "source_location": "L15"
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "0000000000000000000000000000000000000000"
+}

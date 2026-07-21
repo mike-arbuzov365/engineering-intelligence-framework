@@ -14,8 +14,12 @@ Implementation status:
 
 - RTK has a versioned behavioral adapter, command registry, canaries and
   content-free local telemetry. A failed required canary produces `degraded`.
-- Graphify and vendor-docs remain declaration-only until their provider
-  adapters pass their own sessions and evidence gates.
+- Graphify has a versioned structural adapter, synthetic query/path/explain
+  canaries, commit-derived freshness, local raw-artifact policy and an explicit
+  semantic provider/boundary/cost gate. Stale or unknown graphs never report
+  healthy.
+- Vendor-docs remains declaration-only until its provider adapter passes its
+  own session and evidence gate.
 
 The `data_boundary` values here are the declared, expected boundary for a
 typical provider in that integration slot - see
@@ -39,8 +43,9 @@ The generic `.eif/config.yaml` and `eifctl doctor` contract is implemented:
 - `failure_policy: fail-closed` reports a missing provider;
 - `failure_policy: degrade` permits the documented core-only fallback.
 
-The shared declaration layer is not itself health. RTK extends it with a real
-version probe and behavioral canaries; Graphify and vendor-docs do not yet.
+The shared declaration layer is not itself health. RTK and Graphify extend it
+with real version probes and provider-specific behavioral canaries; vendor-docs
+does not yet.
 `eifctl doctor` reports each configured provider independently, and a provider
 must not be marketed as integrated until its capability-specific checks pass.
 Core EIF remains functional with every optional provider disabled or absent.

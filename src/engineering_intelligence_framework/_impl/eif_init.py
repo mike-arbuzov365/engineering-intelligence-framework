@@ -123,6 +123,7 @@ GITIGNORE_BLOCK = (
     ".eif/runtime.next/\n"
     ".eif/runtime.previous/\n"
     ".eif/local-state/\n"
+    "graphify-out/\n"
     "*.next\n"
     "*.previous\n"
     "*.bak-*\n"
@@ -521,6 +522,9 @@ def render_config_data(project_name: str, adapter_name: str, locale: str,
             "structural_graph": {
                 "enabled": False,
                 "provider": None,
+                "mode": "structural",
+                "artifact_path": "graphify-out/graph.json",
+                "baseline_commit": None,
                 "processing": "local",
                 "data_boundary": "local-only",
                 "cost_cap_usd": 0,

@@ -342,7 +342,7 @@ YAML/JSON-Schema self-consistency check, and Knowledge Delta completeness
 (fetched from the live PR body, not the frozen trigger payload). Push to
 `main` triggers no workflow at all - a merged PR was already fully
 validated by this job. The full runtime test suite
-(`scripts/tests/run_all.py`, 25 suites) and the cross-platform package-
+(`scripts/tests/run_all.py`, 28 suites) and the cross-platform package-
 build/license-check matrices run on a manual release gate
 ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml),
 `workflow_dispatch`-only) or locally at no Actions cost - see
@@ -670,7 +670,7 @@ formally ratified (the file is explicit about which is which).
       heading check), and the critical-path `scripts/tests/smoke.py`
       suite - see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
       Every script's own full test suite (positive + negative fixtures,
-      25 suites; exact check count is run evidence, not a fixed contract)
+      28 suites; exact check count is run evidence, not a fixed contract)
       runs on the manual release gate
       ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml))
       or locally, not on every routine PR - moved there under D-14 to

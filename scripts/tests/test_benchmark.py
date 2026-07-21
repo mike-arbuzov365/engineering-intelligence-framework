@@ -98,6 +98,37 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="eif-benchmark-test-") as tmp:
         tmp_root = Path(tmp)
 
+        # --- C/D are explicitly blocked at the real missing boundary. A
+        # deterministic fake agent must never make either mode look real. ---
+        for blocked_mode, expected_signal in (
+            ("C_structural_navigation", "records and consumes Graphify query/path/explain evidence"),
+            ("D_full_stack", "healthy RTK behavioral report"),
+        ):
+            blocked_work = tmp_root / blocked_mode
+            blocked_materialize = run_benchmark(
+                "materialize", str(T02), str(blocked_work), "--mode", blocked_mode,
+            )
+            results.append(check(
+                f"{blocked_mode} materialization is explicitly BLOCKED without fake workspace evidence",
+                blocked_materialize.returncode == 3
+                and "BLOCKED" in blocked_materialize.stdout
+                and expected_signal in blocked_materialize.stdout
+                and not blocked_work.exists(),
+                blocked_materialize.stdout + blocked_materialize.stderr,
+            ))
+            blocked_out = tmp_root / f"{blocked_mode}.jsonl"
+            blocked_run = run_benchmark(
+                "run", str(T02), str(blocked_work), "--mode", blocked_mode,
+                "--agent-runner", sys.executable, str(FAKE_AGENT), "--out", str(blocked_out),
+            )
+            results.append(check(
+                f"{blocked_mode} run is explicitly BLOCKED and writes no result record",
+                blocked_run.returncode == 3
+                and "BLOCKED" in blocked_run.stdout
+                and not blocked_out.exists(),
+                blocked_run.stdout + blocked_run.stderr,
+            ))
+
         # --- invalid manifest rejected ---
         bad_fixture = tmp_root / "bad-fixture"
         bad_fixture.mkdir()

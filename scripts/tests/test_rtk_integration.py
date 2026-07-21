@@ -24,16 +24,19 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
     return bool(condition)
 
 
-def config(*, enabled: bool = True, boundary: str = "local-only", policy: str = "degrade") -> dict:
+def config(*, enabled: bool = True, boundary: str = "local-only", policy: str = "degrade", executable_path: str | None = None) -> dict:
+    entry = {
+        "enabled": enabled,
+        "provider": "rtk" if enabled else None,
+        "processing": "local",
+        "data_boundary": boundary,
+        "failure_policy": policy,
+    }
+    if executable_path is not None:
+        entry["executable_path"] = executable_path
     return {
         "integrations": {
-            "shell_output_compression": {
-                "enabled": enabled,
-                "provider": "rtk" if enabled else None,
-                "processing": "local",
-                "data_boundary": boundary,
-                "failure_policy": policy,
-            }
+            "shell_output_compression": entry
         }
     }
 
@@ -78,6 +81,11 @@ def unit_results() -> list[bool]:
         checked_at=timestamp, which=lambda _name: None, runner=FakeRunner(),
     )[0]
     results.append(check("missing RTK is unavailable, not healthy", unavailable["state"] == "unavailable"))
+    missing_explicit = integrations.evaluate_integrations(
+        config(executable_path=str(FRAMEWORK_ROOT / "does-not-exist")), FRAMEWORK_ROOT, FRAMEWORK_ROOT,
+        checked_at=timestamp, runner=integrations._run,
+    )[0]
+    results.append(check("missing explicit RTK executable is unavailable with actionable evidence", missing_explicit["state"] == "unavailable"))
     results.append(check("unavailable + degrade does not fail core doctor", integrations.integration_problems(config(), [unavailable]) == []))
     results.append(check(
         "unavailable + fail-closed becomes a doctor failure",

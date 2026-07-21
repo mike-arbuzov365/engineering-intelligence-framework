@@ -207,6 +207,11 @@ def check_adapter(tmp_path: Path, adapter: str, entry_rel: str) -> list[Result]:
     text = entry.read_text(encoding="utf-8") if entry.is_file() else ""
     results.append(check(f"{adapter}: correct active entrypoint exists ({entry_rel})", entry.is_file()))
     results.append(check(f"{adapter}: exactly one EIF block", eif_block_count(text) == 1, f"found {eif_block_count(text)}"))
+    results.append(check(
+        f"{adapter}: optional integration health/fallback pointer is discoverable",
+        ".eif/runtime/integrations/README.md" in text
+        and "Only `healthy` is usable without qualification" in text,
+    ))
 
     doctor_proc = doctor_ok(instance)
     results.append(check(f"{adapter}: doctor passes after init", doctor_proc.returncode == 0, doctor_proc.stdout + doctor_proc.stderr))

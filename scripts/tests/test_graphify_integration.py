@@ -64,6 +64,7 @@ def config(
     cost_cap: float = 0,
     semantic_provider: str | None = None,
     artifact_path: str = "graphify-out/graph.json",
+    executable_path: str | None = None,
     policy: str = "degrade",
 ) -> dict:
     entry = {
@@ -79,6 +80,8 @@ def config(
     }
     if semantic_provider is not None:
         entry["semantic_provider"] = semantic_provider
+    if executable_path is not None:
+        entry["executable_path"] = executable_path
     return {"integrations": {"structural_graph": entry}}
 
 
@@ -190,6 +193,14 @@ def unit_results() -> list[bool]:
 
         unavailable = evaluate(instance, config(run_git(instance, "rev-parse", "HEAD")), available=False)
         results.append(check("missing Graphify executable is unavailable, not healthy", unavailable["state"] == "unavailable"))
+        missing_explicit = integrations.evaluate_integrations(
+            config(run_git(instance, "rev-parse", "HEAD"), executable_path=str(instance / "does-not-exist")),
+            FRAMEWORK_ROOT,
+            instance,
+            checked_at=TIMESTAMP,
+            runner=integrations._run,
+        )[0]
+        results.append(check("missing explicit Graphify executable is unavailable with actionable evidence", missing_explicit["state"] == "unavailable"))
         results.append(check("unavailable + degrade does not fail core doctor", integrations.integration_problems(config(baseline), [unavailable]) == []))
         results.append(check(
             "unavailable + fail-closed becomes a doctor failure",

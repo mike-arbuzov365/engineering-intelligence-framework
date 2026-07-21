@@ -1,10 +1,10 @@
 <!-- Knowledge source: GENERALIZE of the private EI's root CLAUDE.md pattern:
 a short, authoritative rule block that points outward to detail files
 instead of duplicating them. The private source file's actual content
-(an internal shell-tool wrapper contract) is intentionally NOT ported -
-that tool is a private, optional integration, out of scope for this slice.
-What's ported is the *shape*: compact, pointer-based, generated once per
-project instance.
+(an internal shell-tool wrapper contract) is intentionally NOT ported.
+RTK now has a public optional behavioral adapter, but EIF still does not
+auto-install hooks or mutate user configuration. What's ported here is the
+*shape*: compact, pointer-based, generated once per project instance.
 
 This template is consumed by scripts/eif_init.py. Everything between the
 EIF:BEGIN and EIF:END markers is a *managed block*: eif_init inserts it into
@@ -64,6 +64,12 @@ yours; the lock is EIF-managed and rewritten on every upgrade).
    - checks config/lock schemas, bundle file hashes, config/adapter/lock/
    entrypoint consistency, and {entrypoint_name}/.gitignore marker integrity
    in one pass.
+5. If `.eif/config.yaml` enables an optional integration, read
+   `.eif/runtime/integrations/README.md` and use the same doctor result as its
+   capability gate. Only `healthy` is usable without qualification. Graphify
+   output is navigation evidence and must be verified against source; a
+   degraded RTK command class falls back to the unfiltered command. Never run
+   semantic/deep Graphify without the explicit provider/boundary/cost gate.
 
 {authority_section}
 

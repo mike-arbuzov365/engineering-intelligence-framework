@@ -27,7 +27,7 @@ integrations:
     provider: graphify
     mode: structural
     artifact_path: graphify-out/graph.json
-    baseline_commit: 0123456789abcdef0123456789abcdef01234567
+    baseline_commit: null
     processing: local
     data_boundary: local-only
     cost_cap_usd: 0
@@ -35,8 +35,11 @@ integrations:
 ```
 
 Build or restore the raw graph separately, place it below `graphify-out/`, and
-record the exact commit used to build it. Generated EIF instances ignore the
-whole `graphify-out/` directory. The committed synthetic canary under
+record the exact commit used to build it as the artifact's `built_at_commit`.
+`baseline_commit` is an explicit override for artifacts without that metadata;
+keeping it in the ignored artifact avoids making a new config commit stale by
+definition. Generated EIF instances ignore the whole `graphify-out/`
+directory. The committed synthetic canary under
 `fixtures/` contains invented code only; it is not a project graph.
 
 Freshness states are commit-derived:

@@ -307,6 +307,19 @@ def evaluate_rtk(
     version_result = runner(version_argv, None, 10.0)
     match = re.search(manifest["compatibility"]["version_pattern"], version_result.stdout.strip())
     detected = match.group(1) if version_result.returncode == 0 and match else None
+    if version_result.returncode == 127 and detected is None:
+        return _base_result(
+            integration,
+            provider,
+            "unavailable",
+            boundary,
+            checked_at,
+            version={"detected": None, "compatible": None, "constraint": _constraint(manifest)},
+            capabilities=[
+                _capability("version-probe", True, "fail", "probe", "configured RTK executable could not be started")
+            ],
+            remediation=["Correct executable_path, install a compatible Rust Token Killer binary, or disable the integration."],
+        )
     version_ok = bool(detected and _compatible(detected, manifest))
     capabilities = [
         _capability(
@@ -596,6 +609,22 @@ def evaluate_graphify(
     version_result = runner([executable, *manifest["compatibility"]["version_command"][1:]], None, 10.0)
     match = re.search(manifest["compatibility"]["version_pattern"], version_result.stdout.strip())
     detected = match.group(1) if version_result.returncode == 0 and match else None
+    if version_result.returncode == 127 and detected is None:
+        capabilities.insert(
+            0,
+            _capability("version-probe", True, "fail", "probe", "configured Graphify executable could not be started"),
+        )
+        return _base_result(
+            integration,
+            provider,
+            "unavailable",
+            boundary,
+            checked_at,
+            version={"detected": None, "compatible": None, "constraint": _constraint(manifest)},
+            capabilities=capabilities,
+            freshness=freshness,
+            remediation=["Correct executable_path, install a compatible graphifyy CLI, or disable the integration."],
+        )
     version_ok = bool(detected and _compatible(detected, manifest))
     capabilities.insert(
         0,

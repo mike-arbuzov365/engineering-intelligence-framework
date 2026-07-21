@@ -208,7 +208,7 @@
           "baseline_commit": {
             "type": ["string", "null"],
             "pattern": "^[0-9a-f]{40}$",
-            "description": "Git commit at which the current graph was built. Null means freshness is unknown until a real baseline is recorded."
+            "description": "Optional override for the Git commit at which the current graph was built. Null uses built_at_commit from the ignored raw artifact; freshness is unknown only if neither source supplies a valid commit."
           },
           "semantic_provider": {
             "type": "string",

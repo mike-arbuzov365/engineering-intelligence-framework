@@ -57,10 +57,21 @@ harness mechanics; this real run proves the end-to-end pilot.
 Modes C and D are declared in
 [`core/schemas/benchmark-result.schema.json`](../../core/schemas/benchmark-result.schema.json)'s
 `mode` enum so the schema doesn't need to change when they become real,
-but `eif_benchmark.py materialize`/`run` refuse to execute them - there is
-no reproducible Graphify/RTK install-version-config contract yet to run
-them against, and a faked C/D result would actively mislead rather than
-just be absent. They stay blocked until that contract exists.
+but `eif_benchmark.py materialize`/`run` still refuse to execute them. The
+Graphify and RTK provider contracts now exist; the remaining boundary is the
+benchmark attempt itself:
+
+- mode C has no real benchmark agent runner that records and consumes
+  Graphify `query`/`path`/`explain` evidence;
+- mode D has the same missing runner boundary and additionally requires a
+  healthy RTK behavioral report plus content-free telemetry attributable to
+  that exact attempt. The locally installed RTK host used for release-candidate
+  work is currently `degraded`, not healthy.
+
+Both commands return exit `3`, name the blocker, and create neither a workspace
+nor a result record. A deterministic fake runner is explicitly tested and
+cannot make C/D look executable. This is an honest `BLOCKED` result under D-07,
+not absence of the now-implemented provider adapters.
 
 ## Harness commands
 

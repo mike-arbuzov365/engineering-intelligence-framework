@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/rtk-command-registry.schema.json",
+  "title": "EIF RTK command routing registry",
+  "description": "Canonical correctness-first RTK routes. A route is eligible for savings only when it is filtered, tracked and its capability canary passes.",
+  "type": "object",
+  "required": ["schema_version", "registry_version", "tested_rtk_versions", "routes"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "registry_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "tested_rtk_versions": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "routes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "match", "canonical_form", "route", "tracking_expected",
+          "filtering_expected", "savings_eligible", "argv_policy", "canary"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "match": { "type": "string", "minLength": 1 },
+          "canonical_form": { "type": "string", "minLength": 1 },
+          "route": {
+            "type": "string",
+            "enum": ["native-filtered", "native-guarded", "summary-filtered", "raw-proxy", "unsupported"]
+          },
+          "tracking_expected": { "type": "boolean" },
+          "filtering_expected": { "type": "boolean" },
+          "savings_eligible": { "type": "boolean" },
+          "argv_policy": {
+            "type": "string",
+            "enum": ["preserved", "space-free-only", "split-alternation", "raw-explicit", "not-applicable"]
+          },
+          "canary": { "type": ["string", "null"] },
+          "note": { "type": "string" }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    }
+  },
+  "additionalProperties": false
+}

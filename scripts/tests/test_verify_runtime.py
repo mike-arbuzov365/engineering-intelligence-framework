@@ -115,34 +115,18 @@ def main() -> int:
     pkg_notes = verify.check_provenance({"framework": {"source_type": "installed-package"}, "package": {"distribution": "engineering-intelligence-framework", "version": "0.1.0.dev0", "python_version": "3.12.0"}})
     results.append(check("provenance: installed-package source is noted by distribution/version, not a fake ref", len(pkg_notes) == 1 and "engineering-intelligence-framework" in pkg_notes[0] and "0.1.0.dev0" in pkg_notes[0]))
 
-    # --- check_integrations: D-008 optional-integration contract. Uses a
-    # local fake executable fixture (per this session's own scope: no real
-    # paid/network operations), not a real Graphify/RTK/vendor-doc tool. ---
-    def fake_executable(directory: Path, name: str) -> None:
-        if os.name == "nt":
-            (directory / f"{name}.bat").write_text("@echo off\r\necho fake %*\r\n", encoding="utf-8")
-        else:
-            script = directory / name
-            script.write_text("#!/bin/sh\necho fake \"$@\"\n", encoding="utf-8")
-            script.chmod(script.stat().st_mode | stat.S_IEXEC | stat.S_IXGRP | stat.S_IXOTH)
-
-    def with_fake_on_path(directory: Path, fn):
-        original_path = os.environ.get("PATH", "")
-        os.environ["PATH"] = str(directory) + os.pathsep + original_path
-        try:
-            return fn()
-        finally:
-            os.environ["PATH"] = original_path
-
+    # --- check_integrations: behavioral health and failure policy. Provider
+    # canaries are covered by test_rtk_integration.py; this wrapper proves
+    # doctor policy no longer equates PATH reachability with health. ---
     results.append(check(
         "integrations: disabled entry is never checked, even with a garbage provider",
         verify.check_integrations({"integrations": {"structural_graph": {"enabled": False, "provider": "not-a-real-thing"}}}) == [],
     ))
     results.append(check(
-        "integrations: enabled + degrade + provider not on PATH -> no problem (absence is allowed)",
-        verify.check_integrations({"integrations": {"shell_output_compression": {
+        "integrations: enabled RTK slot + wrong provider is misconfigured even under degrade",
+        bool(verify.check_integrations({"integrations": {"shell_output_compression": {
             "enabled": True, "provider": "definitely-not-installed-xyz", "data_boundary": "local-only", "failure_policy": "degrade",
-        }}}) == [],
+        }}})),
     ))
     results.append(check(
         "integrations: enabled + fail-closed + provider not on PATH -> reported",
@@ -150,37 +134,13 @@ def main() -> int:
             "enabled": True, "provider": "definitely-not-installed-xyz", "data_boundary": "local-only", "failure_policy": "fail-closed",
         }}})),
     ))
-    with tempfile.TemporaryDirectory() as tmp:
-        fake_dir = Path(tmp)
-        fake_executable(fake_dir, "rtk")
-
-        def check_reachable():
-            return verify.check_integrations({"integrations": {"shell_output_compression": {
-                "enabled": True, "provider": "rtk", "data_boundary": "local-only", "failure_policy": "fail-closed",
-            }}})
-        results.append(check(
-            "integrations: enabled + fail-closed + provider reachable on PATH (fake fixture) -> no problem",
-            with_fake_on_path(fake_dir, check_reachable) == [],
-        ))
-
-        def check_boundary_mismatch():
-            return verify.check_integrations({"integrations": {"shell_output_compression": {
-                "enabled": True, "provider": "rtk", "data_boundary": "external-api", "failure_policy": "degrade",
-            }}})
-        mismatch = with_fake_on_path(fake_dir, check_boundary_mismatch)
-        results.append(check(
-            "integrations: known provider (rtk) declared with a boundary it doesn't support -> reported regardless of failure_policy",
-            len(mismatch) == 1 and "does not match what that provider is known to support" in mismatch[0], mismatch,
-        ))
-
-        def check_boundary_ok():
-            return verify.check_integrations({"integrations": {"shell_output_compression": {
-                "enabled": True, "provider": "rtk", "data_boundary": "local-only", "failure_policy": "degrade",
-            }}})
-        results.append(check(
-            "integrations: known provider (rtk) declared with its actually-supported boundary -> no problem",
-            with_fake_on_path(fake_dir, check_boundary_ok) == [],
-        ))
+    mismatch = verify.check_integrations({"integrations": {"shell_output_compression": {
+        "enabled": True, "provider": "rtk", "data_boundary": "external-api", "failure_policy": "degrade",
+    }}})
+    results.append(check(
+        "integrations: RTK external-api boundary is misconfigured regardless of degrade policy",
+        len(mismatch) == 1 and "misconfigured" in mismatch[0], mismatch,
+    ))
 
     # --- Clean instance: everything passes ---
     with tempfile.TemporaryDirectory() as tmp:

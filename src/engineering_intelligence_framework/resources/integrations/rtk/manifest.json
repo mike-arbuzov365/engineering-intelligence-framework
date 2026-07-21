@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "integration": "rtk",
+  "adapter_version": "1.0.0",
+  "executable": "rtk",
+  "compatibility": {
+    "version_command": ["rtk", "--version"],
+    "version_pattern": "^rtk ([0-9]+\\.[0-9]+\\.[0-9]+)$",
+    "min_inclusive": "0.42.0",
+    "max_exclusive": "0.44.0",
+    "tested_versions": ["0.43.0"]
+  },
+  "capabilities": [
+    {
+      "id": "version-probe",
+      "required_for_healthy": true,
+      "description": "Executable reports a parseable version inside the compatible range."
+    },
+    {
+      "id": "cli-surface",
+      "required_for_healthy": true,
+      "description": "Required native, summary and proxy routes are present."
+    },
+    {
+      "id": "proxy-argv",
+      "required_for_healthy": true,
+      "description": "Explicit raw proxy preserves executable and argument boundaries."
+    },
+    {
+      "id": "grep-alternation",
+      "required_for_healthy": true,
+      "description": "Repeated -e patterns return both expected markers without a silent empty result."
+    },
+    {
+      "id": "git-diff",
+      "required_for_healthy": true,
+      "description": "A native git diff canary preserves a changed-file signal."
+    },
+    {
+      "id": "content-free-telemetry",
+      "required_for_healthy": true,
+      "description": "Local telemetry schema forbids command content, paths, argv and output."
+    }
+  ],
+  "data_boundaries": ["local-only"],
+  "default_mode": "filtering",
+  "failure_modes": ["degrade", "fail-closed"],
+  "artifact_policy": {
+    "raw_output_committed": false,
+    "telemetry_content_allowed": false
+  }
+}

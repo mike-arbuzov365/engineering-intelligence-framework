@@ -10,7 +10,7 @@
   ],
   "properties": {
     "schema_version": { "type": "integer", "const": 1 },
-    "integration": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "integration": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
     "provider": { "type": ["string", "null"] },
     "state": {
       "type": "string",

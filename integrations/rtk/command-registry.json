@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "registry_version": "1.0.0",
+  "tested_rtk_versions": ["0.43.0"],
+  "routes": [
+    {
+      "id": "git-native",
+      "match": "git status, diff, log, fetch and merge-base",
+      "canonical_form": "rtk git <subcommand> <args>",
+      "route": "native-filtered",
+      "tracking_expected": true,
+      "filtering_expected": true,
+      "savings_eligible": true,
+      "argv_policy": "preserved",
+      "canary": "git-diff"
+    },
+    {
+      "id": "grep-simple",
+      "match": "one literal or regex pattern without alternation",
+      "canonical_form": "rtk grep <pattern> <paths>",
+      "route": "native-guarded",
+      "tracking_expected": true,
+      "filtering_expected": true,
+      "savings_eligible": true,
+      "argv_policy": "preserved",
+      "canary": "grep-alternation",
+      "note": "The provider must pass the grep canary before an empty result is trusted."
+    },
+    {
+      "id": "grep-alternation",
+      "match": "top-level A-or-B alternation",
+      "canonical_form": "rtk grep -e <A> -e <B> <paths>",
+      "route": "native-guarded",
+      "tracking_expected": true,
+      "filtering_expected": true,
+      "savings_eligible": true,
+      "argv_policy": "split-alternation",
+      "canary": "grep-alternation",
+      "note": "Do not pass a literal pipe in one pattern on the tested Windows build."
+    },
+    {
+      "id": "read-bounded",
+      "match": "bounded file read",
+      "canonical_form": "rtk read --max-lines <N> <path>",
+      "route": "native-filtered",
+      "tracking_expected": true,
+      "filtering_expected": true,
+      "savings_eligible": true,
+      "argv_policy": "preserved",
+      "canary": "cli-surface",
+      "note": "Use exactly one of --max-lines and --tail-lines."
+    },
+    {
+      "id": "generic-space-free",
+      "match": "tool without native RTK subcommand and space-free argv",
+      "canonical_form": "rtk summary <tool> <space-free-args>",
+      "route": "summary-filtered",
+      "tracking_expected": true,
+      "filtering_expected": true,
+      "savings_eligible": true,
+      "argv_policy": "space-free-only",
+      "canary": "cli-surface"
+    },
+    {
+      "id": "quoted-whitespace",
+      "match": "correctness-sensitive argv containing whitespace or special characters",
+      "canonical_form": "rtk proxy <tool> <args> # rtk-raw-ok: preserve argv",
+      "route": "raw-proxy",
+      "tracking_expected": true,
+      "filtering_expected": false,
+      "savings_eligible": false,
+      "argv_policy": "raw-explicit",
+      "canary": "proxy-argv",
+      "note": "Correctness takes priority; raw proxy contributes zero estimated savings."
+    },
+    {
+      "id": "no-native-subcommand",
+      "match": "rtk <tool> where <tool> is absent from rtk --help",
+      "canonical_form": "unsupported - choose summary or explicit proxy from this registry",
+      "route": "unsupported",
+      "tracking_expected": false,
+      "filtering_expected": false,
+      "savings_eligible": false,
+      "argv_policy": "not-applicable",
+      "canary": "cli-surface",
+      "note": "Silent raw fallback is a parse failure, not a filtered route."
+    },
+    {
+      "id": "proxy-explicit",
+      "match": "intentional raw diagnostic or protocol-preserving command",
+      "canonical_form": "rtk proxy <tool> <args> # rtk-raw-ok: <reason>",
+      "route": "raw-proxy",
+      "tracking_expected": true,
+      "filtering_expected": false,
+      "savings_eligible": false,
+      "argv_policy": "raw-explicit",
+      "canary": "proxy-argv",
+      "note": "Never report proxy output reduction as RTK savings."
+    }
+  ]
+}

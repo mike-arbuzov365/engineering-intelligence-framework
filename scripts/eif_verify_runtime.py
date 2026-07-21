@@ -81,6 +81,11 @@ from eif_adapters import (  # noqa: E402
     resolve_active_entrypoint, resolve_hermes_active_source, check_size_budget, EntrypointState,
 )
 from eif_markers import check_marker_integrity  # noqa: E402
+from eif_integrations import (  # noqa: E402
+    evaluate_integrations,
+    integration_problems,
+    validate_health_results,
+)
 from eif_validate_frontmatter import load_schema, validate_one, _normalize_yaml_scalars  # noqa: E402
 
 try:
@@ -541,70 +546,26 @@ def check_knowledge_index_drift(instance_path: Path, lock: dict | None) -> list[
     return []
 
 
-# D-008: Graphify/RTK/vendor-doc tooling stays external - EIF never installs
-# a binary or mutates a user-level hook. What it CAN do is check that a
-# project instance's own declared contract for an ENABLED integration is
-# both honored (the named provider is actually reachable) and honest (the
-# declared data_boundary matches what that provider is actually known to
-# do - a boundary mismatch is a real security-relevant misconfiguration per
-# SECURITY.md#threat-model, not a style nitpick). A DISABLED integration
-# (the default) is never checked - EIF's core governance model works with
-# none of these present.
-#
-# Known providers and the data_boundary values each is actually
-# documented to support - see integrations/README.md. A provider not in
-# this table is simply not cross-checked for boundary consistency (no
-# false claim about a provider this framework hasn't verified), but
-# reachability is still checked the same way for any declared provider.
-KNOWN_INTEGRATION_PROVIDERS = {
-    "graphify": {"local-only", "external-api"},  # local-only for AST-based extraction; external-api only if semantic community labeling via an LLM backend is enabled
-    "rtk": {"local-only"},
-    "context7": {"external-api"},
-}
+def check_integrations(
+    config: dict | None,
+    framework_root: Path | None = None,
+    instance_path: Path | None = None,
+) -> list[str]:
+    """Compatibility wrapper for callers that need only doctor failures.
 
-
-def check_integrations(config: dict | None) -> list[str]:
-    """For each `integrations.*` entry with enabled: true (see
-    .eif/config.yaml.example), verify its declared provider is reachable
-    (findable on PATH - a generic, tool-agnostic signal, deliberately not
-    a tool-specific --version parse this framework cannot verify for every
-    possible provider) and that its declared data_boundary is one the
-    named provider is actually known to support. An unreachable provider is
-    only a problem when failure_policy is fail-closed - degrade (the
-    default) means "absent is fine, this is optional"."""
-    problems: list[str] = []
-    integrations = (config or {}).get("integrations") or {}
-    if not isinstance(integrations, dict):
-        return problems
-    for name, entry in integrations.items():
-        if not isinstance(entry, dict) or not entry.get("enabled"):
-            continue
-        provider = entry.get("provider")
-        data_boundary = entry.get("data_boundary")
-        failure_policy = entry.get("failure_policy", "degrade")
-
-        if provider and data_boundary and provider in KNOWN_INTEGRATION_PROVIDERS:
-            allowed = KNOWN_INTEGRATION_PROVIDERS[provider]
-            if data_boundary not in allowed:
-                problems.append(
-                    f"integrations.{name}: declared data_boundary {data_boundary!r} for provider {provider!r} "
-                    f"does not match what that provider is known to support ({sorted(allowed)!r}) - fix the "
-                    f"declaration or the provider choice, do not relax this check per-project"
-                )
-
-        detected = bool(provider) and shutil.which(provider) is not None
-        if not detected:
-            base = f"integrations.{name}: enabled with provider {provider!r}, but no such executable was found on PATH"
-            if failure_policy == "fail-closed":
-                problems.append(f"{base} - failure_policy is fail-closed, so this integration must be reachable")
-            # failure_policy == "degrade": expected/allowed, not a problem.
-    return problems
+    Health itself is behavioral and machine-readable through
+    evaluate_integrations(); this wrapper applies fail-closed/degrade policy.
+    """
+    root = framework_root or Path(__file__).resolve().parent.parent
+    instance = instance_path or Path.cwd()
+    return integration_problems(config, evaluate_integrations(config, root, instance))
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--framework-root", required=True, help="Where core/schemas/ lives (the framework checkout, or this instance's own .eif/runtime bundle)")
     ap.add_argument("--instance-path", default=".", help="Instance root to verify. Default: current directory.")
+    ap.add_argument("--integration-report", default=None, help="Optional path for a machine-readable integration health report.")
     args = ap.parse_args(argv)
 
     framework_root = Path(args.framework_root).resolve()
@@ -641,7 +602,24 @@ def main(argv: list[str] | None = None) -> int:
     report.add(f"marker integrity ({entrypoint}, .gitignore)", check_markers(instance_path, entrypoint))
     report.add("config/generated-block drift (adoption.mode, knowledge paths)", check_config_block_drift(config, instance_path, entrypoint))
     report.add("knowledge index drift (ownership marker, hash)", check_knowledge_index_drift(instance_path, lock))
-    report.add("optional integrations (reachability, declared data boundary)", check_integrations(config))
+    integration_results = evaluate_integrations(config, framework_root, instance_path)
+    for result in integration_results:
+        print(
+            f"note: integration {result['integration']} provider={result['provider']!r} "
+            f"state={result['state']} version={result['version']['detected']!r}"
+        )
+        for capability in result["capabilities"]:
+            if capability["status"] != "pass":
+                print(f"  - {capability['id']}: {capability['status']} ({capability['evidence']['summary']})")
+    report.add("optional integration result schema", validate_health_results(integration_results, framework_root))
+    report.add("optional integrations (behavioral health and failure policy)", integration_problems(config, integration_results))
+    if args.integration_report:
+        report_path = Path(args.integration_report).resolve()
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report_path.write_text(
+            json.dumps({"schema_version": 1, "results": integration_results}, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
 
     ok = report.print()
     print(f"\neif-verify-runtime: {'all checks passed' if ok else 'FAILED - see above'}")

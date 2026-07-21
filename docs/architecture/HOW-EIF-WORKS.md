@@ -296,10 +296,15 @@ wrong results, e.g. a search pattern that gets corrupted by the filter and
 returns zero matches instead of an error) can dominate or invalidate a
 week's numbers. Any tool in this category needs the same failure-mode
 discipline as the rest of the system: a filter that fails should fail
-loudly, not silently produce plausible-looking wrong output. See
-The generic config/doctor contract can currently check that an `rtk` executable
-is reachable and declared `local-only`; it does not yet verify version, Windows
-argv preservation, rewrite correctness, or telemetry. See
+loudly, not silently produce plausible-looking wrong output.
+
+The optional RTK adapter now checks a compatible version, CLI routes, raw-proxy
+argv preservation, grep alternation, git diff and the strict content-free
+telemetry contract. Doctor reports `healthy` only when all required canaries
+pass. `degraded` keeps core EIF available but makes the failed command class
+ineligible for savings claims. Raw proxy and parse-failure routes always count
+as zero savings. The framework generates project-local guidance but never
+installs hooks or changes user-level configuration. See
 [`integrations/rtk/`](../../integrations/rtk/).
 
 ## Vendor-documentation integration

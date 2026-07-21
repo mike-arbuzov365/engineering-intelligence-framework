@@ -186,6 +186,15 @@
         "properties": {
           "enabled": { "type": "boolean" },
           "provider": { "type": ["string", "null"] },
+          "executable_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional exact local executable path. It remains in the project-owned config and must never be copied into public evidence."
+          },
+          "telemetry_enabled": {
+            "type": "boolean",
+            "description": "Opt-in for EIF content-free local counters. This never enables provider telemetry or captures command content."
+          },
           "processing": { "type": "string", "enum": ["local", "external"] },
           "data_boundary": {
             "type": "string",

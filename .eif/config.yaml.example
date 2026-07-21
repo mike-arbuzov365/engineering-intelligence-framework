@@ -146,8 +146,10 @@ integrations:
   shell_output_compression:
     enabled: false
     provider: null          # e.g. "rtk"
+    # executable_path: "<local exact path>"  # optional; never copy a machine path into public evidence
     processing: local
     data_boundary: local-only
+    telemetry_enabled: false # content-free local counters only; no commands, argv, paths or output
     failure_policy: degrade
   vendor_docs:
     enabled: false

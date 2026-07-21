@@ -5,6 +5,7 @@ Step-by-step instructions for recurring engineering-intelligence operations.
 | Playbook | Covers |
 |---|---|
 | [`engineering-intelligence-operating-protocol.md`](engineering-intelligence-operating-protocol.md) | Entry point: routing, skill index, stop conditions |
+| [`bounded-evidence-loop.md`](bounded-evidence-loop.md) | Bounded action/observation/adaptation cycles with evidence and budget guards |
 | [`session-preparation.md`](session-preparation.md) | Scoping work, task vs. packet routing |
 | [`session-execution.md`](session-execution.md) | Running a prepared task or session |
 | [`session-closeout.md`](session-closeout.md) | Ending a session, Knowledge Delta |

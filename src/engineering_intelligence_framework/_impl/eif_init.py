@@ -171,6 +171,9 @@ BUNDLE_SCRIPTS = [
 BUNDLE_TREES = [
     "core/schemas",
     "core/ontology",
+    "docs/architecture",
+    "docs/product",
+    "docs/research",
     "locales",
     "templates",
     "playbooks",

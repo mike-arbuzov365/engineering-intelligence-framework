@@ -59,6 +59,12 @@ def anchors_in(path: Path) -> set[str]:
 
 
 def main() -> int:
+    # Windows may default a redirected console/pipe to a legacy code page.
+    # Link targets are project data and may be in any configured locale; a
+    # diagnostic must never crash while trying to print the finding itself.
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
+
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--repo", default=".", help="Repository root")
     args = ap.parse_args()
@@ -66,6 +72,11 @@ def main() -> int:
 
     broken = []
     for md_file in list_tracked_markdown(repo):
+        # git ls-files reflects the index. During an intentional unstaged
+        # deletion the working-tree file is already absent; skip it instead of
+        # crashing before the intended tree can be staged and checked.
+        if not md_file.is_file():
+            continue
         text = md_file.read_text(encoding="utf-8", errors="ignore")
         for match in LINK_RE.finditer(text):
             target = match.group(1).strip()

@@ -38,6 +38,19 @@ import yaml
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = FRAMEWORK_ROOT / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+import eif_init  # noqa: E402
+
+
+def copy_framework_bundle_sources(destination: Path) -> None:
+    """Copy the canonical bundle inputs into a disposable framework fixture.
+
+    Use eif_init.BUNDLE_TREES as the one source of truth. A prior hardcoded
+    list drifted when runtime documentation became a bundle dependency.
+    """
+    shutil.copytree(SCRIPTS, destination / "scripts")
+    for tree in eif_init.BUNDLE_TREES:
+        shutil.copytree(FRAMEWORK_ROOT / tree, destination / tree)
 
 
 def tree_snapshot(root: Path) -> str:
@@ -362,12 +375,7 @@ def main() -> int:
         with tempfile.TemporaryDirectory() as tmp2:
             fake_fw = Path(tmp2) / "framework-copy"
             fake_fw.mkdir()
-            shutil.copytree(SCRIPTS, fake_fw / "scripts")
-            shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw / "core")
-            shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw / "locales")
-            shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw / "templates")
-            shutil.copytree(FRAMEWORK_ROOT / "playbooks", fake_fw / "playbooks")
-            shutil.copytree(FRAMEWORK_ROOT / "skills", fake_fw / "skills")
+            copy_framework_bundle_sources(fake_fw)
 
             inst3 = Path(tmp2) / "instance-3"
             inst3.mkdir()
@@ -427,12 +435,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp3:
         fake_fw = Path(tmp3) / "framework-copy"
         fake_fw.mkdir()
-        shutil.copytree(SCRIPTS, fake_fw / "scripts")
-        shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw / "core")
-        shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw / "locales")
-        shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw / "templates")
-        shutil.copytree(FRAMEWORK_ROOT / "playbooks", fake_fw / "playbooks")
-        shutil.copytree(FRAMEWORK_ROOT / "skills", fake_fw / "skills")
+        copy_framework_bundle_sources(fake_fw)
 
         inst4 = Path(tmp3) / "instance-4"
         inst4.mkdir()
@@ -512,12 +515,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp4:
         fake_fw2 = Path(tmp4) / "framework-copy"
         fake_fw2.mkdir()
-        shutil.copytree(SCRIPTS, fake_fw2 / "scripts")
-        shutil.copytree(FRAMEWORK_ROOT / "core", fake_fw2 / "core")
-        shutil.copytree(FRAMEWORK_ROOT / "locales", fake_fw2 / "locales")
-        shutil.copytree(FRAMEWORK_ROOT / "templates", fake_fw2 / "templates")
-        shutil.copytree(FRAMEWORK_ROOT / "playbooks", fake_fw2 / "playbooks")
-        shutil.copytree(FRAMEWORK_ROOT / "skills", fake_fw2 / "skills")
+        copy_framework_bundle_sources(fake_fw2)
 
         inst5 = Path(tmp4) / "instance-5"
         inst5.mkdir()

@@ -59,6 +59,9 @@ IMPL_SCRIPTS = [
 RESOURCE_TREES = [
     "core/schemas",
     "core/ontology",
+    "docs/architecture",
+    "docs/product",
+    "docs/research",
     "locales",
     "templates",
     "playbooks",

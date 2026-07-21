@@ -7,6 +7,7 @@ created: 2026-07-19
 related:
   - session-preparation.md
   - session-closeout.md
+  - bounded-evidence-loop.md
   - ../templates/task-scope.md
 ---
 
@@ -64,6 +65,14 @@ unexpected starting state.
 
 ## Step 4 - Execute against scope
 
+If execution needs more than one action/feedback cycle, fill or reuse the
+task's bounded loop contract and follow
+[`bounded-evidence-loop.md`](bounded-evidence-loop.md). The contract must name
+success evidence, an evaluator, `max_iterations`, `remote_run_budget`, and
+stop conditions before the first iteration. Hosted CI is not an iterative
+debugger: when a local check answers the same question, use it and preserve
+the remote-run budget.
+
 Rules:
 
 - The Facts file (if this is a packet session) outranks stale prose
@@ -78,6 +87,9 @@ Anti-patterns:
 - Working outside the declared scope because it "seems related."
 - Touching the no-touch zone because it "seems like it needs it."
 - Declaring verification done without having actually run the commands.
+- Repeating the same failing action without new evidence or a changed method.
+- Treating a completion phrase, file existence, build, or merge as behavioral
+  proof.
 - Expanding scope into an adjacent refactor mid-session.
 
 ## Step 5 - Move to closeout

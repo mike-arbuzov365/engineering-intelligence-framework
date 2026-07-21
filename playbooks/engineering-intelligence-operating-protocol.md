@@ -63,6 +63,7 @@ Record the classification before implementation starts, not after.
 | Situation | Use |
 |---|---|
 | Starting any non-trivial task | [`session-preparation.md`](session-preparation.md) |
+| Iterative test/fix/refine work | [`bounded-evidence-loop.md`](bounded-evidence-loop.md) |
 | Work needs a packet | [`execution-packet-planning.md`](execution-packet-planning.md) |
 | Executing a prepared task | [`session-execution.md`](session-execution.md) |
 | Executing a prepared packet | [`execution-packet-execution.md`](execution-packet-execution.md) |
@@ -85,7 +86,10 @@ skill invocation directly.
 3. Experience retrieval preflight
    ([`knowledge-search.md`](knowledge-search.md)).
 4. Execute against the task-scope or session-launch file's declared
-   scope and stop conditions.
+   scope and stop conditions. If the work iterates, use a
+   [Bounded Evidence Loop](bounded-evidence-loop.md): observable success,
+   a real evaluator, explicit iteration and remote-run budgets, and evidence-
+   based stop conditions.
 5. Closeout ([`session-closeout.md`](session-closeout.md)), including
    Knowledge Delta.
 

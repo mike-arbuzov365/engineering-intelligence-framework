@@ -44,6 +44,9 @@ For each session, in the exact order the roadmap states:
 1. Read that session's launch file
    ([`templates/session-launch.md`](../templates/session-launch.md)).
 2. Run [`session-execution.md`](session-execution.md) against it.
+   Iterative work inside the session follows
+   [`bounded-evidence-loop.md`](bounded-evidence-loop.md); its evaluator and
+   budgets come from the launch file, not an ad-hoc retry decision.
 3. Confirm its exit criteria before moving to the next session - a
    session with an unmet exit criterion blocks every session that
    `depends_on` it.
@@ -62,6 +65,10 @@ avoid triggering hosted/paid CI runs until some condition clears), that
 guard applies to every session, not just the one that mentions it. When
 in doubt about whether an action would trigger the guarded resource,
 prefer the local/no-cost equivalent and record the substitution.
+
+The default `remote_run_budget` is 0 when the packet does not authorize a
+number. A failed remote run still consumes one unit. Exhausting a budget is a
+stop condition, not permission to silently raise the cap.
 
 ## Step 4 - One active agent, no delegation
 
@@ -95,6 +102,7 @@ prematurely.
 - Skipping a session's checkpoint "to save time" - it's what makes an
   independent review (or a resumed, interrupted session) possible.
 - Treating a resource/budget guard as advisory once execution starts.
+- Using hosted CI as a repeated test loop when a local evaluator exists.
 - Declaring the packet done while a Definition of Done item is actually
   unmet, deferred, or owner-gated - use the honest closeout status
   instead.

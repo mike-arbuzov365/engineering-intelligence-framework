@@ -45,6 +45,7 @@ SUITES = [
     "test_validate.py",
     "test_operating_layer.py",
     "test_privacy_scan.py",
+    "test_check_links.py",
     "test_knowledge_delta.py",
     "test_generate_index.py",
     "test_search_knowledge.py",

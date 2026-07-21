@@ -6,9 +6,9 @@ specific capability with a documented degraded mode when absent.
 
 | Integration | Adds | Data boundary | Degraded mode without it |
 |---|---|---|---|
-| `graphify/` | Structural code-graph navigation, impact analysis, "what calls this" queries | `local-only` for AST-based extraction; `external-api` if semantic community labeling via an LLM backend is enabled - verify which mode a given provider is actually running in | Agent falls back to grep/manual source browsing - slower, more token-hungry, no cross-file impact analysis |
-| `rtk/` | Shell-output compression, tracked token savings, bare/broken-command auto-rewrite | `local-only` | Agent's shell commands run unfiltered; still functionally correct, just more expensive per session |
-| `vendor-docs/` | Current, versioned library/API documentation instead of stale training data | `external-api` - queries a hosted documentation service | Agent relies on training-data knowledge of libraries, which may be outdated |
+| `graphify/` | Structural code-graph navigation, impact analysis, "what calls this" queries | `local-only` for AST-based extraction; `external-api` if semantic labeling is explicitly enabled | Agent falls back to grep/manual source browsing - slower and without graph-level impact hints |
+| `rtk/` | Shell-output compression and tracked output reduction | `local-only` | Agent's shell commands run unfiltered; still functionally correct, with higher context use |
+| `vendor-docs/` | Current, versioned library/API documentation instead of stale training data | `external-api` - queries a hosted documentation service | Agent relies on local docs or training-data knowledge, which may be outdated |
 
 The `data_boundary` values here are the declared, expected boundary for a
 typical provider in that integration slot - see
@@ -22,4 +22,19 @@ None of these is a hard dependency of the governance model. Marking them
 "required" anywhere is a bug - see
 [`docs/architecture/HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md#extension-model).
 
-Ported content is not populated yet.
+## Current implementation boundary
+
+The generic `.eif/config.yaml` and `eifctl doctor` contract is implemented:
+
+- integrations can be enabled/disabled with a named provider;
+- the declared data boundary is checked against the known provider class;
+- an executable's PATH reachability is checked when enabled;
+- `failure_policy: fail-closed` reports a missing provider;
+- `failure_policy: degrade` permits the documented core-only fallback.
+
+This is a declaration and reachability layer, not full integration health.
+It does not yet prove provider version compatibility, successful Graphify
+queries, graph freshness, RTK argv correctness/filter behavior, telemetry, or
+vendor-document retrieval. A configured provider must not be marketed as
+"integrated" until those capability-specific checks exist and pass. The next
+integration packet owns that work.

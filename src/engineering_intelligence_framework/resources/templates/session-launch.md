@@ -61,6 +61,19 @@ different session, or out of the packet entirely.>
 <runnable command>
 ```
 
+## Bounded loop contract
+
+For iterative work, copy the compact contract from
+[`templates/bounded-evidence-loop.md`](bounded-evidence-loop.md) and fill:
+
+- observable `success_evidence`;
+- the evaluator command/reference;
+- `max_iterations` (default 5 only when the packet sets no narrower limit);
+- `remote_run_budget` (default 0 unless explicitly authorized);
+- stop conditions and the gitignored checkpoint path.
+
+For a one-action session, write `not needed - <reason>`.
+
 ## Exit criteria
 
 - [ ]

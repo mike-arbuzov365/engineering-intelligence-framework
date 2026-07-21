@@ -14,6 +14,12 @@ Desktop.ini
 # Local tool state (never a real config)
 .claude/settings.local.json
 
+# Tier 3 session state is ephemeral. Promote validated learning through a
+# Knowledge Delta, then remove the checkpoint at closeout.
+SESSION_CONTEXT.md
+SESSION_CONTEXT.*.md
+.session-context/
+
 # Secrets
 .env
 .env.local

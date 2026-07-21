@@ -2,6 +2,8 @@
 .eif/runtime/
 .eif/runtime.next/
 .eif/runtime.previous/
+.eif/local-state/
+graphify-out/
 *.next
 *.previous
 *.bak-*

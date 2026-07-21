@@ -26,17 +26,37 @@ bundle:
   - path: core/schemas/benchmark-result.schema.json
     sha256: ffb267ade91126678e7123d25ec535a7f9609089cc29c264bacbbafeea464a69
   - path: core/schemas/eif-config.schema.json
-    sha256: 3dba90641bbff7426b4845f9ebc020051c2c424b28e0e39c135e8334838ff654
+    sha256: f0cd6238458262496837b7c584b42f56843c973d6234cc80f31fbb5bcd471d09
   - path: core/schemas/framework-lock.schema.json
-    sha256: 907608a629ebf516aa36db5ccfc46b8e4b41deb3fc5e997b46e3456863dd5e72
+    sha256: e794c3e344bb19e7c11257f626ecb3f7ac36fe0c97d53eec902a152aa532638f
+  - path: core/schemas/integration-health-result.schema.json
+    sha256: 3a4140160e9e8b3a2f6af14158d7a5d22cb09d3767322cbd2d100d2855fcbc58
+  - path: core/schemas/integration-provider-manifest.schema.json
+    sha256: 3c8a586efeb9e29bd1b8b1d551cfe94f247afcaafb796b152a32df44147c1b32
   - path: core/schemas/knowledge-frontmatter.schema.json
     sha256: be3ff7b0b8bdaa55d98939fd2957e4f31f973c8c89f932c66011cb914ad08b5e
+  - path: core/schemas/rtk-command-registry.schema.json
+    sha256: e389937a0d782717c86d9018d3b24ec8ee03e4fe6e126174c74e4a67c2fd6079
+  - path: core/schemas/rtk-telemetry-event.schema.json
+    sha256: 3aa1d82f9d3ed94b21d20b94641e4a9575b4fc302cb93f69dcc7c9cd9c0ce9c9
+  - path: docs/architecture/HOW-EIF-WORKS.md
+    sha256: faf304eef8c3e3b981b2b7645838dc1e5461ff9736ee4f1f60e52cf5a66ea646
+  - path: docs/architecture/instance-contract.md
+    sha256: d075d81e6ef6a9b7de871a42fbc0a7285ccd59e8ee0dc206f54c20a2a2d79214
+  - path: docs/architecture/merge-enforcement.md
+    sha256: 1fa32b9c30483e2c7cce4903d845d1938f28da0d81c12c0a2cabeb48065e97c3
+  - path: docs/product/claims-evidence.md
+    sha256: 1da82a9ec3bac8fb77368c4c9b9f43c000966c3f4904f49c9f83fe6560a30c4c
+  - path: docs/research/bounded-evidence-loops.md
+    sha256: eb2318bc70b9b1d03e7d3534c92bd662ee4014d10e72d071f5b394a7f2157ffe
   - path: eif_adapters.py
-    sha256: 704ea32be7c78e3d0b37dfcd635fb6828f685f5bcda945455b44d17ddd4e24c7
+    sha256: 83b94b361e3470f6d74e2368fb4c1e49dcef3d01af7935f91548bc259ef119bb
   - path: eif_check_links.py
-    sha256: 1b5aba3ed6792a345323e08c69b18059657ec53cd366b4f37b809badd2b3dc25
+    sha256: 820731dc662903b1d22d9bff5bbc3466f091d7bfc45e45b42d4b5b051e837213
   - path: eif_generate_index.py
     sha256: fde36d7c595307a4698741c787f07ebce14b764356e85bb72119d3b7060edbbb
+  - path: eif_integrations.py
+    sha256: 26aa93cf9ac386fc5af398d9519a372c0f5d8041ac7c05d1051bde054e201d21
   - path: eif_locale.py
     sha256: 9487cf4aaf3c974c177fea02cd9bc47794a5e4372c3256907ac44dcb30657056
   - path: eif_markers.py
@@ -45,12 +65,34 @@ bundle:
     sha256: 450ac1bc62473b5bce271c654f0fde1d868f7cc94571f566b27aef850a0bf639
   - path: eif_render.py
     sha256: 732f733e4c1ad847939c393af559d716aad88e73330019d82fcbed15de658933
+  - path: eif_rtk_telemetry.py
+    sha256: 61ccd387f60a6d68c1df30b5664edc05b048d68e7b8144b9d5a03178417764a6
   - path: eif_search_knowledge.py
     sha256: f9947ee083292cbad174c171e907f0085d637ae7899d0f3fe62ab84394dc97ee
   - path: eif_validate_frontmatter.py
     sha256: 7f176aedb423943dc4f504eb78f017cae4ae441b6e3dd59672147ce2054da1d9
   - path: eif_verify_runtime.py
-    sha256: 8e79b8b5559a1829805c801d8bc5683bdd3dc904c9a4b6ffe8a1fb19480d8737
+    sha256: a60998996213225c285a965d0a9ea5c4ba570ac4fe33b8174981cd0b7ea6cc3e
+  - path: integrations/README.md
+    sha256: 9b8e778aad39778125d42d527efcad251a8182674fe0dd21bf15b064e2b5d296
+  - path: integrations/graphify/README.md
+    sha256: 58728e673fe269380e820ce62eb92b45a8c7b0d08cf0204543891361ce9b5247
+  - path: integrations/graphify/fixtures/structural-canary/canary.py
+    sha256: 1fca45ea60641dcfddaa5c4b25d3c6b7e86b244309ed61b748a9a3a059a2f558
+  - path: integrations/graphify/fixtures/structural-canary/graphify-out/graph.json
+    sha256: 6eb8d96b0df5c0e29821e1e3f921d75daf2f4eb3b1c05a629edf54d03ce62b0b
+  - path: integrations/graphify/manifest.json
+    sha256: 1b22d9c547360e52b61fd072f1901b5b327484909145479b83585340ec283afd
+  - path: integrations/rtk/README.md
+    sha256: f0813d1c8ff02d427ec0774b42f95c4816602e0d82df6326c6540bd45448bda6
+  - path: integrations/rtk/command-registry.json
+    sha256: 19c34871098191cc8e64bb9230894054da689802cce987eb7ee064f9d6190567
+  - path: integrations/rtk/generated-instructions.md
+    sha256: eebbd7cfa10acdbd40f58a0401037b54dd1638afa2926da32bd22a17a671cf78
+  - path: integrations/rtk/manifest.json
+    sha256: 0964a5f14837024c2034af7c9a98aca77f3855a17a5e0bf10c436eae908bc8bf
+  - path: integrations/vendor-docs/README.md
+    sha256: 9e6b08dad339c4072d8a811d86d68965ec92441cfda7fe2d925b48c991483b62
   - path: locales/README.md
     sha256: 375a14313a4329137391b76fc53423e53fc8e5410f3e2aecd4ac9fbf326b8d00
   - path: locales/en/messages.yaml
@@ -65,22 +107,80 @@ bundle:
     sha256: 846e5aa6e1a093a04a8c2f40c0f52c0c7c416580c996c6a00e9ba7009733599c
   - path: locales/uk/templates/session-closeout.md
     sha256: d32aa42909e511c3711582ea2f449bd2ea87efb52fad4cbbf9e2659297566549
+  - path: playbooks/README.md
+    sha256: 7912d5e86d216bd1c3e69c558a14177096be1d8305f2e403e701858f75a92e7a
+  - path: playbooks/bounded-evidence-loop.md
+    sha256: c248bf2df18f67b6323696faf84311af5c61c09ac8eab4725fe1098f445156dd
+  - path: playbooks/engineering-intelligence-operating-protocol.md
+    sha256: 251dc7185e8fdf513da9d52548ad70348816b6520a36b3f858123eaa1a1a6100
+  - path: playbooks/execution-packet-execution.md
+    sha256: 9f37d9c92c388e67e18160e49e6f045730287892579d260a14bca163315bdbe7
+  - path: playbooks/execution-packet-planning.md
+    sha256: bf2eee32b00a1795fe5138fc310ccc4e8902964bf98d02a13a7bd098d514f3a0
+  - path: playbooks/execution-packet-review.md
+    sha256: afb88d12be5472180a07491bbe492b9ee3a95dc8a592201324998a7643818152
+  - path: playbooks/knowledge-ingest.md
+    sha256: 040ccfd42e863658acaf011465fa47b3649a82f08be3adb53a391b1d3a66f0a1
+  - path: playbooks/knowledge-lint.md
+    sha256: 103bb82753ca796c4bafbe2d942023f192b3b08faa12bce5045c926ec6f2c233
+  - path: playbooks/knowledge-search.md
+    sha256: cbc0530ed689d0f5a7b5b0bede52460ea7f8f3255317708a6722984ef3927a48
+  - path: playbooks/session-closeout.md
+    sha256: 0595c512f64e9a9aa2d9a0078336361a091842d0fc6743b452c663de9129c8e5
+  - path: playbooks/session-execution.md
+    sha256: a4532a6a2e08bd8ee197fc4c101af403a8d6cb83fbe2b17cd4ed1e3a663d626c
+  - path: playbooks/session-preparation.md
+    sha256: b0d30ce54d76cd6bab0f05a6d512e7d8c2801fe1fa90bc9e555ab3821a04837b
   - path: requirements.txt
     sha256: 1703de02d8ce47a319e3ea207d1b7af05ac451a02dac5705b67d55104b54abae
+  - path: skills/README.md
+    sha256: ddd203c20d92c2cb7ad73beb80fcc8ef1cd5998511336ff7a49046a934870db2
+  - path: skills/knowledge-ingest/SKILL.md
+    sha256: b1d8c7e568e631ec6194c0a70fd86cfc20196788eeeb46a9b744c6d8da2e426a
+  - path: skills/knowledge-lint/SKILL.md
+    sha256: 2a0442d820b32875852d92185f60b1be22f93578d9a0413d23d82a5e59b0e69a
+  - path: skills/knowledge-search/SKILL.md
+    sha256: 8a4488b3e0818d7b1da24a2c8a26418a285f9dffa97b9ec1e4eef8eaed515783
+  - path: skills/plan-execution-packet/SKILL.md
+    sha256: 568c656b15c68a0cc2fa3f08dbe59e61b467efad6767c45527d75b8b66aaa8aa
+  - path: skills/review-execution-packet/SKILL.md
+    sha256: 7a2446c61b650d76fa93fe51d0c514121579139effb30472a8aed4c74d701591
+  - path: skills/run-bounded-evidence-loop/SKILL.md
+    sha256: d85e93fb11be720d4c4c0c1242a2943c2ba852d6d8555fa400721f8202787891
+  - path: skills/run-execution-packet/SKILL.md
+    sha256: 68ed3c3bd94cee8aeaf15572078ef8ed307ff4729f219519013e80eff721e1cf
   - path: templates/README.md
-    sha256: 96af034eceae28aeefec8ef533bdb7f4351bf518a8d802822a0ffa1fdafa22ff
+    sha256: 579b28f27bc0eca42f5615d1d182f284de36588a93ab3286d6e936b8a783a413
   - path: templates/agent-instructions.md
-    sha256: 4be26906973b2264f601641dcf410060329551a37aa5b39d234482663f8567f0
+    sha256: d87768140f8afbfc692517f453e89f96392ca09996faaaec531ac2ebc1691e2b
+  - path: templates/bounded-evidence-loop.md
+    sha256: 338d099ad52587cef7af92b5052d0c6df1cf234592c818aa976fedee91aa3c6b
   - path: templates/knowledge-delta.md
     sha256: a3ab23101f97a60585ff51bd69eb927d70ec0ea4c6dfd72a782b23e7498cd7b2
+  - path: templates/packet-charter.md
+    sha256: 73f8f27471b7b2bdb3374c7ba3700faefefed664b4e7ea8d840ac98ecb72e4b6
+  - path: templates/packet-closeout.md
+    sha256: 79a671f5b98f11077169bdd505a4ab7def0474eda21f26f61224e1be8b63ab70
+  - path: templates/packet-decisions.md
+    sha256: e85e7394957fb74ebf09d49fa3271df8aa011d91fb2163d0179c9cf82b7205b4
+  - path: templates/packet-facts.md
+    sha256: fefdd13d9763ba1f629d180e241a0fbe624e4f39fc2983699c48e6c9d94af3aa
+  - path: templates/packet-roadmap.md
+    sha256: d8d8a4604f5d015cc9666be83c9b278904b61319c51b6d032a466578cf7367b9
+  - path: templates/packet-self-review.md
+    sha256: beb44ce3ecdd871c8a7eed333bc331cf30dd8592b9909c80be5c0c1791c420fc
+  - path: templates/packet-start.md
+    sha256: 1c38ecb96079734d42e166b64986ccc586eb7ea1722bb4cca69cd0a7dd9b1c9f
   - path: templates/session-closeout.md
-    sha256: 3e20360836c1d9cbf469300d704b1848b24011eeead43b755594be6b430971e0
+    sha256: 1d3d5a136019ccc7f75d326a9ae44e0215af32cd4f304585108188b0044c8b8f
+  - path: templates/session-launch.md
+    sha256: 9ab38c61ad6dfdb1643dde30f9a7286cefd391d73720db2d6efc8d03030aa1d3
   - path: templates/task-scope.md
     sha256: 66555e2692a6417bf8cbfa01bffdef5f218598b00d108eeccb42e01fa3ba9643
-  digest: sha256:bda1ac5516044c4aab63ee026adb41ea334fdf686fe754756c15dc3b64e0207d
-generated_at: '2026-07-17T20:15:51.635664+00:00'
+  digest: sha256:3ed60a67e5c30493d8da4d4d241ebefbe36d80f4c17c371507797f1741810ab3
+generated_at: '2026-07-21T13:01:47.023482+00:00'
 git:
-  commit_sha: 226d9896db627170ed6c1b5d2a674cf312986878
+  commit_sha: e93c53ba477413b336c393b9b9baffb12cf13e2d
   dirty: false
 knowledge_index:
   path: docs/knowledge/index.md

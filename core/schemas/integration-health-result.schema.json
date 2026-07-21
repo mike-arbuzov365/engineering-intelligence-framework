@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/integration-health-result.schema.json",
+  "title": "EIF optional integration health result",
+  "description": "Content-safe behavioral result for one optional integration. PATH reachability alone can never produce healthy; every capability marked required must pass.",
+  "type": "object",
+  "required": [
+    "schema_version", "integration", "provider", "state", "checked_at",
+    "data_boundary", "version", "capabilities", "remediation"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "integration": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "provider": { "type": ["string", "null"] },
+    "state": {
+      "type": "string",
+      "enum": ["disabled", "healthy", "degraded", "stale", "misconfigured", "unavailable"]
+    },
+    "checked_at": { "type": "string", "format": "date-time" },
+    "data_boundary": { "type": "string", "enum": ["local-only", "external-api"] },
+    "version": {
+      "type": "object",
+      "required": ["detected", "compatible", "constraint"],
+      "properties": {
+        "detected": { "type": ["string", "null"] },
+        "compatible": { "type": ["boolean", "null"] },
+        "constraint": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "required", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "required": { "type": "boolean" },
+          "status": { "type": "string", "enum": ["pass", "fail", "skipped", "not-applicable"] },
+          "evidence": {
+            "type": "object",
+            "required": ["kind", "summary", "content_free"],
+            "properties": {
+              "kind": { "type": "string", "enum": ["probe", "canary", "git", "config", "fallback"] },
+              "summary": { "type": "string", "minLength": 1 },
+              "content_free": { "type": "boolean", "const": true }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "freshness": {
+      "type": "object",
+      "required": ["state", "baseline_commit", "current_commit", "merge_base"],
+      "properties": {
+        "state": { "type": "string", "enum": ["fresh", "stale", "diverged", "unknown", "not-applicable"] },
+        "baseline_commit": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" },
+        "current_commit": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" },
+        "merge_base": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" }
+      },
+      "additionalProperties": false
+    },
+    "remediation": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "healthy" } }, "required": ["state"] },
+      "then": {
+        "properties": {
+          "provider": { "type": "string", "minLength": 1 },
+          "version": { "properties": { "compatible": { "const": true } } },
+          "capabilities": {
+            "minItems": 1,
+            "not": {
+              "contains": {
+                "properties": {
+                  "required": { "const": true },
+                  "status": { "enum": ["fail", "skipped", "not-applicable"] }
+                },
+                "required": ["required", "status"]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "state": { "const": "disabled" } }, "required": ["state"] },
+      "then": {
+        "properties": {
+          "provider": { "type": ["string", "null"] },
+          "version": { "properties": { "compatible": { "type": "null" } } }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/integration-provider-manifest.schema.json",
+  "title": "EIF optional integration provider manifest",
+  "description": "Versioned, public contract for one optional external tool. The manifest declares compatibility and capabilities; behavioral health is reported separately by integration-health-result.schema.json.",
+  "type": "object",
+  "required": [
+    "schema_version", "integration", "adapter_version", "executable",
+    "compatibility", "capabilities", "data_boundaries", "default_mode",
+    "failure_modes"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "integration": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "adapter_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "executable": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Executable name only. Project-specific absolute paths belong in local config, never in this public manifest."
+    },
+    "compatibility": {
+      "type": "object",
+      "required": ["version_command", "version_pattern", "min_inclusive", "max_exclusive", "tested_versions"],
+      "properties": {
+        "version_command": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "version_pattern": { "type": "string", "minLength": 1 },
+        "min_inclusive": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "max_exclusive": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "tested_versions": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "required_for_healthy", "description"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "required_for_healthy": { "type": "boolean" },
+          "description": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "data_boundaries": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["local-only", "external-api"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "default_mode": {
+      "type": "string",
+      "enum": ["local", "structural", "semantic", "filtering"]
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["degrade", "fail-closed"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "artifact_policy": {
+      "type": "object",
+      "properties": {
+        "raw_output_committed": { "type": "boolean" },
+        "telemetry_content_allowed": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

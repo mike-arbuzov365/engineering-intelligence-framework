@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "integration": "example-tool",
+  "provider": "example-tool",
+  "state": "healthy",
+  "checked_at": "2026-07-21T00:00:00Z",
+  "data_boundary": "local-only",
+  "version": {
+    "detected": "1.2.3",
+    "compatible": true,
+    "constraint": ">=1.2.0,<2.0.0"
+  },
+  "capabilities": [
+    {
+      "id": "behavioral-canary",
+      "required": true,
+      "status": "pass",
+      "evidence": {
+        "kind": "canary",
+        "summary": "deterministic fixture passed",
+        "content_free": true
+      }
+    }
+  ],
+  "freshness": {
+    "state": "not-applicable",
+    "baseline_commit": null,
+    "current_commit": null,
+    "merge_base": null
+  },
+  "remediation": []
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "integration": "example-tool",
+  "provider": null,
+  "state": "disabled",
+  "checked_at": "2026-07-21T00:00:00Z",
+  "data_boundary": "local-only",
+  "version": {
+    "detected": null,
+    "compatible": null,
+    "constraint": null
+  },
+  "capabilities": [],
+  "freshness": {
+    "state": "not-applicable",
+    "baseline_commit": null,
+    "current_commit": null,
+    "merge_base": null
+  },
+  "remediation": []
+}

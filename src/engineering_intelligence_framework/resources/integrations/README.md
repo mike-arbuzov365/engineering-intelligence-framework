@@ -6,8 +6,8 @@ specific capability with a documented degraded mode when absent.
 
 | Integration | Adds | Data boundary | Degraded mode without it |
 |---|---|---|---|
-| `graphify/` | Structural code-graph navigation, impact analysis, "what calls this" queries | `local-only` for AST-based extraction; `external-api` if semantic labeling is explicitly enabled | Agent falls back to grep/manual source browsing - slower and without graph-level impact hints |
-| `rtk/` | Shell-output compression and tracked output reduction | `local-only` | Agent's shell commands run unfiltered; still functionally correct, with higher context use |
+| `graphify/` | Structural code-graph navigation, impact analysis, "what calls this" queries | `local-only` for AST-based extraction; `external-api` if semantic labeling is explicitly enabled | Agent falls back to source search/manual browsing; no graph-level path or impact hints |
+| `rtk/` | Shell-output compression and tracked output reduction | `local-only` | Agent's shell commands run unfiltered and no RTK reduction is recorded |
 | `vendor-docs/` | Current, versioned library/API documentation instead of stale training data | `external-api` - queries a hosted documentation service | Agent relies on local docs or training-data knowledge, which may be outdated |
 
 Implementation status:

@@ -274,29 +274,31 @@ See [`adapters/README.md`](../../adapters/README.md).
 
 ## Structural-graph integration
 
-Optional. Adds fast "what calls this," "what's the shortest relationship
-between A and B," and impact-analysis queries over a project's codebase,
-instead of the agent grepping and re-reading files from scratch every
-session. Requires a build/refresh step and its own freshness tracking (a
-graph built against an old commit is worse than no graph if the agent
-trusts it blindly). The generic config/doctor contract can declare and check
-provider reachability and an allowed data boundary, but freshness, real query
-behavior, and integration-level health are not ported or tested yet. See
+Optional. Adds "what calls this," relationship-path, explanation and impact
+navigation over a project's codebase. It requires a separate build/restore
+step and commit-derived freshness tracking; graph output is navigation
+evidence and every material claim still has to be verified against source.
+
+The experimental Graphify adapter probes a candidate-compatible version,
+runs `query`, `path`, and `explain` against a three-node synthetic graph, checks
+the project-local artifact boundary and classifies freshness as `fresh`,
+`stale`, `diverged`, or `unknown` from Git evidence. Only `fresh` plus passing
+canaries can be `healthy`. Semantic/deep modes remain external and fail closed
+unless provider, data boundary and cost cap are explicit; doctor never starts
+a provider scan. This is behavioral integration evidence, not evidence that a
+graph makes engineering work faster or better. See
 [`integrations/graphify/`](../../integrations/graphify/).
 
 ## Shell-output compression integration
 
 Optional. Filters and summarizes shell command output before it enters the
-agent's context, with per-command tracking of how much was actually saved.
-The private instance measured this at 52-98% savings depending on the week
-- driven almost entirely by whether one or two high-volume command classes
-happened to be filtered correctly, not by steady overall efficiency. A
-single unfiltered high-volume command (or a filter that silently returns
-wrong results, e.g. a search pattern that gets corrupted by the filter and
-returns zero matches instead of an error) can dominate or invalidate a
-week's numbers. Any tool in this category needs the same failure-mode
-discipline as the rest of the system: a filter that fails should fail
-loudly, not silently produce plausible-looking wrong output.
+agent's context, with content-free per-command accounting. Output reduction is
+eligible for measurement only after the exact route preserves argv and result
+semantics. A single unfiltered high-volume command, or a filter that silently
+returns a plausible but wrong empty result, can invalidate an aggregate. Any
+tool in this category therefore needs the same failure-mode discipline as the
+rest of the system: correctness precedes reduction, and a failed route must be
+reported rather than converted into a savings claim.
 
 The optional RTK adapter now checks a compatible version, CLI routes, raw-proxy
 argv preservation, grep alternation, git diff and the strict content-free
@@ -528,16 +530,20 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    interpreter happens to have installed, confirmed identical on Windows
    and Ubuntu CI - see `scripts/eif_check_licenses.py`).
 5. Real merge-gate/CI enforcement wired up in repository settings, not just
-   present as workflow files.
+   present as workflow files (open).
 6. ~~Reproducible quality-per-token benchmark, run against the vertical
    slice~~ (first bounded pilot done - one model, three of ten fixtures,
    one attempt per mode, 2026-07-20, see
    [`docs/benchmarks/README.md`](../benchmarks/README.md); the remaining
    seven fixtures, additional models, and repeated trials for a real
    confidence interval remain open).
-7. Broader playbook/template/skill porting - only after 5-6, and only as
-   much as the vertical slice's lessons say is actually needed.
-8. `v0.1.0` release -> website and launch content.
+7. ~~Port a bounded v0.1 operating set of playbooks/templates/skills,
+   including the Bounded Evidence Loop~~ (done). Curator/retro/customer and
+   other broader workflows remain post-v0.1 scope.
+8. ~~Add optional RTK and Graphify behavioral adapters with explicit degraded
+   modes~~ (done). Vendor-docs remains declaration-only.
+9. Final local release gate + refreshed fresh-history candidate -> owner-gated
+   `v0.1.0`/package publication -> website implementation and community launch.
 
 ## Definition of Public-Ready
 
@@ -589,9 +595,10 @@ formally ratified (the file is explicit about which is which).
 - [x] GOVERNANCE added.
 
 ### Product
-- [x] `.eif/config.yaml` machine-readable schema drafted
+- [x] `.eif/config.yaml` machine-readable schema implemented and exercised
       ([`core/schemas/eif-config.schema.json`](../../core/schemas/eif-config.schema.json));
-      not finalized, no loader/validator CLI wired up yet.
+      `eifctl init` writes it, `eifctl validate` validates it, and doctor
+      checks config/lock/runtime consistency.
 - [x] English canonical docs exist for the ontology core.
 - [x] A non-English locale works end to end, **partially**: Ukrainian
       status messages, Knowledge Delta, closeout headings, and knowledge
@@ -657,8 +664,12 @@ formally ratified (the file is explicit about which is which).
       v0.1 scope; Codex and Hermes are experimental-supported, not required
       - none of this is a claim that all four are production-ready, or that
       runtime validation is complete for all four.
-- [x] Structural-graph and shell-compression integrations documented as
-      optional.
+- [x] Structural-graph and shell-compression integrations are optional,
+      behaviorally checked adapters. Graphify has bounded
+      query/path/explain and Git-freshness canaries; RTK has version/argv/
+      grep/diff canaries, a command registry and content-free telemetry.
+      Provider/version coverage is bounded and neither adapter supports a
+      general performance claim.
 - [x] Degraded mode documented.
 
 ### Quality
@@ -693,8 +704,9 @@ formally ratified (the file is explicit about which is which).
       gap the private instance found and fixed in itself (see Limitations)
       - do not consider this item done until it's closed the same way
       (repository settings + a hook guard for each adapter).
-- [ ] Graph freshness derived from commit evidence (pattern exists in the
-      private instance; not ported here).
+- [x] Graph freshness is derived from graph baseline, current commit and
+      merge-base evidence, with explicit `fresh`, `stale`, `diverged` and
+      `unknown` states (`scripts/tests/test_graphify_integration.py`).
 - [x] Generated adapters have a machine-readable parity matrix
       (`adapters/parity-matrix.json`, drift-tested by
       `scripts/tests/test_parity_matrix.py` against the live adapter
@@ -758,26 +770,43 @@ formally ratified (the file is explicit about which is which).
 ## FAQ
 
 **Is this just another memory/RAG system?**
-No. Memory/RAG retrieves relevant text; EIF additionally defines an
-authority hierarchy for conflicting sources, a lifecycle for knowledge
+No. Memory/RAG retrieves relevant text; EIF additionally defines a
+multi-axis authority model for conflicting sources, a lifecycle for knowledge
 artifacts (draft -> validated -> superseded -> deprecated), and a
 governed execution workflow around how that knowledge gets used and
 updated. Retrieval is one component, not the whole system.
 
 **Is a code graph required?**
 No. It's an optional integration for structural navigation and impact
-analysis. Without it, an agent falls back to search/manual navigation -
-slower, not broken. See [Degraded modes](#degraded-modes).
+analysis. Without it, an agent falls back to source search/manual navigation;
+core EIF remains available, but no graph-level path or impact hint exists.
+See [Degraded modes](#degraded-modes).
 
 **Is shell-output compression required?**
 No, same as above - optional, with a documented fallback (commands run
-unfiltered, which is more expensive but functionally correct).
+unfiltered and no RTK reduction is recorded).
+
+**Why can Graphify or RTK be `degraded` even when it is installed?**
+Installation proves reachability, not behavior. EIF probes the installed
+version and runs provider-specific canaries. A stale Graphify artifact or a
+failed RTK argv/search route stays explicit and ineligible for a healthy or
+savings claim; doctor reports the evidence and core EIF uses its documented
+fallback.
+
+**What do the RTK and Graphify canaries prove?**
+They prove bounded compatibility, behavior, failure reporting and
+fallback contracts. The first real-agent benchmark pilot has one attempt per
+cell and does not include modes C/D, so no directional performance conclusion
+is supported. See [`docs/product/claims-evidence.md`](../product/claims-evidence.md).
 
 **Does EIF send my private code anywhere?**
-No. EIF is documentation, templates, and scripts that run in your own
-environment against your own repositories. It doesn't introduce a hosted
-service, telemetry backend, or cloud memory store. Read the actual scripts
-before trusting this answer for your threat model.
+Core EIF, RTK accounting and structural Graphify mode are designed for local
+processing and do not introduce an EIF-hosted telemetry or memory service.
+Optional provider slots can declare `external-api`; Graphify semantic/deep mode
+is refused unless that external boundary, provider and a positive cost cap are
+explicit. Check the configured provider's actual behavior and privacy terms;
+a declared boundary is not a substitute for reviewing the tool used in your
+threat model.
 
 **Can EIF be adopted into an existing repository that already has its own
 agent rules?**

@@ -9,16 +9,22 @@
     "build:preview": "vite build --mode preview",
     "build:production": "vite build --mode production",
     "build:test-production": "vite build --mode test-production",
-    "preview": "vite preview",
+    "preview": "vite preview --mode preview",
     "verify:claims": "node scripts/verify-claims.mjs",
     "verify:claims:strict": "node scripts/verify-claims.mjs --strict",
     "verify:metadata": "node scripts/verify-metadata.mjs",
     "generate:social-assets": "node scripts/generate-social-assets.mjs",
     "test:unit": "node --test tests/unit/verify-claims.test.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test --config=playwright.a11y.config.js",
+    "audit:assets": "node scripts/audit-assets.mjs",
+    "audit:lighthouse": "node scripts/audit-lighthouse.mjs",
+    "gate:site": "node scripts/gate-site.mjs"
   },
   "devDependencies": {
     "vite": "8.1.5",
-    "@playwright/test": "1.61.1"
+    "@playwright/test": "1.61.1",
+    "@axe-core/playwright": "4.12.1",
+    "lighthouse": "13.4.1"
   }
 }

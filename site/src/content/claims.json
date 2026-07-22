@@ -1,0 +1,114 @@
+{
+  "note": "Public claim manifest for the EIF website. Every material on-page claim must cite one of these IDs. Source column points at the row topic in the framework repo's docs/product/claims-evidence.md claim register (not a private path). Do not strengthen wording beyond 'allowedWording'.",
+  "generated": "2026-07-22",
+  "claims": [
+    {
+      "id": "CLM-01",
+      "summary": "The control plane connects knowledge, authority, execution and evidence into one loop.",
+      "status": "OBSERVED",
+      "allowedWording": "The v0.1 vertical slice runs end to end as a real subprocess-driven journey, including an injected-failure rollback proof at every commit stage, against one synthetic demo project instance.",
+      "limitations": "One scenario (a leap-year calculator), one adapter (Claude Code), no multi-repo, single operator this session, not yet reproduced by an independent human.",
+      "forbiddenWording": ["EIF works.", "Production-ready.", "Proven at scale."],
+      "source": "docs/product/claims-evidence.md - row \"EIF runs end to end\""
+    },
+    {
+      "id": "CLM-02",
+      "summary": "A seven-subcommand installable wheel passed bounded local package evidence; it is not on PyPI.",
+      "status": "OBSERVED",
+      "allowedWording": "A real, installable eifctl package exists with 7 subcommands, verified end to end - including a full synthetic-task journey (retrieval, implementation, tests, Knowledge Delta, promotion decision, cleanup) from the installed wheel.",
+      "limitations": "Not published to PyPI; the journey uses the Claude Code adapter for its own bootstrap step; does not exercise a genuine multi-source authority conflict.",
+      "forbiddenWording": ["Published package.", "Official release.", "Proves authority-conflict resolution."],
+      "source": "docs/product/claims-evidence.md - row \"An installable eifctl package works without a framework git checkout\""
+    },
+    {
+      "id": "CLM-03",
+      "summary": "Two required adapters and two experimental-supported adapters exist, with different verification depth.",
+      "status": "OBSERVED",
+      "allowedWording": "A full directed switching matrix across all four registered adapters (12 ordered pairs) proves exactly one active EIF block, correct destination-source resolution, project-content preservation, and doctor success after every switch.",
+      "limitations": "Hermes and Cursor are experimental-supported, not required v0.1 adapters; hook-based enforcement is not built for Cursor; some properties are proven adapter-generically rather than independently for all 12 pairs.",
+      "forbiddenWording": ["Fully runtime validated.", "Two production-ready adapters.", "Every property independently proven for every pair."],
+      "source": "docs/product/claims-evidence.md - rows \"The Cursor adapter's entrypoint is generated correctly\", \"The Hermes adapter's active entrypoint is resolved and generated correctly\", \"Switching a project between any two of the four registered adapters is safe and complete\""
+    },
+    {
+      "id": "CLM-04",
+      "summary": "The Bounded Evidence Loop is an observed methodology contract, not an outcome guarantee.",
+      "status": "OBSERVED (methodology contract only)",
+      "allowedWording": "EIF includes a bounded evidence-loop contract for iterative agent work, with explicit evaluators, budgets, evidence, and stop conditions.",
+      "limitations": "Proves the workflow artifacts are internally present and structurally connected. Does not prove fewer retries, higher quality, lower cost, or reliable autonomous completion on real projects.",
+      "forbiddenWording": ["Loops improve quality.", "Autonomous until complete.", "Self-correcting without limits."],
+      "source": "docs/product/claims-evidence.md - row \"EIF defines bounded iterative execution\""
+    },
+    {
+      "id": "CLM-05",
+      "summary": "Graphify structural health and freshness classification is bounded to one host, one version and a tiny fixture.",
+      "status": "OBSERVED",
+      "allowedWording": "EIF has an optional Graphify adapter that behaviorally checks structural query/path/explain, local artifact policy, and commit-derived freshness. Graph output remains navigation evidence; source files remain authority.",
+      "limitations": "One local Graphify version and a tiny synthetic fixture; no comparative navigation outcome, no semantic/deep scan, no proof for every version in the declared candidate range.",
+      "forbiddenWording": ["Graphify improves navigation.", "Faster codebase understanding.", "Semantic analysis is verified.", "All compatible versions are proven."],
+      "source": "docs/product/claims-evidence.md - row \"EIF can classify Graphify structural health and Git freshness\""
+    },
+    {
+      "id": "CLM-06",
+      "summary": "RTK behavioral health can be reported degraded; failed or raw proxy routes record zero token reduction.",
+      "status": "OBSERVED",
+      "allowedWording": "EIF has an optional RTK adapter that reports compatible behavioral health or an explicit degraded state. Raw proxy is recorded as zero savings.",
+      "limitations": "Tested adapter/version/canaries only. This packet's own Windows host is itself degraded (grep alternation and space-containing patterns misbehave); no comparative token or quality result follows from that state.",
+      "forbiddenWording": ["Any specific reduction percentage.", "RTK improves quality.", "RTK is healthy on every platform."],
+      "source": "docs/product/claims-evidence.md - row \"EIF can classify RTK behavioral health without treating PATH as health\""
+    },
+    {
+      "id": "CLM-07",
+      "summary": "Four Ukrainian project surfaces are verified; this is not full response localization.",
+      "status": "OBSERVED",
+      "allowedWording": "Retrieval, Knowledge Delta rendering, session-closeout rendering and generated entrypoint content have been verified in Ukrainian, not only English.",
+      "limitations": "Verified for specific project-facing surfaces and fixtures; does not cover an agent's own free-form conversational responses or every locale-sensitive surface.",
+      "forbiddenWording": ["Full localization.", "Works in any language.", "Native Ukrainian support throughout."],
+      "source": "docs/product/claims-evidence.md - rows \"EIF retrieves relevant prior engineering knowledge\", \"An installable eifctl package works without a framework git checkout\", \"The Cursor adapter's entrypoint is generated correctly\""
+    },
+    {
+      "id": "CLM-08",
+      "summary": "A six-attempt pilot exists; it is not a statistically powered comparison.",
+      "status": "UNVERIFIED (first bounded pilot exists, not sufficient for a general claim)",
+      "allowedWording": "A first bounded real-agent pilot (one model, three fixtures, six total attempts) completed with 100% task success in both the baseline and EIF-governance modes; see the framework's benchmarks documentation for per-attempt token counts. This is not a statistically powered efficiency comparison.",
+      "limitations": "One model, three of ten fixtures, one attempt per cell, no repeated trials, no other providers or models, no modes C/D. Cannot support a directional efficiency claim.",
+      "forbiddenWording": ["Any specific \"N% savings\" or \"tokens saved\" claim.", "Benchmark proves EIF is more efficient.", "Any claim generalized beyond three fixtures, one model, one attempt each."],
+      "source": "docs/product/claims-evidence.md - row \"EIF saves tokens\""
+    },
+    {
+      "id": "CLM-09",
+      "summary": "No general quality or rework-rate outcome is supported by evidence.",
+      "status": "UNVERIFIED",
+      "allowedWording": "No comparative study has been run; this claim is not yet supported by evidence.",
+      "limitations": "No baseline, no control group, no measurement methodology defined yet.",
+      "forbiddenWording": ["Improves quality.", "Reduces rework.", "Fewer bugs."],
+      "source": "docs/product/claims-evidence.md - row \"EIF improves task quality or rework rate\""
+    },
+    {
+      "id": "CLM-10",
+      "summary": "Mechanical command timing exists as evidence; human authoring or review time is unmeasured.",
+      "status": "OBSERVED",
+      "allowedWording": "Command-level timing evidence exists for specific mechanical operations recorded in the framework's benchmark evidence. No claim is made about human task duration.",
+      "limitations": "Timing evidence covers mechanical command execution only; it does not measure or estimate human working time, review time, or end-to-end delivery time.",
+      "forbiddenWording": ["Saves developer hours.", "Faster than a human.", "Any specific human time-saved figure."],
+      "source": "PACKET-2026-08-eif-website/02-FACTS-001-baseline-and-carry-over.md (private planning repo) - Public claim boundary CLM-10, cross-referenced against docs/benchmarks/README.md"
+    },
+    {
+      "id": "CLM-11",
+      "summary": "Coexistence adoption onto an already-governed repository is bounded and preserves tested project content.",
+      "status": "OBSERVED",
+      "allowedWording": "An adoption preflight detects pre-existing project governance before any write and refuses to proceed without an explicit coexistence decision; in coexist mode the generated block defers to existing rules instead of declaring itself sole authority.",
+      "limitations": "Existing-governance detection is a content-length heuristic, not semantic; verified against one synthetic fixture plus repeated runs against disposable copies of one real private pilot target.",
+      "forbiddenWording": ["Automatically merges with any existing setup.", "Zero-config adoption.", "Understands your governance."],
+      "source": "docs/product/claims-evidence.md - row \"EIF can be adopted onto an existing, already-governed repository without silently overriding it\""
+    },
+    {
+      "id": "CLM-12",
+      "summary": "Core and default paths run locally; external integrations are optional and their boundaries need review or a cap.",
+      "status": "OBSERVED",
+      "allowedWording": "Graphify and RTK are optional adapters with an explicit degraded/unavailable state; core EIF behavior does not require either integration to be present.",
+      "limitations": "Optionality is verified structurally for the two named integrations in this repository's own tests, not as a claim about every possible external provider or future integration.",
+      "forbiddenWording": ["Requires Graphify.", "Requires RTK.", "All integrations are equally verified."],
+      "source": "docs/product/claims-evidence.md - rows \"EIF can classify Graphify structural health and Git freshness\", \"EIF can classify RTK behavioral health without treating PATH as health\"; PACKET-2026-08-eif-website/02-FACTS-001 carry-over ledger (\"mandatory Graphify/RTK dependency\" -> closed)"
+    }
+  ]
+}

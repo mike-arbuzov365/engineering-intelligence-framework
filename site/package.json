@@ -1,0 +1,20 @@
+{
+  "name": "eif-website",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local, deploy-ready presentation site for the Engineering Intelligence Framework.",
+  "scripts": {
+    "dev": "vite",
+    "build:preview": "vite build --mode preview",
+    "build:production": "vite build --mode production",
+    "build:test-production": "vite build --mode test-production",
+    "preview": "vite preview",
+    "verify:claims": "node scripts/verify-claims.mjs src",
+    "verify:claims:strict": "node scripts/verify-claims.mjs src --strict",
+    "test:unit": "node --test"
+  },
+  "devDependencies": {
+    "vite": "8.1.5"
+  }
+}

@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  background: #111;
+  color: #fff;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+main {
+  padding: 2rem;
+  max-width: 60rem;
+  margin: 0 auto;
+}
+
+footer {
+  padding: 1rem 2rem;
+  font-size: 0.875rem;
+}

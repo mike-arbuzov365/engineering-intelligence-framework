@@ -156,6 +156,184 @@
           </p>
         </div>
       </section>
+
+      <section class="section loop" id="loop" aria-labelledby="loop-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">03 &middot; The evidence loop</span>
+            <h2 id="loop-heading">Bounded, not autonomous</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-04">
+            EIF includes a bounded evidence-loop contract for iterative agent
+            work, with explicit evaluators, budgets, evidence and stop
+            conditions. This is a methodology contract: it does not by
+            itself prove fewer retries, higher quality, lower cost, or
+            reliable autonomous completion.
+          </p>
+
+          <div class="loop__scene">
+            <div class="loop__sticky">
+              <svg
+                class="loop__diagram"
+                aria-hidden="true"
+                viewBox="0 0 300 300"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
+                <g class="loop__node" data-phase="orient" transform="translate(150,40)">
+                  <circle r="10" />
+                  <text y="-18">Orient</text>
+                </g>
+                <g class="loop__node" data-phase="define" transform="translate(245,95)">
+                  <circle r="10" />
+                  <text y="-18">Define</text>
+                </g>
+                <g class="loop__node" data-phase="act" transform="translate(245,205)">
+                  <circle r="10" />
+                  <text y="30">Act</text>
+                </g>
+                <g class="loop__node" data-phase="observe" transform="translate(150,260)">
+                  <circle r="10" />
+                  <text y="30">Observe</text>
+                </g>
+                <g class="loop__node" data-phase="study" transform="translate(55,205)">
+                  <circle r="10" />
+                  <text y="30">Study</text>
+                </g>
+                <g class="loop__node" data-phase="adapt" transform="translate(55,95)">
+                  <circle r="10" />
+                  <text y="-18">Adapt</text>
+                </g>
+              </svg>
+              <p class="label loop__status" aria-hidden="true">
+                <span class="loop__status-phase">Orient</span>
+              </p>
+            </div>
+
+            <ol class="loop__phases">
+              <li class="loop__phase" data-phase="orient">
+                <span class="label label--accent">01 &middot; Orient</span>
+                <p>Read current source and relevant retrieved knowledge. Record facts separately from assumptions.</p>
+              </li>
+              <li class="loop__phase" data-phase="define">
+                <span class="label label--accent">02 &middot; Define</span>
+                <p>State the next smallest hypothesis and the observation that would confirm or reject it.</p>
+              </li>
+              <li class="loop__phase" data-phase="act">
+                <span class="label label--accent">03 &middot; Act</span>
+                <p>Make one reversible change or run one diagnostic experiment.</p>
+              </li>
+              <li class="loop__phase" data-phase="observe">
+                <span class="label label--accent">04 &middot; Observe</span>
+                <p>Run the declared evaluator and record its actual output.</p>
+              </li>
+              <li class="loop__phase" data-phase="study">
+                <span class="label label--accent">05 &middot; Study</span>
+                <p>Compare expected and actual results. If unsuccessful, record a concise failure signature comparable across attempts.</p>
+              </li>
+              <li class="loop__phase" data-phase="adapt">
+                <span class="label label--accent">06 &middot; Adapt</span>
+                <p>Select the next action because of the observation. An unchanged failing action with no new evidence is not repeated.</p>
+              </li>
+            </ol>
+          </div>
+
+          <div class="loop__control">
+            <div>
+              <h3 class="label">Preconditions</h3>
+              <dl class="loop__precondition-list">
+                <div><dt>goal</dt><dd>one observable outcome</dd></div>
+                <div><dt>success_evidence</dt><dd>what proves the outcome behaviorally</dd></div>
+                <div><dt>evaluator</dt><dd>test, tool, source comparison, rubric or named human decision</dd></div>
+                <div><dt>max_iterations</dt><dd>positive integer, default 5</dd></div>
+                <div><dt>remote_run_budget</dt><dd>default 0 unless explicitly authorized</dd></div>
+                <div><dt>stop_conditions</dt><dd>safety, ambiguity, budget or owner-only boundaries</dd></div>
+              </dl>
+            </div>
+            <div>
+              <h3 class="label">Exits</h3>
+              <ul class="loop__exits">
+                <li><strong class="label--accent">PASS</strong> &mdash; only when success_evidence exists.</li>
+                <li><strong>BLOCKED</strong> &mdash; a stop condition is reached, the evaluator is unavailable with no adequate substitute, the iteration budget is exhausted, or the same unchanged failure signature would be attempted a third time.</li>
+                <li><strong>DEFERRED</strong> &mdash; only when the remaining work is explicitly owner-gated or outside ratified scope, with a named destination.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section integrations" id="integrations" aria-labelledby="integrations-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">04 &middot; Optional boundary</span>
+            <h2 id="integrations-heading">Core works with every integration absent</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-12">
+            None of these are required &mdash; EIF&rsquo;s core (ontology,
+            playbooks, templates) is plain Markdown any agent can read if
+            pointed at it. Adapters and integrations add enforcement and
+            ergonomics, not the methodology itself.
+          </p>
+
+          <svg class="integrations__diagram" aria-hidden="true" viewBox="0 0 700 220" preserveAspectRatio="xMidYMid meet">
+            <line class="integrations__link" x1="350" y1="110" x2="130" y2="40" />
+            <line class="integrations__link" x1="350" y1="110" x2="130" y2="180" />
+            <line class="integrations__link" x1="350" y1="110" x2="600" y2="110" />
+            <g class="integrations__core" transform="translate(350,110)">
+              <circle r="34" />
+              <text y="6">CORE</text>
+            </g>
+            <g class="integrations__node" transform="translate(130,40)">
+              <circle r="16" />
+              <text y="-24">Graphify</text>
+            </g>
+            <g class="integrations__node" transform="translate(130,180)">
+              <circle r="16" />
+              <text y="34">RTK</text>
+            </g>
+            <g class="integrations__node integrations__node--declaration" transform="translate(600,110)">
+              <circle r="16" />
+              <text y="-24">Vendor docs</text>
+            </g>
+          </svg>
+
+          <ul class="integrations__list">
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Graphify</span>
+                <span>Structural code-graph navigation, impact analysis</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-05">
+                <p><strong>Data boundary:</strong> local-only for AST-based extraction; external-api only if semantic labeling is explicitly enabled.</p>
+                <p><strong>Degraded mode without it:</strong> the agent falls back to source search and manual browsing; no graph-level path or impact hints.</p>
+                <p><strong>Health:</strong> fresh/stale/unknown/diverged freshness classification; a stale or unknown graph never reports healthy. Bounded to one local version and a small synthetic fixture &mdash; not a comparative navigation outcome.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">RTK</span>
+                <span>Shell-output compression and tracked reduction</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-06">
+                <p><strong>Data boundary:</strong> local-only.</p>
+                <p><strong>Degraded mode without it:</strong> shell commands run unfiltered and no reduction is recorded.</p>
+                <p><strong>Health:</strong> a failed required canary reports degraded, not healthy. A raw or failed proxy route is recorded as zero savings &mdash; never a positive reduction number.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Vendor docs</span>
+                <span>Current library/API documentation instead of stale training data</span>
+              </button>
+              <div class="reveal__detail">
+                <p><strong>Data boundary:</strong> external-api &mdash; queries a hosted documentation service.</p>
+                <p><strong>Degraded mode without it:</strong> the agent relies on local docs or training-data knowledge, which may be outdated.</p>
+                <p><strong>Health:</strong> declaration-only until its provider adapter passes its own session and evidence gate.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
     </main>
 
     <footer>

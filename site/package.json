@@ -13,10 +13,10 @@
     "verify:claims": "node scripts/verify-claims.mjs",
     "verify:claims:strict": "node scripts/verify-claims.mjs --strict",
     "test:unit": "node --test tests/unit/verify-claims.test.mjs",
-    "test:browser": "node --test tests/browser/hero.test.mjs"
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
     "vite": "8.1.5",
-    "playwright": "1.61.1"
+    "@playwright/test": "1.61.1"
   }
 }

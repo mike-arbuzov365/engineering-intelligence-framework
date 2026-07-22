@@ -1,0 +1,61 @@
+/* Shared hover/focus/tap disclosure. The detail is always in the DOM (no-JS
+   and AT users are never denied the content); a plain CSS sibling selector
+   reveals it on hover or focus with zero JS. main.js layers a persistent
+   open/close toggle on top for touch, where ":hover" does not apply. */
+.reveal {
+  border-top: 1px solid var(--eif-rule);
+  padding: var(--eif-space-2) 0;
+}
+
+.reveal:last-child {
+  border-bottom: 1px solid var(--eif-rule);
+}
+
+.reveal__trigger {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  cursor: pointer;
+  padding: var(--eif-space-1) 0;
+  color: var(--eif-fg);
+}
+
+.reveal__trigger span:last-child {
+  color: var(--eif-fg-muted);
+}
+
+.reveal__detail {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height var(--eif-duration-medium) var(--eif-ease),
+    opacity var(--eif-duration-fast) linear;
+}
+
+.reveal__detail p {
+  margin: var(--eif-space-1) 0;
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
+}
+
+.reveal__detail p strong {
+  color: var(--eif-fg);
+}
+
+.reveal__trigger:hover + .reveal__detail,
+.reveal__trigger:focus + .reveal__detail,
+.reveal__detail:hover,
+.reveal__detail:focus-within,
+.reveal.is-open .reveal__detail {
+  max-height: 30rem;
+  opacity: 1;
+  padding-top: var(--eif-space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal__detail {
+    transition: none;
+  }
+}

@@ -54,3 +54,5 @@ build/
 # hand-edited or committed. package-lock.json IS committed (canonical, D-02).
 site/node_modules/
 site/.vite-temp/
+site/test-results/
+site/playwright-report/

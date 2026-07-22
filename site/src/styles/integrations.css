@@ -1,0 +1,50 @@
+.integrations__diagram {
+  width: 100%;
+  max-width: 44rem;
+  height: auto;
+  margin: var(--eif-space-5) 0;
+}
+
+.integrations__link {
+  stroke: var(--eif-rule);
+  stroke-width: 2;
+  stroke-dasharray: 5 6;
+}
+
+.integrations__core circle {
+  fill: var(--eif-charcoal-800);
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+}
+
+.integrations__core text {
+  fill: var(--eif-fg);
+  font-family: var(--eif-font-mono);
+  font-size: 16px;
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
+.integrations__node circle {
+  fill: var(--eif-bg);
+  stroke: var(--eif-fg-muted);
+  stroke-width: 2;
+}
+
+.integrations__node--declaration circle {
+  stroke-dasharray: 3 3;
+}
+
+.integrations__node text {
+  fill: var(--eif-fg-muted);
+  font-family: var(--eif-font-mono);
+  font-size: 18px;
+  text-anchor: middle;
+}
+
+.integrations__list {
+  list-style: none;
+  margin: var(--eif-space-4) 0 0;
+  padding: 0;
+  max-width: var(--eif-content-max);
+}

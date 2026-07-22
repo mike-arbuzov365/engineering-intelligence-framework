@@ -19,6 +19,7 @@
     "test:a11y": "playwright test --config=playwright.a11y.config.js",
     "audit:assets": "node scripts/audit-assets.mjs",
     "audit:lighthouse": "node scripts/audit-lighthouse.mjs",
+    "verify:bundle": "node scripts/verify-bundle.mjs",
     "gate:site": "node scripts/gate-site.mjs"
   },
   "devDependencies": {

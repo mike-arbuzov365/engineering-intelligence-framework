@@ -11,16 +11,157 @@
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="hero">
+      <svg
+        class="hero__path"
+        aria-hidden="true"
+        viewBox="0 0 1240 400"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <path
+          class="hero__path-line"
+          d="M -40 320 L 180 260 L 380 340 L 580 220 L 780 320 L 980 200 L 1180 300 L 1320 240"
+          fill="none"
+        />
+        <circle class="hero__path-dot" cx="-40" cy="320" r="5" />
+        <circle class="hero__path-dot" cx="180" cy="260" r="5" />
+        <circle class="hero__path-dot" cx="380" cy="340" r="5" />
+        <circle class="hero__path-dot" cx="580" cy="220" r="5" />
+        <circle class="hero__path-dot" cx="780" cy="320" r="5" />
+        <circle class="hero__path-dot" cx="980" cy="200" r="5" />
+        <circle class="hero__path-dot" cx="1180" cy="300" r="5" />
+      </svg>
+
+      <div class="hero__content">
+        <p class="label label--accent">Engineering Intelligence Framework &middot; pre-release</p>
+        <h1 class="hero__name">
+          Engineering<br />
+          Intelligence<br />
+          Framework
+        </h1>
+        <p class="hero__descriptor">
+          A quality-first control plane for governed AI-agent software
+          development.
+        </p>
+        <p class="hero__promise">
+          EIF gives AI coding agents persistent engineering knowledge,
+          explicit source identity, controlled execution workflows, quality
+          gates and token-efficient tool integrations &mdash; so evidence,
+          not chat history, is what an agent trusts.
+        </p>
+        <nav class="hero__ctas" aria-label="Primary">
+          <a href="#control-plane">The control plane</a>
+          <a href="#loop">The evidence loop</a>
+          <a href="#evidence">Current evidence</a>
+        </nav>
+      </div>
+    </header>
+
     <main id="main">
-      <h1>Engineering Intelligence Framework</h1>
-      <p>
-        Site scaffold for the local, evidence-linked presentation build.
-        Visual system and narrative sections land in later sessions of this
-        packet.
-      </p>
+      <section class="section problem" id="problem" aria-labelledby="problem-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">01 &middot; The problem</span>
+            <h2 id="problem-heading">Chat history is not engineering memory</h2>
+          </div>
+          <p class="section__lede">
+            AI coding agents are powerful, but most agentic workflows still
+            treat a conversation as if it were durable engineering knowledge.
+          </p>
+          <ol class="problem__list">
+            <li>Previous decisions live only in a conversation that gets compacted or lost.</li>
+            <li>The agent re-discovers the same files and re-derives the same conclusions every session.</li>
+            <li>Local lessons never resurface before a new, similar task.</li>
+            <li>Command output floods the context window without filtering.</li>
+            <li>Architecture decisions and scope get mixed up with unverified assumptions.</li>
+            <li>A merged PR gets treated as proof of working behavior, without evidence.</li>
+            <li>Quality, privacy and token-efficiency are governed by separate, sometimes contradictory rules.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section control-plane" id="control-plane" aria-labelledby="control-plane-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">02 &middot; The control plane</span>
+            <h2 id="control-plane-heading">One governed loop, source to durable knowledge</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-01">
+            EIF is a control plane that coordinates tools and agents without
+            replacing them &mdash; it connects knowledge, authority,
+            execution and evidence into a single, observable sequence.
+          </p>
+
+          <svg
+            class="control-plane__diagram"
+            aria-hidden="true"
+            viewBox="0 0 1240 220"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <path
+              class="control-plane__path"
+              fill="none"
+              d="M 60 150 L 220 90 L 380 170 L 540 90 L 700 170 L 860 90 L 1020 170 L 1180 130"
+            />
+            <g class="control-plane__node" transform="translate(60,150)">
+              <circle r="8" />
+              <text y="-24">Intent</text>
+            </g>
+            <g class="control-plane__node" transform="translate(220,90)">
+              <circle r="8" />
+              <text y="-24">Retrieval</text>
+            </g>
+            <g class="control-plane__node" transform="translate(380,170)">
+              <circle r="8" />
+              <text y="34">Authority</text>
+            </g>
+            <g class="control-plane__node" transform="translate(540,90)">
+              <circle r="8" />
+              <text y="-24">Navigation</text>
+            </g>
+            <g class="control-plane__node" transform="translate(700,170)">
+              <circle r="8" />
+              <text y="34">Execution</text>
+            </g>
+            <g class="control-plane__node" transform="translate(860,90)">
+              <circle r="8" />
+              <text y="-24">Evidence</text>
+            </g>
+            <g class="control-plane__node" transform="translate(1020,170)">
+              <circle r="8" />
+              <text y="34">Knowledge Delta</text>
+            </g>
+            <g class="control-plane__node control-plane__node--terminal" transform="translate(1180,130)">
+              <circle r="9" />
+              <text y="-26">Durable</text>
+            </g>
+          </svg>
+
+          <ol class="control-plane__list">
+            <li><strong>User intent</strong> &mdash; a task or question enters the loop.</li>
+            <li><strong>Experience retrieval</strong> &mdash; prior validated knowledge is pulled into context before new work starts.</li>
+            <li><strong>Authority and scope</strong> &mdash; what should happen, what actually happens, and what may be cited are kept as separate questions.</li>
+            <li><strong>Structural navigation</strong> &mdash; an optional code graph may help find things faster; it is navigation evidence, not authority.</li>
+            <li><strong>Controlled execution</strong> &mdash; work proceeds under explicit scope, budgets and stop conditions.</li>
+            <li><strong>Tests and evidence</strong> &mdash; a merged change is not treated as proof of working behavior on its own.</li>
+            <li><strong>Knowledge Delta</strong> &mdash; what was learned is written down in the same session, not left in chat.</li>
+            <li><strong>Durable engineering intelligence</strong> &mdash; validated knowledge is available to the next task and the next agent.</li>
+          </ol>
+
+          <p class="control-plane__note label" data-claim-id="CLM-12">
+            Source files remain authority throughout. An optional structural
+            graph, when present, is navigation evidence &mdash; it does not
+            replace source verification.
+          </p>
+        </div>
+      </section>
     </main>
+
     <footer>
-      <p>Status: pre-release. Evidence and source links will appear here.</p>
+      <div class="section__inner">
+        <p>Status: pre-release. Evidence and source links will appear here.</p>
+      </div>
     </footer>
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // Claims / privacy / placeholder verifier for the EIF website (D-04, D-08).
-// Usage: node scripts/verify-claims.mjs <target-dir> [--strict]
+// Usage: node scripts/verify-claims.mjs [target...] [--strict]
+// With no target, scans index.html + src/ (real site content). A target may
+// be a single file or a directory (used by tests/unit against one fixture
+// dir at a time).
 //
 // Always fails on: unknown claim IDs, forbidden wording, private/absolute
 // paths, placeholder markers, hardcoded non-HTTPS or third-party runtime
@@ -18,8 +21,10 @@ const siteRoot = path.resolve(__dirname, '..');
 
 const args = process.argv.slice(2);
 const strict = args.includes('--strict');
-const targetArg = args.find((a) => !a.startsWith('--')) ?? 'src';
-const targetDir = path.resolve(siteRoot, targetArg);
+const targetArgs = args.filter((a) => !a.startsWith('--'));
+const targets = (targetArgs.length > 0 ? targetArgs : ['index.html', 'src']).map((t) =>
+  path.resolve(siteRoot, t),
+);
 
 const SCANNED_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json']);
 const MANIFEST_RELATIVE_PATH = path.join('src', 'content', 'claims.json');
@@ -83,19 +88,31 @@ const CSS_REMOTE_URL_RE = /url\(\s*["']?(https?:)?\/\/[^)'"]+/gi;
 const VANITY_COUNT_RE =
   /\b\d[\d,]*\+?\s*(users?|customers?|installs?|downloads?|stars?|companies|teams)\b/gi;
 
+const SKIPPED_DIR_NAMES = new Set(['node_modules', 'dist', 'tests', '.vite-temp']);
+
 function walk(dir) {
   const entries = readdirSync(dir, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name === 'dist') continue;
+      if (SKIPPED_DIR_NAMES.has(entry.name)) continue;
       files.push(...walk(full));
     } else if (SCANNED_EXTENSIONS.has(path.extname(entry.name))) {
       files.push(full);
     }
   }
   return files;
+}
+
+// A target may be a single file (used by tests/unit fixtures and by the
+// index.html root shell) or a directory (walked recursively).
+function collectFiles(target) {
+  const stat = statSync(target);
+  if (stat.isDirectory()) {
+    return walk(target);
+  }
+  return SCANNED_EXTENSIONS.has(path.extname(target)) ? [target] : [];
 }
 
 function loadManifest() {
@@ -208,21 +225,25 @@ function main() {
     }
   }
 
-  let files = [];
-  try {
-    files = walk(targetDir);
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      console.error(`[verify-claims] target dir not found: ${targetDir}`);
-      process.exit(1);
+  const fileSet = new Set();
+  for (const target of targets) {
+    try {
+      for (const f of collectFiles(target)) fileSet.add(f);
+    } catch (err) {
+      if (err.code === 'ENOENT') {
+        console.error(`[verify-claims] target not found: ${target}`);
+        process.exit(1);
+      }
+      throw err;
     }
-    throw err;
   }
 
   // The manifest itself legitimately catalogs forbidden phrases as reference
   // data (claims.json's own forbiddenWording arrays); it is validated by
   // loadManifest() above, not by the copy-scanning rules below.
-  files = files.filter((f) => path.relative(siteRoot, f) !== MANIFEST_RELATIVE_PATH);
+  const files = [...fileSet].filter(
+    (f) => path.relative(siteRoot, f) !== MANIFEST_RELATIVE_PATH,
+  );
 
   const violations = [];
   const usedIds = new Set();
@@ -232,6 +253,8 @@ function main() {
     scanFile(file, content, ids, violations, usedIds);
   }
 
+  const targetLabel = targets.map((t) => path.relative(siteRoot, t) || '.').join(', ');
+
   const unused = [...ids].filter((id) => !usedIds.has(id));
   if (unused.length > 0) {
     for (const id of unused) {
@@ -239,7 +262,7 @@ function main() {
         rule: strict ? 'unused-claim-id' : 'unused-claim-id-warning',
         file: '(manifest)',
         line: 0,
-        detail: `${id} is never referenced under ${path.relative(siteRoot, targetDir)}`,
+        detail: `${id} is never referenced under ${targetLabel}`,
       });
     }
   }
@@ -248,7 +271,7 @@ function main() {
     (v) => strict || v.rule !== 'unused-claim-id-warning',
   );
 
-  console.log(`[verify-claims] target=${path.relative(siteRoot, targetDir)} strict=${strict}`);
+  console.log(`[verify-claims] target=${targetLabel} strict=${strict}`);
   console.log(`[verify-claims] manifest claims: ${manifest.claims.length}, referenced: ${usedIds.size}`);
   for (const v of violations) {
     console.log(`  ${v.rule} :: ${v.file}:${v.line} :: ${v.detail}`);

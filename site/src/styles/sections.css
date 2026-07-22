@@ -1,0 +1,116 @@
+.section__lede {
+  font-size: var(--eif-size-lede);
+  max-width: var(--eif-measure);
+  color: var(--eif-fg);
+  margin-bottom: var(--eif-space-4);
+}
+
+/* Problem section: a rule-separated editorial list, not cards. */
+.problem__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: var(--eif-content-max);
+  counter-reset: problem;
+}
+
+.problem__list li {
+  counter-increment: problem;
+  position: relative;
+  padding: var(--eif-space-3) 0 var(--eif-space-3) var(--eif-space-5);
+  border-top: 1px solid var(--eif-rule);
+  max-width: var(--eif-measure);
+}
+
+.problem__list li:last-child {
+  border-bottom: 1px solid var(--eif-rule);
+}
+
+.problem__list li::before {
+  content: counter(problem, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: var(--eif-space-3);
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  color: var(--eif-accent);
+}
+
+/* Control plane section. */
+.control-plane__diagram {
+  width: 100%;
+  height: auto;
+  margin: var(--eif-space-5) 0 var(--eif-space-4);
+}
+
+.control-plane__path {
+  stroke: var(--eif-rule);
+  stroke-width: 2;
+}
+
+.control-plane__path--drawn {
+  stroke: var(--eif-accent);
+}
+
+.control-plane__node circle {
+  fill: var(--eif-bg);
+  stroke: var(--eif-fg-muted);
+  stroke-width: 2;
+}
+
+.control-plane__node--terminal circle {
+  fill: var(--eif-accent);
+  stroke: var(--eif-accent);
+}
+
+.control-plane__node text {
+  fill: var(--eif-fg-muted);
+  font-family: var(--eif-font-mono);
+  font-size: 20px;
+  text-anchor: middle;
+}
+
+.control-plane__list {
+  list-style: none;
+  counter-reset: cp;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--eif-space-3) var(--eif-space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.control-plane__list li {
+  counter-increment: cp;
+  padding-left: var(--eif-space-4);
+  position: relative;
+}
+
+.control-plane__list li::before {
+  content: counter(cp, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  color: var(--eif-accent);
+}
+
+.control-plane__list strong {
+  display: block;
+  color: var(--eif-fg);
+}
+
+.control-plane__note {
+  margin-top: var(--eif-space-4);
+  max-width: var(--eif-measure);
+  border-left: 2px solid var(--eif-warn);
+  padding-left: var(--eif-space-2);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+@media (max-width: 720px) {
+  .control-plane__list {
+    grid-template-columns: 1fr;
+  }
+}

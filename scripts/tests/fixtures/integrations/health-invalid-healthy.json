@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "integration": "example-tool",
+  "provider": "example-tool",
+  "state": "healthy",
+  "checked_at": "2026-07-21T00:00:00Z",
+  "data_boundary": "local-only",
+  "version": {
+    "detected": "1.2.3",
+    "compatible": false,
+    "constraint": ">=1.2.0,<2.0.0"
+  },
+  "capabilities": [
+    {
+      "id": "behavioral-canary",
+      "required": true,
+      "status": "fail",
+      "evidence": {
+        "kind": "canary",
+        "summary": "canary failed",
+        "content_free": true
+      }
+    }
+  ],
+  "remediation": ["Use a compatible provider version and rerun doctor."]
+}

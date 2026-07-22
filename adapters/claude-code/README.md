@@ -4,8 +4,8 @@
 30-templates/claude-code-hooks/README.md (dated 2026-06-16) + live
 re-verification during this vertical slice, 2026-07-15. The private
 source's RTK-specific PreToolUse wrapper script is intentionally NOT
-ported here - RTK is an optional integration out of scope for this slice
-(see adapters/README.md and this PR's boundaries). What's kept is the
+ported here. RTK is now a public optional behavioral adapter, but hooks remain
+an explicit maintainer-owned installation step (see `integrations/rtk/`). What's kept is the
 *mechanism description*: where Claude Code looks for instructions and
 skills, how hooks are layered, and - most load-bearing for EIF's own
 design - the verified evidence that hooks are local-machine state CI
@@ -86,9 +86,9 @@ no access to either at merge time. This means:
 
 - No hook scripts (`settings.json`, `PreToolUse`/`Stop` wrapper scripts).
   The private instance's hook scripts are tightly coupled to its RTK
-  integration, which is out of scope for this slice per this PR's
-  boundaries. Porting a generic (non-RTK) hook example is a reasonable
-  follow-up, not done here.
+  integration and are not portable evidence. The public RTK adapter provides
+  version/correctness health and generated guidance without installing those
+  hooks. A generic hook example remains a separate, owner-reviewed follow-up.
 - No claim that this vertical slice's own workflow depends on hooks in
   any way - every step in `examples/demo-workspace/README.md` is a plain
   command, runnable with or without Claude Code hooks configured.

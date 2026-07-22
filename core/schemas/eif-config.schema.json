@@ -186,6 +186,35 @@
         "properties": {
           "enabled": { "type": "boolean" },
           "provider": { "type": ["string", "null"] },
+          "executable_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Optional exact local executable path. It remains in the project-owned config and must never be copied into public evidence."
+          },
+          "telemetry_enabled": {
+            "type": "boolean",
+            "description": "Opt-in for EIF content-free local counters. This never enables provider telemetry or captures command content."
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["structural", "semantic", "deep"],
+            "description": "Graph extraction mode. Structural is local-only and the safe default. Semantic/deep require an explicit external provider, external-api boundary, and positive cost cap; doctor validates that gate but never starts a paid scan."
+          },
+          "artifact_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Instance-relative Graphify raw graph path. The adapter requires graphify-out/graph.json (or a descendant of graphify-out/) and rejects escapes outside the instance."
+          },
+          "baseline_commit": {
+            "type": ["string", "null"],
+            "pattern": "^[0-9a-f]{40}$",
+            "description": "Optional override for the Git commit at which the current graph was built. Null uses built_at_commit from the ignored raw artifact; freshness is unknown only if neither source supplies a valid commit."
+          },
+          "semantic_provider": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Explicit provider name for semantic/deep extraction. Merely setting this field never causes EIF doctor to invoke the provider."
+          },
           "processing": { "type": "string", "enum": ["local", "external"] },
           "data_boundary": {
             "type": "string",

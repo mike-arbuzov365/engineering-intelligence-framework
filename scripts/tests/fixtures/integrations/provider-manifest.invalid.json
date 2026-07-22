@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "integration": "Example Tool",
+  "adapter_version": "latest",
+  "executable": "",
+  "compatibility": {
+    "version_command": [],
+    "version_pattern": "",
+    "min_inclusive": "1.0",
+    "max_exclusive": "2",
+    "tested_versions": []
+  },
+  "capabilities": [],
+  "data_boundaries": [],
+  "default_mode": "magic",
+  "failure_modes": []
+}

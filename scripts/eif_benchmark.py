@@ -8,12 +8,13 @@
     eif_benchmark.py validate-result <result_record.json>
     eif_benchmark.py aggregate <results_dir> --out <summary.json>
 
-Modes A (no EIF) and B (installed eifctl governance) are the only
-executable modes this round. C (+ Graphify) and D (+ Graphify + RTK) are
-schema-declared in core/schemas/benchmark-result.schema.json's mode enum,
-but `run` refuses to execute them - there is no reproducible Graphify/RTK
-install-version-config contract yet to run them against, and faking a C/D
-result would be worse than not having one. See docs/benchmarks/README.md.
+Modes A (no EIF) and B (installed eifctl governance) are executable. C
+(+ Graphify) and D (+ Graphify + RTK) are schema-declared, but materialize
+and run return explicit BLOCKED results. The provider contracts exist; the
+benchmark still lacks a real agent runner that consumes/records Graphify
+evidence, and D additionally requires healthy RTK plus attempt telemetry.
+A fake C/D result would be worse than not having one. See
+docs/benchmarks/README.md.
 
 Every attempt - success, task failure, harness error, timeout, or abort -
 produces exactly one result record; none is ever discarded or silently
@@ -40,7 +41,17 @@ import yaml
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS_DIR = FRAMEWORK_ROOT / "core" / "schemas"
-BLOCKED_MODES = {"C_structural_navigation", "D_full_stack"}
+BLOCKED_MODE_REASONS = {
+    "C_structural_navigation": (
+        "the provider contract now exists, but no benchmark agent runner yet records and consumes "
+        "Graphify query/path/explain evidence for the attempt"
+    ),
+    "D_full_stack": (
+        "mode C runner integration is absent, and mode D additionally requires a healthy RTK "
+        "behavioral report plus attempt-attributed content-free telemetry"
+    ),
+}
+BLOCKED_MODES = set(BLOCKED_MODE_REASONS)
 EXECUTABLE_MODES = {"A_baseline", "B_eif_governance"}
 HARNESS_VERSION = "0.1.0"
 
@@ -205,9 +216,8 @@ def cmd_materialize(args: argparse.Namespace) -> int:
 
     if args.mode in BLOCKED_MODES:
         print(
-            f"materialize: BLOCKED - mode {args.mode} is schema-declared but not "
-            f"operationally executable this round (no reproducible Graphify/RTK "
-            f"install-version-config contract yet). See docs/benchmarks/README.md."
+            f"materialize: BLOCKED - mode {args.mode}: {BLOCKED_MODE_REASONS[args.mode]}. "
+            "No workspace or result record was created. See docs/benchmarks/README.md."
         )
         return 3
 
@@ -308,7 +318,10 @@ def cmd_run(args: argparse.Namespace) -> int:
     manifest = json.loads((fixture_dir / "manifest.json").read_text(encoding="utf-8"))
 
     if args.mode in BLOCKED_MODES:
-        print(f"run: BLOCKED - mode {args.mode} is not operationally executable this round.")
+        print(
+            f"run: BLOCKED - mode {args.mode}: {BLOCKED_MODE_REASONS[args.mode]}. "
+            "No result record was created."
+        )
         return 3
 
     # materialize must have already run against this exact work_dir - its

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/rtk-telemetry-event.schema.json",
+  "title": "EIF content-free local RTK telemetry event",
+  "description": "Local counter event. It stores route class, outcome and numeric volume estimates only. Command text, argv, paths and output are structurally impossible because additional properties are rejected.",
+  "type": "object",
+  "required": [
+    "schema_version", "event_id", "recorded_at", "integration",
+    "registry_version", "command_class", "route", "outcome", "raw_bytes",
+    "emitted_bytes", "estimated_raw_tokens", "estimated_emitted_tokens",
+    "estimated_saved_tokens", "savings_eligible"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "event_id": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "integration": { "type": "string", "const": "rtk" },
+    "registry_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "command_class": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "route": {
+      "type": "string",
+      "enum": ["native-filtered", "native-guarded", "summary-filtered", "raw-proxy", "parse-failure", "unsupported"]
+    },
+    "outcome": { "type": "string", "enum": ["success", "failure", "degraded"] },
+    "raw_bytes": { "type": "integer", "minimum": 0 },
+    "emitted_bytes": { "type": "integer", "minimum": 0 },
+    "estimated_raw_tokens": { "type": "integer", "minimum": 0 },
+    "estimated_emitted_tokens": { "type": "integer", "minimum": 0 },
+    "estimated_saved_tokens": { "type": "integer", "minimum": 0 },
+    "savings_eligible": { "type": "boolean" }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "route": { "enum": ["raw-proxy", "parse-failure", "unsupported"] } },
+        "required": ["route"]
+      },
+      "then": {
+        "properties": {
+          "estimated_saved_tokens": { "const": 0 },
+          "savings_eligible": { "const": false }
+        }
+      }
+    }
+  ]
+}

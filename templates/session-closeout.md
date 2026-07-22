@@ -36,6 +36,15 @@ A locale-rendered version of this template's headings lives at
       result is `SKIPPED`, not `PASS`.
 - [ ] If verification failed, go back to implementation - don't close out.
 
+## Step 2a - Close the bounded loop
+
+- [ ] Final status is `PASS`, `BLOCKED`, or `DEFERRED`.
+- [ ] Iterations and remote runs used are recorded against their budgets.
+- [ ] Success evidence and encountered failure signatures are recorded.
+- [ ] Adaptations explain how the method changed after negative evidence.
+- [ ] The Tier 3 checkpoint is deleted; only validated learning is routed to
+      Knowledge Delta.
+
 ## Step 3 - Fill the Knowledge Delta
 
 Use [`templates/knowledge-delta.md`](knowledge-delta.md) (or its locale
@@ -63,6 +72,7 @@ Knowledge Delta's "Promote to shared knowledge base?" question). Apply
 - Promoted to shared knowledge base: <yes/no, which candidates>
 - Not done / out of scope: <list with reasons>
 - Open questions left: <list>
+- Loop: <PASS/BLOCKED/DEFERRED; iterations; remote runs; evidence>
 - Knowledge Delta: <included in PR>
 ```
 

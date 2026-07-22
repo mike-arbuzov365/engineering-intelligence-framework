@@ -22,6 +22,7 @@ FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 PLAYBOOKS_DIR = FRAMEWORK_ROOT / "playbooks"
 TEMPLATES_DIR = FRAMEWORK_ROOT / "templates"
 SKILLS_DIR = FRAMEWORK_ROOT / "skills"
+PACKAGE_RESOURCES_DIR = FRAMEWORK_ROOT / "src" / "engineering_intelligence_framework" / "resources"
 
 Result = tuple[bool, str]
 
@@ -86,8 +87,53 @@ def check_skills() -> list[Result]:
     return results
 
 
+def check_bounded_loop_contract() -> list[Result]:
+    results: list[Result] = []
+    playbook = (PLAYBOOKS_DIR / "bounded-evidence-loop.md").read_text(encoding="utf-8")
+    template = (TEMPLATES_DIR / "bounded-evidence-loop.md").read_text(encoding="utf-8")
+    session_execution = (PLAYBOOKS_DIR / "session-execution.md").read_text(encoding="utf-8")
+    packet_execution = (PLAYBOOKS_DIR / "execution-packet-execution.md").read_text(encoding="utf-8")
+    gitignore = (FRAMEWORK_ROOT / ".gitignore").read_text(encoding="utf-8")
+
+    for field in ("success_evidence", "evaluator", "max_iterations", "remote_run_budget", "failure_signature"):
+        results.append(check(
+            f"bounded loop: playbook and template declare {field}",
+            field in playbook and field in template,
+        ))
+    results.append(check(
+        "bounded loop: session execution invokes the contract",
+        "bounded-evidence-loop.md" in session_execution,
+    ))
+    results.append(check(
+        "bounded loop: packet execution invokes the contract",
+        "bounded-evidence-loop.md" in packet_execution,
+    ))
+    results.append(check(
+        "Tier 3: .session-context is gitignored",
+        ".session-context/" in gitignore,
+    ))
+    session_context = FRAMEWORK_ROOT / ".session-context"
+    committed_like_files = list(session_context.glob("*.md")) if session_context.exists() else []
+    results.append(check(
+        "Tier 3: repository contains no durable session-context files",
+        not committed_like_files,
+        ", ".join(p.name for p in committed_like_files),
+    ))
+    runtime_docs = (
+        "docs/architecture/HOW-EIF-WORKS.md",
+        "docs/product/claims-evidence.md",
+        "docs/research/bounded-evidence-loops.md",
+    )
+    for relative_path in runtime_docs:
+        results.append(check(
+            f"runtime docs: package contains {relative_path}",
+            (PACKAGE_RESOURCES_DIR / relative_path).is_file(),
+        ))
+    return results
+
+
 def main() -> int:
-    all_results = check_playbooks() + check_templates() + check_skills()
+    all_results = check_playbooks() + check_templates() + check_skills() + check_bounded_loop_contract()
     for _, line in all_results:
         print(line)
 

@@ -16,7 +16,9 @@ Usage:
 from __future__ import annotations
 
 import os
+import json
 import shutil
+import shlex
 import subprocess
 import sys
 import tarfile
@@ -24,6 +26,8 @@ import tempfile
 import venv
 import zipfile
 from pathlib import Path
+
+import yaml
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 
@@ -39,6 +43,38 @@ def run(cmd: list[str], cwd: Path | None = None, env: dict | None = None) -> sub
         cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True, encoding="utf-8", errors="replace",
         env=full_env,
     )
+
+
+def make_python_command_shim(root: Path, python_executable: Path, stem: str, source: str) -> Path:
+    """Create a local test-only executable that forwards argv to Python."""
+    provider = root / f"{stem}.py"
+    provider.write_text(source, encoding="utf-8")
+    if sys.platform == "win32":
+        shim = root / f"{stem}.cmd"
+        shim.write_text(
+            f'@echo off\r\n"{python_executable}" "{provider}" %*\r\n',
+            encoding="utf-8",
+        )
+    else:
+        shim = root / stem
+        shim.write_text(
+            f"#!/bin/sh\nexec {shlex.quote(str(python_executable))} {shlex.quote(str(provider))} \"$@\"\n",
+            encoding="utf-8",
+        )
+        shim.chmod(0o755)
+    return shim
+
+
+def snapshot_paths(root: Path, paths: list[Path]) -> dict[str, bytes]:
+    snapshot = {}
+    for path in paths:
+        if path.is_dir():
+            files = sorted(item for item in path.rglob("*") if item.is_file() and "__pycache__" not in item.parts)
+        else:
+            files = [path] if path.is_file() else []
+        for file_path in files:
+            snapshot[file_path.relative_to(root).as_posix()] = file_path.read_bytes()
+    return snapshot
 
 
 def clean_checkout_export(framework_root: Path, dest_dir: Path) -> None:
@@ -118,10 +154,16 @@ def main() -> int:
             "wheel contains cli.py",
             any(n.endswith("engineering_intelligence_framework/cli.py") for n in names),
         ))
+        expected_impl = {
+            path.name for path in (clean_src / "src" / "engineering_intelligence_framework" / "_impl").glob("eif_*.py")
+        }
+        actual_impl = {
+            Path(name).name for name in names if "/_impl/eif_" in name and name.endswith(".py")
+        }
         results.append(check(
-            "wheel contains all 12 _impl scripts",
-            sum(1 for n in names if "/_impl/eif_" in n and n.endswith(".py")) == 12,
-            str([n for n in names if "/_impl/" in n]),
+            f"wheel contains the exact canonical set of {len(expected_impl)} _impl scripts",
+            actual_impl == expected_impl,
+            f"expected={sorted(expected_impl)} actual={sorted(actual_impl)}",
         ))
         canonical_schema_count = len(list((clean_src / "core" / "schemas").glob("*.schema.json")))
         results.append(check(
@@ -203,6 +245,214 @@ def main() -> int:
             "eifctl doctor reports all checks passed on the just-initialized project",
             doctor_proc.returncode == 0 and "all checks passed" in doctor_proc.stdout,
             doctor_proc.stdout + doctor_proc.stderr,
+        ))
+
+        # --- Installed-wheel optional-integration status matrix. The local
+        # shims below prove that packaged doctor transports provider argv,
+        # resources and machine-readable results correctly. They are test
+        # doubles, never evidence that the real providers are healthy. ---
+        disabled_report_path = tmp_root / "integrations-disabled.json"
+        disabled_doctor = run([
+            str(eifctl_exe), "doctor", "--instance-path", str(project_dir),
+            "--integration-report", str(disabled_report_path),
+        ], cwd=tmp_root)
+        disabled_report = json.loads(disabled_report_path.read_text(encoding="utf-8")) if disabled_report_path.exists() else {}
+        disabled_results = disabled_report.get("results", [])
+        results.append(check(
+            "installed-wheel doctor reports every default optional integration as disabled",
+            disabled_doctor.returncode == 0 and disabled_results and all(item["state"] == "disabled" for item in disabled_results),
+            disabled_doctor.stdout + disabled_doctor.stderr,
+        ))
+
+        integration_project = tmp_root / "integration-status-pkgtest"
+        integration_init = run([
+            str(eifctl_exe), "init", "--project-name", "integration-status-pkgtest",
+            "--adapter", "claude-code", "--instance-path", str(integration_project),
+        ], cwd=tmp_root)
+        results.append(check("installed wheel initializes the integration status fixture", integration_init.returncode == 0, integration_init.stdout + integration_init.stderr))
+        run(["git", "init", "-q"], cwd=integration_project)
+        run(["git", "config", "user.email", "eif-canary@example.invalid"], cwd=integration_project)
+        run(["git", "config", "user.name", "EIF Canary"], cwd=integration_project)
+        (integration_project / "source.py").write_text("VALUE = 1\n", encoding="utf-8")
+        run(["git", "add", "-A"], cwd=integration_project)
+        run(["git", "commit", "-q", "-m", "baseline"], cwd=integration_project)
+        baseline = run(["git", "rev-parse", "HEAD"], cwd=integration_project).stdout.strip()
+
+        graph_dir = integration_project / "graphify-out"
+        graph_dir.mkdir()
+        graph_path = graph_dir / "graph.json"
+        graph_data = {
+            "directed": True,
+            "multigraph": False,
+            "nodes": [
+                {"id": "source.py::Service", "label": "Service"},
+                {"id": "source.py::Repository", "label": "Repository"},
+            ],
+            "links": [{"source": "source.py::Service", "target": "source.py::Repository", "relation": "CALLS"}],
+            "hyperedges": [],
+            "built_at_commit": baseline,
+        }
+        graph_path.write_text(json.dumps(graph_data), encoding="utf-8")
+
+        graphify_shim = make_python_command_shim(
+            tmp_root,
+            venv_python,
+            "fake-graphify-provider",
+            """import sys
+args = sys.argv[1:]
+if args == ['--version']:
+    print('graphify 0.9.12')
+elif args and args[0] == 'query':
+    print('PaymentService InvoiceRepository CALLS')
+elif args and args[0] == 'path':
+    print('CheckoutController -> PaymentService -> InvoiceRepository')
+elif args and args[0] == 'explain':
+    print('PaymentService CALLS InvoiceRepository')
+else:
+    raise SystemExit(2)
+""",
+        )
+        rtk_shim = make_python_command_shim(
+            tmp_root,
+            venv_python,
+            "fake-rtk-provider",
+            """import json
+import subprocess
+import sys
+args = sys.argv[1:]
+if args == ['--version']:
+    print('rtk 0.43.0')
+elif args == ['--help']:
+    print('  git x\\n  grep x\\n  read x\\n  summary x\\n  proxy x')
+elif args and args[0] == 'proxy':
+    raise SystemExit(2)
+elif args and args[0] == 'grep':
+    print('EIF_RTK_ALPHA\\nEIF_RTK_BETA')
+elif len(args) >= 2 and args[:2] == ['git', 'diff']:
+    print('sample.txt | 2 +-')
+else:
+    raise SystemExit(2)
+""",
+        )
+
+        integration_config_path = integration_project / ".eif" / "config.yaml"
+        integration_config = yaml.safe_load(integration_config_path.read_text(encoding="utf-8"))
+        structural = integration_config["integrations"]["structural_graph"]
+        structural.update({
+            "enabled": True,
+            "provider": "graphify",
+            "mode": "structural",
+            "artifact_path": "graphify-out/graph.json",
+            "baseline_commit": None,
+            "processing": "local",
+            "data_boundary": "local-only",
+            "cost_cap_usd": 0,
+            "failure_policy": "degrade",
+            "executable_path": str(tmp_root / "missing-graphify-provider"),
+        })
+
+        def write_integration_config() -> None:
+            integration_config_path.write_text(yaml.safe_dump(integration_config, sort_keys=False), encoding="utf-8")
+
+        def installed_doctor_report(stem: str) -> tuple[subprocess.CompletedProcess, dict]:
+            report_path = tmp_root / f"{stem}.json"
+            proc = run([
+                str(eifctl_exe), "doctor", "--instance-path", str(integration_project),
+                "--integration-report", str(report_path),
+            ], cwd=tmp_root)
+            report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.exists() else {}
+            return proc, {item["integration"]: item for item in report.get("results", [])}
+
+        write_integration_config()
+        unavailable_doctor, unavailable_by_name = installed_doctor_report("integration-unavailable")
+        unavailable_graph = unavailable_by_name.get("structural_graph", {})
+        results.append(check(
+            "installed-wheel doctor reports a missing explicit provider executable as unavailable and actionable",
+            unavailable_doctor.returncode == 0
+            and unavailable_graph.get("state") == "unavailable"
+            and bool(unavailable_graph.get("remediation")),
+            unavailable_doctor.stdout + unavailable_doctor.stderr,
+        ))
+
+        structural["executable_path"] = str(graphify_shim)
+        graph_data["built_at_commit"] = "0" * 40
+        graph_path.write_text(json.dumps(graph_data), encoding="utf-8")
+        write_integration_config()
+        degraded_doctor, degraded_by_name = installed_doctor_report("integration-degraded")
+        degraded_graph = degraded_by_name.get("structural_graph", {})
+        results.append(check(
+            "installed-wheel doctor reports unknown Graphify freshness as degraded, not healthy",
+            degraded_doctor.returncode == 0
+            and degraded_graph.get("state") == "degraded"
+            and (degraded_graph.get("freshness") or {}).get("state") == "unknown",
+            degraded_doctor.stdout + degraded_doctor.stderr,
+        ))
+
+        graph_data["built_at_commit"] = baseline
+        graph_path.write_text(json.dumps(graph_data), encoding="utf-8")
+        compression = integration_config["integrations"]["shell_output_compression"]
+        compression.update({
+            "enabled": True,
+            "provider": "rtk",
+            "processing": "local",
+            "data_boundary": "local-only",
+            "failure_policy": "degrade",
+            "executable_path": str(rtk_shim),
+        })
+        write_integration_config()
+        healthy_doctor, healthy_by_name = installed_doctor_report("integration-healthy")
+        results.append(check(
+            "installed-wheel doctor can report Graphify healthy only with fresh artifact and passing canaries",
+            healthy_doctor.returncode == 0 and healthy_by_name.get("structural_graph", {}).get("state") == "healthy",
+            healthy_doctor.stdout + healthy_doctor.stderr,
+        ))
+        installed_rtk = healthy_by_name.get("shell_output_compression", {})
+        failed_rtk_capabilities = {
+            item.get("id") for item in installed_rtk.get("capabilities", []) if item.get("status") == "fail"
+        }
+        results.append(check(
+            "installed-wheel doctor reports RTK degraded when a required argv canary fails",
+            healthy_doctor.returncode == 0
+            and installed_rtk.get("state") == "degraded"
+            and failed_rtk_capabilities == {"proxy-argv"},
+            healthy_doctor.stdout + healthy_doctor.stderr,
+        ))
+
+        owner_sentinel = "\nOWNER_SENTINEL: preserve project content\n"
+        entrypoint_path = integration_project / "CLAUDE.md"
+        entrypoint_path.write_text(entrypoint_path.read_text(encoding="utf-8") + owner_sentinel, encoding="utf-8")
+        config_before_upgrade = integration_config_path.read_bytes()
+        integration_upgrade = run([
+            str(eifctl_exe), "init", "--instance-path", str(integration_project),
+        ], cwd=tmp_root)
+        results.append(check(
+            "installed-wheel routine upgrade preserves integration config and project-owned entrypoint content",
+            integration_upgrade.returncode == 0
+            and integration_config_path.read_bytes() == config_before_upgrade
+            and owner_sentinel.strip() in entrypoint_path.read_text(encoding="utf-8"),
+            integration_upgrade.stdout + integration_upgrade.stderr,
+        ))
+
+        managed_paths = [
+            integration_project / ".eif" / "runtime",
+            integration_project / ".eif" / "framework.lock.yaml",
+            integration_config_path,
+            entrypoint_path,
+            integration_project / ".gitignore",
+        ]
+        before_failed_upgrade = snapshot_paths(integration_project, managed_paths)
+        failed_upgrade = run(
+            [str(eifctl_exe), "init", "--instance-path", str(integration_project)],
+            cwd=tmp_root,
+            env={"EIF_INIT_TEST_FAIL_AFTER": "runtime"},
+        )
+        after_failed_upgrade = snapshot_paths(integration_project, managed_paths)
+        results.append(check(
+            "installed-wheel injected upgrade failure rolls back managed state and preserves project content",
+            failed_upgrade.returncode != 0
+            and before_failed_upgrade == after_failed_upgrade
+            and owner_sentinel.strip() in entrypoint_path.read_text(encoding="utf-8"),
+            failed_upgrade.stdout + failed_upgrade.stderr,
         ))
 
         # --- doctor detects a modified/corrupted packaged resource bundle:

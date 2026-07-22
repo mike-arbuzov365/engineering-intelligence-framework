@@ -48,7 +48,7 @@ Validation and CI-gate scripts:
 
 ## Development / testing
 
-19 suites under `scripts/tests/`, all self-contained (use
+28 suites in `scripts/tests/run_all.py`, all self-contained (use
 `tempfile`/subprocess, don't touch this repository's own tracked files) -
 18 of them run via [`scripts/tests/run_all.py`](tests/run_all.py) (one
 process each, a single ok/FAIL summary line per suite), which needs only
@@ -58,21 +58,15 @@ process each, a single ok/FAIL summary line per suite), which needs only
 python scripts/tests/run_all.py
 ```
 
-`test_validate.py` (frontmatter + config/lock schema fixtures, positive +
-negative), `test_privacy_scan.py`, `test_knowledge_delta.py`,
-`test_paths.py`, `test_markers.py`, `test_init.py`, `test_verify_runtime.py`,
-`test_generate_index.py`, `test_search_knowledge.py`, `test_locale.py`,
-`test_render.py`, `test_journey.py` (a real subprocess journey against a
-fresh seed instance), `test_adoption.py` (adoption/coexistence against a
-realistic sanitized fixture), `test_cursor_adapter.py`,
-`test_parity_matrix.py`, `test_merge_gate.py`, `test_format_dependencies.py`,
-`test_check_licenses.py`. Positive frontmatter/config fixtures live in
+The canonical inventory is the `SUITES` list in
+[`tests/run_all.py`](tests/run_all.py), including the RTK, Graphify and shared
+integration-contract suites. Positive frontmatter/config fixtures live in
 `scripts/tests/fixtures/{frontmatter,config}/` and must pass; negative
 fixtures must fail. Run `python scripts/eif_privacy_scan.py --repo .`
 before committing anything that references a real project, path, or
 person.
 
-The 19th, `test_package_build.py`, is deliberately **not** in
+`test_package_build.py` is deliberately **not** in
 `run_all.py`'s list and needs its own extra tooling
 (`pip install build hatchling`) - it builds a real wheel, installs it into
 a clean venv (path containing a space and non-ASCII text), and runs every

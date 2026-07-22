@@ -27,6 +27,9 @@ Full workflow: [`playbooks/execution-packet-execution.md`](../../playbooks/execu
    - Confirm its exit criteria before starting the next session.
    - Keep its checkpoint - this is what makes an interrupted session
      resumable and the whole packet independently reviewable.
+   - For iterative work, run the session's bounded evidence loop. Do not exceed
+     its iteration or remote-run budget, and do not treat a completion phrase
+     as proof.
 3. Respect any resource/budget guard from the packet's decisions file
    (e.g. avoiding hosted/paid CI) for every session, not just the one
    that states it.

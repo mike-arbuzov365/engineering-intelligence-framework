@@ -34,6 +34,14 @@ integration is local-only without checking its declared boundary and the
 actual provider's behavior; a declared boundary that doesn't match
 observed behavior is itself a security bug, not a documentation nitpick.
 
+**Graphify raw graphs are local artifacts, not public evidence.** Generated
+instances ignore `graphify-out/`; the adapter rejects absolute paths, parent
+traversal and artifacts outside that directory. A structural graph can still
+contain private identifiers and relationships, so do not commit or paste it
+into reports. Semantic/deep mode is external processing and fails closed unless
+the config names a provider, declares `external-api`, and sets a positive cost
+cap. `eifctl doctor` validates that gate but never starts the paid scan.
+
 **Generated adapters and hooks run with the same permissions as the agent
 they're installed for.** A hook that can rewrite or block a shell command
 can, in principle, also be a vector for unintended command execution if

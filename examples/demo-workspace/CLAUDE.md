@@ -30,6 +30,12 @@ yours; the lock is EIF-managed and rewritten on every upgrade).
    - checks config/lock schemas, bundle file hashes, config/adapter/lock/
    entrypoint consistency, and CLAUDE.md/.gitignore marker integrity
    in one pass.
+5. If `.eif/config.yaml` enables an optional integration, read
+   `.eif/runtime/integrations/README.md` and use the same doctor result as its
+   capability gate. Only `healthy` is usable without qualification. Graphify
+   output is navigation evidence and must be verified against source; a
+   degraded RTK command class falls back to the unfiltered command. Never run
+   semantic/deep Graphify without the explicit provider/boundary/cost gate.
 
 ## Execution authority
 

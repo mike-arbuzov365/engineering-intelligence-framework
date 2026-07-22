@@ -15,6 +15,13 @@ plain Markdown any agent can read if pointed at it. Adapters add
 enforcement (hooks) and ergonomics (skill loading), not the methodology
 itself.
 
+All four generated entrypoints share the same compact optional-integration
+pointer: read `.eif/runtime/integrations/README.md`, treat doctor as the
+behavioral capability gate, keep source files authoritative over graph output,
+and use core-safe fallbacks for non-healthy providers. The smoke suite verifies
+that this pointer is present after init for every supported adapter. No adapter
+auto-installs Graphify, RTK or hooks.
+
 **Adapter scope is frozen as of this round** (2026-07-18): these four
 adapters (two required - Claude Code, Cursor; two experimental supported -
 Codex, Hermes) are the complete v0.1 set. See

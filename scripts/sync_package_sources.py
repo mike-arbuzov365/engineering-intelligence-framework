@@ -43,6 +43,7 @@ from eif_init import BUNDLE_SCRIPTS  # noqa: E402 - single source of truth for w
 IMPL_SCRIPTS = [
     "eif_init.py",
     "eif_verify_runtime.py",
+    "eif_integrations.py",
     "eif_search_knowledge.py",
     "eif_render.py",
     "eif_privacy_scan.py",
@@ -59,10 +60,14 @@ IMPL_SCRIPTS = [
 RESOURCE_TREES = [
     "core/schemas",
     "core/ontology",
+    "docs/architecture",
+    "docs/product",
+    "docs/research",
     "locales",
     "templates",
     "playbooks",
     "skills",
+    "integrations",
 ]
 
 

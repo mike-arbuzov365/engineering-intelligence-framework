@@ -13,6 +13,11 @@ locale-rendered per instance), and
 renders into a project instance's entrypoint file, e.g. `CLAUDE.md`) -
 built and in active use by the vertical slice.
 
+Iterative tasks additionally use
+[`bounded-evidence-loop.md`](bounded-evidence-loop.md) to declare success
+evidence, the evaluator, iteration and remote-run budgets, stop conditions,
+and a compact loop closeout.
+
 ## Execution packet (multi-session work)
 
 [`session-launch.md`](session-launch.md) (one packet session) plus the

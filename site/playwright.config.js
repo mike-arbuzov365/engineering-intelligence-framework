@@ -20,9 +20,12 @@ export default defineConfig({
     screenshot: 'off',
   },
   webServer: {
-    command: `npm run dev -- --port ${PORT} --strictPort`,
+    // Exercise the emitted HTML/CSS/JS contract, especially no-JS behavior.
+    // Vite dev injects imported CSS through JavaScript, which can make a
+    // broken no-JS production state look healthy when JS is disabled.
+    command: `npm run build:preview && npm run preview -- --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 30_000,
   },
   projects: [

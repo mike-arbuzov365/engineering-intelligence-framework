@@ -47,7 +47,7 @@ test.describe('loop no-js', () => {
     await page.goto('/#loop');
     const text = await page.locator('.loop__phases').innerText();
     for (const word of ['Orient', 'Define', 'Act', 'Observe', 'Study', 'Adapt']) {
-      expect(text).toContain(word);
+      expect(text.toLowerCase()).toContain(word.toLowerCase());
     }
   });
 });

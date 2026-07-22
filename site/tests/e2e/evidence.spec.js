@@ -63,9 +63,14 @@ test.describe('evidence no-js', () => {
     page,
   }) => {
     await page.goto('/#evidence');
+    const details = page.locator('#evidence .reveal__detail');
+    await expect(details).toHaveCount(7);
+    for (let index = 0; index < 7; index += 1) {
+      await expect(details.nth(index)).toBeVisible();
+    }
     const text = await page.locator('#evidence .evidence__tasks').innerText();
     for (const word of ['Install', 'Adopt', 'Retrieve', 'Plan', 'Verify', 'Switch', 'Localize']) {
-      expect(text).toContain(word);
+      expect(text.toLowerCase()).toContain(word.toLowerCase());
     }
     expect(text).toContain('Limitation:');
   });

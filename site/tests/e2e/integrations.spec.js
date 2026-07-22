@@ -50,6 +50,16 @@ test.describe('integrations no-js', () => {
     page,
   }) => {
     await page.goto('/#integrations');
+    const details = page.locator('#integrations .reveal__detail');
+    await expect(details).toHaveCount(3);
+    for (let index = 0; index < 3; index += 1) {
+      await expect(details.nth(index)).toBeVisible();
+    }
+    await expect(page.locator('#integrations .reveal__trigger').first()).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    await expect(page.locator('#integrations .reveal__trigger').first()).toBeDisabled();
     const text = await page.locator('#integrations .integrations__list').innerText();
     expect(text).toContain('falls back to source search');
     expect(text).toContain('run unfiltered');

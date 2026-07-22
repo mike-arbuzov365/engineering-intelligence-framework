@@ -9,6 +9,11 @@ import './styles/reveal.css';
 import './styles/motion.css';
 import './styles/lang-toggle.css';
 
+// Collapse enhanced disclosures only after the main module and its styles
+// loaded successfully. If JavaScript is disabled or this bundle fails, the
+// static HTML stays expanded and readable instead of becoming dead UI.
+document.documentElement.classList.add('js');
+
 // The `eif:deploy-status` meta tag is injected at build time by the
 // eif-deploy-status Vite plugin (vite.config.js), so it is statically
 // verifiable in dist/index.html without running this script.
@@ -101,6 +106,10 @@ function initLoopScene() {
 // attach to whatever `.reveal__trigger` elements exist at call time.
 function initRevealRows() {
   document.querySelectorAll('.reveal__trigger').forEach((trigger) => {
+    // Static HTML is expanded for the no-JS path. Once enhancement is
+    // available, collapse each row before wiring the disclosure control.
+    trigger.disabled = false;
+    trigger.setAttribute('aria-expanded', 'false');
     trigger.addEventListener('click', () => {
       const row = trigger.closest('.reveal');
       const isOpen = row.classList.toggle('is-open');
@@ -124,6 +133,10 @@ function initLanguageToggle() {
   const toggle = document.getElementById('lang-toggle');
   const blocks = document.querySelectorAll('.i18n-block');
   if (!toggle || blocks.length === 0) return;
+
+  // The language switch has no truthful behavior without JavaScript, so it
+  // is hidden in static HTML and exposed only after its handler can run.
+  toggle.hidden = false;
 
   const englishHtml = new Map();
   const ukrainianTemplate = new Map();

@@ -25,7 +25,7 @@
       "summary": "Two required adapters and two experimental-supported adapters exist, with different verification depth.",
       "status": "OBSERVED",
       "allowedWording": "A full directed switching matrix across all four registered adapters (12 ordered pairs) proves exactly one active EIF block, correct destination-source resolution, project-content preservation, and doctor success after every switch.",
-      "limitations": "Hermes and Cursor are experimental-supported, not required v0.1 adapters; hook-based enforcement is not built for Cursor; some properties are proven adapter-generically rather than independently for all 12 pairs.",
+      "limitations": "Codex and Hermes are experimental-supported, not required v0.1 adapters; hook-based enforcement is not built for Cursor; some properties are proven adapter-generically rather than independently for all 12 pairs.",
       "forbiddenWording": ["Fully runtime validated.", "Two production-ready adapters.", "Every property independently proven for every pair."],
       "source": "docs/product/claims-evidence.md - rows \"The Cursor adapter's entrypoint is generated correctly\", \"The Hermes adapter's active entrypoint is resolved and generated correctly\", \"Switching a project between any two of the four registered adapters is safe and complete\""
     },

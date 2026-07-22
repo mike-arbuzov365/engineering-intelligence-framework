@@ -22,7 +22,7 @@
   stroke-dasharray: 4 6;
 }
 
-.loop__node {
+.js .loop__node {
   cursor: pointer;
 }
 
@@ -58,7 +58,7 @@
   transition: fill var(--eif-duration-fast) var(--eif-ease);
 }
 
-.loop__node:hover circle:not(.loop__node-hit) {
+.js .loop__node:hover circle:not(.loop__node-hit) {
   stroke: var(--eif-accent);
 }
 

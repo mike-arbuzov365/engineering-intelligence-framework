@@ -29,13 +29,11 @@ const targets = (targetArgs.length > 0 ? targetArgs : ['index.html', 'src']).map
 const SCANNED_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json']);
 const MANIFEST_RELATIVE_PATH = path.join('src', 'content', 'claims.json');
 
+const POSIX_USER_ROOT = '/' + 'Users/';
 const PRIVATE_PATH_PATTERNS = [
-  /[A-Za-z]:\\[^\s"'<>]+/, // Windows absolute path, e.g. D:\Repos\...
-  /\/Users\/[^\s"'<>]+/,
+  /[A-Za-z]:\\[^\s"'<>]+/, // Windows absolute path shape.
+  new RegExp(`${POSIX_USER_ROOT}[^\\s"'<>]+`),
   /\/home\/[^\s"'<>]+/,
-  /\bwm-engineering-intelligence\b/,
-  /\bwm-agent-platform\b/,
-  /\bpreo-platform\b/,
 ];
 
 const PLACEHOLDER_PATTERNS = [

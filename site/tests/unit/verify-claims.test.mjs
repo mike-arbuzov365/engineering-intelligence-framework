@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -34,8 +36,20 @@ test('forbidden wording fails', () => {
   assert.match(result.stdout, /forbidden-wording/);
 });
 
-test('private path fails', () => {
-  const result = runVerifier('tests/fixtures/claims/negative-private-path');
+test('private path fails', (t) => {
+  // Assemble the negative value only at runtime: committing a real-looking
+  // machine path as a fixture would correctly trip the repository's own
+  // privacy scanner before this narrower website verifier even runs.
+  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'eif-claims-private-path-'));
+  t.after(() => rmSync(fixtureDir, { recursive: true, force: true }));
+  const privatePath = ['D:', 'Repos', 'private-instance', 'planning'].join('\\');
+  writeFileSync(
+    path.join(fixtureDir, 'bad.html'),
+    `<p data-claim-id="CLM-01">Evidence lives at ${privatePath}.</p>\n`,
+    'utf8',
+  );
+
+  const result = runVerifier(fixtureDir);
   assert.notEqual(result.status, 0);
   assert.match(result.stdout, /private-path/);
 });

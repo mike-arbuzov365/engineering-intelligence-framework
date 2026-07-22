@@ -64,6 +64,7 @@ test.describe('hero no-js', () => {
 
   test('hero content and CTA hrefs are present without a script running', async ({ page }) => {
     await page.goto('/');
+    await expect(page.locator('#lang-toggle')).toBeHidden();
     const h1Text = (await page.textContent('h1.hero__name'))?.replace(/\s+/g, ' ').trim();
     expect(h1Text).toContain('Engineering Intelligence Framework');
     const hrefs = await page

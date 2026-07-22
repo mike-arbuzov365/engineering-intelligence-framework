@@ -3,11 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Engineering Intelligence Framework</title>
+    <title>Engineering Intelligence Framework &mdash; a control plane for governed AI-agent development</title>
     <meta
       name="description"
-      content="A quality-first control plane for governed AI-agent software development."
+      content="A quality-first control plane for governed AI-agent software development: persistent engineering knowledge, explicit source identity, controlled execution and evidence. Pre-release."
     />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Engineering Intelligence Framework" />
+    <meta property="og:title" content="Engineering Intelligence Framework" />
+    <meta
+      property="og:description"
+      content="A quality-first control plane for governed AI-agent software development. Pre-release."
+    />
+    <meta property="og:image" content="/social-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Engineering Intelligence Framework" />
+    <meta
+      name="twitter:description"
+      content="A quality-first control plane for governed AI-agent software development. Pre-release."
+    />
+    <meta name="twitter:image" content="/social-card.png" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -332,6 +353,169 @@
               </div>
             </li>
           </ul>
+        </div>
+      </section>
+
+      <section class="section evidence" id="evidence" aria-labelledby="evidence-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">05 &middot; Current tasks and evidence</span>
+            <h2 id="evidence-heading">What is bounded and observed today</h2>
+          </div>
+          <p class="section__lede">
+            Seven tasks a governed agent actually performs with this
+            framework, each with its own evidence and boundary &mdash; not a
+            single blanket capability claim.
+          </p>
+
+          <ul class="integrations__list evidence__tasks">
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Install</span>
+                <span>An installable eifctl wheel with seven subcommands</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-02">
+                <p>A real wheel built from <code>pyproject.toml</code>, installed into a clean venv, gives a working <code>eifctl</code> command (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) proven through a full synthetic-task journey.</p>
+                <p><strong>Limitation:</strong> not published to PyPI; the full journey exercises the Claude Code adapter for its own bootstrap step.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Adopt</span>
+                <span>Coexistence on an already-governed repository</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-11">
+                <p>An adoption preflight detects pre-existing project governance before any write and refuses to proceed without an explicit coexistence decision; coexist mode defers to existing rules instead of declaring sole authority.</p>
+                <p><strong>Limitation:</strong> governance detection is a content-length heuristic, not semantic; verified against one synthetic fixture plus repeated runs against one real private pilot target.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Retrieve</span>
+                <span>Experience retrieval before implementation</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-01">
+                <p>Offline, lifecycle-aware, schema-aware keyword retrieval surfaces relevant validated knowledge (including Ukrainian), excludes rejected/superseded results by default, and reports unparseable vs. schema-invalid vs. not-found as three distinct outcomes.</p>
+                <p><strong>Limitation:</strong> offline keyword/substring scoring, not semantic search; tested against small seeded indexes.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Plan</span>
+                <span>Bounded, evidence-driven execution</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-04">
+                <p>Work is scoped as a session or execution packet with an explicit evaluator, iteration/remote-run budgets, and a named stop condition &mdash; see <a href="#loop">the evidence loop</a>.</p>
+                <p><strong>Limitation:</strong> a methodology contract, not a guarantee of fewer retries or lower cost.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Verify</span>
+                <span>A project instance audits its own integrity</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-01">
+                <p>A bundled verifier checks config/lock schema validity, manifest digests against a fresh recompute, adapter/config consistency, marker integrity, and drift between config and generated entrypoint content.</p>
+                <p><strong>Limitation:</strong> scoped to the bundle's own manifest, not a general-purpose file-integrity tool.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Switch</span>
+                <span>Move between any two of four registered adapters</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-03">
+                <p>A full directed switching matrix (12 ordered pairs across Claude Code, Cursor, Codex and Hermes) proves exactly one active EIF block, correct destination resolution, and project-content preservation after every switch.</p>
+                <p><strong>Limitation:</strong> only Claude Code and Cursor are required for v0.1; Codex and Hermes are experimental-supported additions.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="false">
+                <span class="label label--accent">Localize</span>
+                <span>Ukrainian project surfaces, not full response localization</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-07">
+                <p>Retrieval, Knowledge Delta rendering, session-closeout rendering and generated entrypoint content have been verified in Ukrainian, config-driven per project instance.</p>
+                <p><strong>Limitation:</strong> does not cover an agent's own free-form conversational responses.</p>
+              </div>
+            </li>
+          </ul>
+
+          <div class="evidence__proof">
+            <h3 class="label">Bounded proof on record</h3>
+            <ul>
+              <li data-claim-id="CLM-08">
+                A first bounded real-agent pilot (one model, three fixtures, six total attempts) completed with 100% task success in both baseline and EIF-governance modes. This is not a statistically powered efficiency comparison &mdash; see <a href="#limitations">limitations</a>.
+              </li>
+              <li data-claim-id="CLM-10">
+                Command-level timing evidence exists for specific mechanical operations in the framework's benchmark evidence. No claim is made about human authoring or review time.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section quickstart" id="quickstart" aria-labelledby="quickstart-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">06 &middot; Quickstart</span>
+            <h2 id="quickstart-heading">A synthetic walkthrough, not a release</h2>
+          </div>
+          <p class="section__lede">
+            Cloning the repository gets you the ontology, schemas, governance
+            docs, the <code>eifctl</code> source package, and one reproduced
+            vertical slice &mdash; not a stable release or a representative
+            sample of real engineering tasks.
+          </p>
+          <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale en</code></pre>
+          <p>
+            That one command initializes a separate, runnable project
+            instance. The bundled demo then seeds and retrieves real
+            knowledge, makes one change informed by that retrieval, verifies
+            it with a real failing-before/passing-after test, and closes out
+            &mdash; in Ukrainian, via a config-driven locale layer, in the
+            reference walkthrough.
+          </p>
+          <p class="label">
+            No PyPI package yet. No claim about how long any of this takes a
+            human.
+          </p>
+        </div>
+      </section>
+
+      <section class="section limitations" id="limitations" aria-labelledby="limitations-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">07 &middot; Limitations</span>
+            <h2 id="limitations-heading">What this is not, yet</h2>
+          </div>
+          <ul class="limitations__list">
+            <li><strong>Pre-release.</strong> v0.1 is in progress; this repository is being extracted from a private production instance. Expect gaps.</li>
+            <li><strong>Not on PyPI.</strong> There is no <code>pip install</code> from a package index yet.</li>
+            <li data-claim-id="CLM-09"><strong>No quality or rework claim.</strong> No comparative study has been run; this framework makes no claim about task quality, rework rate or defect count.</li>
+            <li><strong>Bounded scale.</strong> Evidence comes from one synthetic vertical slice, a three-fixture benchmark pilot, and adapter-level test suites &mdash; not a large or independently-reproduced sample.</li>
+            <li><strong>Optional integrations stay optional.</strong> Graphify and RTK are never required; a stale or degraded provider is reported as such, never marketed as healthy.</li>
+            <li>
+              <strong>Explicit v0.1 non-goals:</strong> hosted SaaS, an
+              autonomous multi-agent runtime, a proprietary cloud memory
+              service, a mandatory code-graph or shell-compression
+              dependency, or any universal token-savings claim.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section final-cta" id="final-cta" aria-labelledby="final-cta-heading">
+        <div class="section__inner">
+          <div class="section__head">
+            <span class="label">08 &middot; Go deeper</span>
+            <h2 id="final-cta-heading">Architecture, evidence, source</h2>
+          </div>
+          <nav class="final-cta__links" aria-label="Go deeper">
+            <a href="#control-plane">Architecture</a>
+            <a href="#evidence">Evidence</a>
+            <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL__</a>
+          </nav>
         </div>
       </section>
     </main>

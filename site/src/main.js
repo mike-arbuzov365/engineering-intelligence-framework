@@ -4,6 +4,7 @@ import './styles/hero.css';
 import './styles/sections.css';
 import './styles/loop.css';
 import './styles/integrations.css';
+import './styles/content.css';
 import './styles/reveal.css';
 import './styles/motion.css';
 

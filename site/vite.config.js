@@ -1,4 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
+import { writeFileSync } from 'node:fs';
+import path from 'node:path';
 
 const HTTPS_URL_RE = /^https:\/\/\S+$/;
 const RESERVED_INVALID_RE = /\.invalid(\/|$)/i;
@@ -53,6 +55,57 @@ function eifDeployStatusPlugin(getDeployStatus) {
   };
 }
 
+// Static-HTML metadata substitution and dist/robots.txt + dist/sitemap.xml
+// generation, all resolved at build time so no-JS visitors get the correct
+// per-mode result with zero runtime branching (D-09).
+function eifMetadataPlugin(getUrls) {
+  return {
+    name: 'eif-metadata',
+    transformIndexHtml(html) {
+      const { siteUrl, repositoryUrl } = getUrls();
+      const repoHref = repositoryUrl || '#evidence';
+      const repoLabel = repositoryUrl
+        ? 'Public repository'
+        : 'Public repository (link added at publication)';
+
+      let out = html
+        .replaceAll('__EIF_REPO_CTA_HREF__', repoHref)
+        .replaceAll('__EIF_REPO_CTA_LABEL__', repoLabel);
+
+      const tags = [];
+      if (siteUrl) {
+        const canonical = new URL('/', siteUrl).toString();
+        tags.push({ tag: 'link', injectTo: 'head', attrs: { rel: 'canonical', href: canonical } });
+        tags.push({
+          tag: 'meta',
+          injectTo: 'head',
+          attrs: { property: 'og:url', content: canonical },
+        });
+      }
+      return { html: out, tags };
+    },
+    writeBundle(options) {
+      const outDir = options.dir ?? 'dist';
+      const { siteUrl } = getUrls();
+
+      const robots = siteUrl
+        ? `User-agent: *\nAllow: /\nSitemap: ${new URL('/sitemap.xml', siteUrl).toString()}\n`
+        : `User-agent: *\nDisallow: /\n`;
+      writeFileSync(path.join(outDir, 'robots.txt'), robots);
+
+      if (siteUrl) {
+        const loc = new URL('/', siteUrl).toString();
+        const sitemap =
+          `<?xml version="1.0" encoding="UTF-8"?>\n` +
+          `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+          `  <url><loc>${loc}</loc></url>\n` +
+          `</urlset>\n`;
+        writeFileSync(path.join(outDir, 'sitemap.xml'), sitemap);
+      }
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'EIF_');
   const isProduction = mode === 'production';
@@ -72,7 +125,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     root: '.',
-    plugins: [eifDeployStatusPlugin(() => deployStatus)],
+    plugins: [
+      eifDeployStatusPlugin(() => deployStatus),
+      eifMetadataPlugin(() => ({ siteUrl, repositoryUrl })),
+    ],
     define: {
       __EIF_SITE_URL__: JSON.stringify(siteUrl),
       __EIF_REPOSITORY_URL__: JSON.stringify(repositoryUrl),

@@ -22,15 +22,35 @@
   stroke-dasharray: 4 6;
 }
 
-.loop__node circle {
+.loop__node {
+  cursor: pointer;
+}
+
+/* The visible dot and its label sit on top of (and exactly centered on)
+   .loop__node-hit, an invisible larger circle that is the real click/tap
+   target - both because 20px is too small a target on touch, and because
+   without this, a click computed at the group's bounding-box center (which
+   the offset text label skews away from the dot) can land on empty SVG
+   canvas and fall through to the parent <svg> instead of the node. The
+   visible circle and text get pointer-events: none so they never shadow the
+   hit target underneath them. */
+.loop__node-hit {
+  pointer-events: all;
+}
+
+.loop__node circle:not(.loop__node-hit) {
+  pointer-events: none;
   fill: var(--eif-bg);
   stroke: var(--eif-fg-muted);
   stroke-width: 2;
+  r: 10px;
   transition: fill var(--eif-duration-fast) var(--eif-ease),
-    stroke var(--eif-duration-fast) var(--eif-ease);
+    stroke var(--eif-duration-fast) var(--eif-ease),
+    r var(--eif-duration-fast) var(--eif-ease);
 }
 
 .loop__node text {
+  pointer-events: none;
   fill: var(--eif-fg-muted);
   font-family: var(--eif-font-mono);
   font-size: 18px;
@@ -38,18 +58,18 @@
   transition: fill var(--eif-duration-fast) var(--eif-ease);
 }
 
-.loop__node.is-active circle {
+.loop__node:hover circle:not(.loop__node-hit) {
+  stroke: var(--eif-accent);
+}
+
+.loop__node.is-active circle:not(.loop__node-hit) {
   fill: var(--eif-accent);
   stroke: var(--eif-accent);
+  r: 13px;
 }
 
 .loop__node.is-active text {
   fill: var(--eif-fg);
-}
-
-.loop__status {
-  text-align: center;
-  margin-top: var(--eif-space-2);
 }
 
 .loop__phases {
@@ -80,45 +100,44 @@
   gap: var(--eif-space-5);
 }
 
-.loop__precondition-list {
+.loop__precondition-list,
+.loop__exits {
   margin: var(--eif-space-2) 0 0;
 }
 
-.loop__precondition-list > div {
-  padding: var(--eif-space-1) 0;
+.loop__precondition-list > div,
+.loop__exits-row {
+  padding: var(--eif-space-2) 0;
   border-top: 1px solid var(--eif-rule);
   display: flex;
-  gap: var(--eif-space-2);
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem var(--eif-space-2);
 }
 
-.loop__precondition-list dt {
+.loop__precondition-list dt,
+.loop__exits-row dt {
   font-family: var(--eif-font-mono);
   font-size: var(--eif-size-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--eif-accent);
   flex: 0 0 9rem;
 }
 
-.loop__precondition-list dd {
+.loop__precondition-list dd,
+.loop__exits-row dd {
   margin: 0;
+  flex: 1 1 16rem;
   color: var(--eif-fg-muted);
 }
 
-.loop__exits {
-  list-style: none;
-  margin: var(--eif-space-2) 0 0;
-  padding: 0;
+.loop__exits-row--blocked dt {
+  color: var(--eif-warn);
 }
 
-.loop__exits li {
-  padding: var(--eif-space-1) 0;
-  border-top: 1px solid var(--eif-rule);
+.loop__exits-row--deferred dt {
   color: var(--eif-fg-muted);
-}
-
-.loop__exits strong {
-  font-family: var(--eif-font-mono);
-  color: var(--eif-fg);
-  margin-right: 0.5em;
 }
 
 @media (max-width: 860px) {

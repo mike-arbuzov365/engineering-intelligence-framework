@@ -58,6 +58,9 @@
 }
 
 .hero__ctas a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
   font-family: var(--eif-font-mono);
   font-size: var(--eif-size-label);
   letter-spacing: 0.04em;
@@ -70,13 +73,24 @@
     border-color var(--eif-duration-fast) var(--eif-ease);
 }
 
-.hero__ctas a::before {
-  content: "\2192  ";
-  color: var(--eif-accent);
+.hero__ctas a::after {
+  content: "";
+  flex: none;
+  width: 0.4em;
+  height: 0.4em;
+  border-right: 1.5px solid var(--eif-accent);
+  border-top: 1.5px solid var(--eif-accent);
+  transform: rotate(45deg);
+  transition: transform var(--eif-duration-fast) var(--eif-ease);
 }
 
 .hero__ctas a:hover,
 .hero__ctas a:focus-visible {
   color: var(--eif-accent);
   border-color: var(--eif-accent);
+}
+
+.hero__ctas a:hover::after,
+.hero__ctas a:focus-visible::after {
+  transform: rotate(45deg) translate(15%, -15%);
 }

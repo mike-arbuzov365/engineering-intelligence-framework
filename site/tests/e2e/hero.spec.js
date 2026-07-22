@@ -30,10 +30,15 @@ test.describe('hero', () => {
     expect(animationName).toBe('none');
   });
 
-  test('keyboard: skip link then the three hero CTAs are reachable in order', async ({ page }) => {
+  test('keyboard: skip link, then the language toggle, then the three hero CTAs are reachable in order', async ({
+    page,
+  }) => {
     await page.goto('/');
     await page.keyboard.press('Tab');
     await expect(page.locator(':focus')).toHaveClass('skip-link');
+
+    await page.keyboard.press('Tab');
+    await expect(page.locator(':focus')).toHaveId('lang-toggle');
 
     for (const label of ['The control plane', 'The evidence loop', 'Current evidence']) {
       await page.keyboard.press('Tab');

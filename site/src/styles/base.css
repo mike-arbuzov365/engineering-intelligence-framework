@@ -125,11 +125,17 @@ button {
   margin: 0 auto;
 }
 
+/* Eyebrow label stacked above the heading, not beside it - a short mono
+   label baseline-aligned next to a display-sized h2 read cramped. */
 .section__head {
   display: flex;
-  align-items: baseline;
-  gap: var(--eif-space-2);
+  flex-direction: column;
+  gap: var(--eif-space-1);
   margin-bottom: var(--eif-space-4);
+}
+
+.section__head > .label {
+  white-space: nowrap;
 }
 
 .section__head h2 {

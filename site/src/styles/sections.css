@@ -16,8 +16,10 @@
 
 .problem__list li {
   counter-increment: problem;
-  position: relative;
-  padding: var(--eif-space-3) 0 var(--eif-space-3) var(--eif-space-5);
+  display: flex;
+  align-items: baseline;
+  gap: var(--eif-space-2);
+  padding: var(--eif-space-3) 0;
   border-top: 1px solid var(--eif-rule);
   max-width: var(--eif-measure);
 }
@@ -28,9 +30,7 @@
 
 .problem__list li::before {
   content: counter(problem, decimal-leading-zero);
-  position: absolute;
-  left: 0;
-  top: var(--eif-space-3);
+  flex: 0 0 auto;
   font-family: var(--eif-font-mono);
   font-size: var(--eif-size-label);
   color: var(--eif-accent);
@@ -72,7 +72,6 @@
 
 .control-plane__list {
   list-style: none;
-  counter-reset: cp;
   margin: 0;
   padding: 0;
   display: grid;
@@ -81,23 +80,17 @@
 }
 
 .control-plane__list li {
-  counter-increment: cp;
-  padding-left: var(--eif-space-4);
-  position: relative;
+  padding-top: var(--eif-space-1);
+  border-top: 1px solid var(--eif-rule);
 }
 
-.control-plane__list li::before {
-  content: counter(cp, decimal-leading-zero);
-  position: absolute;
-  left: 0;
-  font-family: var(--eif-font-mono);
-  font-size: var(--eif-size-label);
-  color: var(--eif-accent);
-}
-
-.control-plane__list strong {
+.control-plane__list li > .label {
   display: block;
-  color: var(--eif-fg);
+}
+
+.control-plane__list p {
+  margin: 0.35rem 0 0;
+  color: var(--eif-fg-muted);
 }
 
 .control-plane__note {

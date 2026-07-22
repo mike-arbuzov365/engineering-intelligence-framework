@@ -7,46 +7,98 @@ import './styles/integrations.css';
 import './styles/content.css';
 import './styles/reveal.css';
 import './styles/motion.css';
+import './styles/lang-toggle.css';
 
 // The `eif:deploy-status` meta tag is injected at build time by the
 // eif-deploy-status Vite plugin (vite.config.js), so it is statically
 // verifiable in dist/index.html without running this script.
 
-// --- Loop scene: highlight the phase nearest the viewport center as the
-// reader scrolls. Progressive enhancement only - the adjacent .loop__phases
-// <ol> is the always-visible, always-complete content; this just keeps the
-// sticky diagram's echo in sync while JS is available.
-function initLoopScene() {
-  const phases = document.querySelectorAll('.loop__phase');
-  const nodes = document.querySelectorAll('.loop__diagram .loop__node');
-  const statusPhase = document.querySelector('.loop__status-phase');
-  if (phases.length === 0 || !('IntersectionObserver' in window)) return;
+let loopCleanup;
 
-  const nodeByPhase = new Map();
-  nodes.forEach((node) => nodeByPhase.set(node.dataset.phase, node));
+// --- Loop scene: highlight the phase closest to the viewport's vertical
+// center as the reader scrolls, and let clicking a diagram node jump to (and
+// activate) its phase. Progressive enhancement only - the adjacent
+// .loop__phases <ol> is the always-visible, always-complete content; this
+// keeps the sticky diagram's echo in sync and adds a shortcut while JS is
+// available.
+//
+// Deliberately NOT IntersectionObserver: with six short phases, several can
+// be simultaneously 100%-intersecting at once, and picking "highest ratio"
+// among tied 1.0 values has no stable, predictable winner - it read as the
+// active dot jumping around at random while scrolling, and racing visibly
+// against the click handler's own scrollIntoView. A direct
+// getBoundingClientRect() distance-to-center comparison has exactly one
+// closest phase at any scroll position, so there is nothing to race.
+//
+// Safe to call again after a language swap replaces the loop section's DOM
+// (tears down the previous listeners first, then re-queries fresh nodes).
+function initLoopScene() {
+  loopCleanup?.();
+
+  const phases = Array.from(document.querySelectorAll('.loop__phase'));
+  const nodes = document.querySelectorAll('.loop__diagram .loop__node');
+  if (phases.length === 0) return;
+
+  const phaseByName = new Map();
+  phases.forEach((phase) => phaseByName.set(phase.dataset.phase, phase));
 
   function setActive(phase) {
     nodes.forEach((node) => node.classList.toggle('is-active', node.dataset.phase === phase));
-    if (statusPhase) statusPhase.textContent = phase.charAt(0).toUpperCase() + phase.slice(1);
   }
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible) setActive(visible.target.dataset.phase);
-    },
-    { rootMargin: '-40% 0px -40% 0px', threshold: [0, 0.5, 1] },
-  );
+  function updateActiveFromScroll() {
+    const viewportCenter = window.innerHeight / 2;
+    let closest = null;
+    let closestDistance = Infinity;
+    for (const phase of phases) {
+      const rect = phase.getBoundingClientRect();
+      const distance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        closest = phase;
+      }
+    }
+    if (closest) setActive(closest.dataset.phase);
+  }
 
-  phases.forEach((phase) => observer.observe(phase));
+  let ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      updateActiveFromScroll();
+      ticking = false;
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  updateActiveFromScroll();
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clickHandlers = [];
+  nodes.forEach((node) => {
+    const handler = () => {
+      const target = phaseByName.get(node.dataset.phase);
+      setActive(node.dataset.phase);
+      target?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+    };
+    node.addEventListener('click', handler);
+    clickHandlers.push([node, handler]);
+  });
+
+  loopCleanup = () => {
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onScroll);
+    clickHandlers.forEach(([node, handler]) => node.removeEventListener('click', handler));
+  };
 }
 
-// --- Reveal rows (integrations now, task/evidence rows reuse this in a
-// later session): CSS already reveals on hover/focus with no JS at all.
-// This adds a persistent open/close toggle for touch, where ":hover" does
-// not apply, and keeps aria-expanded correct for assistive tech.
+// --- Reveal rows (integrations, evidence/tasks): CSS already reveals on
+// hover/focus with no JS at all. This adds a persistent open/close toggle
+// for touch, where ":hover" does not apply, and keeps aria-expanded correct
+// for assistive tech. Safe to call again after a language swap - listeners
+// attach to whatever `.reveal__trigger` elements exist at call time.
 function initRevealRows() {
   document.querySelectorAll('.reveal__trigger').forEach((trigger) => {
     trigger.addEventListener('click', () => {
@@ -57,5 +109,62 @@ function initRevealRows() {
   });
 }
 
+const REINIT_HANDLERS = {
+  loop: initLoopScene,
+  reveal: initRevealRows,
+};
+
+// --- Language toggle: English is the static, always-present default (so a
+// no-JS visitor gets the primary language, not a degraded state). Each
+// `.i18n-block` caches its own original (English) HTML once; switching to
+// Ukrainian clones the matching <template>; switching back restores the
+// cached English HTML. No cookie/localStorage - the choice is session-only,
+// keeping the zero-storage state this site already verifies (D-08).
+function initLanguageToggle() {
+  const toggle = document.getElementById('lang-toggle');
+  const blocks = document.querySelectorAll('.i18n-block');
+  if (!toggle || blocks.length === 0) return;
+
+  const englishHtml = new Map();
+  const ukrainianTemplate = new Map();
+  blocks.forEach((block) => englishHtml.set(block.dataset.i18nId, block.innerHTML));
+  document.querySelectorAll('#i18n-templates template').forEach((tpl) => {
+    ukrainianTemplate.set(tpl.dataset.i18nId, tpl);
+  });
+
+  let lang = 'en';
+
+  function applyReinit() {
+    const kinds = new Set();
+    blocks.forEach((block) => {
+      if (block.dataset.i18nReinit) kinds.add(block.dataset.i18nReinit);
+    });
+    kinds.forEach((kind) => REINIT_HANDLERS[kind]?.());
+  }
+
+  function setLanguage(next) {
+    lang = next;
+    document.documentElement.lang = lang;
+    blocks.forEach((block) => {
+      const id = block.dataset.i18nId;
+      if (lang === 'uk') {
+        const tpl = ukrainianTemplate.get(id);
+        if (tpl) block.innerHTML = tpl.innerHTML;
+      } else {
+        block.innerHTML = englishHtml.get(id) ?? block.innerHTML;
+      }
+    });
+    toggle.setAttribute(
+      'aria-label',
+      lang === 'en' ? toggle.dataset.labelEn : toggle.dataset.labelUk,
+    );
+    toggle.classList.toggle('is-uk', lang === 'uk');
+    applyReinit();
+  }
+
+  toggle.addEventListener('click', () => setLanguage(lang === 'en' ? 'uk' : 'en'));
+}
+
 initLoopScene();
 initRevealRows();
+initLanguageToggle();

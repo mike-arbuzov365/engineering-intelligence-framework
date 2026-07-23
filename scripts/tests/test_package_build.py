@@ -323,10 +323,10 @@ args = sys.argv[1:]
 if args == ['--version']:
     print('rtk 0.43.0')
 elif args == ['--help']:
-    print('  git x\\n  grep x\\n  read x\\n  summary x\\n  proxy x')
+    print('  git x\\n  rg x\\n  read x\\n  summary x\\n  proxy x')
 elif args and args[0] == 'proxy':
     raise SystemExit(2)
-elif args and args[0] == 'grep':
+elif args and args[0] == 'rg':
     print('EIF_RTK_ALPHA\\nEIF_RTK_BETA')
 elif len(args) >= 2 and args[:2] == ['git', 'diff']:
     print('sample.txt | 2 +-')
@@ -381,15 +381,40 @@ else:
         degraded_doctor, degraded_by_name = installed_doctor_report("integration-degraded")
         degraded_graph = degraded_by_name.get("structural_graph", {})
         results.append(check(
-            "installed-wheel doctor reports unknown Graphify freshness as degraded, not healthy",
+            "installed-wheel doctor reports missing Graphify lifecycle metadata as blocked and degraded, not healthy",
             degraded_doctor.returncode == 0
             and degraded_graph.get("state") == "degraded"
-            and (degraded_graph.get("freshness") or {}).get("state") == "unknown",
+            and (degraded_graph.get("freshness") or {}).get("state") == "blocked",
             degraded_doctor.stdout + degraded_doctor.stderr,
         ))
 
         graph_data["built_at_commit"] = baseline
         graph_path.write_text(json.dumps(graph_data), encoding="utf-8")
+        graph_scope_path = integration_project / ".eif" / "graphify-scope.json"
+        graph_scope_path.write_text(
+            json.dumps({
+                "schema_version": 1,
+                "repo_id": "integration-status-pkgtest",
+                "source_paths": ["source.py"],
+                "semantic_paths": [],
+                "exclude_paths": [".eif", "graphify-out"],
+                "suppressed": False,
+            }, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        capture_metadata = run([
+            str(venv_python),
+            str(integration_project / ".eif" / "runtime" / "eif_graphify.py"),
+            "capture-metadata",
+            "--instance-root", str(integration_project),
+            "--graphify-version", "0.9.12",
+            "--generated-at", "2026-07-23T00:00:00+00:00",
+        ], cwd=tmp_root)
+        results.append(check(
+            "installed-wheel Graphify lifecycle captures deterministic D08 metadata",
+            capture_metadata.returncode == 0,
+            capture_metadata.stdout + capture_metadata.stderr,
+        ))
         compression = integration_config["integrations"]["shell_output_compression"]
         compression.update({
             "enabled": True,

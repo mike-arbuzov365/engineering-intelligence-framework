@@ -42,9 +42,9 @@ def config(*, enabled: bool = True, boundary: str = "local-only", policy: str = 
 
 
 class FakeRunner:
-    def __init__(self, *, version: str = "0.43.0", grep_passes: bool = True):
+    def __init__(self, *, version: str = "0.43.0", search_passes: bool = True):
         self.version = version
-        self.grep_passes = grep_passes
+        self.search_passes = search_passes
         self.calls: list[list[str]] = []
 
     def __call__(self, argv: list[str], cwd: Path | None, timeout: float) -> CompletedProcess:
@@ -53,13 +53,13 @@ class FakeRunner:
         if argv[1:] == ["--version"]:
             return CompletedProcess(argv, 0, f"rtk {self.version}\n", "")
         if argv[1:] == ["--help"]:
-            return CompletedProcess(argv, 0, "  git x\n  grep x\n  read x\n  summary x\n  proxy x\n", "")
+            return CompletedProcess(argv, 0, "  git x\n  rg x\n  read x\n  summary x\n  proxy x\n", "")
         if len(argv) > 1 and argv[1] == "proxy":
             return CompletedProcess(argv, 0, json.dumps(argv[-3:]), "")
-        if len(argv) > 1 and argv[1] == "grep":
-            if self.grep_passes:
+        if len(argv) > 1 and argv[1] == "rg":
+            if self.search_passes:
                 return CompletedProcess(argv, 0, "EIF_RTK_ALPHA\nEIF_RTK_BETA\n", "")
-            return CompletedProcess(argv, 2, "", "grep failed")
+            return CompletedProcess(argv, 2, "", "search failed")
         if len(argv) > 2 and argv[1:3] == ["git", "diff"]:
             return CompletedProcess(argv, 0, "sample.txt | 2 +-\n", "")
         return CompletedProcess(argv, 1, "", "unexpected fake command")
@@ -113,7 +113,7 @@ def unit_results() -> list[bool]:
 
     degraded = integrations.evaluate_integrations(
         config(), FRAMEWORK_ROOT, FRAMEWORK_ROOT,
-        checked_at=timestamp, which=lambda _name: "fake-rtk", runner=FakeRunner(grep_passes=False),
+        checked_at=timestamp, which=lambda _name: "fake-rtk", runner=FakeRunner(search_passes=False),
     )[0]
     failed = {item["id"] for item in degraded["capabilities"] if item["status"] == "fail"}
     results.append(check("failed grep canary produces explicit degraded state", degraded["state"] == "degraded" and failed == {"grep-alternation"}, str(failed)))

@@ -13,8 +13,8 @@ makes an empty native search result inconclusive.
 ## Canonical routes
 
 - `git-native`: `rtk git <subcommand> <args>` - eligible after canary.
-- `grep-simple`: `rtk grep <pattern> <paths>` - eligible after canary.
-- `grep-alternation`: `rtk grep -e <A> -e <B> <paths>` - eligible after canary.
+- `grep-simple`: `rtk rg <pattern> <paths>` - eligible after canary.
+- `grep-alternation`: `rtk rg -e <A> -e <B> <paths>` - eligible after canary.
 - `read-bounded`: `rtk read --max-lines <N> <path>` - eligible after canary.
 - `generic-space-free`: `rtk summary <tool> <space-free-args>` - eligible after canary.
 - `quoted-whitespace`: `rtk proxy <tool> <args> # rtk-raw-ok: preserve argv` - always zero savings.

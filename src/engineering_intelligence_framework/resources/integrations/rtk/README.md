@@ -9,7 +9,7 @@ EIF now ships a removable RTK adapter with:
 
 - a compatible version range `>=0.42.0,<0.44.0`, tested with `0.43.0`;
 - a machine-readable provider manifest and command registry;
-- canaries for the CLI surface, proxy argv preservation, grep alternation and
+- canaries for the CLI surface, proxy argv preservation, search alternation and
   git diff;
 - generated compact routing instructions for the shared contract and all four
   public agent adapters;
@@ -79,7 +79,7 @@ Critical invariants:
   boundary;
 - correctness-sensitive whitespace/special-character argv uses explicit raw
   proxy after the proxy canary passes;
-- grep output is trusted only when the grep canary passes; empty output from a
+- search output is trusted only when the search canary passes; empty output from a
   failed route is inconclusive;
 - user hooks and user-level agent config are never installed or modified.
 
@@ -112,14 +112,18 @@ always record zero savings, even if their output happens to be shorter.
 `attempt_id` is an optional content-free identifier; it enables benchmark
 attribution without storing a prompt, command, path or output.
 
-## Release-candidate evidence and degraded mode
+## Release-candidate evidence and Windows search routing
 
-The Windows release-candidate host resolved RTK `0.43.0` and passed version,
-CLI-surface, raw-proxy argv, git-diff and telemetry canaries. Its split grep
-alternation canary returned exit 2, so the adapter correctly reported
-`degraded`, not `healthy`. That is the intended safety property: use the
-unfiltered/core-safe fallback for a failed command class and inspect the
-provider issue before counting any savings.
+The first Windows release-candidate probe resolved RTK `0.43.0` but reported
+`degraded`: `rtk grep` selected an unrelated Embarcadero `grep.exe` earlier on
+PATH, and that executable rejected RTK's `-I` argument. The failure was real,
+but it was not a failure of RTK's native ripgrep filter.
+
+The portable contract now uses `rtk rg` explicitly. This route is present in
+RTK `0.43.0`, bypasses the ambiguous `grep.exe` lookup and preserves repeated
+`-e` arguments. The same host must pass the revised behavioral canary before
+the adapter may report `healthy` or count search savings. No global PATH edit
+or vendor-tool removal is required.
 
 No general token-reduction or quality-improvement claim follows from these
 canaries. Comparative benchmark evidence remains a separate requirement.

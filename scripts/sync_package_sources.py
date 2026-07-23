@@ -44,6 +44,7 @@ IMPL_SCRIPTS = [
     "eif_init.py",
     "eif_verify_runtime.py",
     "eif_integrations.py",
+    "eif_graphify.py",
     "eif_search_knowledge.py",
     "eif_render.py",
     "eif_privacy_scan.py",

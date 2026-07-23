@@ -34,7 +34,7 @@
     {
       "id": "artifact-policy",
       "required_for_healthy": true,
-      "description": "The raw graph is valid JSON below graphify-out and remains ignored local state."
+      "description": "The raw graph, metadata sidecar and explicit scope manifest validate together without folder-derived repository identity."
     },
     {
       "id": "semantic-gate",
@@ -44,7 +44,7 @@
     {
       "id": "git-freshness",
       "required_for_healthy": true,
-      "description": "Graph baseline, current commit, and merge base classify freshness as fresh, stale, diverged, or unknown."
+      "description": "Git history plus manifest and scope hashes classify fresh, code-update, semantic-update, full-rebuild, blocked and suppressed states."
     }
   ],
   "data_boundaries": ["local-only", "external-api"],

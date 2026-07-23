@@ -53,12 +53,26 @@
     },
     "freshness": {
       "type": "object",
-      "required": ["state", "baseline_commit", "current_commit", "merge_base"],
+      "required": [
+        "state", "baseline_commit", "current_commit", "merge_base",
+        "manifest_hash", "scope_hash", "changed_source_files",
+        "source_verification_required"
+      ],
       "properties": {
-        "state": { "type": "string", "enum": ["fresh", "stale", "diverged", "unknown", "not-applicable"] },
+        "state": {
+          "type": "string",
+          "enum": [
+            "fresh", "code-update-required", "semantic-update-required",
+            "full-rebuild-required", "blocked", "suppressed", "not-applicable"
+          ]
+        },
         "baseline_commit": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" },
         "current_commit": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" },
-        "merge_base": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" }
+        "merge_base": { "type": ["string", "null"], "pattern": "^[0-9a-f]{40}$" },
+        "manifest_hash": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
+        "scope_hash": { "type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$" },
+        "changed_source_files": { "type": "integer", "minimum": 0 },
+        "source_verification_required": { "type": "boolean" }
       },
       "additionalProperties": false
     },

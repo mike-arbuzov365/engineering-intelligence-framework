@@ -224,13 +224,13 @@
             </div>
             <ol class="knowledge-route__steps">
               <li data-tier="T3">
-                <details>
+                <details open>
                   <summary><span>01</span><strong>Session evidence</strong><em>Tier 3</em></summary>
                   <p>Work produces observations, decisions, failures and a draft Knowledge Delta.</p>
                 </details>
               </li>
               <li data-tier="GATE" class="knowledge-route__gate">
-                <details open>
+                <details>
                   <summary><span>02</span><strong>Closeout + retro</strong><em>Gate</em></summary>
                   <p>Compare intent with evidence, name failure patterns and decide what is reusable. Unverified notes do not pass.</p>
                 </details>
@@ -813,7 +813,7 @@
           EIF перетворює перевірений інженерний досвід на придатний до
           повторного використання операційний інтелект: спільні методи,
           пам&rsquo;ять проєкту, дисципліну сесій та виконувані навички агента,
-          що не зникають разом з окремою розмовою з агентом.
+          що не зникають після завершення окремої робочої сесії з агентом.
         </p>
         <nav class="hero__ctas" aria-label="Основна навігація">
           <a href="#methodology">Що таке EIF</a>
@@ -943,13 +943,13 @@
           </div>
           <ol class="knowledge-route__steps">
             <li data-tier="T3">
-              <details>
+              <details open>
                 <summary><span>01</span><strong>Докази сесії</strong><em>Рівень 3</em></summary>
                 <p>Робота створює спостереження, рішення, збої та чернетку Knowledge Delta.</p>
               </details>
             </li>
             <li data-tier="GATE" class="knowledge-route__gate">
-              <details open>
+              <details>
                 <summary><span>02</span><strong>Закриття + ретроспектива</strong><em>Перевірка</em></summary>
                 <p>Порівняти намір із доказами, виявити повторювані моделі збоїв і вирішити, що можна використати знову. Неперевірені нотатки не проходять.</p>
               </details>
@@ -1090,21 +1090,21 @@
           <div class="loop__sticky">
             <svg class="loop__diagram" aria-hidden="true" data-label="Навігація фазами обмеженого циклу доказів" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
               <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
-              <g class="loop__node" data-phase="orient" data-label="Показати фазу Орієнтація" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Орієнтація</text></g>
+              <g class="loop__node" data-phase="orient" data-label="Показати фазу Контекст" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Контекст</text></g>
               <g class="loop__node" data-phase="define" data-label="Показати фазу Визначення" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Визначення</text></g>
               <g class="loop__node" data-phase="act" data-label="Показати фазу Дія" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Дія</text></g>
               <g class="loop__node" data-phase="observe" data-label="Показати фазу Спостереження" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Спостереження</text></g>
               <g class="loop__node" data-phase="study" data-label="Показати фазу Аналіз" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Аналіз</text></g>
-              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Коригування" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Коригування</text></g>
+              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Уточнення" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Уточнення</text></g>
             </svg>
           </div>
           <ol class="loop__phases">
-            <li class="loop__phase" data-phase="orient"><span class="label label--accent">01 &middot; Орієнтація</span><p>Прочитати поточне джерело й здобуте знання, що стосується справи. Факти фіксувати окремо від припущень.</p></li>
+            <li class="loop__phase" data-phase="orient"><span class="label label--accent">01 &middot; Контекст</span><p>Прочитати поточне джерело й здобуте знання, що стосується справи. Факти фіксувати окремо від припущень.</p></li>
             <li class="loop__phase" data-phase="define"><span class="label label--accent">02 &middot; Визначення</span><p>Сформулювати найменшу наступну гіпотезу і спостереження, яке її підтвердить або спростує.</p></li>
             <li class="loop__phase" data-phase="act"><span class="label label--accent">03 &middot; Дія</span><p>Внести одну оборотну зміну або провести один діагностичний експеримент.</p></li>
             <li class="loop__phase" data-phase="observe"><span class="label label--accent">04 &middot; Спостереження</span><p>Запустити оголошений оцінювач і зафіксувати його реальний результат.</p></li>
             <li class="loop__phase" data-phase="study"><span class="label label--accent">05 &middot; Аналіз</span><p>Порівняти очікуване з фактичним. Якщо не вийшло - зафіксувати стислу сигнатуру збою, яку можна порівняти з іншими спробами.</p></li>
-            <li class="loop__phase" data-phase="adapt"><span class="label label--accent">06 &middot; Коригування</span><p>Обрати наступний крок, спираючись на спостереження. Дію, що вже не спрацювала, без нових доказів не повторюють.</p></li>
+            <li class="loop__phase" data-phase="adapt"><span class="label label--accent">06 &middot; Уточнення</span><p>Обрати наступний крок, спираючись на спостереження. Дію, що вже не спрацювала, без нових доказів не повторюють.</p></li>
           </ol>
         </div>
         <div class="loop__control">

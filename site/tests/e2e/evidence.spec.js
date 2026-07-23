@@ -15,6 +15,10 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#layers .knowledge-route__steps li')).toHaveCount(5);
     await expect(page.locator('#layers .knowledge-route')).toContainText('Closeout + retro');
 
+    const routeDetails = page.locator('#layers .knowledge-route details');
+    await expect(routeDetails.nth(0)).toHaveAttribute('open', '');
+    await expect(routeDetails.nth(1)).not.toHaveAttribute('open', '');
+
     const projectMemory = page.locator('#layers .knowledge-route details').nth(2);
     await projectMemory.locator('summary').click();
     await expect(projectMemory).toHaveAttribute('open', '');
@@ -33,7 +37,15 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#layers .knowledge-route')).toContainText(
       'Закриття + ретроспектива',
     );
+    const routeDetails = page.locator('#layers .knowledge-route details');
+    await expect(routeDetails.nth(0)).toHaveAttribute('open', '');
+    await expect(routeDetails.nth(1)).not.toHaveAttribute('open', '');
     await expect(page.locator('#learning')).toContainText('не прихована поведінка моделі');
+    await expect(page.locator('#loop')).toContainText('Контекст');
+    await expect(page.locator('#loop')).toContainText('Уточнення');
+    await expect(page.locator('body')).toContainText(
+      'після завершення окремої робочої сесії з агентом',
+    );
 
     const ukrainianText = await page.locator('main').innerText();
     for (const avoidableAnglicism of [
@@ -52,6 +64,9 @@ test.describe('engineering-intelligence methodology', () => {
       'Tier 3',
       'playbook',
       'skill',
+      'Орієнтація',
+      'Коригування',
+      'розмовою з агентом',
     ]) {
       expect(ukrainianText).not.toContain(avoidableAnglicism);
     }

@@ -14,8 +14,11 @@ Usage:
 """
 from __future__ import annotations
 
+import argparse
+import hashlib
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -25,6 +28,7 @@ SCRIPTS_DIR = Path(__file__).resolve().parents[1]
 FRAMEWORK_ROOT = SCRIPTS_DIR.parent
 BENCHMARK_SCRIPT = SCRIPTS_DIR / "eif_benchmark.py"
 FAKE_AGENT = SCRIPTS_DIR / "tests" / "fixtures" / "benchmark" / "fake_agent_runner.py"
+FAKE_EIFCTL = SCRIPTS_DIR / "tests" / "fixtures" / "benchmark" / "fake_eifctl.py"
 FIXTURES_DIR = FRAMEWORK_ROOT / "docs" / "benchmarks" / "fixtures"
 T02 = FIXTURES_DIR / "T02-fix-a-bug"
 T07 = FIXTURES_DIR / "T07-avoid-repeating-a-known-failed-fix"
@@ -61,7 +65,278 @@ def materialize_and_run(fixture: Path, work_dir: Path, behavior: str, **run_kwar
     return proc, out_path
 
 
-def main() -> int:
+def make_eifctl_shim(root: Path) -> Path:
+    if os.name == "nt":
+        shim = root / "fake-eifctl.cmd"
+        shim.write_text(f'@"{sys.executable}" "{FAKE_EIFCTL}" %*\n', encoding="utf-8")
+    else:
+        shim = root / "fake-eifctl"
+        shim.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{FAKE_EIFCTL}" "$@"\n', encoding="utf-8")
+        shim.chmod(0o755)
+    return shim
+
+
+def write_integration_contract(
+    root: Path,
+    *,
+    rtk_state: str = "healthy",
+) -> tuple[Path, Path, Path]:
+    root.mkdir(parents=True, exist_ok=True)
+    graph_path = root / "structural-graph.json"
+    graph_path.write_text(json.dumps({
+        "directed": True,
+        "multigraph": False,
+        "nodes": [
+            {"id": "src/pricing.py::calculate_price", "label": "calculate_price"},
+            {"id": "tests/test_pricing.py::boundary", "label": "boundary"},
+        ],
+        "links": [
+            {
+                "source": "tests/test_pricing.py::boundary",
+                "target": "src/pricing.py::calculate_price",
+                "relation": "CALLS",
+            }
+        ],
+    }), encoding="utf-8")
+    graph_metadata_path = root / "graph-metadata.json"
+    graph_metadata_path.write_text(json.dumps({
+        "schema_version": 1,
+        "repo_id": "benchmark-fixture",
+        "source_commit": "a" * 40,
+        "graphify_version": "0.9.12",
+        "manifest_hash": "sha256:" + "b" * 64,
+        "scope_hash": "sha256:" + "c" * 64,
+        "graph_sha256": "sha256:" + hashlib.sha256(graph_path.read_bytes()).hexdigest(),
+        "generated_at": "2026-07-23T00:00:00Z",
+    }), encoding="utf-8")
+
+    def capability(capability_id: str) -> dict:
+        return {
+            "id": capability_id,
+            "required": True,
+            "status": "pass",
+            "evidence": {
+                "kind": "canary",
+                "summary": "deterministic contract fixture passed",
+                "content_free": True,
+            },
+        }
+
+    graphify = {
+        "schema_version": 1,
+        "integration": "structural_graph",
+        "provider": "graphify",
+        "state": "healthy",
+        "checked_at": "2026-07-23T00:00:00Z",
+        "data_boundary": "local-only",
+        "version": {
+            "detected": "0.9.12",
+            "compatible": True,
+            "constraint": ">=0.9.0,<1.0.0",
+        },
+        "capabilities": [
+            capability("artifact-policy"),
+            capability("semantic-gate"),
+            capability("git-freshness"),
+            capability("query-canary"),
+            capability("path-canary"),
+            capability("explain-canary"),
+        ],
+        "freshness": {
+            "state": "fresh",
+            "baseline_commit": "a" * 40,
+            "current_commit": "a" * 40,
+            "merge_base": "a" * 40,
+            "manifest_hash": "sha256:" + "b" * 64,
+            "scope_hash": "sha256:" + "c" * 64,
+            "changed_source_files": 0,
+            "source_verification_required": True,
+        },
+        "remediation": [
+            "Verify every graph-derived claim against source files before editing."
+        ],
+    }
+    rtk_capability_ids = [
+        "version-probe",
+        "cli-surface",
+        "proxy-argv",
+        "grep-alternation",
+        "git-diff",
+        "content-free-telemetry",
+    ]
+    rtk = {
+        "schema_version": 1,
+        "integration": "shell_output_compression",
+        "provider": "rtk",
+        "state": rtk_state,
+        "checked_at": "2026-07-23T00:00:00Z",
+        "data_boundary": "local-only",
+        "version": {
+            "detected": "0.43.0",
+            "compatible": True,
+            "constraint": ">=0.42.0,<0.44.0",
+        },
+        "capabilities": [capability(item) for item in rtk_capability_ids],
+        "freshness": {
+            "state": "not-applicable",
+            "baseline_commit": None,
+            "current_commit": None,
+            "merge_base": None,
+            "manifest_hash": None,
+            "scope_hash": None,
+            "changed_source_files": 0,
+            "source_verification_required": False,
+        },
+        "remediation": [] if rtk_state == "healthy" else ["Use a core-safe fallback."],
+    }
+    if rtk_state != "healthy":
+        rtk["capabilities"][3]["status"] = "fail"
+    report_path = root / "integration-health.json"
+    report_path.write_text(
+        json.dumps({"schema_version": 1, "results": [graphify, rtk]}, indent=2),
+        encoding="utf-8",
+    )
+    return report_path, graph_path, graph_metadata_path
+
+
+def real_host_mode_d_contract(root: Path) -> tuple[bool, str]:
+    """One local, zero-cost mode D contract using real provider canaries."""
+    from eif_graphify import capture_metadata
+    from eif_integrations import evaluate_integrations, validate_health_results
+
+    source_repo = root / "real-host-graph-source"
+    shutil.copytree(
+        T02 / "source",
+        source_repo,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "*.pyo"),
+    )
+    git_commands = [
+        ["git", "init", "-q"],
+        ["git", "config", "user.email", "eif-canary@example.invalid"],
+        ["git", "config", "user.name", "EIF Canary"],
+        ["git", "add", "-A"],
+        ["git", "commit", "-q", "-m", "source baseline"],
+    ]
+    for command in git_commands:
+        proc = subprocess.run(command, cwd=source_repo, capture_output=True, text=True)
+        if proc.returncode != 0:
+            return False, f"Git setup failed: {proc.stdout}{proc.stderr}"
+
+    graph_dir = source_repo / "graphify-out"
+    graph_dir.mkdir()
+    graph_path = graph_dir / "graph.json"
+    graph_path.write_text(json.dumps({
+        "directed": True,
+        "multigraph": False,
+        "nodes": [
+            {"id": "src/pricing.py::calculate_price", "label": "calculate_price"},
+            {"id": "tests/test_pricing.py::boundary", "label": "boundary"},
+        ],
+        "links": [
+            {
+                "source": "tests/test_pricing.py::boundary",
+                "target": "src/pricing.py::calculate_price",
+                "relation": "CALLS",
+            }
+        ],
+    }), encoding="utf-8")
+    scope_path = source_repo / ".eif" / "graphify-scope.json"
+    scope_path.parent.mkdir()
+    scope_path.write_text(json.dumps({
+        "schema_version": 1,
+        "repo_id": "benchmark-real-host",
+        "source_paths": ["src", "tests"],
+        "semantic_paths": [],
+        "exclude_paths": [".eif", "graphify-out"],
+        "suppressed": False,
+    }), encoding="utf-8")
+    graph_entry = {
+        "enabled": True,
+        "provider": "graphify",
+        "mode": "structural",
+        "artifact_path": "graphify-out/graph.json",
+        "metadata_path": "graphify-out/eif-graph-metadata.json",
+        "scope_manifest_path": ".eif/graphify-scope.json",
+        "baseline_commit": None,
+        "processing": "local",
+        "data_boundary": "local-only",
+        "cost_cap_usd": 0,
+        "failure_policy": "degrade",
+    }
+    capture_metadata(
+        source_repo,
+        graph_entry,
+        "0.9.12",
+        generated_at="2026-07-23T00:00:00+00:00",
+        root=FRAMEWORK_ROOT,
+    )
+    config = {
+        "integrations": {
+            "shell_output_compression": {
+                "enabled": True,
+                "provider": "rtk",
+                "processing": "local",
+                "data_boundary": "local-only",
+                "telemetry_enabled": False,
+                "failure_policy": "degrade",
+            },
+            "structural_graph": graph_entry,
+        }
+    }
+    health_results = evaluate_integrations(config, FRAMEWORK_ROOT, source_repo)
+    schema_problems = validate_health_results(health_results, FRAMEWORK_ROOT)
+    by_name = {item["integration"]: item for item in health_results}
+    if schema_problems or any(
+        by_name.get(name, {}).get("state") != "healthy"
+        for name in ("shell_output_compression", "structural_graph")
+    ):
+        return False, json.dumps({
+            "schema_problems": schema_problems,
+            "states": {name: item.get("state") for name, item in by_name.items()},
+        })
+    report_path = root / "real-host-integration-health.json"
+    report_path.write_text(
+        json.dumps({"schema_version": 1, "results": health_results}, indent=2),
+        encoding="utf-8",
+    )
+    work = root / "real-host-mode-d-work"
+    out = root / "real-host-mode-d.jsonl"
+    fake_eifctl = make_eifctl_shim(root)
+    materialize = run_benchmark(
+        "materialize", str(T02), str(work), "--mode", "D_full_stack",
+        "--eifctl-path", str(fake_eifctl),
+        "--integration-report", str(report_path),
+        "--graph-artifact", str(graph_path),
+        "--graph-metadata", str(source_repo / "graphify-out" / "eif-graph-metadata.json"),
+    )
+    run = run_benchmark(
+        "run", str(T02), str(work), "--mode", "D_full_stack",
+        "--agent-runner", sys.executable, str(FAKE_AGENT),
+        "--out", str(out),
+        env={"EIF_FAKE_AGENT_BEHAVIOR": "correct_fix"},
+    )
+    if not out.is_file():
+        return False, materialize.stdout + materialize.stderr + run.stdout + run.stderr
+    record = json.loads(out.read_text(encoding="utf-8").strip())
+    valid = run_benchmark("validate-result", str(out))
+    return (
+        materialize.returncode == 0
+        and run.returncode == 0
+        and valid.returncode == 0
+        and record["integration_evidence"]["graphify"]["consumption_verified"] is True
+        and record["integration_evidence"]["rtk"]["telemetry_attempt_attributed"] is True,
+        materialize.stdout + materialize.stderr + run.stdout + run.stderr + valid.stdout + valid.stderr,
+    )
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--real",
+        action="store_true",
+        help="Also run one zero-cost mode D contract with installed RTK and Graphify canaries.",
+    )
+    args = parser.parse_args(argv)
     results: list[bool] = []
 
     # --- seeded mode order reproducible ---
@@ -98,21 +373,16 @@ def main() -> int:
     with tempfile.TemporaryDirectory(prefix="eif-benchmark-test-") as tmp:
         tmp_root = Path(tmp)
 
-        # --- C/D are explicitly blocked at the real missing boundary. A
-        # deterministic fake agent must never make either mode look real. ---
-        for blocked_mode, expected_signal in (
-            ("C_structural_navigation", "records and consumes Graphify query/path/explain evidence"),
-            ("D_full_stack", "healthy RTK behavioral report"),
-        ):
+        # --- C/D fail loud without their explicit integration boundary. ---
+        for blocked_mode in ("C_structural_navigation", "D_full_stack"):
             blocked_work = tmp_root / blocked_mode
             blocked_materialize = run_benchmark(
                 "materialize", str(T02), str(blocked_work), "--mode", blocked_mode,
             )
             results.append(check(
-                f"{blocked_mode} materialization is explicitly BLOCKED without fake workspace evidence",
+                f"{blocked_mode} materialization is BLOCKED without an integration report and graph artifact",
                 blocked_materialize.returncode == 3
                 and "BLOCKED" in blocked_materialize.stdout
-                and expected_signal in blocked_materialize.stdout
                 and not blocked_work.exists(),
                 blocked_materialize.stdout + blocked_materialize.stderr,
             ))
@@ -122,12 +392,171 @@ def main() -> int:
                 "--agent-runner", sys.executable, str(FAKE_AGENT), "--out", str(blocked_out),
             )
             results.append(check(
-                f"{blocked_mode} run is explicitly BLOCKED and writes no result record",
+                f"{blocked_mode} run without materialization writes no result record",
                 blocked_run.returncode == 3
-                and "BLOCKED" in blocked_run.stdout
                 and not blocked_out.exists(),
                 blocked_run.stdout + blocked_run.stderr,
             ))
+
+        integration_report, graph_artifact, graph_metadata = write_integration_contract(tmp_root)
+        fake_eifctl = make_eifctl_shim(tmp_root)
+
+        presence_report_data = json.loads(integration_report.read_text(encoding="utf-8"))
+        presence_report_data["results"][0]["capabilities"] = [
+            item
+            for item in presence_report_data["results"][0]["capabilities"]
+            if item["id"] not in {"query-canary", "path-canary", "explain-canary"}
+        ]
+        presence_report = tmp_root / "provider-presence-only.json"
+        presence_report.write_text(json.dumps(presence_report_data), encoding="utf-8")
+        presence_work = tmp_root / "mode-c-provider-presence-only"
+        presence_materialize = run_benchmark(
+            "materialize", str(T02), str(presence_work),
+            "--mode", "C_structural_navigation",
+            "--eifctl-path", str(fake_eifctl),
+            "--integration-report", str(presence_report),
+            "--graph-artifact", str(graph_artifact),
+            "--graph-metadata", str(graph_metadata),
+        )
+        results.append(check(
+            "mode C rejects provider presence plus an artifact when behavioral canaries are absent",
+            presence_materialize.returncode == 3 and not presence_work.exists(),
+            presence_materialize.stdout + presence_materialize.stderr,
+        ))
+        substituted_metadata_data = json.loads(graph_metadata.read_text(encoding="utf-8"))
+        substituted_metadata_data["graph_sha256"] = "sha256:" + "0" * 64
+        substituted_metadata = tmp_root / "substituted-graph-metadata.json"
+        substituted_metadata.write_text(json.dumps(substituted_metadata_data), encoding="utf-8")
+        substituted_work = tmp_root / "mode-c-substituted-artifact"
+        substituted_materialize = run_benchmark(
+            "materialize", str(T02), str(substituted_work),
+            "--mode", "C_structural_navigation",
+            "--eifctl-path", str(fake_eifctl),
+            "--integration-report", str(integration_report),
+            "--graph-artifact", str(graph_artifact),
+            "--graph-metadata", str(substituted_metadata),
+        )
+        results.append(check(
+            "mode C rejects a graph artifact that is not integrity-bound to its D08 metadata",
+            substituted_materialize.returncode == 3 and not substituted_work.exists(),
+            substituted_materialize.stdout + substituted_materialize.stderr,
+        ))
+
+        def materialize_integration(mode: str, work: Path, report: Path = integration_report) -> subprocess.CompletedProcess:
+            return run_benchmark(
+                "materialize", str(T02), str(work), "--mode", mode,
+                "--eifctl-path", str(fake_eifctl),
+                "--integration-report", str(report),
+                "--graph-artifact", str(graph_artifact),
+                "--graph-metadata", str(graph_metadata),
+            )
+
+        def run_integration(mode: str, work: Path, behavior: str) -> tuple[subprocess.CompletedProcess, Path]:
+            out = work.parent / f"{work.name}.jsonl"
+            proc = run_benchmark(
+                "run", str(T02), str(work), "--mode", mode,
+                "--agent-runner", sys.executable, str(FAKE_AGENT),
+                "--out", str(out),
+                env={"EIF_FAKE_AGENT_BEHAVIOR": behavior},
+            )
+            return proc, out
+
+        mode_c_work = tmp_root / "mode-c-happy"
+        mode_c_materialize = materialize_integration("C_structural_navigation", mode_c_work)
+        mode_c_run, mode_c_out = run_integration("C_structural_navigation", mode_c_work, "correct_fix")
+        mode_c_record = json.loads(mode_c_out.read_text(encoding="utf-8").strip())
+        mode_c_graph = mode_c_record["integration_evidence"]["graphify"]
+        results.append(check(
+            "mode C executes only with healthy/fresh Graphify and records verified consumption",
+            mode_c_materialize.returncode == 0
+            and mode_c_run.returncode == 0
+            and mode_c_record["outcome"]["status"] == "success"
+            and mode_c_graph["consumption_verified"] is True
+            and mode_c_graph["capabilities_consumed"] == ["query"],
+            mode_c_materialize.stdout + mode_c_materialize.stderr + mode_c_run.stdout + mode_c_run.stderr,
+        ))
+        results.append(check(
+            "mode C result validates against the public result contract",
+            run_benchmark("validate-result", str(mode_c_out)).returncode == 0,
+        ))
+
+        for behavior in ("presence_only", "fabricated_graph", "fabricated_source", "wrong_attempt"):
+            work = tmp_root / f"mode-c-{behavior}"
+            materialize_integration("C_structural_navigation", work)
+            failed_run, failed_out = run_integration("C_structural_navigation", work, behavior)
+            failed_record = json.loads(failed_out.read_text(encoding="utf-8").strip())
+            results.append(check(
+                f"mode C rejects {behavior} evidence and retains one harness_error record",
+                failed_run.returncode == 21
+                and failed_record["outcome"]["status"] == "harness_error"
+                and failed_record["integration_evidence"]["graphify"]["consumption_verified"] is False,
+                failed_run.stdout + failed_run.stderr,
+            ))
+
+        degraded_report, _, _ = write_integration_contract(tmp_root / "degraded-contract", rtk_state="degraded")
+        mode_d_blocked_work = tmp_root / "mode-d-degraded"
+        mode_d_blocked = materialize_integration(
+            "D_full_stack",
+            mode_d_blocked_work,
+            degraded_report,
+        )
+        results.append(check(
+            "mode D remains BLOCKED for a degraded RTK report and creates no workspace",
+            mode_d_blocked.returncode == 3 and not mode_d_blocked_work.exists(),
+            mode_d_blocked.stdout + mode_d_blocked.stderr,
+        ))
+
+        mode_d_work = tmp_root / "mode-d-happy"
+        mode_d_materialize = materialize_integration("D_full_stack", mode_d_work)
+        mode_d_run, mode_d_out = run_integration("D_full_stack", mode_d_work, "correct_fix")
+        mode_d_record = json.loads(mode_d_out.read_text(encoding="utf-8").strip())
+        mode_d_rtk = mode_d_record["integration_evidence"]["rtk"]
+        results.append(check(
+            "mode D records healthy RTK plus attempt-attributed content-free telemetry",
+            mode_d_materialize.returncode == 0
+            and mode_d_run.returncode == 0
+            and mode_d_rtk["telemetry_attempt_attributed"] is True
+            and mode_d_rtk["telemetry_events"] == 1
+            and mode_d_rtk["savings_eligible_events"] == 1,
+            mode_d_materialize.stdout + mode_d_materialize.stderr + mode_d_run.stdout + mode_d_run.stderr,
+        ))
+        results.append(check(
+            "mode D result validates against the public result contract",
+            run_benchmark("validate-result", str(mode_d_out)).returncode == 0,
+        ))
+
+        mode_d_missing_work = tmp_root / "mode-d-missing-telemetry"
+        materialize_integration("D_full_stack", mode_d_missing_work)
+        missing_run, missing_out = run_integration("D_full_stack", mode_d_missing_work, "missing_telemetry")
+        missing_record = json.loads(missing_out.read_text(encoding="utf-8").strip())
+        results.append(check(
+            "mode D rejects missing attempt telemetry and retains one harness_error record",
+            missing_run.returncode == 21
+            and missing_record["outcome"]["status"] == "harness_error"
+            and missing_record["integration_evidence"]["rtk"]["telemetry_attempt_attributed"] is False,
+            missing_run.stdout + missing_run.stderr,
+        ))
+
+        forbidden_integration_keys = {"path", "prompt", "command", "argv", "output", "cwd"}
+
+        def nested_keys(value) -> set[str]:
+            if isinstance(value, dict):
+                found = set(value)
+                for item in value.values():
+                    found.update(nested_keys(item))
+                return found
+            if isinstance(value, list):
+                found = set()
+                for item in value:
+                    found.update(nested_keys(item))
+                return found
+            return set()
+
+        results.append(check(
+            "C/D result integration evidence contains no path, prompt, command, argv, output or cwd fields",
+            not (nested_keys(mode_c_record["integration_evidence"]) | nested_keys(mode_d_record["integration_evidence"]))
+            & forbidden_integration_keys,
+        ))
 
         # --- invalid manifest rejected ---
         bad_fixture = tmp_root / "bad-fixture"
@@ -172,6 +601,20 @@ def main() -> int:
         results.append(check(
             "validate-manifest accepts the real T10 fixture",
             run_benchmark("validate-manifest", str(FIXTURES_DIR / "T10-security-relevant-fix")).returncode == 0,
+        ))
+        corpus_fixtures = sorted(
+            path for path in FIXTURES_DIR.iterdir()
+            if path.is_dir() and (path / "manifest.json").is_file()
+        )
+        corpus_validation = [
+            run_benchmark("validate-manifest", str(path))
+            for path in corpus_fixtures
+        ]
+        results.append(check(
+            "all 10 corpus fixtures validate with executable A/B/C/D mode declarations",
+            len(corpus_fixtures) == 10
+            and all(proc.returncode == 0 for proc in corpus_validation),
+            "\n".join(proc.stdout + proc.stderr for proc in corpus_validation if proc.returncode != 0),
         ))
 
         # --- failed attempt retained ---
@@ -510,6 +953,15 @@ def main() -> int:
             len(dirty_findings) > 0 and "absolute_path_leak" in dirty_findings[0],
             str(dirty_findings),
         ))
+
+    if args.real:
+        with tempfile.TemporaryDirectory(prefix="eif-benchmark-real-host-") as tmp:
+            passed_real, detail = real_host_mode_d_contract(Path(tmp))
+            results.append(check(
+                "real host completes one zero-cost mode D contract with healthy Graphify/RTK evidence",
+                passed_real,
+                detail,
+            ))
 
     passed = sum(results)
     print(f"EIF-RESULT: passed={passed} total={len(results)}")

@@ -3,18 +3,16 @@
 (docs/benchmarks/README.md). Five subcommands:
 
     eif_benchmark.py validate-manifest <fixture_dir>
-    eif_benchmark.py materialize <fixture_dir> <work_dir> --mode {A_baseline,B_eif_governance}
+    eif_benchmark.py materialize <fixture_dir> <work_dir> --mode <A|B|C|D>
     eif_benchmark.py run <fixture_dir> <work_dir> --mode {...} --agent-runner python runner.py --out results.jsonl [--attempt-kind ...] [--parent-attempt-id ID]
     eif_benchmark.py validate-result <result_record.json>
     eif_benchmark.py aggregate <results_dir> --out <summary.json>
 
-Modes A (no EIF) and B (installed eifctl governance) are executable. C
-(+ Graphify) and D (+ Graphify + RTK) are schema-declared, but materialize
-and run return explicit BLOCKED results. The provider contracts exist; the
-benchmark still lacks a real agent runner that consumes/records Graphify
-evidence, and D additionally requires healthy RTK plus attempt telemetry.
-A fake C/D result would be worse than not having one. See
-docs/benchmarks/README.md.
+Modes C and D are executable only through an explicit, privacy-safe
+integration interface. C requires a schema-valid healthy/fresh Graphify report,
+a real graph artifact digest and runner-returned consumption proof. D requires
+the same plus healthy RTK and content-free telemetry attributed to the exact
+attempt. Missing or fabricated evidence fails loud.
 
 Every attempt - success, task failure, harness error, timeout, or abort -
 produces exactly one result record; none is ever discarded or silently
@@ -41,19 +39,9 @@ import yaml
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS_DIR = FRAMEWORK_ROOT / "core" / "schemas"
-BLOCKED_MODE_REASONS = {
-    "C_structural_navigation": (
-        "the provider contract now exists, but no benchmark agent runner yet records and consumes "
-        "Graphify query/path/explain evidence for the attempt"
-    ),
-    "D_full_stack": (
-        "mode C runner integration is absent, and mode D additionally requires a healthy RTK "
-        "behavioral report plus attempt-attributed content-free telemetry"
-    ),
-}
-BLOCKED_MODES = set(BLOCKED_MODE_REASONS)
-EXECUTABLE_MODES = {"A_baseline", "B_eif_governance"}
-HARNESS_VERSION = "0.1.0"
+INTEGRATION_MODES = {"C_structural_navigation", "D_full_stack"}
+EXECUTABLE_MODES = {"A_baseline", "B_eif_governance", *INTEGRATION_MODES}
+HARNESS_VERSION = "0.2.0"
 
 # `run`'s exit codes (adoption-hardening round): distinct from whether a
 # result record was written, which happens on EVERY attempt regardless -
@@ -140,6 +128,143 @@ def compute_source_digest(source_dir: Path) -> str:
     return f"sha256:{h.hexdigest()}"
 
 
+def _sha256_file(path: Path) -> str:
+    return f"sha256:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+
+
+def _schema_errors(data: dict, schema_name: str) -> list[str]:
+    validator = _validator(_load_schema(schema_name))
+    return [
+        error.message
+        for error in sorted(validator.iter_errors(data), key=lambda item: list(item.path))
+    ]
+
+
+def _passed_capabilities(result: dict) -> set[str]:
+    return {
+        item.get("id")
+        for item in result.get("capabilities", [])
+        if item.get("status") == "pass"
+    }
+
+
+def _prepare_integration_input(
+    mode: str,
+    report_path: str | None,
+    graph_artifact_path: str | None,
+    graph_metadata_path: str | None,
+    source_dir: Path,
+) -> tuple[dict | None, str | None]:
+    if not report_path or not graph_artifact_path or not graph_metadata_path:
+        return None, "mode C/D requires --integration-report, --graph-artifact and --graph-metadata"
+    report_file = Path(report_path).resolve()
+    graph_file = Path(graph_artifact_path).resolve()
+    metadata_file = Path(graph_metadata_path).resolve()
+    try:
+        report = json.loads(report_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None, "integration report is missing, unreadable or invalid JSON"
+    results = report.get("results") if isinstance(report, dict) else None
+    if not isinstance(results, list):
+        return None, "integration report must contain a results array"
+    health_schema = _load_schema("integration-health-result.schema.json")
+    health_validator = _validator(health_schema)
+    for item in results:
+        if not isinstance(item, dict) or list(health_validator.iter_errors(item)):
+            return None, "integration report contains a result that fails the public health schema"
+    integration_names = [item.get("integration") for item in results]
+    if len(integration_names) != len(set(integration_names)):
+        return None, "integration report contains duplicate integration results"
+    by_name = {item.get("integration"): item for item in results}
+    graphify = by_name.get("structural_graph")
+    if not graphify:
+        return None, "integration report does not contain structural_graph evidence"
+    graph_caps = _passed_capabilities(graphify)
+    required_graph_caps = {"query-canary", "path-canary", "explain-canary"}
+    if (
+        graphify.get("provider") != "graphify"
+        or graphify.get("state") != "healthy"
+        or (graphify.get("freshness") or {}).get("state") != "fresh"
+        or not required_graph_caps.issubset(graph_caps)
+    ):
+        return None, "mode C/D requires healthy, fresh Graphify with query/path/explain canaries"
+    try:
+        graph = json.loads(graph_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None, "graph artifact is missing, unreadable or invalid JSON"
+    links = graph.get("links", graph.get("edges"))
+    if not isinstance(graph.get("nodes"), list) or not isinstance(links, list):
+        return None, "graph artifact lacks nodes and links/edges arrays"
+    source_files = [
+        path.relative_to(source_dir).as_posix()
+        for path in source_dir.rglob("*")
+        if path.is_file()
+        and not any(part in _DIGEST_SKIP_DIR_NAMES for part in path.relative_to(source_dir).parts[:-1])
+        and path.suffix not in _DIGEST_SKIP_SUFFIXES
+    ]
+    graph_text = json.dumps(graph, ensure_ascii=False, sort_keys=True)
+    if not source_files or not any(relative in graph_text for relative in source_files):
+        return None, "graph artifact has no structural reference to the benchmark target source"
+    version = (graphify.get("version") or {}).get("detected")
+    if not isinstance(version, str) or not version:
+        return None, "Graphify health evidence lacks a detected version"
+    try:
+        metadata = json.loads(metadata_file.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None, "Graphify metadata is missing, unreadable or invalid JSON"
+    metadata_errors = _schema_errors(metadata, "graphify-artifact-metadata.schema.json")
+    if metadata_errors:
+        return None, f"Graphify metadata failed schema validation: {metadata_errors[0]}"
+    freshness = graphify["freshness"]
+    artifact_digest = _sha256_file(graph_file)
+    if (
+        metadata["graph_sha256"] != artifact_digest
+        or metadata["graphify_version"] != version
+        or metadata["source_commit"] != freshness["baseline_commit"]
+        or metadata["manifest_hash"] != freshness["manifest_hash"]
+        or metadata["scope_hash"] != freshness["scope_hash"]
+    ):
+        return None, "Graphify health, metadata and graph artifact are not one integrity-bound evidence set"
+    integration_input: dict = {
+        "schema_version": 1,
+        "mode": mode,
+        "graphify": {
+            "provider": "graphify",
+            "health_state": "healthy",
+            "freshness_state": "fresh",
+            "version": version,
+            "artifact_digest": artifact_digest,
+            "target_source_digest": compute_source_digest(source_dir),
+            "available_capabilities": ["query", "path", "explain"],
+        },
+    }
+    if mode == "D_full_stack":
+        rtk = by_name.get("shell_output_compression")
+        if not rtk or rtk.get("provider") != "rtk" or rtk.get("state") != "healthy":
+            return None, "mode D requires a healthy RTK behavioral report"
+        required = {
+            item.get("id")
+            for item in rtk.get("capabilities", [])
+            if item.get("required") is True
+        }
+        if not required or not required.issubset(_passed_capabilities(rtk)):
+            return None, "mode D requires every required RTK capability to pass"
+        rtk_version = (rtk.get("version") or {}).get("detected")
+        if not isinstance(rtk_version, str) or not rtk_version:
+            return None, "RTK health evidence lacks a detected version"
+        registry = json.loads(
+            (FRAMEWORK_ROOT / "integrations" / "rtk" / "command-registry.json").read_text(encoding="utf-8")
+        )
+        integration_input["rtk"] = {
+            "provider": "rtk",
+            "health_state": "healthy",
+            "version": rtk_version,
+            "registry_version": registry["registry_version"],
+        }
+    errors = _schema_errors(integration_input, "benchmark-integration-input.schema.json")
+    return (None, f"integration input failed schema validation: {errors[0]}") if errors else (integration_input, None)
+
+
 # --------------------------------------------------------------------------
 # validate-manifest
 # --------------------------------------------------------------------------
@@ -214,18 +339,29 @@ def cmd_materialize(args: argparse.Namespace) -> int:
     work_dir = Path(args.work_dir).resolve()
     manifest = json.loads((fixture_dir / "manifest.json").read_text(encoding="utf-8"))
 
-    if args.mode in BLOCKED_MODES:
-        print(
-            f"materialize: BLOCKED - mode {args.mode}: {BLOCKED_MODE_REASONS[args.mode]}. "
-            "No workspace or result record was created. See docs/benchmarks/README.md."
-        )
-        return 3
-
     if args.mode not in manifest["supported_modes"]:
         print(f"materialize: FAIL - {manifest['task_id']} does not declare support for mode {args.mode}")
         return 1
 
     source_dir = fixture_dir / manifest["source_dir"]
+    integration_input = None
+    graph_artifact_source = None
+    if args.mode in INTEGRATION_MODES:
+        integration_input, integration_error = _prepare_integration_input(
+            args.mode,
+            args.integration_report,
+            args.graph_artifact,
+            args.graph_metadata,
+            source_dir,
+        )
+        if integration_error:
+            print(
+                f"materialize: BLOCKED - mode {args.mode}: {integration_error}. "
+                "No workspace or result record was created."
+            )
+            return 3
+        graph_artifact_source = Path(args.graph_artifact).resolve()
+
     if work_dir.exists():
         shutil.rmtree(work_dir)
     shutil.copytree(source_dir, work_dir)
@@ -234,12 +370,12 @@ def cmd_materialize(args: argparse.Namespace) -> int:
     setup_cost_seconds = 0.0
     eifctl_provenance = None
     adapter_name = None
-    if args.mode == "B_eif_governance":
+    if args.mode != "A_baseline":
         import time
         adapter_name = args.adapter
         eifctl = args.eifctl_path or shutil.which("eifctl")
         if not eifctl:
-            print("materialize: FAIL - mode B requires the 'eifctl' console command on PATH", file=sys.stderr)
+            print("materialize: FAIL - modes B/C/D require the 'eifctl' console command on PATH", file=sys.stderr)
             return 1
         start = time.monotonic()
         proc = subprocess.run(
@@ -251,7 +387,7 @@ def cmd_materialize(args: argparse.Namespace) -> int:
         if proc.returncode != 0:
             print(f"materialize: FAIL - eifctl init failed:\n{proc.stdout}\n{proc.stderr}", file=sys.stderr)
             return 1
-        print(f"materialize: eifctl init succeeded in {setup_cost_seconds}s (mode B governance installed)")
+        print(f"materialize: eifctl init succeeded in {setup_cost_seconds}s ({args.mode} governance installed)")
 
         # Read the eifctl provenance eifctl ITSELF just recorded (this exact
         # venv's package/version/resource_manifest_digest/wheel_sha256) from
@@ -263,7 +399,7 @@ def cmd_materialize(args: argparse.Namespace) -> int:
         lock_data = yaml.safe_load(lock_path.read_text(encoding="utf-8"))
         if (lock_data.get("framework") or {}).get("source_type") != "installed-package":
             print(
-                "materialize: FAIL - mode B's eifctl init did not record "
+                f"materialize: FAIL - mode {args.mode}'s eifctl init did not record "
                 "framework.source_type: installed-package in the instance lock "
                 "- cannot attribute this attempt to a specific eifctl install.",
                 file=sys.stderr,
@@ -279,6 +415,21 @@ def cmd_materialize(args: argparse.Namespace) -> int:
         if "wheel_sha256" in pkg:
             eifctl_provenance["wheel_sha256"] = pkg["wheel_sha256"]
 
+    graph_artifact_rel = None
+    if integration_input is not None and graph_artifact_source is not None:
+        integration_dir = work_dir / ".benchmark-integrations"
+        integration_dir.mkdir(parents=True, exist_ok=True)
+        graph_target = integration_dir / "graph.json"
+        shutil.copyfile(graph_artifact_source, graph_target)
+        if _sha256_file(graph_target) != integration_input["graphify"]["artifact_digest"]:
+            print("materialize: FAIL - copied graph artifact digest changed", file=sys.stderr)
+            return 1
+        graph_artifact_rel = ".benchmark-integrations/graph.json"
+        (integration_dir / "input.json").write_text(
+            json.dumps(integration_input, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+
     (work_dir / ".benchmark-materialize.json").write_text(
         json.dumps({
             "task_id": manifest["task_id"],
@@ -287,6 +438,8 @@ def cmd_materialize(args: argparse.Namespace) -> int:
             "setup_cost_seconds": setup_cost_seconds,
             "adapter": adapter_name,
             "eifctl": eifctl_provenance,
+            "integration_input": integration_input,
+            "graph_artifact_rel": graph_artifact_rel,
         }, indent=2),
         encoding="utf-8",
     )
@@ -310,19 +463,101 @@ def _run_test_command(test_command: list[str], cwd: Path) -> tuple[int, int, str
     return int(m.group(1)), int(m.group(2)), output
 
 
+def _initial_integration_evidence(integration_input: dict) -> dict:
+    graphify = integration_input["graphify"]
+    evidence: dict = {
+        "graphify": {
+            "provider": "graphify",
+            "health_state": graphify["health_state"],
+            "freshness_state": graphify["freshness_state"],
+            "version": graphify["version"],
+            "artifact_digest": graphify["artifact_digest"],
+            "target_source_digest": graphify["target_source_digest"],
+            "capabilities_consumed": [],
+            "consumption_verified": False,
+        }
+    }
+    if "rtk" in integration_input:
+        rtk = integration_input["rtk"]
+        evidence["rtk"] = {
+            "provider": "rtk",
+            "health_state": rtk["health_state"],
+            "version": rtk["version"],
+            "telemetry_attempt_attributed": False,
+            "telemetry_events": 0,
+            "savings_eligible_events": 0,
+            "estimated_saved_tokens": 0,
+        }
+    return evidence
+
+
+def _verify_graph_consumption(
+    integration_input: dict,
+    agent_report: dict,
+    attempt_id: str,
+) -> tuple[list[str], bool, str | None]:
+    consumption = agent_report.get("integration_consumption")
+    if not isinstance(consumption, dict) or consumption.get("attempt_id") != attempt_id:
+        return [], False, "runner did not return integration consumption for this attempt"
+    graph = consumption.get("graphify")
+    if not isinstance(graph, dict):
+        return [], False, "runner did not return Graphify consumption evidence"
+    used = graph.get("capabilities_used")
+    available = set(integration_input["graphify"]["available_capabilities"])
+    valid_used = (
+        isinstance(used, list)
+        and bool(used)
+        and len(used) == len(set(used))
+        and all(isinstance(item, str) and item in available for item in used)
+    )
+    digest_ok = graph.get("artifact_digest") == integration_input["graphify"]["artifact_digest"]
+    source_ok = graph.get("target_source_digest") == integration_input["graphify"]["target_source_digest"]
+    if not valid_used or not digest_ok or not source_ok:
+        return used if isinstance(used, list) else [], False, "runner consumption proof is missing, fabricated or incompatible"
+    return sorted(used), True, None
+
+
+def _rtk_attempt_evidence(work_dir: Path, attempt_id: str) -> tuple[dict, str | None]:
+    evidence = {
+        "telemetry_attempt_attributed": False,
+        "telemetry_events": 0,
+        "savings_eligible_events": 0,
+        "estimated_saved_tokens": 0,
+    }
+    telemetry_path = work_dir / ".eif" / "local-state" / "rtk-telemetry.jsonl"
+    if not telemetry_path.is_file():
+        return evidence, "mode D runner produced no local RTK telemetry"
+    validator = _validator(_load_schema("rtk-telemetry-event.schema.json"))
+    matching = []
+    try:
+        lines = telemetry_path.read_text(encoding="utf-8").splitlines()
+        for line in lines:
+            if not line.strip():
+                continue
+            event = json.loads(line)
+            if list(validator.iter_errors(event)):
+                return evidence, "mode D telemetry failed the content-free RTK schema"
+            if event.get("attempt_id") == attempt_id:
+                matching.append(event)
+    except (OSError, json.JSONDecodeError):
+        return evidence, "mode D telemetry is unreadable or invalid JSONL"
+    if not matching:
+        return evidence, "mode D telemetry is not attributed to this attempt"
+    evidence.update({
+        "telemetry_attempt_attributed": True,
+        "telemetry_events": len(matching),
+        "savings_eligible_events": sum(1 for item in matching if item["savings_eligible"]),
+        "estimated_saved_tokens": sum(item["estimated_saved_tokens"] for item in matching),
+    })
+    return evidence, None
+
+
 def cmd_run(args: argparse.Namespace) -> int:
     import platform
 
     fixture_dir = Path(args.fixture_dir).resolve()
     work_dir = Path(args.work_dir).resolve()
     manifest = json.loads((fixture_dir / "manifest.json").read_text(encoding="utf-8"))
-
-    if args.mode in BLOCKED_MODES:
-        print(
-            f"run: BLOCKED - mode {args.mode}: {BLOCKED_MODE_REASONS[args.mode]}. "
-            "No result record was created."
-        )
-        return 3
 
     # materialize must have already run against this exact work_dir - its
     # record of adapter/eifctl provenance is authoritative (this command
@@ -331,6 +566,9 @@ def cmd_run(args: argparse.Namespace) -> int:
     # install than the one that actually materialized the instance).
     materialize_path = work_dir / ".benchmark-materialize.json"
     if not materialize_path.is_file():
+        if args.mode in INTEGRATION_MODES:
+            print("run: BLOCKED - mode C/D requires a validated materialization. No result record was created.")
+            return 3
         print(f"run: FAIL - {materialize_path} not found - run materialize first.", file=sys.stderr)
         return 1
     materialize_data = json.loads(materialize_path.read_text(encoding="utf-8"))
@@ -341,6 +579,30 @@ def cmd_run(args: argparse.Namespace) -> int:
             file=sys.stderr,
         )
         return 1
+
+    integration_input = materialize_data.get("integration_input")
+    graph_artifact_path = None
+    if args.mode in INTEGRATION_MODES:
+        if not isinstance(integration_input, dict):
+            print("run: BLOCKED - mode C/D materialization has no integration input.", file=sys.stderr)
+            return 3
+        input_errors = _schema_errors(integration_input, "benchmark-integration-input.schema.json")
+        graph_artifact_rel = materialize_data.get("graph_artifact_rel")
+        if input_errors or not isinstance(graph_artifact_rel, str):
+            print("run: BLOCKED - mode C/D materialization integration evidence is invalid.", file=sys.stderr)
+            return 3
+        graph_artifact_path = (work_dir / graph_artifact_rel).resolve()
+        try:
+            graph_artifact_path.relative_to(work_dir)
+        except ValueError:
+            print("run: BLOCKED - materialized graph path escapes the workspace.", file=sys.stderr)
+            return 3
+        if (
+            not graph_artifact_path.is_file()
+            or _sha256_file(graph_artifact_path) != integration_input["graphify"]["artifact_digest"]
+        ):
+            print("run: BLOCKED - materialized graph artifact is absent or has drifted.", file=sys.stderr)
+            return 3
 
     attempt_id = str(uuid.uuid4())
     started_at = datetime.now(timezone.utc).isoformat()
@@ -356,7 +618,11 @@ def cmd_run(args: argparse.Namespace) -> int:
         "run_index": args.run_index,
         "randomized_order_seed": args.order_seed,
         "model": {"name": args.model_name, "version_or_snapshot": args.model_version},
-        "tool_versions": {"eifctl": materialize_data.get("eifctl")},
+        "tool_versions": {
+            "eifctl": materialize_data.get("eifctl"),
+            "graphify": (integration_input or {}).get("graphify", {}).get("version"),
+            "rtk": (integration_input or {}).get("rtk", {}).get("version"),
+        },
         "environment": {"os": platform.system()},
         "started_at": started_at,
         "finished_at": None,
@@ -381,12 +647,24 @@ def cmd_run(args: argparse.Namespace) -> int:
         "outcome": {"status": "harness_error", "notes": "run did not complete"},
         "harness_version": HARNESS_VERSION,
     }
+    if integration_input is not None:
+        record["integration_evidence"] = _initial_integration_evidence(integration_input)
 
     import time
     wall_start = time.monotonic()
+    runner_argv = [*args.agent_runner, str(work_dir), str(fixture_dir / manifest["task_prompt_path"])]
+    if integration_input is not None and graph_artifact_path is not None:
+        attempt_input = dict(integration_input)
+        attempt_input["attempt_id"] = attempt_id
+        attempt_input_path = work_dir / ".benchmark-integrations" / "attempt-input.json"
+        attempt_input_path.write_text(
+            json.dumps(attempt_input, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        runner_argv.extend([str(attempt_input_path), str(graph_artifact_path), attempt_id])
     try:
         agent_proc = subprocess.run(
-            [*args.agent_runner, str(work_dir), str(fixture_dir / manifest["task_prompt_path"])],
+            runner_argv,
             capture_output=True, text=True, timeout=manifest["budget"]["max_wall_time_seconds"],
         )
     except subprocess.TimeoutExpired:
@@ -437,6 +715,30 @@ def cmd_run(args: argparse.Namespace) -> int:
     record["measurement"] = agent_report.get("measurement") or {
         "source": "estimated", "exact": False, "collector_version": None,
     }
+
+    if integration_input is not None:
+        consumed, graph_verified, graph_error = _verify_graph_consumption(
+            integration_input,
+            agent_report,
+            attempt_id,
+        )
+        graph_evidence = record["integration_evidence"]["graphify"]
+        graph_evidence["capabilities_consumed"] = consumed
+        graph_evidence["consumption_verified"] = graph_verified
+        integration_errors = [graph_error] if graph_error else []
+        if args.mode == "D_full_stack":
+            rtk_evidence, rtk_error = _rtk_attempt_evidence(work_dir, attempt_id)
+            record["integration_evidence"]["rtk"].update(rtk_evidence)
+            if rtk_error:
+                integration_errors.append(rtk_error)
+        if integration_errors:
+            record["outcome"] = {
+                "status": "harness_error",
+                "notes": "; ".join(item for item in integration_errors if item),
+            }
+            _write_record(args.out, record)
+            print(f"run: HARNESS_ERROR (integration evidence) - {record['record_id']}")
+            return EXIT_HARNESS_ERROR
 
     passed, total, _ = _run_test_command(manifest["test_command"], cwd=work_dir)
     if passed is None:
@@ -522,6 +824,20 @@ def cmd_validate_result(args: argparse.Namespace) -> int:
         m = record.get("metrics", {})
         if m.get("tests_passed", 0) > m.get("tests_total", 0):
             problems.append(f"record {i}: tests_passed ({m.get('tests_passed')}) > tests_total ({m.get('tests_total')})")
+        mode = record.get("mode")
+        integration = record.get("integration_evidence") or {}
+        terminal_status = record.get("outcome", {}).get("status")
+        if mode in INTEGRATION_MODES and terminal_status in {"success", "partial", "failure"}:
+            graph = integration.get("graphify") or {}
+            if graph.get("consumption_verified") is not True or not graph.get("capabilities_consumed"):
+                problems.append(f"record {i}: mode C/D terminal agent outcome requires verified Graphify consumption")
+            target_digest = ((record.get("inputs") or {}).get("provenance") or {}).get("source_digest")
+            if graph.get("target_source_digest") != target_digest:
+                problems.append(f"record {i}: Graphify evidence is not bound to the benchmark target source digest")
+        if mode == "D_full_stack" and terminal_status in {"success", "partial", "failure"}:
+            rtk = integration.get("rtk") or {}
+            if rtk.get("telemetry_attempt_attributed") is not True or rtk.get("telemetry_events", 0) < 1:
+                problems.append(f"record {i}: mode D terminal agent outcome requires attempt-attributed RTK telemetry")
 
     if problems:
         print(f"validate-result: FAIL - {len(problems)} problem(s)")
@@ -666,16 +982,19 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("materialize")
     p.add_argument("fixture_dir")
     p.add_argument("work_dir")
-    p.add_argument("--mode", required=True, choices=sorted(EXECUTABLE_MODES | BLOCKED_MODES))
-    p.add_argument("--adapter", default="claude-code", help="Adapter to configure for mode B (eifctl init --adapter); ignored for mode A.")
-    p.add_argument("--eifctl-path", default=None, help="Exact eifctl executable to use for mode B (e.g. a specific venv's Scripts/eifctl.exe) - overrides PATH lookup, so a test can pin exactly which install runs, not whichever eifctl happens to resolve first on PATH.")
+    p.add_argument("--mode", required=True, choices=sorted(EXECUTABLE_MODES))
+    p.add_argument("--adapter", default="claude-code", help="Adapter to configure for modes B/C/D; ignored for mode A.")
+    p.add_argument("--eifctl-path", default=None, help="Exact eifctl executable to use for modes B/C/D - overrides PATH lookup.")
+    p.add_argument("--integration-report", default=None, help="Schema-valid eifctl doctor integration report required for modes C/D.")
+    p.add_argument("--graph-artifact", default=None, help="Structural graph JSON whose digest and consumption are recorded for modes C/D.")
+    p.add_argument("--graph-metadata", default=None, help="D08 Graphify metadata sidecar that integrity-binds the health report and graph artifact for modes C/D.")
     p.set_defaults(func=cmd_materialize)
 
     p = sub.add_parser("run")
     p.add_argument("fixture_dir")
     p.add_argument("work_dir")
-    p.add_argument("--mode", required=True, choices=sorted(EXECUTABLE_MODES | BLOCKED_MODES))
-    p.add_argument("--agent-runner", required=True, nargs="+", help="Command (e.g. 'python runner.py'); work_dir and task_prompt_path are appended; stdout must be JSON {input_tokens, output_tokens, tool_calls}")
+    p.add_argument("--mode", required=True, choices=sorted(EXECUTABLE_MODES))
+    p.add_argument("--agent-runner", required=True, nargs="+", help="Command (e.g. 'python runner.py'); work_dir and task_prompt_path are appended. C/D additionally receive integration_input_path, graph_artifact_path and attempt_id.")
     p.add_argument("--out", required=True, help="JSONL file to append the result record to")
     p.add_argument("--run-index", type=int, default=0)
     p.add_argument("--order-seed", type=int, default=None)

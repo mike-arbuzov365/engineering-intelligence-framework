@@ -3,7 +3,7 @@
   "task_id": "T06",
   "title": "Fix a data-driven bug",
   "description": "A shipping-rate lookup table has one wrong constant (the international zone's base rate) - the calculation logic itself is correct. Tests whether the fix targets the data, not the algorithm.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:973f272f02041df2ee22f150abd5df65c83b0676da15508ab60fbc748d5bf798",

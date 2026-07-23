@@ -51,27 +51,33 @@ harness mechanics; this real run proves the end-to-end pilot.
 |---|---:|---:|---:|---|
 | A - baseline | no | no | no | **Executable** |
 | B - EIF governance | yes (`eifctl init`) | no | no | **Executable** |
-| C - + structural navigation | yes | yes | no | **Schema-declared, operationally BLOCKED** |
-| D - full stack | yes | yes | yes | **Schema-declared, operationally BLOCKED** |
+| C - + structural navigation | yes | yes | no | **Executable contract; no real-agent result yet** |
+| D - full stack | yes | yes | yes | **Executable contract; no real-agent result yet** |
 
-Modes C and D are declared in
-[`core/schemas/benchmark-result.schema.json`](../../core/schemas/benchmark-result.schema.json)'s
-`mode` enum so the schema doesn't need to change when they become real,
-but `eif_benchmark.py materialize`/`run` still refuse to execute them. The
-Graphify and RTK provider contracts now exist; the remaining boundary is the
-benchmark attempt itself:
+Modes C and D now have an executable attempt boundary, not a performance
+result. `materialize` accepts a schema-valid integration health report, a
+structural graph artifact and its D08 metadata sidecar. It requires Graphify
+`healthy`, freshness `fresh`, passing `query`/`path`/`explain` canaries and a
+parseable graph. The sidecar must bind the exact artifact digest, Graphify
+version, source commit, manifest hash and scope hash to the health report. The
+graph must also reference at least one file in the fixture source tree, and the
+integration record is bound to that tree's existing source digest. Mode D
+additionally requires RTK `healthy` with every required capability passing.
 
-- mode C has no real benchmark agent runner that records and consumes
-  Graphify `query`/`path`/`explain` evidence;
-- mode D has the same missing runner boundary and additionally requires a
-  healthy RTK behavioral report plus content-free telemetry attributable to
-  that exact attempt. The locally installed RTK host used for release-candidate
-  work is currently `degraded`, not healthy.
+For C/D, `run` passes three extra arguments to the agent runner:
+`integration_input_path`, `graph_artifact_path`, and `attempt_id`. A runner
+must return the exact attempt ID, graph digest and non-empty set of consumed
+capabilities. Mode D must also write content-free RTK telemetry attributed to
+that attempt under the materialized instance's local state. Missing,
+presence-only, wrong-attempt or substituted-digest evidence produces one
+append-only `harness_error` record and exit `21`; it can never become a
+successful C/D result. Missing health/artifact preconditions return exit `3`
+and create no workspace or result.
 
-Both commands return exit `3`, name the blocker, and create neither a workspace
-nor a result record. A deterministic fake runner is explicitly tested and
-cannot make C/D look executable. This is an honest `BLOCKED` result under D-07,
-not absence of the now-implemented provider adapters.
+The deterministic C/D runs in the test suite are contract tests only. Their
+`measurement.source` is `fake-runner`, so aggregation suppresses token figures
+and no quality, productivity or savings claim follows from them. A real-agent
+C/D run remains future evidence.
 
 ## Harness commands
 
@@ -84,9 +90,21 @@ python scripts/eif_benchmark.py validate-result results.jsonl
 python scripts/eif_benchmark.py aggregate <results_dir> --out summary.json
 ```
 
-`--agent-runner` is a pluggable command (argv: `[work_dir,
-task_prompt_path]`, stdout: JSON `{input_tokens, output_tokens,
-tool_calls}`, optionally `measurement`) - this repo provides two:
+Modes C/D add explicit materialization inputs:
+
+```bash
+python scripts/eif_benchmark.py materialize <fixture_dir> <work_dir> \
+  --mode C_structural_navigation --eifctl-path <exact-eifctl> \
+  --integration-report <doctor-report.json> \
+  --graph-artifact <graph.json> \
+  --graph-metadata <eif-graph-metadata.json>
+```
+
+`--agent-runner` is a pluggable command. A/B argv is `[work_dir,
+task_prompt_path]`; C/D append `[integration_input_path,
+graph_artifact_path, attempt_id]`. Stdout is JSON `{input_tokens,
+output_tokens, tool_calls}`, optionally `measurement`, and for C/D the
+required `integration_consumption` proof. This repo provides two:
 `scripts/tests/fixtures/benchmark/fake_agent_runner.py` (deterministic,
 for harness self-tests, `measurement.source: fake-runner`) and
 `scripts/tests/fixtures/benchmark/deepseek_agent_runner.py` (real, single-

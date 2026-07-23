@@ -3,7 +3,7 @@
   "task_id": "T03",
   "title": "Refactor without changing behavior",
   "description": "Two functions duplicate the same validate-and-compute-subtotal logic. Requires extracting a shared helper without changing either function's observable behavior (return values, exceptions).",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:57092791e87b8b69c2d219151ee4e82d3391c73ad749c0ec345267a633fdf8ae",

@@ -3,7 +3,7 @@
   "task_id": "T02",
   "title": "Fix a bug",
   "description": "A bulk-discount pricing function has an off-by-one boundary bug at the 50-unit tier threshold. Requires finding and fixing the exact boundary condition without breaking the other tiers.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:f8c5b252af05b56356163c9f34d919230a2970ee874d54139d6d1e5364d0de0f",

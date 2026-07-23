@@ -1,0 +1,92 @@
+/* All entrance/path motion is pure CSS, scoped behind
+   prefers-reduced-motion: no-preference. Outside that query no animation
+   property is ever set, so JS-disabled and reduced-motion visitors get the
+   final, fully visible state immediately - there is nothing to "fall back"
+   from (D-06). */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__name {
+    animation: eif-rise var(--eif-duration-medium) var(--eif-ease) both;
+  }
+
+  .hero__descriptor {
+    animation: eif-rise var(--eif-duration-medium) var(--eif-ease) both;
+    animation-delay: 120ms;
+  }
+
+  .hero__promise {
+    animation: eif-rise var(--eif-duration-medium) var(--eif-ease) both;
+    animation-delay: 200ms;
+  }
+
+  .hero__ctas {
+    animation: eif-rise var(--eif-duration-medium) var(--eif-ease) both;
+    animation-delay: 280ms;
+  }
+
+  .hero__path-line {
+    stroke-dasharray: 2600;
+    stroke-dashoffset: 2600;
+    animation: eif-draw var(--eif-duration-path) var(--eif-ease) both;
+    animation-delay: 380ms;
+  }
+
+  .hero__path-dot {
+    opacity: 0;
+    animation: eif-fade-in var(--eif-duration-fast) linear both;
+  }
+
+  .hero__path-dot:nth-of-type(1) { animation-delay: 380ms; }
+  .hero__path-dot:nth-of-type(2) { animation-delay: 560ms; }
+  .hero__path-dot:nth-of-type(3) { animation-delay: 740ms; }
+  .hero__path-dot:nth-of-type(4) { animation-delay: 920ms; }
+  .hero__path-dot:nth-of-type(5) { animation-delay: 1100ms; }
+  .hero__path-dot:nth-of-type(6) { animation-delay: 1280ms; }
+  .hero__path-dot:nth-of-type(7) { animation-delay: 1460ms; }
+
+  .control-plane__path {
+    stroke-dasharray: 1500;
+    stroke-dashoffset: 1500;
+    animation: eif-draw-plane var(--eif-duration-path) var(--eif-ease) both;
+    animation-delay: 200ms;
+  }
+}
+
+@keyframes eif-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes eif-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes eif-draw {
+  from {
+    stroke-dashoffset: 2600;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes eif-draw-plane {
+  from {
+    stroke-dashoffset: 1500;
+    stroke: var(--eif-rule);
+  }
+  to {
+    stroke-dashoffset: 0;
+    stroke: var(--eif-accent);
+  }
+}

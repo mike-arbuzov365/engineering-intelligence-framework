@@ -281,8 +281,11 @@ evidence and every material claim still has to be verified against source.
 
 The experimental Graphify adapter probes a candidate-compatible version,
 runs `query`, `path`, and `explain` against a three-node synthetic graph, checks
-the project-local artifact boundary and classifies freshness as `fresh`,
-`stale`, `diverged`, or `unknown` from Git evidence. Only `fresh` plus passing
+the project-local artifact boundary and validates a D-08 metadata sidecar. The
+sidecar binds the graph digest to its source commit, Graphify version, explicit
+repository identity, reviewed scope and manifest hashes. Lifecycle states are
+`fresh`, `code-update-required`, `semantic-update-required`,
+`full-rebuild-required`, `blocked` and `suppressed`; only `fresh` plus passing
 canaries can be `healthy`. Semantic/deep modes remain external and fail closed
 unless provider, data boundary and cost cap are explicit; doctor never starts
 a provider scan. This is behavioral integration evidence, not evidence that a
@@ -301,7 +304,7 @@ rest of the system: correctness precedes reduction, and a failed route must be
 reported rather than converted into a savings claim.
 
 The optional RTK adapter now checks a compatible version, CLI routes, raw-proxy
-argv preservation, grep alternation, git diff and the strict content-free
+argv preservation, native `rtk rg` alternation, git diff and the strict content-free
 telemetry contract. Doctor reports `healthy` only when all required canaries
 pass. `degraded` keeps core EIF available but makes the failed command class
 ineligible for savings claims. Raw proxy and parse-failure routes always count
@@ -666,8 +669,9 @@ formally ratified (the file is explicit about which is which).
       runtime validation is complete for all four.
 - [x] Structural-graph and shell-compression integrations are optional,
       behaviorally checked adapters. Graphify has bounded
-      query/path/explain and Git-freshness canaries; RTK has version/argv/
-      grep/diff canaries, a command registry and content-free telemetry.
+      query/path/explain canaries and a D-08 artifact lifecycle; RTK has
+      version/argv/native-`rg`/diff canaries, a command registry and
+      content-free telemetry.
       Provider/version coverage is bounded and neither adapter supports a
       general performance claim.
 - [x] Degraded mode documented.
@@ -704,9 +708,12 @@ formally ratified (the file is explicit about which is which).
       gap the private instance found and fixed in itself (see Limitations)
       - do not consider this item done until it's closed the same way
       (repository settings + a hook guard for each adapter).
-- [x] Graph freshness is derived from graph baseline, current commit and
-      merge-base evidence, with explicit `fresh`, `stale`, `diverged` and
-      `unknown` states (`scripts/tests/test_graphify_integration.py`).
+- [x] Graph lifecycle is derived from validated artifact metadata, graph
+      digest, explicit repository identity, reviewed scope, source commit,
+      current commit and Git ancestry, with explicit `fresh`,
+      `code-update-required`, `semantic-update-required`,
+      `full-rebuild-required`, `blocked` and `suppressed` states
+      (`scripts/tests/test_graphify_integration.py`).
 - [x] Generated adapters have a machine-readable parity matrix
       (`adapters/parity-matrix.json`, drift-tested by
       `scripts/tests/test_parity_matrix.py` against the live adapter
@@ -726,7 +733,7 @@ formally ratified (the file is explicit about which is which).
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
 - [x] Demo workflow has executable evidence:
-      `scripts/tests/test_journey.py` (259 checks) drives a real subprocess
+      `scripts/tests/test_journey.py` (273 checks) drives a real subprocess
       journey against a fresh instance, and
       [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
       has real captured command output, both reproducible from a clean
@@ -788,16 +795,17 @@ unfiltered and no RTK reduction is recorded).
 
 **Why can Graphify or RTK be `degraded` even when it is installed?**
 Installation proves reachability, not behavior. EIF probes the installed
-version and runs provider-specific canaries. A stale Graphify artifact or a
-failed RTK argv/search route stays explicit and ineligible for a healthy or
+version and runs provider-specific canaries. A non-fresh Graphify artifact or
+a failed RTK argv/search route stays explicit and ineligible for a healthy or
 savings claim; doctor reports the evidence and core EIF uses its documented
 fallback.
 
 **What do the RTK and Graphify canaries prove?**
 They prove bounded compatibility, behavior, failure reporting and
 fallback contracts. The first real-agent benchmark pilot has one attempt per
-cell and does not include modes C/D, so no directional performance conclusion
-is supported. See [`docs/product/claims-evidence.md`](../product/claims-evidence.md).
+A/B cell. Modes C/D have deterministic integrity-contract evidence but no
+real-agent result, so no directional performance conclusion is supported. See
+[`docs/product/claims-evidence.md`](../product/claims-evidence.md).
 
 **Does EIF send my private code anywhere?**
 Core EIF, RTK accounting and structural Graphify mode are designed for local

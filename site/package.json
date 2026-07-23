@@ -1,0 +1,31 @@
+{
+  "name": "eif-website",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Local, deploy-ready presentation site for the Engineering Intelligence Framework.",
+  "scripts": {
+    "dev": "vite",
+    "build:preview": "vite build --mode preview",
+    "build:production": "vite build --mode production",
+    "build:test-production": "vite build --mode test-production",
+    "preview": "vite preview --mode preview",
+    "verify:claims": "node scripts/verify-claims.mjs",
+    "verify:claims:strict": "node scripts/verify-claims.mjs --strict",
+    "verify:metadata": "node scripts/verify-metadata.mjs",
+    "generate:social-assets": "node scripts/generate-social-assets.mjs",
+    "test:unit": "node --test tests/unit/verify-claims.test.mjs tests/unit/vite-config.test.mjs",
+    "test:e2e": "node scripts/run-playwright.mjs e2e 5183",
+    "test:a11y": "node scripts/run-playwright.mjs a11y 5184",
+    "audit:assets": "node scripts/audit-assets.mjs",
+    "audit:lighthouse": "node scripts/audit-lighthouse.mjs",
+    "verify:bundle": "node scripts/verify-bundle.mjs",
+    "gate:site": "node scripts/gate-site.mjs"
+  },
+  "devDependencies": {
+    "vite": "8.1.5",
+    "@playwright/test": "1.61.1",
+    "@axe-core/playwright": "4.12.1",
+    "lighthouse": "13.4.1"
+  }
+}

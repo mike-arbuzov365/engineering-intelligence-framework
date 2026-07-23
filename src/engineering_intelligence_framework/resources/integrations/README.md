@@ -15,9 +15,10 @@ Implementation status:
 - RTK has a versioned behavioral adapter, command registry, canaries and
   content-free local telemetry. A failed required canary produces `degraded`.
 - Graphify has a versioned structural adapter, synthetic query/path/explain
-  canaries, commit-derived freshness, local raw-artifact policy and an explicit
-  semantic provider/boundary/cost gate. Stale or unknown graphs never report
-  healthy.
+  canaries, validated artifact metadata, explicit repository/scope identity,
+  portable restore/status commands, a Git-and-hash-derived artifact lifecycle,
+  local raw-artifact policy and an explicit semantic provider/boundary/cost gate.
+  Any non-fresh state preserves the source-navigation fallback.
 - Vendor-docs remains declaration-only until its provider adapter passes its
   own session and evidence gate.
 

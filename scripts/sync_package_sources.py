@@ -44,6 +44,7 @@ IMPL_SCRIPTS = [
     "eif_init.py",
     "eif_verify_runtime.py",
     "eif_integrations.py",
+    "eif_graphify.py",
     "eif_search_knowledge.py",
     "eif_render.py",
     "eif_privacy_scan.py",
@@ -54,6 +55,14 @@ IMPL_SCRIPTS = [
     "eif_adapters.py",
     "eif_markers.py",
     "eif_locale.py",
+]
+
+# Standalone verification tools that are part of the published framework
+# contract but are not eifctl subcommands and must not be installed into every
+# initialized project's .eif/runtime/. They remain executable from the
+# installed package's resource tree.
+PACKAGE_TOOL_SCRIPTS = [
+    "eif_benchmark.py",
 ]
 
 # Resource trees the _impl scripts read at runtime via --framework-root.
@@ -100,6 +109,11 @@ def planned_copies() -> list[tuple[Path, Path]]:
         src = FRAMEWORK_ROOT / "scripts" / name
         if not src.exists():
             raise FileNotFoundError(f"mandatory bundle-source resource missing: scripts/{name}")
+        pairs.append((src, PKG_ROOT / "resources" / "scripts" / name))
+    for name in PACKAGE_TOOL_SCRIPTS:
+        src = FRAMEWORK_ROOT / "scripts" / name
+        if not src.exists():
+            raise FileNotFoundError(f"mandatory package-tool resource missing: scripts/{name}")
         pairs.append((src, PKG_ROOT / "resources" / "scripts" / name))
     return pairs
 

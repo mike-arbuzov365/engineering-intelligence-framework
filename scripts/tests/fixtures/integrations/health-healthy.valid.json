@@ -26,7 +26,11 @@
     "state": "not-applicable",
     "baseline_commit": null,
     "current_commit": null,
-    "merge_base": null
+    "merge_base": null,
+    "manifest_hash": null,
+    "scope_hash": null,
+    "changed_source_files": 0,
+    "source_verification_required": false
   },
   "remediation": []
 }

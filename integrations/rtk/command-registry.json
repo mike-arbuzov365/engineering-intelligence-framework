@@ -17,26 +17,26 @@
     {
       "id": "grep-simple",
       "match": "one literal or regex pattern without alternation",
-      "canonical_form": "rtk grep <pattern> <paths>",
+      "canonical_form": "rtk rg <pattern> <paths>",
       "route": "native-guarded",
       "tracking_expected": true,
       "filtering_expected": true,
       "savings_eligible": true,
       "argv_policy": "preserved",
       "canary": "grep-alternation",
-      "note": "The provider must pass the grep canary before an empty result is trusted."
+      "note": "Use the explicit ripgrep route to avoid unrelated grep.exe programs earlier on Windows PATH. The provider must pass the search canary before an empty result is trusted."
     },
     {
       "id": "grep-alternation",
       "match": "top-level A-or-B alternation",
-      "canonical_form": "rtk grep -e <A> -e <B> <paths>",
+      "canonical_form": "rtk rg -e <A> -e <B> <paths>",
       "route": "native-guarded",
       "tracking_expected": true,
       "filtering_expected": true,
       "savings_eligible": true,
       "argv_policy": "split-alternation",
       "canary": "grep-alternation",
-      "note": "Do not pass a literal pipe in one pattern on the tested Windows build."
+      "note": "Do not pass a literal pipe in one pattern on the tested Windows build. Repeated -e arguments preserve alternation."
     },
     {
       "id": "read-bounded",

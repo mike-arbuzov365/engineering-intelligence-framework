@@ -1,0 +1,62 @@
+:root {
+  /* Color: editorial atlas on charcoal + warm ivory, one signal-green
+     evidence accent, one restrained amber for BLOCKED/UNVERIFIED states.
+     D-03 (private planning repo, PACKET-2026-08-eif-website). */
+  --eif-charcoal-950: #101114;
+  --eif-charcoal-900: #17181c;
+  --eif-charcoal-800: #212226;
+  --eif-charcoal-700: #35363b;
+  --eif-charcoal-600: #55565c;
+  --eif-ivory-050: #f6f1e6;
+  --eif-ivory-100: #efe8d8;
+  --eif-ivory-200: #ddd4bd;
+  --eif-ivory-muted: #a89f8c;
+  --eif-signal-green: #2fd673;
+  --eif-signal-green-dim: #1f9a53;
+  --eif-amber: #c77d2e;
+
+  --eif-bg: var(--eif-charcoal-900);
+  --eif-bg-raised: var(--eif-charcoal-800);
+  --eif-fg: var(--eif-ivory-050);
+  --eif-fg-muted: var(--eif-ivory-muted);
+  --eif-rule: var(--eif-charcoal-700);
+  --eif-accent: var(--eif-signal-green);
+  --eif-accent-dim: var(--eif-signal-green-dim);
+  --eif-warn: var(--eif-amber);
+
+  /* Type: system-only stacks (D-03/D-08 - no remote or self-hosted
+     webfont request). Sans for prose/UI, mono for evidence/labels/code -
+     the mono-for-metadata convention is the atlas/field-guide signature. */
+  --eif-font-sans: -apple-system, "Segoe UI Variable", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --eif-font-mono: "Cascadia Code", "Cascadia Mono", ui-monospace, "SF Mono",
+    "JetBrains Mono", Consolas, "Roboto Mono", monospace;
+
+  --eif-size-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  --eif-size-lede: clamp(1.15rem, 1.05rem + 0.4vw, 1.4rem);
+  --eif-size-h2: clamp(1.75rem, 1.4rem + 1.5vw, 2.75rem);
+  --eif-size-h1: clamp(2.75rem, 1.6rem + 5vw, 6.5rem);
+  --eif-size-label: 0.8125rem;
+
+  --eif-leading-tight: 1.05;
+  --eif-leading-normal: 1.6;
+
+  /* Space: 8px base rhythm. */
+  --eif-space-1: 0.5rem;
+  --eif-space-2: 1rem;
+  --eif-space-3: 1.5rem;
+  --eif-space-4: 2rem;
+  --eif-space-5: 3rem;
+  --eif-space-6: 4.5rem;
+  --eif-space-7: 7rem;
+
+  --eif-content-max: 72rem;
+  --eif-measure: 38rem;
+
+  --eif-duration-fast: 160ms;
+  --eif-duration-medium: 420ms;
+  --eif-duration-path: 1400ms;
+  --eif-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  color-scheme: dark;
+}

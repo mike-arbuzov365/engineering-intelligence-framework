@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "matrix_version": "1.0.0",
+  "adapters": {
+    "claude-code": {
+      "instruction_surface": "CLAUDE.md",
+      "tested_product_versions": ["2.1.169"],
+      "hook": {
+        "template_generated": true,
+        "schema_tested": true,
+        "behavior": "rewrite-capable",
+        "event": "PreToolUse",
+        "input_command_path": "tool_input.command",
+        "output_contract": "hookSpecificOutput.updatedInput.command",
+        "evidence": "Private end-to-end evidence dated 2026-06-16; public schema fixture is deterministic.",
+        "runtime_status": "carried-evidence"
+      }
+    },
+    "cursor": {
+      "instruction_surface": ".cursor/rules/eif/governance.mdc",
+      "tested_product_versions": ["3.11.19"],
+      "hook": {
+        "template_generated": true,
+        "schema_tested": true,
+        "behavior": "rewrite-capable",
+        "event": "preToolUse",
+        "input_command_path": "command",
+        "output_contract": "updated_input.command",
+        "evidence": "Cursor hook schema and generated payload fixture are validated; active user configuration is outside EIF.",
+        "runtime_status": "carried-evidence"
+      }
+    },
+    "codex": {
+      "instruction_surface": "AGENTS.override.md or AGENTS.md",
+      "tested_product_versions": ["0.144.5"],
+      "hook": {
+        "template_generated": true,
+        "schema_tested": true,
+        "behavior": "block-only",
+        "event": "PreToolUse",
+        "input_command_path": "tool_input.command",
+        "output_contract": "non-zero exit with exact replacement message",
+        "evidence": "hooks.json command-handler shape is known; updatedInput mutation is not accepted without a version-specific behavioral canary.",
+        "runtime_status": "mutation-unverified"
+      }
+    },
+    "hermes": {
+      "instruction_surface": ".hermes.md, AGENTS.md, CLAUDE.md or Cursor rules",
+      "tested_product_versions": ["0.18.2"],
+      "hook": {
+        "template_generated": true,
+        "schema_tested": true,
+        "behavior": "block-only",
+        "event": "pre_tool_call",
+        "input_command_path": "tool_input.command",
+        "output_contract": "action=block with exact replacement message",
+        "evidence": "Hermes 0.18.2 live canary applied block but ignored updatedInput.",
+        "runtime_status": "verified"
+      }
+    }
+  }
+}

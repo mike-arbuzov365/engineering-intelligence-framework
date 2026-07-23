@@ -29,7 +29,7 @@
     {
       "id": "grep-alternation",
       "required_for_healthy": true,
-      "description": "Repeated -e patterns return both expected markers without a silent empty result."
+      "description": "The native rtk rg route with repeated -e patterns returns both expected markers without a silent empty result or Windows grep.exe PATH collision."
     },
     {
       "id": "git-diff",

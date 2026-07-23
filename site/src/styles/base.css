@@ -1,0 +1,162 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Component rules using `all: unset` must not turn a progressive-enhancement
+   control back on while its HTML `hidden` contract is active. */
+[hidden] {
+  display: none !important;
+}
+
+html {
+  background: var(--eif-bg);
+}
+
+body {
+  margin: 0;
+  background: var(--eif-bg);
+  color: var(--eif-fg);
+  font-family: var(--eif-font-sans);
+  font-size: var(--eif-size-body);
+  line-height: var(--eif-leading-normal);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--eif-font-sans);
+  font-weight: 800;
+  line-height: var(--eif-leading-tight);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+p {
+  margin: 0 0 var(--eif-space-2);
+  max-width: var(--eif-measure);
+}
+
+a {
+  color: inherit;
+}
+
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+img {
+  max-width: 100%;
+}
+
+code,
+kbd {
+  font-family: var(--eif-font-mono);
+}
+
+::selection {
+  background: var(--eif-accent);
+  color: var(--eif-charcoal-950);
+}
+
+:focus-visible {
+  outline: 2px solid var(--eif-accent);
+  outline-offset: 3px;
+}
+
+/* Coarse pointers get a 44px minimum interactive target (D-07). */
+a,
+button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--eif-space-2);
+  top: -3rem;
+  z-index: 100;
+  padding: var(--eif-space-1) var(--eif-space-2);
+  background: var(--eif-accent);
+  color: var(--eif-charcoal-950);
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  text-decoration: none;
+  transition: top var(--eif-duration-fast) var(--eif-ease);
+}
+
+.skip-link:focus {
+  top: var(--eif-space-2);
+}
+
+/* Evidence / metadata label convention: mono, uppercase, tracked out. Used
+   for claim IDs, section numbers and status words - the field-guide
+   signature distinguishing this from a generic sans-only marketing page. */
+.label {
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--eif-fg-muted);
+}
+
+.label--accent {
+  color: var(--eif-accent);
+}
+
+.section {
+  padding: var(--eif-space-6) var(--eif-space-3);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.section__inner {
+  max-width: var(--eif-content-max);
+  margin: 0 auto;
+}
+
+/* Eyebrow label stacked above the heading, not beside it - a short mono
+   label baseline-aligned next to a display-sized h2 read cramped. */
+.section__head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--eif-space-1);
+  margin-bottom: var(--eif-space-4);
+}
+
+.section__head > .label {
+  white-space: nowrap;
+}
+
+.section__head h2 {
+  font-size: var(--eif-size-h2);
+}
+
+footer {
+  padding: var(--eif-space-4) var(--eif-space-3);
+  border-top: 1px solid var(--eif-rule);
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  color: var(--eif-fg-muted);
+}
+
+footer .section__inner {
+  max-width: var(--eif-content-max);
+  margin: 0 auto;
+}

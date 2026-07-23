@@ -7,10 +7,10 @@ Registry version: `1.0.0`. Tested RTK: `0.43.0`.
 Correctness precedes compression. A route is savings-eligible only when its canary passes.
 
 - `git-native`: `rtk git <subcommand> <args>` - savings-eligible; argv: preserved.
-- `grep-simple`: `rtk grep <pattern> <paths>` - savings-eligible; argv: preserved.
-  The provider must pass the grep canary before an empty result is trusted.
-- `grep-alternation`: `rtk grep -e <A> -e <B> <paths>` - savings-eligible; argv: split-alternation.
-  Do not pass a literal pipe in one pattern on the tested Windows build.
+- `grep-simple`: `rtk rg <pattern> <paths>` - savings-eligible; argv: preserved.
+  Use the explicit ripgrep route to avoid unrelated grep.exe programs earlier on Windows PATH. The provider must pass the search canary before an empty result is trusted.
+- `grep-alternation`: `rtk rg -e <A> -e <B> <paths>` - savings-eligible; argv: split-alternation.
+  Do not pass a literal pipe in one pattern on the tested Windows build. Repeated -e arguments preserve alternation.
 - `read-bounded`: `rtk read --max-lines <N> <path>` - savings-eligible; argv: preserved.
   Use exactly one of --max-lines and --tail-lines.
 - `generic-space-free`: `rtk summary <tool> <space-free-args>` - savings-eligible; argv: space-free-only.

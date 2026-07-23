@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/graphify-scope-manifest.schema.json",
+  "title": "EIF Graphify structural scope manifest",
+  "type": "object",
+  "required": [
+    "schema_version", "repo_id", "source_paths", "semantic_paths",
+    "exclude_paths", "suppressed"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "repo_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{1,127}$" },
+    "source_paths": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "semantic_paths": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "exclude_paths": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "suppressed": { "type": "boolean" },
+    "suppression_reason": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": { "suppressed": { "const": true } },
+        "required": ["suppressed"]
+      },
+      "then": { "required": ["suppression_reason"] }
+    }
+  ]
+}

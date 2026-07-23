@@ -20,6 +20,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator, FormatChecker
 
+from eif_graphify import evaluate_status as evaluate_graphify_status
+
 
 CommandRunner = Callable[[list[str], Path | None, float], subprocess.CompletedProcess]
 
@@ -92,6 +94,10 @@ def _freshness_not_applicable() -> dict:
         "baseline_commit": None,
         "current_commit": None,
         "merge_base": None,
+        "manifest_hash": None,
+        "scope_hash": None,
+        "changed_source_files": 0,
+        "source_verification_required": False,
     }
 
 
@@ -178,7 +184,7 @@ def _rtk_canaries(
     results: dict[str, tuple[bool, str]] = {}
 
     help_result = runner([executable, "--help"], None, 10.0)
-    required_routes = ("git", "grep", "read", "summary", "proxy")
+    required_routes = ("git", "rg", "read", "summary", "proxy")
     help_ok = help_result.returncode == 0 and all(
         re.search(rf"(?m)^\s*{re.escape(route)}\s", help_result.stdout)
         for route in required_routes
@@ -207,11 +213,11 @@ def _rtk_canaries(
             "explicit raw proxy preserved tested argv boundaries" if proxy_ok else "explicit raw proxy did not preserve tested argv boundaries",
         )
 
-    with tempfile.TemporaryDirectory(prefix="eif-rtk-grep-") as raw_tmp:
+    with tempfile.TemporaryDirectory(prefix="eif-rtk-search-") as raw_tmp:
         marker_file = Path(raw_tmp) / "markers.txt"
         marker_file.write_text("EIF_RTK_ALPHA\nEIF_RTK_BETA\n", encoding="utf-8")
         grep_result = runner(
-            [executable, "grep", "-e", "EIF_RTK_ALPHA", "-e", "EIF_RTK_BETA", str(marker_file)],
+            [executable, "rg", "-e", "EIF_RTK_ALPHA", "-e", "EIF_RTK_BETA", str(marker_file)],
             None,
             15.0,
         )
@@ -222,7 +228,9 @@ def _rtk_canaries(
         )
         results["grep-alternation"] = (
             grep_ok,
-            "split alternation returned both markers" if grep_ok else f"split alternation canary failed with exit {grep_result.returncode}",
+            "native rg split alternation returned both markers"
+            if grep_ok
+            else f"native rg split alternation canary failed with exit {grep_result.returncode}",
         )
 
     with tempfile.TemporaryDirectory(prefix="eif-rtk-diff-") as raw_tmp:
@@ -376,68 +384,6 @@ def evaluate_rtk(
     )
 
 
-_FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
-
-
-def classify_graph_freshness(
-    baseline_commit: str | None,
-    current_commit: str | None,
-    merge_base: str | None,
-) -> str:
-    """Classify a graph baseline without file-count or wall-clock heuristics."""
-    if not baseline_commit or not current_commit:
-        return "unknown"
-    if not _FULL_SHA.fullmatch(baseline_commit) or not _FULL_SHA.fullmatch(current_commit):
-        return "unknown"
-    if baseline_commit == current_commit:
-        return "fresh"
-    if merge_base == baseline_commit:
-        return "stale"
-    return "diverged"
-
-
-def _graphify_freshness(instance_path: Path, baseline_commit: str | None) -> dict:
-    result = {
-        "state": "unknown",
-        "baseline_commit": baseline_commit if baseline_commit and _FULL_SHA.fullmatch(baseline_commit) else None,
-        "current_commit": None,
-        "merge_base": None,
-    }
-    if result["baseline_commit"] is None:
-        return result
-
-    current_result = _run(["git", "-C", str(instance_path), "rev-parse", "HEAD"], timeout=10.0)
-    current = current_result.stdout.strip().lower()
-    if current_result.returncode != 0 or not _FULL_SHA.fullmatch(current):
-        return result
-    result["current_commit"] = current
-    if current == result["baseline_commit"]:
-        result["merge_base"] = current
-        result["state"] = "fresh"
-        return result
-
-    exists = _run(
-        ["git", "-C", str(instance_path), "cat-file", "-e", f"{result['baseline_commit']}^{{commit}}"],
-        timeout=10.0,
-    )
-    if exists.returncode != 0:
-        return result
-    merge_result = _run(
-        ["git", "-C", str(instance_path), "merge-base", result["baseline_commit"], current],
-        timeout=10.0,
-    )
-    merge_base = merge_result.stdout.strip().lower()
-    if merge_result.returncode == 0 and _FULL_SHA.fullmatch(merge_base):
-        result["merge_base"] = merge_base
-    elif merge_result.returncode == 1:
-        result["state"] = "diverged"
-        return result
-    else:
-        return result
-    result["state"] = classify_graph_freshness(result["baseline_commit"], current, result["merge_base"])
-    return result
-
-
 def _graphify_semantic_gate(entry: dict) -> tuple[bool, str]:
     mode = entry.get("mode", "structural")
     processing = entry.get("processing", "local")
@@ -469,35 +415,6 @@ def _graphify_semantic_gate(entry: dict) -> tuple[bool, str]:
         if passed
         else "semantic/deep mode requires external processing, external-api boundary, an explicit semantic_provider and a positive cost cap",
     )
-
-
-def _graphify_artifact(instance_path: Path, entry: dict) -> tuple[bool, str, str | None, str]:
-    configured = entry.get("artifact_path", "graphify-out/graph.json")
-    if not isinstance(configured, str) or not configured.strip():
-        return False, "artifact_path must be a non-empty instance-relative path", None, "config"
-    relative = Path(configured)
-    if relative.is_absolute() or ".." in relative.parts or not relative.parts or relative.parts[0] != "graphify-out":
-        return False, "raw graph path must stay below instance-local graphify-out/", None, "config"
-    root = instance_path.resolve()
-    artifact = (root / relative).resolve()
-    try:
-        artifact.relative_to(root)
-    except ValueError:
-        return False, "raw graph path escapes the project instance", None, "config"
-    if not artifact.is_file():
-        return False, "instance-local raw graph artifact is missing", None, "missing"
-    try:
-        graph = _read_json(artifact)
-    except (OSError, json.JSONDecodeError):
-        return False, "raw graph artifact is unreadable or invalid JSON", None, "invalid"
-    links = graph.get("links", graph.get("edges"))
-    if not isinstance(graph.get("nodes"), list) or not isinstance(links, list):
-        return False, "raw graph artifact lacks nodes and links/edges arrays", None, "invalid"
-    baseline = entry.get("baseline_commit")
-    if not (isinstance(baseline, str) and _FULL_SHA.fullmatch(baseline)):
-        built_at = graph.get("built_at_commit")
-        baseline = built_at if isinstance(built_at, str) and _FULL_SHA.fullmatch(built_at) and set(built_at) != {"0"} else None
-    return True, f"instance-local raw graph parsed ({len(graph['nodes'])} nodes, {len(links)} links)", baseline, "ok"
 
 
 def _graphify_canaries(
@@ -567,8 +484,20 @@ def evaluate_graphify(
         )
 
     gate_ok, gate_summary = _graphify_semantic_gate(entry)
-    artifact_ok, artifact_summary, baseline, artifact_issue = _graphify_artifact(instance_path, entry)
-    freshness = _graphify_freshness(instance_path, baseline)
+    lifecycle = evaluate_graphify_status(instance_path, entry, root=framework_root)
+    artifact_ok = lifecycle["artifact_valid"] and lifecycle["metadata_valid"]
+    artifact_summary = lifecycle["summary"]
+    artifact_issue = lifecycle["issue_kind"]
+    freshness = {
+        "state": lifecycle["state"],
+        "baseline_commit": lifecycle["source_commit"],
+        "current_commit": lifecycle["current_commit"],
+        "merge_base": lifecycle["merge_base"],
+        "manifest_hash": lifecycle["manifest_hash"],
+        "scope_hash": lifecycle["scope_hash"],
+        "changed_source_files": lifecycle["changed_source_files"],
+        "source_verification_required": lifecycle["source_verification_required"],
+    }
     capabilities = [
         _capability("artifact-policy", True, "pass" if artifact_ok else "fail", "config", artifact_summary),
         _capability("semantic-gate", True, "pass" if gate_ok else "fail", "config", gate_summary),
@@ -590,6 +519,20 @@ def evaluate_graphify(
             capabilities=capabilities,
             freshness=freshness,
             remediation=["Correct the Graphify mode, data boundary, cost gate and instance-local artifact path."],
+        )
+    if freshness["state"] == "suppressed":
+        return _base_result(
+            integration,
+            provider,
+            "degraded",
+            boundary,
+            checked_at,
+            capabilities=capabilities,
+            freshness=freshness,
+            remediation=[
+                "Use source search/manual navigation while structural graph use is explicitly suppressed.",
+                "Verify every graph-derived claim against source files before editing.",
+            ],
         )
 
     executable = entry.get("executable_path") or which(manifest["executable"])
@@ -661,16 +604,19 @@ def evaluate_graphify(
     remediation: list[str] = []
     if not artifact_ok:
         state = "degraded"
-        remediation.append("Restore or generate an instance-local graphify-out/graph.json and record its build commit.")
-    elif freshness["state"] == "stale":
+        remediation.append("Restore a graph plus validated metadata, or capture metadata after a separate structural build.")
+    elif freshness["state"] == "code-update-required":
         state = "stale"
-        remediation.append("Refresh the graph from the current source revision, then record the new baseline commit.")
-    elif freshness["state"] == "diverged":
+        remediation.append("Run a local structural update, then capture fresh artifact metadata.")
+    elif freshness["state"] == "semantic-update-required":
+        state = "stale"
+        remediation.append("Obtain the required provider/privacy/cost approval before semantic refresh; use source navigation meanwhile.")
+    elif freshness["state"] == "full-rebuild-required":
         state = "misconfigured"
-        remediation.append("Rebuild the graph on the current history; its recorded baseline is not an ancestor of HEAD.")
-    elif freshness["state"] == "unknown":
+        remediation.append("Create a new structural graph on current history; the recorded source commit is not a valid ancestor.")
+    elif freshness["state"] == "blocked":
         state = "degraded"
-        remediation.append("Record a reachable 40-character graph baseline commit to make freshness reproducible.")
+        remediation.append("Restore or repair the scope manifest, metadata sidecar and raw graph before graph navigation.")
     elif failed_canary:
         state = "degraded"
         remediation.append("Use source search/manual navigation and inspect the failing structural canary.")
@@ -679,6 +625,7 @@ def evaluate_graphify(
         remediation.append("Doctor validates but never executes paid semantic/deep scans; attach separately approved provider evidence.")
     else:
         state = "healthy"
+    remediation.append("Verify every graph-derived claim against source files before editing.")
     return _base_result(
         integration,
         provider,

@@ -1,0 +1,68 @@
+/* Shared hover/focus/tap disclosure. Static HTML defaults to expanded so a
+   production bundle remains fully readable with JavaScript disabled. Only
+   a successfully loaded main module adds .js, collapses details and lets
+   main.js maintain aria-expanded on tap/click. */
+.reveal {
+  border-top: 1px solid var(--eif-rule);
+  padding: var(--eif-space-2) 0;
+}
+
+.reveal:last-child {
+  border-bottom: 1px solid var(--eif-rule);
+}
+
+.reveal__trigger {
+  all: unset;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
+  padding: var(--eif-space-1) 0;
+  color: var(--eif-fg);
+}
+
+.reveal__trigger span:last-child {
+  color: var(--eif-fg-muted);
+}
+
+.reveal__detail {
+  padding-top: var(--eif-space-1);
+}
+
+.js .reveal__detail {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding-top: 0;
+  transition: max-height var(--eif-duration-medium) var(--eif-ease),
+    opacity var(--eif-duration-fast) linear,
+    padding-top var(--eif-duration-fast) linear;
+}
+
+.reveal__detail p {
+  margin: var(--eif-space-1) 0;
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
+}
+
+.reveal__detail p strong {
+  color: var(--eif-fg);
+}
+
+.js .reveal__trigger:hover + .reveal__detail,
+.js .reveal__trigger:focus + .reveal__detail,
+.js .reveal__detail:hover,
+.js .reveal__detail:focus-within,
+.js .reveal.is-open .reveal__detail {
+  max-height: 30rem;
+  opacity: 1;
+  padding-top: var(--eif-space-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal__detail {
+    transition: none;
+  }
+}

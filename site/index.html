@@ -1,0 +1,1409 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Engineering Intelligence Framework: methodology, memory and governed learning</title>
+    <meta
+      name="description"
+      content="An operating methodology for AI-agent engineering: reusable experience, three intelligence layers, controlled sessions, evidence and governed learning. Pre-release."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Engineering Intelligence Framework" />
+    <meta property="og:title" content="Engineering Intelligence Framework" />
+    <meta
+      property="og:description"
+      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Pre-release."
+    />
+    <meta property="og:image" content="/social-card.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Engineering Intelligence Framework" />
+    <meta
+      name="twitter:description"
+      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Pre-release."
+    />
+    <meta name="twitter:image" content="/social-card.png" />
+  </head>
+  <body>
+    <a
+      class="skip-link"
+      href="#main"
+      data-label-en="Skip to content"
+      data-label-uk="Перейти до вмісту"
+    >Skip to content</a>
+    <button
+      id="lang-toggle"
+      type="button"
+      class="lang-toggle"
+      aria-label="Switch to Ukrainian"
+      data-label-en="Switch to Ukrainian"
+      data-label-uk="Switch to English"
+      data-title-en="Engineering Intelligence Framework: methodology, memory and governed learning"
+      data-title-uk="Engineering Intelligence Framework: методологія, пам'ять і кероване навчання"
+      hidden
+    >
+      <span aria-hidden="true">EN</span><span aria-hidden="true" class="lang-toggle__alt">UA</span>
+    </button>
+
+    <header class="hero">
+      <svg
+        class="hero__path"
+        aria-hidden="true"
+        viewBox="0 0 1240 400"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <path
+          class="hero__path-line"
+          d="M -40 320 L 180 260 L 380 340 L 580 220 L 780 320 L 980 200 L 1180 300 L 1320 240"
+          fill="none"
+        />
+        <circle class="hero__path-dot" cx="-40" cy="320" r="5" />
+        <circle class="hero__path-dot" cx="180" cy="260" r="5" />
+        <circle class="hero__path-dot" cx="380" cy="340" r="5" />
+        <circle class="hero__path-dot" cx="580" cy="220" r="5" />
+        <circle class="hero__path-dot" cx="780" cy="320" r="5" />
+        <circle class="hero__path-dot" cx="980" cy="200" r="5" />
+        <circle class="hero__path-dot" cx="1180" cy="300" r="5" />
+      </svg>
+
+      <div class="hero__content">
+        <p class="label label--accent">Engineering Intelligence Framework</p>
+        <h1 class="hero__name">
+          Engineering<br />
+          Intelligence<br />
+          Framework
+        </h1>
+        <div class="i18n-block" data-i18n-id="hero.body">
+          <p class="hero__descriptor">
+            A governed methodology that lets engineering experience compound.
+          </p>
+          <p class="hero__promise">
+            EIF turns validated engineering experience into reusable
+            operational intelligence: shared methods, project memory, session
+            discipline and invokable skills that outlive one agent conversation.
+          </p>
+          <nav class="hero__ctas" aria-label="Primary">
+            <a href="#methodology">What EIF is</a>
+            <a href="#layers">The three layers</a>
+            <a href="#learning">How it learns</a>
+            <a href="#evidence">Current evidence</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="section problem" id="problem" aria-labelledby="problem-heading">
+        <div class="section__inner i18n-block" data-i18n-id="problem.body">
+          <div class="section__head">
+            <span class="label">01 &middot; The problem</span>
+            <h2 id="problem-heading">Chat history is not engineering memory</h2>
+          </div>
+          <p class="section__lede">
+            AI coding agents are powerful, but most workflows still treat a
+            conversation as if it were durable engineering knowledge.
+          </p>
+          <ol class="problem__list">
+            <li>Previous decisions live only in a conversation that gets compacted or lost.</li>
+            <li>The agent re-discovers the same files and re-derives the same conclusions every session.</li>
+            <li>Local lessons never resurface before a new, similar task.</li>
+            <li>Command output floods the context window without filtering.</li>
+            <li>Architecture decisions and scope get mixed up with unverified assumptions.</li>
+            <li>A merged PR gets treated as proof of working behavior, even when behavioral evidence is missing.</li>
+            <li>Quality, privacy and token-efficiency are governed by separate, sometimes contradictory rules.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section methodology" id="methodology" aria-labelledby="methodology-heading">
+        <div class="section__inner i18n-block" data-i18n-id="methodology.body">
+          <div class="section__head">
+            <span class="label">02 &middot; The methodology</span>
+            <h2 id="methodology-heading">Engineering Intelligence is the system around the agent</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-15">
+            EIF defines a governed learning flow in which a session's
+            validated Knowledge Delta can be classified, linted, retained
+            locally or promoted into reusable artifacts such as rules,
+            playbooks, templates and skills.
+          </p>
+          <div class="methodology__definition" data-claim-id="CLM-15">
+            <p class="methodology__statement">
+              <strong>Engineering Intelligence</strong> is versioned
+              experience plus the methods that govern its use. It changes how
+              the next task is prepared, executed and verified - not merely
+              where knowledge is stored.
+            </p>
+            <dl class="methodology__parts">
+              <div>
+                <dt class="label label--accent">Methodology</dt>
+                <dd>Principles, ontology, authority, playbooks and evidence rules define how work is performed.</dd>
+              </div>
+              <div>
+                <dt class="label label--accent">Experience</dt>
+                <dd>Validated facts, decisions, incidents, failure patterns and rejected approaches become retrievable before implementation.</dd>
+              </div>
+              <div>
+                <dt class="label label--accent">Capability</dt>
+                <dd>Templates make good structure repeatable; skills make complete workflows invokable by an agent.</dd>
+              </div>
+            </dl>
+          </div>
+          <p class="methodology__boundary" data-claim-id="CLM-15">
+            <strong>What “learning” means here:</strong> the engineering
+            system externalizes validated experience into reviewed,
+            versioned artifacts that the next session can retrieve. EIF does
+            not train model weights, fine-tune an LLM or let an agent rewrite
+            its own safeguards.
+          </p>
+        </div>
+      </section>
+
+      <section class="section layers" id="layers" aria-labelledby="layers-heading">
+        <div class="section__inner i18n-block" data-i18n-id="layers.body">
+          <div class="section__head">
+            <span class="label">03 &middot; Intelligence layers</span>
+            <h2 id="layers-heading">Three layers separate method, memory and work in progress</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-13">
+            EIF separates reusable framework methodology, durable project
+            knowledge and ephemeral session context into three tiers, with
+            Knowledge Delta governing promotion between them.
+          </p>
+          <div class="layers__stack" data-claim-id="CLM-13">
+            <article class="layers__tier layers__tier--one">
+              <div class="layers__tier-id">
+                <span class="label label--accent">Tier 1</span>
+                <span class="layers__scope">Reusable</span>
+              </div>
+              <div>
+                <h3>Framework intelligence</h3>
+                <p>Cross-project methodology: ontology, authority, global rules, playbooks, templates and skills.</p>
+              </div>
+              <p class="layers__examples">How to work</p>
+            </article>
+            <article class="layers__tier layers__tier--two">
+              <div class="layers__tier-id">
+                <span class="label label--accent">Tier 2</span>
+                <span class="layers__scope">Durable</span>
+              </div>
+              <div>
+                <h3>Project intelligence</h3>
+                <p>Architecture, decisions, domain facts, incidents, risks and local conventions that belong to one project.</p>
+              </div>
+              <p class="layers__examples">What this system knows</p>
+            </article>
+            <article class="layers__tier layers__tier--three">
+              <div class="layers__tier-id">
+                <span class="label label--accent">Tier 3</span>
+                <span class="layers__scope">Ephemeral</span>
+              </div>
+              <div>
+                <h3>Session intelligence</h3>
+                <p>Current scope, progress, observations, assumptions, open questions and a draft Knowledge Delta.</p>
+              </div>
+              <p class="layers__examples">What is happening now</p>
+            </article>
+          </div>
+          <div class="knowledge-route" data-claim-id="CLM-13">
+            <div class="knowledge-route__head">
+              <div>
+                <span class="label label--accent">The learning elevator</span>
+                <h3>Evidence moves up. Intelligence comes back down.</h3>
+              </div>
+              <div class="knowledge-route__legend" aria-label="Flow directions">
+                <span>&uarr; Promotion</span>
+                <span>&darr; Retrieval</span>
+              </div>
+            </div>
+            <ol class="knowledge-route__steps">
+              <li data-tier="T3">
+                <details open>
+                  <summary><span>01</span><strong>Session evidence</strong><em>Tier 3</em></summary>
+                  <p>Work produces observations, decisions, failures and a draft Knowledge Delta.</p>
+                </details>
+              </li>
+              <li data-tier="GATE" class="knowledge-route__gate">
+                <details>
+                  <summary><span>02</span><strong>Closeout + retro</strong><em>Gate</em></summary>
+                  <p>Compare intent with evidence, name failure patterns and decide what is reusable. Unverified notes do not pass.</p>
+                </details>
+              </li>
+              <li data-tier="T2">
+                <details>
+                  <summary><span>03</span><strong>Project memory</strong><em>Tier 2</em></summary>
+                  <p>Validated local facts, decisions, incidents and lessons become durable project intelligence.</p>
+                </details>
+              </li>
+              <li data-tier="GATE" class="knowledge-route__gate">
+                <details>
+                  <summary><span>04</span><strong>Promotion decision</strong><em>Gate</em></summary>
+                  <p>Only a cross-project lesson with provenance and review can move beyond its project.</p>
+                </details>
+              </li>
+              <li data-tier="T1">
+                <details>
+                  <summary><span>05</span><strong>Framework method</strong><em>Tier 1</em></summary>
+                  <p>A reusable rule, playbook, template or skill becomes available to other projects.</p>
+                </details>
+              </li>
+            </ol>
+            <p class="knowledge-route__return">
+              <span aria-hidden="true">&darr;</span>
+              <strong>The next session retrieves from the durable layers:</strong>
+              relevant methods and project experience return before action, while working context stays ephemeral.
+            </p>
+          </div>
+          <div class="layers__flows" aria-label="Knowledge flow between tiers" data-claim-id="CLM-13">
+            <p><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> method, constraints, prior experience and reusable skills.</p>
+            <p><span aria-hidden="true">&uarr;</span><strong>Flows up:</strong> only validated learning, through Knowledge Delta and an explicit promotion decision.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section control-plane" id="control-plane" aria-labelledby="control-plane-heading">
+        <div class="section__inner i18n-block" data-i18n-id="control-plane.body">
+          <div class="section__head">
+            <span class="label">04 &middot; The control plane</span>
+            <h2 id="control-plane-heading">One governed loop, from intent to durable knowledge</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-01">
+            EIF is a control plane that coordinates tools and agents without
+            replacing them. It connects knowledge, authority, execution and
+            evidence into a single, observable sequence.
+          </p>
+
+          <svg
+            class="control-plane__diagram"
+            aria-hidden="true"
+            viewBox="0 0 1240 220"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <path
+              class="control-plane__path"
+              fill="none"
+              d="M 60 150 L 220 90 L 380 170 L 540 90 L 700 170 L 860 90 L 1020 170 L 1180 130"
+            />
+            <g class="control-plane__node" transform="translate(60,150)">
+              <circle r="8" />
+              <text y="-24">Intent</text>
+            </g>
+            <g class="control-plane__node" transform="translate(220,90)">
+              <circle r="8" />
+              <text y="-24">Retrieval</text>
+            </g>
+            <g class="control-plane__node" transform="translate(380,170)">
+              <circle r="8" />
+              <text y="34">Authority</text>
+            </g>
+            <g class="control-plane__node" transform="translate(540,90)">
+              <circle r="8" />
+              <text y="-24">Navigation</text>
+            </g>
+            <g class="control-plane__node" transform="translate(700,170)">
+              <circle r="8" />
+              <text y="34">Execution</text>
+            </g>
+            <g class="control-plane__node" transform="translate(860,90)">
+              <circle r="8" />
+              <text y="-24">Evidence</text>
+            </g>
+            <g class="control-plane__node" transform="translate(1020,170)">
+              <circle r="8" />
+              <text y="34">Knowledge Delta</text>
+            </g>
+            <g class="control-plane__node control-plane__node--terminal" transform="translate(1180,130)">
+              <circle r="9" />
+              <text y="-26">Durable</text>
+            </g>
+          </svg>
+
+          <ol class="control-plane__list">
+            <li><span class="label label--accent">01 &middot; User intent</span><p>A task or question enters the loop.</p></li>
+            <li><span class="label label--accent">02 &middot; Experience retrieval</span><p>Prior validated knowledge is pulled into context before new work starts.</p></li>
+            <li><span class="label label--accent">03 &middot; Authority and scope</span><p>What should happen, what actually happens, and what may be cited are kept as separate questions.</p></li>
+            <li><span class="label label--accent">04 &middot; Structural navigation</span><p>An optional code graph may help find things faster. It is navigation evidence, not authority.</p></li>
+            <li><span class="label label--accent">05 &middot; Controlled execution</span><p>Work proceeds under explicit scope, budgets and stop conditions.</p></li>
+            <li><span class="label label--accent">06 &middot; Tests and evidence</span><p>A merged change is not treated as proof of working behavior on its own.</p></li>
+            <li><span class="label label--accent">07 &middot; Knowledge Delta</span><p>What was learned is written down in the same session, not left in chat.</p></li>
+            <li><span class="label label--accent">08 &middot; Durable engineering intelligence</span><p>Validated knowledge is available to the next task and the next agent.</p></li>
+          </ol>
+
+          <p class="control-plane__note label" data-claim-id="CLM-12">
+            Source files remain authority throughout. An optional structural
+            graph, when present, is navigation evidence: it does not replace
+            source verification.
+          </p>
+        </div>
+      </section>
+
+      <section class="section session" id="session" aria-labelledby="session-heading">
+        <div class="section__inner i18n-block" data-i18n-id="session.body">
+          <div class="section__head">
+            <span class="label">05 &middot; The session</span>
+            <h2 id="session-heading">A session is the unit of controlled work and learning</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-14">
+            EIF requires retrieval of relevant prior knowledge before non-trivial
+            work and defines preparation, controlled execution, verification
+            and closeout as the session lifecycle.
+          </p>
+          <ol class="session__timeline" data-claim-id="CLM-14">
+            <li>
+              <span class="session__number label label--accent">01</span>
+              <div>
+                <h3>Retrieve and orient</h3>
+                <p>Read active instructions and source, then search durable knowledge for relevant lessons, failures and rejected approaches.</p>
+              </div>
+              <span class="session__artifact">Tier 1 + Tier 2</span>
+            </li>
+            <li>
+              <span class="session__number label label--accent">02</span>
+              <div>
+                <h3>Scope and prepare</h3>
+                <p>Choose a single session or an execution packet. Name the goal, evidence, constraints, budgets and stop conditions.</p>
+              </div>
+              <span class="session__artifact">Task scope</span>
+            </li>
+            <li>
+              <span class="session__number label label--accent">03</span>
+              <div>
+                <h3>Execute and verify</h3>
+                <p>Keep observations separate from assumptions, work within scope and use declared evaluators instead of completion language.</p>
+              </div>
+              <span class="session__artifact">Tier 3</span>
+            </li>
+            <li>
+              <span class="session__number label label--accent">04</span>
+              <div>
+                <h3>Close out and promote</h3>
+                <p>Record actual evidence, open work and Knowledge Delta. Retain validated learning; remove or discard ephemeral session state.</p>
+              </div>
+              <span class="session__artifact">Durable delta</span>
+            </li>
+          </ol>
+          <p class="session__boundary" data-claim-id="CLM-14">
+            Tier 3 is a checkpoint, not memory: it may contain progress,
+            evidence labels, open questions and a draft delta, but no raw AI
+            reasoning. It is never promoted wholesale.
+          </p>
+        </div>
+      </section>
+
+      <section class="section loop" id="loop" aria-labelledby="loop-heading">
+        <div class="section__inner i18n-block" data-i18n-id="loop.body" data-i18n-reinit="loop">
+          <div class="section__head">
+            <span class="label">06 &middot; The evidence loop</span>
+            <h2 id="loop-heading">Bounded iteration, not open-ended autonomy</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-04">
+            EIF includes a bounded evidence-loop contract for iterative agent
+            work, with explicit evaluators, budgets, evidence and stop
+            conditions. This is a methodology contract. It does not by
+            itself prove fewer retries, higher quality, lower cost, or
+            reliable autonomous completion.
+          </p>
+
+          <div class="loop__scene">
+            <div class="loop__sticky">
+              <svg
+                class="loop__diagram"
+                aria-hidden="true"
+                data-label="Bounded evidence loop phase navigation"
+                viewBox="0 0 300 300"
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
+                <g class="loop__node" data-phase="orient" data-label="Show the Orient phase" transform="translate(150,40)">
+                  <circle class="loop__node-hit" r="26" fill="transparent" />
+                  <circle r="10" />
+                  <text y="-18">Orient</text>
+                </g>
+                <g class="loop__node" data-phase="define" data-label="Show the Define phase" transform="translate(245,95)">
+                  <circle class="loop__node-hit" r="26" fill="transparent" />
+                  <circle r="10" />
+                  <text y="-18">Define</text>
+                </g>
+                <g class="loop__node" data-phase="act" data-label="Show the Act phase" transform="translate(245,205)">
+                  <circle class="loop__node-hit" r="26" fill="transparent" />
+                  <circle r="10" />
+                  <text y="30">Act</text>
+                </g>
+                <g class="loop__node" data-phase="observe" data-label="Show the Observe phase" transform="translate(150,260)">
+                  <circle class="loop__node-hit" r="26" fill="transparent" />
+                  <circle r="10" />
+                  <text y="30">Observe</text>
+                </g>
+                <g class="loop__node" data-phase="study" data-label="Show the Study phase" transform="translate(55,205)">
+                  <circle class="loop__node-hit" r="26" fill="transparent" />
+                  <circle r="10" />
+                  <text y="30">Study</text>
+                </g>
+                <g class="loop__node" data-phase="adapt" data-label="Show the Adapt phase" transform="translate(55,95)">
+                  <circle class="loop__node-hit" r="26" fill="transparent" />
+                  <circle r="10" />
+                  <text y="-18">Adapt</text>
+                </g>
+              </svg>
+            </div>
+
+            <ol class="loop__phases">
+              <li class="loop__phase" data-phase="orient">
+                <span class="label label--accent">01 &middot; Orient</span>
+                <p>Read current source and relevant retrieved knowledge. Record facts separately from assumptions.</p>
+              </li>
+              <li class="loop__phase" data-phase="define">
+                <span class="label label--accent">02 &middot; Define</span>
+                <p>State the next smallest hypothesis and the observation that would confirm or reject it.</p>
+              </li>
+              <li class="loop__phase" data-phase="act">
+                <span class="label label--accent">03 &middot; Act</span>
+                <p>Make one reversible change or run one diagnostic experiment.</p>
+              </li>
+              <li class="loop__phase" data-phase="observe">
+                <span class="label label--accent">04 &middot; Observe</span>
+                <p>Run the declared evaluator and record its actual output.</p>
+              </li>
+              <li class="loop__phase" data-phase="study">
+                <span class="label label--accent">05 &middot; Study</span>
+                <p>Compare expected and actual results. If unsuccessful, record a concise failure signature comparable across attempts.</p>
+              </li>
+              <li class="loop__phase" data-phase="adapt">
+                <span class="label label--accent">06 &middot; Adapt</span>
+                <p>Select the next action because of the observation. An unchanged failing action with no new evidence is not repeated.</p>
+              </li>
+            </ol>
+          </div>
+
+          <div class="loop__control">
+            <div>
+              <h3 class="label">Preconditions</h3>
+              <dl class="loop__precondition-list">
+                <div><dt>Goal</dt><dd>One observable outcome.</dd></div>
+                <div><dt>Success evidence</dt><dd>What proves the outcome behaviorally.</dd></div>
+                <div><dt>Evaluator</dt><dd>Test, tool, source comparison, rubric or named human decision.</dd></div>
+                <div><dt>Iteration limit</dt><dd>Positive integer, default 5.</dd></div>
+                <div><dt>Remote budget</dt><dd>Default 0 unless explicitly authorized.</dd></div>
+                <div><dt>Stop conditions</dt><dd>Safety, ambiguity, budget or owner-only boundaries.</dd></div>
+              </dl>
+            </div>
+            <div>
+              <h3 class="label">Exits</h3>
+              <dl class="loop__exits">
+                <div class="loop__exits-row loop__exits-row--pass">
+                  <dt>Pass</dt>
+                  <dd>Only when success evidence exists.</dd>
+                </div>
+                <div class="loop__exits-row loop__exits-row--blocked">
+                  <dt>Blocked</dt>
+                  <dd>A stop condition is reached, the evaluator is unavailable with no adequate substitute, the iteration budget is exhausted, or the same unchanged failure signature would be attempted a third time.</dd>
+                </div>
+                <div class="loop__exits-row loop__exits-row--deferred">
+                  <dt>Deferred</dt>
+                  <dd>Only when the remaining work is explicitly owner-gated or outside ratified scope, with a named destination.</dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section learning" id="learning" aria-labelledby="learning-heading">
+        <div class="section__inner i18n-block" data-i18n-id="learning.body">
+          <div class="section__head">
+            <span class="label">07 &middot; Governed learning</span>
+            <h2 id="learning-heading">From experience to reusable knowledge and skills</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-15">
+            Learning becomes durable only when a session's validated
+            Knowledge Delta is classified, linted, retained locally or
+            explicitly promoted into a versioned rule, playbook, template or
+            skill.
+          </p>
+          <ol class="learning__flow" data-claim-id="CLM-15">
+            <li><span class="label label--accent">Observe</span><p>Real work produces evidence: a fact, incident, rejected approach, risk or repeatable method.</p></li>
+            <li><span class="label label--accent">Capture</span><p>The session records a concise Knowledge Delta, including what remains unverified.</p></li>
+            <li><span class="label label--accent">Retro</span><p>Closeout compares intent with evidence, extracts failure patterns and decides whether a lesson is reusable.</p></li>
+            <li><span class="label label--accent">Classify + validate</span><p>Knowledge Ingest and Lint check artifact type, source, status, language, duplication and links.</p></li>
+            <li><span class="label label--accent">Promote</span><p>Project-specific knowledge remains in Tier 2; a general lesson moves to Tier 1 only by explicit decision.</p></li>
+            <li><span class="label label--accent">Retrieve</span><p>The next relevant session finds the artifact before acting, closing the learning loop.</p></li>
+          </ol>
+          <div class="learning__distinction" data-claim-id="CLM-15">
+            <div>
+              <span class="label">Experience</span>
+              <h3>What the system has learned</h3>
+              <p>Facts, decisions, incidents, edge cases, failure patterns and lessons with provenance and lifecycle status.</p>
+            </div>
+            <div>
+              <span class="label">Skill</span>
+              <h3>How the system can act</h3>
+              <p>A reusable, invokable workflow for planning, execution, review, retrieval or curation. It is versioned instructions, not hidden model behavior.</p>
+            </div>
+          </div>
+          <p class="learning__boundary" data-claim-id="CLM-15">
+            This is governed system-level learning, not autonomous
+            self-modification. A lesson can be rejected, remain local, expire
+            or be superseded; a local skill may specialize workflow but cannot
+            lower framework safety rules.
+          </p>
+        </div>
+      </section>
+
+      <section class="section integrations" id="integrations" aria-labelledby="integrations-heading">
+        <div class="section__inner i18n-block" data-i18n-id="integrations.body" data-i18n-reinit="reveal">
+          <div class="section__head">
+            <span class="label">08 &middot; Optional capabilities</span>
+            <h2 id="integrations-heading">Three accelerators. A fallback for each.</h2>
+          </div>
+          <p class="section__lede" data-claim-id="CLM-12">
+            Graphify, RTK and Context7 each add one bounded capability. None
+            is the methodology itself: when one is unavailable, EIF keeps a
+            named core path through source search, raw shell output or local
+            documentation.
+          </p>
+          <figure class="capability-map">
+            <figcaption>
+              <span class="label label--accent">Optional capability bridges</span>
+              <span>Core path remains available underneath every bridge</span>
+            </figcaption>
+            <ol>
+              <li>
+                <span class="capability-map__index">01</span>
+                <div><strong>Understand the codebase</strong><small>paths, communities, impact hints</small></div>
+                <span class="capability-map__bridge" aria-hidden="true"></span>
+                <b>Graphify</b>
+                <em>fallback: source search</em>
+              </li>
+              <li>
+                <span class="capability-map__index">02</span>
+                <div><strong>Reduce tool noise</strong><small>compressed output, tracked reduction</small></div>
+                <span class="capability-map__bridge" aria-hidden="true"></span>
+                <b>RTK</b>
+                <em>fallback: raw shell</em>
+              </li>
+              <li>
+                <span class="capability-map__index">03</span>
+                <div><strong>Consult current vendor docs</strong><small>version-aware library and API sources</small></div>
+                <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
+                <b>Context7</b>
+                <em>fallback: local docs</em>
+              </li>
+            </ol>
+          </figure>
+
+          <ul class="integrations__list">
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Graphify</span>
+                <span>Structural code-graph navigation, impact analysis</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-05">
+                <p><strong>Data boundary:</strong> local-only for AST-based extraction; external-api only if semantic labeling is explicitly enabled.</p>
+                <p><strong>Degraded mode without it:</strong> the agent falls back to source search and manual browsing; no graph-level path or impact hints.</p>
+                <p><strong>Health:</strong> D-08 metadata binds the graph digest to its source commit, Graphify version, explicit repository identity and reviewed scope. Only <code>fresh</code> reports healthy; code, semantic or history changes request the matching update, while invalid or intentionally suppressed artifacts remain unavailable. Bounded to one local version and a small synthetic fixture, not a comparative navigation outcome.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">RTK</span>
+                <span>Shell-output compression and tracked reduction</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-06">
+                <p><strong>Data boundary:</strong> local-only.</p>
+                <p><strong>Degraded mode without it:</strong> shell commands run unfiltered and no reduction is recorded.</p>
+                <p><strong>Health:</strong> RTK 0.43.0 passes all 24 checks on the tested Windows host through native <code>rtk rg</code>. Any failed required canary still reports <code>degraded</code>; a raw or failed proxy route records zero savings, never a positive reduction number. This is not a cross-platform or efficiency claim.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Context7</span>
+                <span>Current library/API documentation instead of stale training data</span>
+              </button>
+              <div class="reveal__detail">
+                <p><strong>Data boundary:</strong> external-api; queries a hosted documentation service.</p>
+                <p><strong>Degraded mode without it:</strong> the agent relies on local docs or training-data knowledge, which may be outdated.</p>
+                <p><strong>Health:</strong> declaration-only until its provider adapter passes its own session and evidence gate.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section evidence" id="evidence" aria-labelledby="evidence-heading">
+        <div class="section__inner i18n-block" data-i18n-id="evidence.body" data-i18n-reinit="reveal">
+          <div class="section__head">
+            <span class="label">09 &middot; Current tasks and evidence</span>
+            <h2 id="evidence-heading">What has been observed within clear boundaries</h2>
+          </div>
+          <p class="section__lede">
+            Seven tasks a governed agent actually performs with this
+            framework, each with its own evidence and boundary, not a
+            single blanket capability claim.
+          </p>
+
+          <ul class="integrations__list evidence__tasks">
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Install</span>
+                <span>An installable eifctl wheel with seven subcommands</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-02">
+                <p>A real wheel built from <code>pyproject.toml</code>, installed into a clean venv, gives a working <code>eifctl</code> command with seven subcommands and delivers the standalone benchmark C/D contract tool. The package is proven through a full synthetic-task journey.</p>
+                <p><strong>Limitation:</strong> not published to PyPI; the full journey exercises the Claude Code adapter for its own bootstrap step, and the C/D proof is deterministic contract evidence rather than a real-agent result.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Adopt</span>
+                <span>Coexistence on an already-governed repository</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-11">
+                <p>An adoption preflight detects pre-existing project governance before any write and refuses to proceed without an explicit coexistence decision; coexist mode defers to existing rules instead of declaring sole authority.</p>
+                <p><strong>Limitation:</strong> governance detection is a content-length heuristic, not semantic; verified against one synthetic fixture plus repeated runs against one real private pilot target.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Retrieve</span>
+                <span>Experience retrieval before implementation</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-01">
+                <p>Offline, lifecycle-aware, schema-aware keyword retrieval surfaces relevant validated knowledge (including Ukrainian), excludes rejected/superseded results by default, and reports unparseable vs. schema-invalid vs. not-found as three distinct outcomes.</p>
+                <p><strong>Limitation:</strong> offline keyword/substring scoring, not semantic search; tested against small seeded indexes.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Plan</span>
+                <span>Bounded, evidence-driven execution</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-04">
+                <p>Work is scoped as a session or execution packet with an explicit evaluator, iteration/remote-run budgets, and a named stop condition (see <a href="#loop">the evidence loop</a>).</p>
+                <p><strong>Limitation:</strong> a methodology contract, not a guarantee of fewer retries or lower cost.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Verify</span>
+                <span>A project instance audits its own integrity</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-01">
+                <p>A bundled verifier checks config/lock schema validity, manifest digests against a fresh recompute, adapter/config consistency, marker integrity, and drift between config and generated entrypoint content.</p>
+                <p><strong>Limitation:</strong> scoped to the bundle's own manifest, not a general-purpose file-integrity tool.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Switch</span>
+                <span>Move between any two of four registered adapters</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-03">
+                <p>A full directed switching matrix (12 ordered pairs across Claude Code, Cursor, Codex and Hermes) proves exactly one active EIF block, correct destination resolution, and project-content preservation after every switch.</p>
+                <p><strong>Limitation:</strong> only Claude Code and Cursor are required for v0.1; Codex and Hermes are experimental-supported additions.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Localize</span>
+                <span>Ukrainian project surfaces, not full response localization</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-07">
+                <p>Retrieval, Knowledge Delta rendering, session-closeout rendering and generated entrypoint content have been verified in Ukrainian, config-driven per project instance.</p>
+                <p><strong>Limitation:</strong> does not cover an agent's own free-form conversational responses.</p>
+              </div>
+            </li>
+          </ul>
+
+          <div class="evidence__proof">
+            <h3 class="label">Bounded proof on record</h3>
+            <ul>
+              <li data-claim-id="CLM-08">
+                A first bounded real-agent A/B pilot (one model, three fixtures, six total attempts) completed with 100% task success in both modes. Modes C/D now have executable integrity contracts, but no real-agent performance result. This is not a statistically powered efficiency comparison (see <a href="#limitations">limitations</a>).
+              </li>
+              <li data-claim-id="CLM-10">
+                Command-level timing evidence exists for specific mechanical operations in the framework's benchmark evidence. No claim is made about human authoring or review time.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section quickstart" id="quickstart" aria-labelledby="quickstart-heading">
+        <div class="section__inner i18n-block" data-i18n-id="quickstart.body">
+          <div class="section__head">
+            <span class="label">10 &middot; Quickstart</span>
+            <h2 id="quickstart-heading">A synthetic walkthrough, not a release</h2>
+          </div>
+          <p class="section__lede">
+            Cloning the repository gets you the ontology, schemas, governance
+            docs, the <code>eifctl</code> source package, and one reproduced
+            vertical slice, not a stable release or a representative
+            sample of real engineering tasks.
+          </p>
+          <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale en</code></pre>
+          <p>
+            That command initializes a separate, runnable project instance.
+            In the reference walkthrough, the bundled demo seeds and retrieves
+            real knowledge, makes one retrieval-informed change, verifies it
+            with a real failing-before/passing-after test, and closes the
+            session in Ukrainian through a config-driven locale layer.
+          </p>
+          <p class="label">
+            No PyPI package yet. No claim about how long any of this takes a
+            human.
+          </p>
+        </div>
+      </section>
+
+      <section class="section limitations" id="limitations" aria-labelledby="limitations-heading">
+        <div class="section__inner i18n-block" data-i18n-id="limitations.body">
+          <div class="section__head">
+            <span class="label">11 &middot; Limitations</span>
+            <h2 id="limitations-heading">What EIF is not yet</h2>
+          </div>
+          <ul class="limitations__list">
+            <li><strong>Pre-release.</strong> v0.1 is in progress; this repository is being extracted from a private production instance. Expect gaps.</li>
+            <li><strong>Not on PyPI.</strong> There is no <code>pip install</code> from a package index yet.</li>
+            <li data-claim-id="CLM-09"><strong>No quality or rework claim.</strong> No comparative study has been run; this framework makes no claim about task quality, rework rate or defect count.</li>
+            <li><strong>Bounded scale.</strong> Evidence comes from one synthetic vertical slice, a three-fixture benchmark pilot, and adapter-level test suites, not a large or independently-reproduced sample.</li>
+            <li><strong>Optional integrations stay optional.</strong> Graphify and RTK are never required; a non-fresh or degraded provider is reported as such, never marketed as healthy.</li>
+            <li>
+              <strong>Explicit v0.1 non-goals:</strong> hosted SaaS, an
+              autonomous multi-agent runtime, a proprietary cloud memory
+              service, a mandatory code-graph or shell-compression
+              dependency, or any universal token-savings claim.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section final-cta" id="final-cta" aria-labelledby="final-cta-heading">
+        <div class="section__inner i18n-block" data-i18n-id="final-cta.body">
+          <div class="section__head">
+            <span class="label">12 &middot; Go deeper</span>
+            <h2 id="final-cta-heading">Architecture, evidence, source</h2>
+          </div>
+          <nav class="final-cta__links" aria-label="Go deeper">
+            <a href="#control-plane">Architecture</a>
+            <a href="#evidence">Evidence</a>
+            <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL__</a>
+          </nav>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="section__inner i18n-block" data-i18n-id="footer.body">
+        <p>Apache-2.0 licensed. Local build, not yet deployed.</p>
+      </div>
+    </footer>
+
+    <div id="i18n-templates" hidden>
+      <template data-i18n-id="hero.body">
+        <p class="hero__descriptor">
+          Керована методологія, завдяки якій інженерний досвід накопичується.
+        </p>
+        <p class="hero__promise">
+          EIF перетворює перевірений інженерний досвід на придатний до
+          повторного використання операційний інтелект: спільні методи,
+          пам&rsquo;ять проєкту, дисципліну сесій та виконувані навички агента,
+          що не зникають після завершення окремої робочої сесії з агентом.
+        </p>
+        <nav class="hero__ctas" aria-label="Основна навігація">
+          <a href="#methodology">Що таке EIF</a>
+          <a href="#layers">Три шари</a>
+          <a href="#learning">Як система навчається</a>
+          <a href="#evidence">Поточні докази</a>
+        </nav>
+      </template>
+
+      <template data-i18n-id="problem.body">
+        <div class="section__head">
+          <span class="label">01 &middot; Проблема</span>
+          <h2 id="problem-heading">Історія чату не замінює інженерну пам&rsquo;ять</h2>
+        </div>
+        <p class="section__lede">
+          Агенти ШІ для розробки потужні, але в більшості робочих процесів
+          розмову досі трактують як стійке інженерне знання.
+        </p>
+        <ol class="problem__list">
+          <li>Попередні рішення живуть лише в розмові, яку стискають або втрачають.</li>
+          <li>Агент щоразу заново шукає ті самі файли й виводить ті самі висновки.</li>
+          <li>Локальні уроки не спливають перед новим, схожим завданням.</li>
+          <li>Вивід команд заповнює контекстне вікно без фільтрації.</li>
+          <li>Архітектурні рішення змішуються з неперевіреними припущеннями.</li>
+          <li>PR після злиття вважають доказом робочої поведінки, навіть коли поведінкових доказів немає.</li>
+          <li>Якість, приватність і ефективність використання токенів підпорядковані різним, часто суперечливим правилам.</li>
+        </ol>
+      </template>
+
+      <template data-i18n-id="methodology.body">
+        <div class="section__head">
+          <span class="label">02 &middot; Методологія</span>
+          <h2 id="methodology-heading">Інженерний інтелект - це система навколо агента</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-15">
+          EIF задає керований потік навчання: перевірений Knowledge Delta
+          сесії можна класифікувати, перевірити, залишити в проєкті або
+          підвищити до рівня повторно використовуваних правил, сценаріїв
+          роботи, шаблонів і навичок агента.
+        </p>
+        <div class="methodology__definition" data-claim-id="CLM-15">
+          <p class="methodology__statement">
+            <strong>Engineering Intelligence</strong> - це версійований досвід
+            і методи, що керують його застосуванням. Він змінює підготовку,
+            виконання та перевірку наступного завдання, а не лише місце
+            зберігання знань.
+          </p>
+          <dl class="methodology__parts">
+            <div>
+              <dt class="label label--accent">Методологія</dt>
+              <dd>Принципи, онтологія, модель повноважень, сценарії роботи й правила доказів визначають спосіб роботи.</dd>
+            </div>
+            <div>
+              <dt class="label label--accent">Досвід</dt>
+              <dd>Перевірені факти, рішення, інциденти, повторювані моделі збоїв і відхилені підходи стають доступними до початку реалізації.</dd>
+            </div>
+            <div>
+              <dt class="label label--accent">Спроможність</dt>
+              <dd>Шаблони роблять вдалу структуру повторюваною, а навички дають агенту змогу запускати цілі робочі процеси.</dd>
+            </div>
+          </dl>
+        </div>
+        <p class="methodology__boundary" data-claim-id="CLM-15">
+          <strong>Що тут означає &ldquo;навчання&rdquo;:</strong> інженерна
+          система виносить перевірений досвід у переглянуті й версійовані
+          артефакти, які може знайти наступна сесія. EIF не тренує ваги
+          моделі, не донавчає LLM і не дозволяє агенту переписувати власні
+          правила безпеки.
+        </p>
+      </template>
+
+      <template data-i18n-id="layers.body">
+        <div class="section__head">
+          <span class="label">03 &middot; Шари інтелекту</span>
+          <h2 id="layers-heading">Три шари відокремлюють метод, пам&rsquo;ять і поточну роботу</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-13">
+          EIF відокремлює повторно використовувану методологію фреймворку,
+          стійке знання проєкту та тимчасовий контекст сесії у три рівні;
+          Knowledge Delta керує переходом знання між ними.
+        </p>
+        <div class="layers__stack" data-claim-id="CLM-13">
+          <article class="layers__tier layers__tier--one">
+            <div class="layers__tier-id">
+              <span class="label label--accent">Рівень 1</span>
+              <span class="layers__scope">Спільний</span>
+            </div>
+            <div>
+              <h3>Інтелект фреймворку</h3>
+              <p>Міжпроєктна методологія: онтологія, модель повноважень, глобальні правила, сценарії роботи, шаблони та навички агента.</p>
+            </div>
+            <p class="layers__examples">Як працювати</p>
+          </article>
+          <article class="layers__tier layers__tier--two">
+            <div class="layers__tier-id">
+              <span class="label label--accent">Рівень 2</span>
+              <span class="layers__scope">Стійкий</span>
+            </div>
+            <div>
+              <h3>Інтелект проєкту</h3>
+              <p>Архітектура, рішення, доменні факти, інциденти, ризики й локальні правила одного проєкту.</p>
+            </div>
+            <p class="layers__examples">Що знає ця система</p>
+          </article>
+          <article class="layers__tier layers__tier--three">
+            <div class="layers__tier-id">
+              <span class="label label--accent">Рівень 3</span>
+              <span class="layers__scope">Тимчасовий</span>
+            </div>
+            <div>
+              <h3>Інтелект сесії</h3>
+              <p>Поточний обсяг і стан роботи, спостереження, припущення, відкриті питання та чернетка Knowledge Delta.</p>
+            </div>
+            <p class="layers__examples">Що відбувається зараз</p>
+          </article>
+        </div>
+        <div class="knowledge-route" data-claim-id="CLM-13">
+          <div class="knowledge-route__head">
+            <div>
+              <span class="label label--accent">Ліфт навчання</span>
+              <h3>Докази рухаються вгору. Інтелект повертається вниз.</h3>
+            </div>
+            <div class="knowledge-route__legend" aria-label="Напрямки потоку">
+              <span>&uarr; Підвищення рівня</span>
+              <span>&darr; Пошук досвіду</span>
+            </div>
+          </div>
+          <ol class="knowledge-route__steps">
+            <li data-tier="T3">
+              <details open>
+                <summary><span>01</span><strong>Докази сесії</strong><em>Рівень 3</em></summary>
+                <p>Робота створює спостереження, рішення, збої та чернетку Knowledge Delta.</p>
+              </details>
+            </li>
+            <li data-tier="GATE" class="knowledge-route__gate">
+              <details>
+                <summary><span>02</span><strong>Закриття + ретроспектива</strong><em>Перевірка</em></summary>
+                <p>Порівняти намір із доказами, виявити повторювані моделі збоїв і вирішити, що можна використати знову. Неперевірені нотатки не проходять.</p>
+              </details>
+            </li>
+            <li data-tier="T2">
+              <details>
+                <summary><span>03</span><strong>Пам&rsquo;ять проєкту</strong><em>Рівень 2</em></summary>
+                <p>Перевірені локальні факти, рішення, інциденти й уроки стають стійким інтелектом проєкту.</p>
+              </details>
+            </li>
+            <li data-tier="GATE" class="knowledge-route__gate">
+              <details>
+                <summary><span>04</span><strong>Рішення про підвищення рівня</strong><em>Перевірка</em></summary>
+                <p>За межі проєкту переходить лише міжпроєктний урок із зафіксованим походженням і результатом перевірки.</p>
+              </details>
+            </li>
+            <li data-tier="T1">
+              <details>
+                <summary><span>05</span><strong>Метод фреймворку</strong><em>Рівень 1</em></summary>
+                <p>Повторно використовуване правило, сценарій роботи, шаблон або навичка агента стає доступною іншим проєктам.</p>
+              </details>
+            </li>
+          </ol>
+          <p class="knowledge-route__return">
+            <span aria-hidden="true">&darr;</span>
+            <strong>Наступна сесія шукає знання у стійких шарах:</strong>
+            потрібні методи й досвід проєкту повертаються до початку дії, а робочий контекст лишається тимчасовим.
+          </p>
+        </div>
+        <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
+          <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані навички агента.</p>
+          <p><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання через Knowledge Delta та явне рішення про підвищення рівня.</p>
+        </div>
+      </template>
+
+      <template data-i18n-id="control-plane.body">
+        <div class="section__head">
+          <span class="label">04 &middot; Площина керування</span>
+          <h2 id="control-plane-heading">Один керований цикл: від джерела до стійкого знання</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-01">
+          EIF координує інструменти та агентів, не підмінюючи їх, і зводить
+          знання, повноваження, виконання й докази в одну послідовність, яку
+          можна спостерігати.
+        </p>
+        <svg class="control-plane__diagram" aria-hidden="true" viewBox="0 0 1240 220" preserveAspectRatio="xMidYMid meet">
+          <path class="control-plane__path" fill="none" d="M 60 150 L 220 90 L 380 170 L 540 90 L 700 170 L 860 90 L 1020 170 L 1180 130" />
+          <g class="control-plane__node" transform="translate(60,150)"><circle r="8" /><text y="-24">Намір</text></g>
+          <g class="control-plane__node" transform="translate(220,90)"><circle r="8" /><text y="-24">Пошук</text></g>
+          <g class="control-plane__node" transform="translate(380,170)"><circle r="8" /><text y="34">Повноваження</text></g>
+          <g class="control-plane__node" transform="translate(540,90)"><circle r="8" /><text y="-24">Навігація</text></g>
+          <g class="control-plane__node" transform="translate(700,170)"><circle r="8" /><text y="34">Виконання</text></g>
+          <g class="control-plane__node" transform="translate(860,90)"><circle r="8" /><text y="-24">Докази</text></g>
+          <g class="control-plane__node" transform="translate(1020,170)"><circle r="8" /><text y="34">Knowledge Delta</text></g>
+          <g class="control-plane__node control-plane__node--terminal" transform="translate(1180,130)"><circle r="9" /><text y="-26">Стійке</text></g>
+        </svg>
+        <ol class="control-plane__list">
+          <li><span class="label label--accent">01 &middot; Намір користувача</span><p>У циклі з&rsquo;являється завдання або питання.</p></li>
+          <li><span class="label label--accent">02 &middot; Здобуття досвіду</span><p>Раніше перевірене знання підвантажується в контекст ще до початку роботи.</p></li>
+          <li><span class="label label--accent">03 &middot; Повноваження й межі</span><p>Що має відбутися, що відбувається насправді і що можна цитувати - три різні питання.</p></li>
+          <li><span class="label label--accent">04 &middot; Структурна навігація</span><p>Необов&rsquo;язковий граф коду допомагає швидше знаходити потрібне. Це доказ для навігації, не джерело повноважень.</p></li>
+          <li><span class="label label--accent">05 &middot; Контрольоване виконання</span><p>Робота триває в межах чітко визначеного обсягу, бюджетів і умов зупинки.</p></li>
+          <li><span class="label label--accent">06 &middot; Тести й докази</span><p>Змерджену зміну не вважають доказом робочої поведінки саму собою.</p></li>
+          <li><span class="label label--accent">07 &middot; Knowledge Delta</span><p>Здобуте знання фіксують у тій самій сесії, а не залишають у чаті.</p></li>
+          <li><span class="label label--accent">08 &middot; Стійкий інженерний інтелект</span><p>Перевірене знання стає доступним наступному завданню й наступному агенту.</p></li>
+        </ol>
+        <p class="control-plane__note label" data-claim-id="CLM-12">
+          Файли джерела лишаються головним джерелом повноважень завжди.
+          Необов&rsquo;язковий структурний граф - це доказ для навігації, він не замінює
+          перевірку джерела.
+        </p>
+      </template>
+
+      <template data-i18n-id="session.body">
+        <div class="section__head">
+          <span class="label">05 &middot; Сесія</span>
+          <h2 id="session-heading">Сесія - одиниця контрольованої роботи й навчання</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-14">
+          EIF вимагає пошуку релевантного попереднього знання до нетривіальної
+          роботи й визначає підготовку, контрольоване виконання, перевірку
+          та закриття як життєвий цикл сесії.
+        </p>
+        <ol class="session__timeline" data-claim-id="CLM-14">
+          <li>
+            <span class="session__number label label--accent">01</span>
+            <div>
+              <h3>Знайти досвід і зорієнтуватися</h3>
+              <p>Прочитати активні інструкції та вихідні файли, а потім знайти у стійкому знанні потрібні уроки, збої й відхилені підходи.</p>
+            </div>
+            <span class="session__artifact">Рівень 1 + рівень 2</span>
+          </li>
+          <li>
+            <span class="session__number label label--accent">02</span>
+            <div>
+              <h3>Визначити обсяг і підготуватися</h3>
+              <p>Обрати одну сесію або execution packet. Назвати мету, докази, обмеження, бюджети й умови зупинки.</p>
+            </div>
+            <span class="session__artifact">Обсяг завдання</span>
+          </li>
+          <li>
+            <span class="session__number label label--accent">03</span>
+            <div>
+              <h3>Виконати й перевірити</h3>
+              <p>Тримати спостереження окремо від припущень, працювати в межах визначеного обсягу та спиратися на оголошені оцінювачі, а не на фразу про завершення.</p>
+            </div>
+            <span class="session__artifact">Рівень 3</span>
+          </li>
+          <li>
+            <span class="session__number label label--accent">04</span>
+            <div>
+              <h3>Закрити й підняти знання</h3>
+              <p>Записати реальні докази, відкриту роботу й Knowledge Delta. Зберегти перевірене знання, а ефемерний стан сесії видалити.</p>
+            </div>
+            <span class="session__artifact">Стійка зміна знань</span>
+          </li>
+        </ol>
+        <p class="session__boundary" data-claim-id="CLM-14">
+          Рівень 3 - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
+          стан виконання, позначки доказів, відкриті питання й чернетка
+          Knowledge Delta, але не сирі міркування ШІ. Цей шар ніколи не
+          підвищують цілком.
+        </p>
+      </template>
+
+      <template data-i18n-id="loop.body">
+        <div class="section__head">
+          <span class="label">06 &middot; Цикл доказів</span>
+          <h2 id="loop-heading">Обмежені ітерації замість безмежної автономності</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-04">
+          EIF задає контракт обмеженого циклу для ітеративної роботи агента:
+          явні оцінювачі, бюджети, докази й умови зупинки. Це методологічний
+          контракт - сам собою він не доводить менше повторів, вищу якість,
+          нижчу вартість чи надійне автономне завершення.
+        </p>
+        <div class="loop__scene">
+          <div class="loop__sticky">
+            <svg class="loop__diagram" aria-hidden="true" data-label="Навігація фазами обмеженого циклу доказів" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
+              <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
+              <g class="loop__node" data-phase="orient" data-label="Показати фазу Контекст" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Контекст</text></g>
+              <g class="loop__node" data-phase="define" data-label="Показати фазу Визначення" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Визначення</text></g>
+              <g class="loop__node" data-phase="act" data-label="Показати фазу Дія" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Дія</text></g>
+              <g class="loop__node" data-phase="observe" data-label="Показати фазу Спостереження" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Спостереження</text></g>
+              <g class="loop__node" data-phase="study" data-label="Показати фазу Аналіз" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Аналіз</text></g>
+              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Уточнення" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Уточнення</text></g>
+            </svg>
+          </div>
+          <ol class="loop__phases">
+            <li class="loop__phase" data-phase="orient"><span class="label label--accent">01 &middot; Контекст</span><p>Прочитати поточне джерело й здобуте знання, що стосується справи. Факти фіксувати окремо від припущень.</p></li>
+            <li class="loop__phase" data-phase="define"><span class="label label--accent">02 &middot; Визначення</span><p>Сформулювати найменшу наступну гіпотезу і спостереження, яке її підтвердить або спростує.</p></li>
+            <li class="loop__phase" data-phase="act"><span class="label label--accent">03 &middot; Дія</span><p>Внести одну оборотну зміну або провести один діагностичний експеримент.</p></li>
+            <li class="loop__phase" data-phase="observe"><span class="label label--accent">04 &middot; Спостереження</span><p>Запустити оголошений оцінювач і зафіксувати його реальний результат.</p></li>
+            <li class="loop__phase" data-phase="study"><span class="label label--accent">05 &middot; Аналіз</span><p>Порівняти очікуване з фактичним. Якщо не вийшло - зафіксувати стислу сигнатуру збою, яку можна порівняти з іншими спробами.</p></li>
+            <li class="loop__phase" data-phase="adapt"><span class="label label--accent">06 &middot; Уточнення</span><p>Обрати наступний крок, спираючись на спостереження. Дію, що вже не спрацювала, без нових доказів не повторюють.</p></li>
+          </ol>
+        </div>
+        <div class="loop__control">
+          <div>
+            <h3 class="label">Передумови</h3>
+            <dl class="loop__precondition-list">
+              <div><dt>Мета</dt><dd>Один спостережуваний результат.</dd></div>
+              <div><dt>Доказ успіху</dt><dd>Що саме підтверджує результат на практиці.</dd></div>
+              <div><dt>Оцінювач</dt><dd>Тест, інструмент, звірка з джерелом, рубрика або рішення визначеної людини.</dd></div>
+              <div><dt>Ліміт ітерацій</dt><dd>Ціле додатне число, типово 5.</dd></div>
+              <div><dt>Віддалений бюджет</dt><dd>Типово 0, якщо немає окремого дозволу.</dd></div>
+              <div><dt>Умови зупинки</dt><dd>Безпека, неоднозначність, бюджет або межі, які визначає лише власник.</dd></div>
+            </dl>
+          </div>
+          <div>
+            <h3 class="label">Виходи</h3>
+            <dl class="loop__exits">
+              <div class="loop__exits-row loop__exits-row--pass"><dt>Пройдено</dt><dd>Тільки коли доказ успіху справді існує.</dd></div>
+              <div class="loop__exits-row loop__exits-row--blocked"><dt>Заблоковано</dt><dd>Настала умова зупинки, оцінювач недоступний і немає гідної заміни, вичерпано бюджет ітерацій, або та сама сигнатура збою повторилася б утретє без змін.</dd></div>
+              <div class="loop__exits-row loop__exits-row--deferred"><dt>Відкладено</dt><dd>Тільки коли решта роботи явно належить власнику або виходить за межі затвердженого обсягу - із названим місцем призначення.</dd></div>
+            </dl>
+          </div>
+        </div>
+      </template>
+
+      <template data-i18n-id="learning.body">
+        <div class="section__head">
+          <span class="label">07 &middot; Кероване навчання</span>
+          <h2 id="learning-heading">Від досвіду до повторно використовуваних знань і виконуваних навичок агента</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-15">
+          Навчання стає стійким лише тоді, коли перевірений Knowledge Delta
+          сесії класифікують, перевіряють, залишають у проєкті або явно
+          підвищують до рівня версійованого правила, сценарію роботи, шаблону
+          чи навички агента.
+        </p>
+        <ol class="learning__flow" data-claim-id="CLM-15">
+          <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає докази: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
+          <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
+          <li><span class="label label--accent">Ретроспектива</span><p>Закриття сесії порівнює намір із доказами, виділяє повторювані моделі збоїв і визначає, чи придатний урок до повторного використання.</p></li>
+          <li><span class="label label--accent">Класифікувати + перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
+          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні 2; загальний урок переходить на рівень 1 тільки за явним рішенням.</p></li>
+          <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
+        </ol>
+        <div class="learning__distinction" data-claim-id="CLM-15">
+          <div>
+            <span class="label">Досвід</span>
+            <h3>Що система дізналася</h3>
+            <p>Факти, рішення, інциденти, граничні випадки, повторювані моделі збоїв та уроки із зафіксованим походженням і станом у життєвому циклі.</p>
+          </div>
+          <div>
+            <span class="label">Skill</span>
+            <h3>Як система може діяти</h3>
+            <p>Повторно використовуваний робочий процес для планування, виконання, перевірки, пошуку досвіду або впорядкування знань. Це версійовані інструкції, а не прихована поведінка моделі.</p>
+          </div>
+        </div>
+        <p class="learning__boundary" data-claim-id="CLM-15">
+          Це кероване навчання на рівні системи, а не автономна
+          самомодифікація. Урок можна відхилити, залишити локальним, визнати
+          простроченим або замінити новішим; локальна навичка агента може
+          спеціалізувати робочий процес, але не послаблювати правила безпеки
+          фреймворку.
+        </p>
+      </template>
+
+      <template data-i18n-id="integrations.body">
+        <div class="section__head">
+          <span class="label">08 &middot; Необов&rsquo;язкові спроможності</span>
+          <h2 id="integrations-heading">Три прискорювачі. Для кожного є резервний шлях.</h2>
+        </div>
+        <p class="section__lede" data-claim-id="CLM-12">
+          Graphify, RTK і Context7 додають по одній обмеженій спроможності.
+          Жодна не є самою методологією: якщо інструмент недоступний, EIF має
+          визначений базовий шлях через пошук у вихідних файлах, нефільтрований
+          вивід команд або локальну документацію.
+        </p>
+        <figure class="capability-map">
+          <figcaption>
+            <span class="label label--accent">Мости необов&rsquo;язкових спроможностей</span>
+            <span>Під кожним мостом лишається базовий шлях</span>
+          </figcaption>
+          <ol>
+            <li>
+              <span class="capability-map__index">01</span>
+              <div><strong>Зрозуміти кодову базу</strong><small>зв&rsquo;язки, групи компонентів, підказки щодо впливу</small></div>
+              <span class="capability-map__bridge" aria-hidden="true"></span>
+              <b>Graphify</b>
+              <em>резерв: пошук у вихідних файлах</em>
+            </li>
+            <li>
+              <span class="capability-map__index">02</span>
+              <div><strong>Зменшити шум інструментів</strong><small>стиснений вивід і облік скорочення</small></div>
+              <span class="capability-map__bridge" aria-hidden="true"></span>
+              <b>RTK</b>
+              <em>резерв: нефільтрований командний рядок</em>
+            </li>
+            <li>
+              <span class="capability-map__index">03</span>
+              <div><strong>Звіритися з актуальною документацією постачальника</strong><small>джерела для відповідної версії бібліотеки чи API</small></div>
+              <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
+              <b>Context7</b>
+              <em>резерв: локальна документація</em>
+            </li>
+          </ol>
+        </figure>
+        <ul class="integrations__list">
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Graphify</span>
+              <span>Навігація графом коду, аналіз впливу змін</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-05">
+              <p><strong>Межа даних:</strong> лише локально для структурного видобутку на основі AST; <code>external-api</code> - тільки якщо явно ввімкнено семантичне маркування.</p>
+              <p><strong>Без неї:</strong> агент повертається до пошуку в джерелах і ручного перегляду - підказок за графом і впливом немає.</p>
+              <p><strong>Справність:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, явним ідентифікатором репозиторію та перевіреною областю аналізу. Лише стан <code>fresh</code> означає справність; зміни коду, семантичної області чи історії вимагають відповідного оновлення, а пошкоджений або свідомо вимкнений артефакт лишається недоступним. Перевірено на одній локальній версії й невеликому синтетичному прикладі - це не порівняльний результат навігації.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">RTK</span>
+              <span>Стиснення виводу командного рядка з відстежуваним скороченням</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-06">
+              <p><strong>Межа даних:</strong> лише локально.</p>
+              <p><strong>Без неї:</strong> команди виконуються без фільтрації, скорочення не фіксується.</p>
+              <p><strong>Справність:</strong> RTK 0.43.0 проходить усі 24 перевірки на випробуваному Windows-середовищі через вбудований маршрут <code>rtk rg</code>. Невдала обов&rsquo;язкова перевірка й надалі означає стан <code>degraded</code>; нефільтрований або невдалий маршрут через <code>rtk proxy</code> фіксується як нульова економія. Це не заява про всі платформи чи ефективність.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Context7</span>
+              <span>Актуальна документація бібліотек і API замість застарілих даних навчання</span>
+            </button>
+            <div class="reveal__detail">
+              <p><strong>Межа даних:</strong> <code>external-api</code> - звернення до зовнішньої служби документації.</p>
+              <p><strong>Без неї:</strong> агент покладається на локальну документацію або власні знання з навчання, які можуть застаріти.</p>
+              <p><strong>Справність:</strong> поки що лише декларація - адаптер постачальника ще не пройшов власну сесію й перевірку доказів.</p>
+            </div>
+          </li>
+        </ul>
+      </template>
+
+      <template data-i18n-id="evidence.body">
+        <div class="section__head">
+          <span class="label">09 &middot; Поточні завдання й докази</span>
+          <h2 id="evidence-heading">Що вже перевірено у чітко визначених межах</h2>
+        </div>
+        <p class="section__lede">
+          Сім завдань, які керований агент справді виконує з цим
+          фреймворком - кожне зі своїм доказом і межею, а не одна загальна
+          заява про можливості.
+        </p>
+        <ul class="integrations__list evidence__tasks">
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Встановлення</span>
+              <span>Пакет eifctl, придатний до встановлення, із сімома підкомандами</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-02">
+              <p>Справжній wheel, зібраний із <code>pyproject.toml</code> і встановлений у чисте віртуальне середовище, дає робочу команду <code>eifctl</code> (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) - перевірено повним синтетичним завданням від початку до кінця.</p>
+              <p><strong>Обмеження:</strong> пакета ще немає на PyPI; весь прохід спирається на адаптер Claude Code для власного запуску.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Впровадження</span>
+              <span>Співіснування з уже налаштованим репозиторієм</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-11">
+              <p>Перевірка перед впровадженням виявляє наявне керування проєктом ще до першого запису й не продовжує роботу без явного рішення про співіснування; у режимі <code>coexist</code> згенерований блок поступається наявним правилам, а не оголошує себе єдиним джерелом повноважень.</p>
+              <p><strong>Обмеження:</strong> виявлення керування спирається на евристику за довжиною вмісту, а не на семантику; перевірено на одній синтетичній фікстурі та повторних запусках проти однієї реальної приватної цілі.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Пошук</span>
+              <span>Здобуття досвіду ще до початку реалізації</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-01">
+              <p>Офлайн-пошук за ключовими словами, чутливий до життєвого циклу знання й схеми, показує релевантні перевірені факти (зокрема українською), за замовчуванням приховує відхилене чи замінене та окремо розрізняє стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code>.</p>
+              <p><strong>Обмеження:</strong> це офлайн-оцінка за ключовими словами й підрядками, не семантичний пошук; перевірено на невеликих тестових індексах.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Планування</span>
+              <span>Виконання, обмежене доказами</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-04">
+              <p>Роботу окреслюють як сесію або пакет виконання з явним оцінювачем, бюджетами ітерацій і віддалених запусків та названою умовою зупинки (докладніше - у <a href="#loop">циклі доказів</a>).</p>
+              <p><strong>Обмеження:</strong> це методологічний контракт, а не гарантія меншої кількості повторів чи нижчої вартості.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Перевірка</span>
+              <span>Екземпляр проєкту перевіряє власну цілісність</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-01">
+              <p>Вбудований засіб перевірки звіряє коректність схеми конфігурації й lock-файлу, дайджести маніфесту з новим обчисленням, узгодженість адаптера з конфігурацією, цілісність маркерів і розбіжності між конфігурацією та згенерованою точкою входу.</p>
+              <p><strong>Обмеження:</strong> перевірка обмежена власним маніфестом пакета, це не інструмент загальної перевірки цілісності файлів.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Перемикання</span>
+              <span>Перехід між будь-якими двома з чотирьох адаптерів</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-03">
+              <p>Повна матриця перемикань (12 упорядкованих пар серед Claude Code, Cursor, Codex і Hermes) підтверджує, що після кожного перемикання лишається рівно один активний блок EIF, правильно визначено новий адаптер і збережено вміст проєкту.</p>
+              <p><strong>Обмеження:</strong> для v0.1 обов&rsquo;язкові лише Claude Code і Cursor; Codex і Hermes поки експериментальні.</p>
+            </div>
+          </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Локалізація</span>
+              <span>Українські поверхні проєкту, ще не повна локалізація відповідей</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-07">
+              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською - мову задає конфігурація кожного окремого екземпляра.</p>
+              <p><strong>Обмеження:</strong> це не стосується довільних розмовних відповідей самого агента.</p>
+            </div>
+          </li>
+        </ul>
+        <div class="evidence__proof">
+          <h3 class="label">Задокументовані обмежені докази</h3>
+          <ul>
+              <li data-claim-id="CLM-08">
+              Перший обмежений пілот A/B із реальним агентом (одна модель, три тестові приклади, шість спроб) завершився стовідсотковим успіхом в обох режимах. Режими C/D уже мають виконувані контракти цілісності, але ще не мають результату з реальним агентом. Це не статистично потужне порівняння ефективності (див. <a href="#limitations">обмеження</a>).
+            </li>
+            <li data-claim-id="CLM-10">
+              Хронометраж на рівні окремих команд існує для конкретних механічних операцій у бенчмарках фреймворку. Про час людини на створення чи перевірку коду заяв не робимо.
+            </li>
+          </ul>
+        </div>
+      </template>
+
+      <template data-i18n-id="quickstart.body">
+        <div class="section__head">
+          <span class="label">10 &middot; Швидкий старт</span>
+          <h2 id="quickstart-heading">Синтетичний прохід, а не реліз</h2>
+        </div>
+        <p class="section__lede">
+          Клонування репозиторію дає онтологію, схеми, документи керування,
+          вихідний пакет <code>eifctl</code> і один відтворений вертикальний
+          зріз - це не стабільний реліз і не репрезентативна вибірка
+          реальних інженерних завдань.
+        </p>
+        <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale uk</code></pre>
+        <p>
+          Ця команда створює окремий екземпляр проєкту, готовий до запуску.
+          В еталонному проході вбудований приклад додає і знаходить реальне
+          знання, вносить одну зміну на його основі, перевіряє її справжнім
+          тестом, який спочатку падає, а після зміни проходить, і закриває
+          сесію українською через мову, задану в конфігурації.
+        </p>
+        <p class="label">
+          Пакета на PyPI ще немає. Про те, скільки часу це займає в людини,
+          заяв не робимо.
+        </p>
+      </template>
+
+      <template data-i18n-id="limitations.body">
+        <div class="section__head">
+          <span class="label">11 &middot; Обмеження</span>
+          <h2 id="limitations-heading">Чого тут ще немає</h2>
+        </div>
+        <ul class="limitations__list">
+          <li><strong>Попередня версія.</strong> v0.1 ще в розробці: репозиторій відокремлюють від приватного робочого екземпляра. Можливі прогалини.</li>
+          <li><strong>Ще не на PyPI.</strong> Встановити через <code>pip install</code> з індексу пакетів поки не можна.</li>
+          <li data-claim-id="CLM-09"><strong>Без заяв про якість чи переробку.</strong> Порівняльного дослідження не проводили; фреймворк не стверджує нічого про якість завдань, частку переробок чи кількість дефектів.</li>
+          <li><strong>Обмежений масштаб.</strong> Докази спираються на один синтетичний вертикальний зріз, пілот на трьох тестових прикладах і тестові набори на рівні адаптерів - це не велика й не незалежно відтворена вибірка.</li>
+          <li><strong>Необов&rsquo;язкові інтеграції такими й лишаються.</strong> Graphify і RTK ніколи не є обов&rsquo;язковими; несвіжий чи деградований інструмент так і позначають, а не видають за справний.</li>
+          <li>
+            <strong>Явні не-цілі v0.1:</strong> розміщений SaaS,
+            автономне мультиагентне середовище виконання, власна хмарна служба пам&rsquo;яті,
+            обов&rsquo;язкова залежність від графа коду чи стиснення виводу,
+            або будь-яка загальна заява про економію токенів.
+          </li>
+        </ul>
+      </template>
+
+      <template data-i18n-id="final-cta.body">
+        <div class="section__head">
+          <span class="label">12 &middot; Заглибитися</span>
+          <h2 id="final-cta-heading">Архітектура, докази, джерело</h2>
+        </div>
+        <nav class="final-cta__links" aria-label="Заглибитися">
+          <a href="#control-plane">Архітектура</a>
+          <a href="#evidence">Докази</a>
+          <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL__</a>
+        </nav>
+      </template>
+
+      <template data-i18n-id="footer.body">
+        <p>Ліцензія Apache-2.0. Локальна збірка, ще не розгорнута.</p>
+      </template>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -3,7 +3,7 @@
   "task_id": "T09",
   "title": "Add an optional parameter without breaking existing callers",
   "description": "format_name(first, last) needs an optional middle-name parameter added without breaking any existing 2-argument call - a backward-compatibility/API-evolution task, not a bug fix in existing logic.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:27e6cff37ca7bad42896521c449b6a95e27bc0e4439cb9057e4d82bbef085430",

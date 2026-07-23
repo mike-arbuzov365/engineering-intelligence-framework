@@ -3,7 +3,7 @@
   "task_id": "T07",
   "title": "Avoid repeating a known failed fix",
   "description": "A username-normalization bug (only strips leading whitespace) whose task prompt explicitly documents a previously-tried, wrong fix (stripping all spaces, which breaks multi-word names) and instructs not to repeat it. Tests the exact scenario in the task_id's own name.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:9fdce7862e03722cb3609295f838adf0009ebe3d4d83c3c87b81161c08f507fd",

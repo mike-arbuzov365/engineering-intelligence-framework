@@ -16,6 +16,11 @@
     "recorded_at": { "type": "string", "format": "date-time" },
     "integration": { "type": "string", "const": "rtk" },
     "registry_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "attempt_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$",
+      "description": "Optional content-free benchmark or execution attempt identifier."
+    },
     "command_class": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
     "route": {
       "type": "string",
@@ -35,6 +40,18 @@
       "if": {
         "properties": { "route": { "enum": ["raw-proxy", "parse-failure", "unsupported"] } },
         "required": ["route"]
+      },
+      "then": {
+        "properties": {
+          "estimated_saved_tokens": { "const": 0 },
+          "savings_eligible": { "const": false }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "outcome": { "enum": ["failure", "degraded"] } },
+        "required": ["outcome"]
       },
       "then": {
         "properties": {

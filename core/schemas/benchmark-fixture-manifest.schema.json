@@ -22,7 +22,7 @@
       "type": "array",
       "items": { "type": "string", "enum": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"] },
       "minItems": 1,
-      "description": "Which modes this fixture can actually be run under this round. C/D are schema-declared across the corpus but operationally BLOCKED (see docs/benchmarks/README.md) - a fixture may list them here for future use, but eif_benchmark.py's `run` command refuses to execute C/D regardless."
+      "description": "Which modes this fixture can run. C/D require the explicit integration-report, graph-artifact, runner-consumption and attempt-telemetry contracts documented in docs/benchmarks/README.md."
     },
     "task_prompt_path": {
       "type": "string",

@@ -3,7 +3,7 @@
   "task_id": "T04",
   "title": "Add input validation",
   "description": "divide_evenly(total, parts)'s docstring promises a ValueError for a non-positive parts value, but the function does not validate this yet - parts=0 crashes with an undocumented ZeroDivisionError, and negative parts silently returns a wrong result.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:9717ea3a110f32aba3b379be900905a67d8ef4d3dd7a5a80ff04b93d39a2ac52",

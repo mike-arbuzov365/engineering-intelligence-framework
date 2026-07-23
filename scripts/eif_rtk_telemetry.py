@@ -42,11 +42,14 @@ def _token_estimate(byte_count: int) -> int:
 
 
 def build_event(args: argparse.Namespace, framework_root: Path) -> dict:
-    savings_eligible = args.route in {"native-filtered", "native-guarded", "summary-filtered"}
+    savings_eligible = (
+        args.route in {"native-filtered", "native-guarded", "summary-filtered"}
+        and args.outcome == "success"
+    )
     raw_tokens = _token_estimate(args.raw_bytes)
     emitted_tokens = _token_estimate(args.emitted_bytes)
     saved_tokens = max(0, raw_tokens - emitted_tokens) if savings_eligible else 0
-    return {
+    event = {
         "schema_version": 1,
         "event_id": uuid.uuid4().hex,
         "recorded_at": dt.datetime.now(dt.timezone.utc).isoformat(),
@@ -62,6 +65,10 @@ def build_event(args: argparse.Namespace, framework_root: Path) -> dict:
         "estimated_saved_tokens": saved_tokens,
         "savings_eligible": savings_eligible,
     }
+    attempt_id = getattr(args, "attempt_id", None)
+    if attempt_id:
+        event["attempt_id"] = attempt_id
+    return event
 
 
 def validate_event(event: dict, framework_root: Path) -> list[str]:
@@ -119,6 +126,8 @@ def cmd_summary(args: argparse.Namespace) -> int:
         for error in errors:
             print(f"  - {error}")
         return 1
+    if args.attempt_id:
+        events = [event for event in events if event.get("attempt_id") == args.attempt_id]
     grouped: dict[tuple[str, str], dict[str, int]] = defaultdict(
         lambda: {"events": 0, "raw_bytes": 0, "emitted_bytes": 0, "estimated_saved_tokens": 0}
     )
@@ -130,6 +139,7 @@ def cmd_summary(args: argparse.Namespace) -> int:
         bucket["estimated_saved_tokens"] += event["estimated_saved_tokens"]
     summary = {
         "schema_version": 1,
+        "attempt_id": args.attempt_id,
         "events": len(events),
         "groups": [
             {"command_class": key[0], "route": key[1], **values}
@@ -147,6 +157,7 @@ def parser() -> argparse.ArgumentParser:
     record.add_argument("--instance-root", default=".")
     record.add_argument("--framework-root")
     record.add_argument("--command-class", required=True)
+    record.add_argument("--attempt-id")
     record.add_argument(
         "--route",
         required=True,
@@ -160,6 +171,7 @@ def parser() -> argparse.ArgumentParser:
     summary = sub.add_parser("summary")
     summary.add_argument("--instance-root", default=".")
     summary.add_argument("--framework-root")
+    summary.add_argument("--attempt-id")
     summary.set_defaults(func=cmd_summary)
     return ap
 

@@ -142,7 +142,9 @@ integrations:
     # executable_path: "<local exact path>"  # optional; never copy a machine path into public evidence
     mode: structural        # structural | semantic | deep; doctor never starts a paid semantic/deep scan
     artifact_path: graphify-out/graph.json # raw graph stays local and is ignored by the generated .gitignore
-    baseline_commit: null   # null reads built_at_commit from the ignored graph; override only if the artifact lacks it
+    metadata_path: graphify-out/eif-graph-metadata.json # validated D-08 metadata sidecar
+    scope_manifest_path: .eif/graphify-scope.json # explicit repo_id and source/semantic scope; never derived from a worktree name
+    baseline_commit: null   # optional compatibility assertion; when set it must equal metadata.source_commit
     # semantic_provider: "<explicit provider>" # required only for semantic/deep
     processing: local       # semantic/deep requires external
     data_boundary: local-only   # local-only | external-api - must match the provider's actual behavior, not a wish

@@ -3,7 +3,7 @@
   "task_id": "T01",
   "title": "Implement a function from a written spec",
   "description": "parse_duration(text) is unimplemented (raises NotImplementedError). Requires implementing a compact duration-string parser from its own docstring spec, including validation of malformed input.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:280eadcc27f943a7378bbec7c148d47d7e47d5321176b28779f17c9e7f56d94b",

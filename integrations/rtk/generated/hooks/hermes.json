@@ -1,0 +1,17 @@
+{
+  "adapter": "hermes",
+  "behavior": "block-only",
+  "event": "pre_tool_call",
+  "input_command_path": "tool_input.command",
+  "installed": false,
+  "output_contract": "action=block with exact replacement message",
+  "runtime_status": "verified",
+  "safety": {
+    "active_install_requires_owner_review": true,
+    "failed_canary_savings_eligible": false,
+    "raw_proxy_savings_eligible": false,
+    "user_config_mutated_by_generator": false
+  },
+  "schema_version": 1,
+  "template_only": true
+}

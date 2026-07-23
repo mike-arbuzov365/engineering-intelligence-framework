@@ -34,7 +34,7 @@
     "mode": {
       "type": "string",
       "enum": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
-      "description": "A: no EIF, no Graphify, no RTK. B: EIF (eifctl), no Graphify, no RTK. C: EIF + Graphify, no RTK - schema-declared, operationally BLOCKED (see docs/benchmarks/README.md) until a reproducible Graphify install/version/config contract exists. D: EIF + Graphify + RTK - same block, plus RTK's own contract."
+      "description": "A: no EIF, no Graphify, no RTK. B: EIF (eifctl), no Graphify, no RTK. C: EIF plus consumed-and-recorded healthy/fresh Graphify evidence. D: mode C plus healthy RTK and attempt-attributed content-free telemetry."
     },
     "run_index": {
       "type": "integer",
@@ -170,6 +170,60 @@
         "collector_version": { "type": ["string", "null"], "description": "Version of whatever collected this measurement (e.g. the fake-runner script's own version, or a telemetry library version) - null if not applicable/unknown." }
       }
     },
+    "integration_evidence": {
+      "type": "object",
+      "description": "Privacy-safe evidence for integrations actually consumed by this attempt. Required for C/D and forbidden for A/B. It stores provider states, versions, digests, capability names and counters only.",
+      "required": ["graphify"],
+      "properties": {
+        "graphify": {
+          "type": "object",
+          "required": [
+            "provider", "health_state", "freshness_state", "version",
+            "artifact_digest", "target_source_digest",
+            "capabilities_consumed", "consumption_verified"
+          ],
+          "properties": {
+            "provider": { "const": "graphify" },
+            "health_state": { "const": "healthy" },
+            "freshness_state": { "const": "fresh" },
+            "version": { "type": "string", "minLength": 1 },
+            "artifact_digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "target_source_digest": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "capabilities_consumed": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["query", "path", "explain"] },
+              "uniqueItems": true
+            },
+            "consumption_verified": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "rtk": {
+          "type": "object",
+          "required": [
+            "provider", "health_state", "version", "telemetry_attempt_attributed",
+            "telemetry_events", "savings_eligible_events", "estimated_saved_tokens"
+          ],
+          "properties": {
+            "provider": { "const": "rtk" },
+            "health_state": { "const": "healthy" },
+            "version": { "type": "string", "minLength": 1 },
+            "telemetry_attempt_attributed": { "type": "boolean" },
+            "telemetry_events": { "type": "integer", "minimum": 0 },
+            "savings_eligible_events": { "type": "integer", "minimum": 0 },
+            "estimated_saved_tokens": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "outcome": {
       "type": "object",
       "required": ["status"],
@@ -187,5 +241,42 @@
       "description": "Pointer (path or URL) to the full raw transcript/log for this run - the record itself stays a compact summary, never the full transcript inline. Any transcript this points at must pass a privacy scan before publication (see D-12)."
     },
     "harness_version": { "type": "string" }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "enum": ["C_structural_navigation", "D_full_stack"]
+          }
+        },
+        "required": ["mode"]
+      },
+      "then": { "required": ["integration_evidence"] }
+    },
+    {
+      "if": {
+        "properties": { "mode": { "const": "D_full_stack" } },
+        "required": ["mode"]
+      },
+      "then": {
+        "properties": {
+          "integration_evidence": { "required": ["rtk"] }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "enum": ["A_baseline", "B_eif_governance"]
+          }
+        },
+        "required": ["mode"]
+      },
+      "then": {
+        "not": { "required": ["integration_evidence"] }
+      }
+    }
+  ]
 }

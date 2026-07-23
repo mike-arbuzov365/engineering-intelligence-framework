@@ -3,7 +3,7 @@
   "task_id": "T05",
   "title": "Fix a boundary bug",
   "description": "A pagination function has an off-by-one in its slice-index arithmetic that drops the last item of every page (a different boundary-bug flavor than T02's threshold-comparison bug - here the bug is in index arithmetic, not a comparison operator).",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:99f04bcc67bb6f0ec263d3ae625919fea3202718f6a00b1d94e43a32621f9d71",

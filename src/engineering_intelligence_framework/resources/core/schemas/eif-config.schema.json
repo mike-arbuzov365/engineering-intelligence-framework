@@ -205,10 +205,20 @@
             "minLength": 1,
             "description": "Instance-relative Graphify raw graph path. The adapter requires graphify-out/graph.json (or a descendant of graphify-out/) and rejects escapes outside the instance."
           },
+          "metadata_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Instance-relative Graphify metadata sidecar below graphify-out/. Defaults to graphify-out/eif-graph-metadata.json."
+          },
+          "scope_manifest_path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Instance-relative explicit repository identity and source-scope manifest. Defaults to .eif/graphify-scope.json."
+          },
           "baseline_commit": {
             "type": ["string", "null"],
             "pattern": "^[0-9a-f]{40}$",
-            "description": "Optional override for the Git commit at which the current graph was built. Null uses built_at_commit from the ignored raw artifact; freshness is unknown only if neither source supplies a valid commit."
+            "description": "Optional compatibility assertion. When set, it must equal source_commit in the validated artifact metadata sidecar."
           },
           "semantic_provider": {
             "type": "string",

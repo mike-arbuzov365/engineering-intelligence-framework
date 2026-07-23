@@ -9,7 +9,10 @@ selected via the EIF_FAKE_AGENT_BEHAVIOR env var:
     crash         - exits non-zero (harness_error)
     hang          - sleeps long enough to trigger the fixture's timeout
 
-argv: [work_dir, task_prompt_path]
+argv for A/B: [work_dir, task_prompt_path]
+argv for C/D:
+[work_dir, task_prompt_path, integration_input_path, graph_artifact_path,
+attempt_id]
 
 Reports measurement provenance (adoption-hardening round) alongside the
 token/tool counts: source: fake-runner, exact: true (the reported numbers
@@ -22,6 +25,7 @@ from fake-runner records at all.
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 import sys
 import time
@@ -31,10 +35,87 @@ FAKE_RUNNER_VERSION = "0.1.0"
 
 work_dir = Path(sys.argv[1])
 behavior = os.environ.get("EIF_FAKE_AGENT_BEHAVIOR", "correct_fix")
+integration_input_path = Path(sys.argv[3]) if len(sys.argv) >= 6 else None
+graph_artifact_path = Path(sys.argv[4]) if len(sys.argv) >= 6 else None
+attempt_id = sys.argv[5] if len(sys.argv) >= 6 else None
 
 
 def _measurement() -> dict:
     return {"source": "fake-runner", "exact": True, "collector_version": FAKE_RUNNER_VERSION}
+
+
+def _integration_report() -> dict:
+    if integration_input_path is None or graph_artifact_path is None or attempt_id is None:
+        return {}
+    integration_input = json.loads(integration_input_path.read_text(encoding="utf-8"))
+    graph = json.loads(graph_artifact_path.read_text(encoding="utf-8"))
+    if not isinstance(graph.get("nodes"), list):
+        raise ValueError("graph artifact has no nodes")
+    graph_labels = {
+        str(node.get("label", node.get("id", "")))
+        for node in graph["nodes"]
+        if isinstance(node, dict)
+    }
+    if not graph_labels:
+        raise ValueError("graph query returned no labels")
+
+    if integration_input["mode"] == "D_full_stack" and behavior != "missing_telemetry":
+        telemetry_path = work_dir / ".eif" / "local-state" / "rtk-telemetry.jsonl"
+        telemetry_path.parent.mkdir(parents=True, exist_ok=True)
+        event = {
+            "schema_version": 1,
+            "event_id": hashlib.sha256(attempt_id.encode("utf-8")).hexdigest()[:32],
+            "recorded_at": "2026-07-23T00:00:00Z",
+            "integration": "rtk",
+            "registry_version": integration_input["rtk"]["registry_version"],
+            "attempt_id": attempt_id,
+            "command_class": "grep-alternation",
+            "route": "native-guarded",
+            "outcome": "success",
+            "raw_bytes": 100,
+            "emitted_bytes": 40,
+            "estimated_raw_tokens": 25,
+            "estimated_emitted_tokens": 10,
+            "estimated_saved_tokens": 15,
+            "savings_eligible": True,
+        }
+        with telemetry_path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(event) + "\n")
+
+    if behavior == "presence_only":
+        return {}
+    reported_attempt = "wrong-attempt" if behavior == "wrong_attempt" else attempt_id
+    reported_digest = (
+        "sha256:" + "0" * 64
+        if behavior == "fabricated_graph"
+        else integration_input["graphify"]["artifact_digest"]
+    )
+    reported_source_digest = (
+        "sha256:" + "0" * 64
+        if behavior == "fabricated_source"
+        else integration_input["graphify"]["target_source_digest"]
+    )
+    return {
+        "integration_consumption": {
+            "attempt_id": reported_attempt,
+            "graphify": {
+                "artifact_digest": reported_digest,
+                "target_source_digest": reported_source_digest,
+                "capabilities_used": ["query"],
+            },
+        }
+    }
+
+
+def _emit(input_tokens: int, output_tokens: int, tool_calls: int) -> None:
+    report = {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "tool_calls": tool_calls,
+        "measurement": _measurement(),
+        **_integration_report(),
+    }
+    print(json.dumps(report))
 
 
 if behavior == "crash":
@@ -46,7 +127,7 @@ if behavior == "hang":
     sys.exit(0)
 
 if behavior == "no_fix":
-    print(json.dumps({"input_tokens": 100, "output_tokens": 50, "tool_calls": 1, "measurement": _measurement()}))
+    _emit(100, 50, 1)
     sys.exit(0)
 
 pricing = work_dir / "src" / "pricing.py"
@@ -85,4 +166,4 @@ elif behavior == "wrong_fix":
         text = username.read_text(encoding="utf-8")
         username.write_text(text.replace("return raw.lstrip().lower()", "return raw.replace(' ', '').lower()"), encoding="utf-8")
 
-print(json.dumps({"input_tokens": 500, "output_tokens": 200, "tool_calls": 2, "measurement": _measurement()}))
+_emit(500, 200, 2)

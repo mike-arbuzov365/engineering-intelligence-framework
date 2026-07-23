@@ -3,7 +3,7 @@
   "task_id": "T08",
   "title": "Fix an inconsistency across two functions",
   "description": "checkout.py's compute_single_item_price() has its own hardcoded discount rate that disagrees with the shared MEMBER_DISCOUNT_RATE in pricing_rules.py that compute_order_total() correctly uses - a real multi-file/multi-function coordination bug, not a single isolated line fix in one place.",
-  "supported_modes": ["A_baseline", "B_eif_governance"],
+  "supported_modes": ["A_baseline", "B_eif_governance", "C_structural_navigation", "D_full_stack"],
   "task_prompt_path": "task-prompt.md",
   "source_dir": "source",
   "source_digest": "sha256:b475231bf21af204f8d758457c7fcea47e0ca60ab48e9e9196d7a6b9efcc38a3",

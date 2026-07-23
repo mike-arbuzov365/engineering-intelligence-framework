@@ -1,0 +1,124 @@
+.capability-map {
+  margin: var(--eif-space-5) 0 var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
+  border-bottom: 1px solid var(--eif-rule);
+}
+
+.capability-map figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--eif-space-3);
+  padding: var(--eif-space-2) 0;
+  color: var(--eif-fg-muted);
+}
+
+.capability-map ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.capability-map li {
+  display: grid;
+  grid-template-columns: 2rem minmax(12rem, 1.15fr) minmax(5rem, 0.85fr) minmax(6rem, 0.45fr) minmax(9rem, 0.65fr);
+  gap: var(--eif-space-2);
+  align-items: center;
+  min-height: 6rem;
+  border-top: 1px solid var(--eif-rule);
+}
+
+.capability-map__index,
+.capability-map li em,
+.capability-map li small {
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  font-style: normal;
+  color: var(--eif-fg-muted);
+}
+
+.capability-map li strong,
+.capability-map li small {
+  display: block;
+}
+
+.capability-map li small {
+  margin-top: 0.35rem;
+}
+
+.capability-map li b {
+  color: var(--eif-accent);
+  font-family: var(--eif-font-mono);
+}
+
+.capability-map__bridge {
+  position: relative;
+  height: 1px;
+  background: var(--eif-accent);
+}
+
+.capability-map__bridge::before,
+.capability-map__bridge::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--eif-accent);
+  border-radius: 50%;
+  background: var(--eif-bg);
+  transform: translateY(-50%);
+}
+
+.capability-map__bridge::before {
+  left: 0;
+}
+
+.capability-map__bridge::after {
+  right: 0;
+}
+
+.capability-map__bridge--declared {
+  height: 0;
+  border-top: 1px dashed var(--eif-warn);
+  background: none;
+}
+
+.capability-map__bridge--declared::before,
+.capability-map__bridge--declared::after {
+  border-color: var(--eif-warn);
+}
+
+@media (max-width: 720px) {
+  .capability-map figcaption {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .capability-map li {
+    grid-template-columns: 1.5rem minmax(0, 1fr) auto;
+    gap: var(--eif-space-1);
+    padding: var(--eif-space-2) 0;
+  }
+
+  .capability-map__bridge {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+
+  .capability-map li b {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .capability-map li em {
+    grid-column: 2 / -1;
+    grid-row: 3;
+  }
+}
+
+.integrations__list {
+  list-style: none;
+  margin: var(--eif-space-4) 0 0;
+  padding: 0;
+  max-width: var(--eif-content-max);
+}

@@ -475,3 +475,13 @@ semantics were pinned against `github.com/openai/codex` commit
 `3a067484584861606ad842de5bc4ac735a865ddf` and installed CLI `0.144.5` as
 of 2026-07-18; the rest of this document is current as of `0.144.5` /
 2026-07-17. Neither is assumed stable indefinitely.
+
+## Optional RTK portability fragment
+
+EIF generates a compact
+[`codex` RTK fragment](../../integrations/rtk/generated/adapters/rtk-codex.md)
+and a non-installing
+[`PreToolUse` contract](../../integrations/rtk/generated/hooks/codex.json).
+The contract is deliberately block-only. It does not claim that
+`updatedInput` mutation works on the tested Codex version and it never edits
+the user's `hooks.json`.

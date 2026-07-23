@@ -310,3 +310,12 @@ and re-read the installed source (not a cached copy or a documentation
 page) before relying on the precedence/transformation/limit details
 above - current as of `0.18.2` (`2026.7.7.2`) / 2026-07-18, not assumed
 stable indefinitely.
+
+## Optional RTK portability fragment
+
+EIF generates a compact
+[`hermes` RTK fragment](../../integrations/rtk/generated/adapters/rtk-hermes.md)
+and a non-installing
+[`pre_tool_call` contract](../../integrations/rtk/generated/hooks/hermes.json).
+The contract stays block-only because Hermes `0.18.2` ignored
+`updatedInput` in a live canary. No active Hermes configuration is changed.

@@ -100,3 +100,13 @@ If the Claude Code CLI version changes materially, re-run
 end-to-end (install a minimal `PreToolUse` hook, trigger it, confirm
 `updatedInput` is applied) before relying on the carried-over 2026-06-16
 evidence for anything load-bearing.
+
+## Optional RTK portability fragment
+
+EIF generates a compact
+[`claude-code` RTK fragment](../../integrations/rtk/generated/adapters/rtk-claude-code.md)
+and a non-installing
+[`PreToolUse` contract](../../integrations/rtk/generated/hooks/claude-code.json).
+The contract records carried rewrite evidence but does not install a script or
+modify Claude Code settings. Active use still requires owner review and a
+version-specific behavioral canary.

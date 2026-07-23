@@ -1,0 +1,17 @@
+{
+  "adapter": "claude-code",
+  "behavior": "rewrite-capable",
+  "event": "PreToolUse",
+  "input_command_path": "tool_input.command",
+  "installed": false,
+  "output_contract": "hookSpecificOutput.updatedInput.command",
+  "runtime_status": "carried-evidence",
+  "safety": {
+    "active_install_requires_owner_review": true,
+    "failed_canary_savings_eligible": false,
+    "raw_proxy_savings_eligible": false,
+    "user_config_mutated_by_generator": false
+  },
+  "schema_version": 1,
+  "template_only": true
+}

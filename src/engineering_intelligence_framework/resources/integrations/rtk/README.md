@@ -11,7 +11,10 @@ EIF now ships a removable RTK adapter with:
 - a machine-readable provider manifest and command registry;
 - canaries for the CLI surface, proxy argv preservation, grep alternation and
   git diff;
-- generated compact routing instructions;
+- generated compact routing instructions for the shared contract and all four
+  public agent adapters;
+- a provider/version capability matrix plus generated, non-installing hook
+  contract templates that distinguish rewrite-capable from block-only hosts;
 - strict local telemetry that cannot store command text, argv, paths, cwd or
   output;
 - doctor states `disabled`, `healthy`, `degraded`, `misconfigured` and
@@ -57,8 +60,12 @@ Do not commit a report that contains project-specific local configuration.
 ## Command routing contract
 
 Canonical routes live in [`command-registry.json`](command-registry.json).
-[`generated-instructions.md`](generated-instructions.md) is generated from that
-registry and must pass:
+Provider-specific delivery facts live in
+[`adapter-capabilities.json`](adapter-capabilities.json). The command registry
+remains the only route source. Together they generate
+[`generated-instructions.md`](generated-instructions.md), four compact adapter
+fragments under [`generated/adapters/`](generated/adapters/) and four reviewed
+hook contracts under [`generated/hooks/`](generated/hooks/). They must pass:
 
 ```text
 python scripts/eif_generate_rtk_guidance.py --check
@@ -76,6 +83,14 @@ Critical invariants:
   failed route is inconclusive;
 - user hooks and user-level agent config are never installed or modified.
 
+The generated hook JSON files are contract templates, not executable hook
+scripts or active configuration. They make the provider event, input path,
+output behavior and current evidence boundary reviewable. Claude Code and
+Cursor are marked rewrite-capable from their available evidence; Codex and
+Hermes remain block-only because input mutation is unverified or known not to
+apply on the tested version. A maintainer must still review, implement and
+behaviorally test any active hook before installation.
+
 ## Content-free local telemetry
 
 Telemetry is opt-in and local. The bundled recorder writes only under
@@ -83,15 +98,19 @@ Telemetry is opt-in and local. The bundled recorder writes only under
 
 ```text
 python .eif/runtime/eif_rtk_telemetry.py record --instance-root . \
+  --attempt-id benchmark-attempt-001 \
   --command-class git-native --route native-filtered --outcome success \
   --raw-bytes 400 --emitted-bytes 40
-python .eif/runtime/eif_rtk_telemetry.py summary --instance-root .
+python .eif/runtime/eif_rtk_telemetry.py summary --instance-root . \
+  --attempt-id benchmark-attempt-001
 ```
 
 The schema rejects additional fields, so command content, argv, paths and
 output cannot be added accidentally. Estimates are byte-based and remain
-estimates. Raw proxy, parse failure and unsupported routes always record zero
-savings, even if their output happens to be shorter.
+estimates. Raw proxy, parse failure, unsupported, failed and degraded routes
+always record zero savings, even if their output happens to be shorter.
+`attempt_id` is an optional content-free identifier; it enables benchmark
+attribution without storing a prompt, command, path or output.
 
 ## Release-candidate evidence and degraded mode
 

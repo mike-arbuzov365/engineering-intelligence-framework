@@ -142,3 +142,12 @@ If the Cursor version changes materially, re-run `cursor --version` and
 re-fetch `cursor.com/docs` (Rules page) before relying on the frontmatter
 field table above - it was current as of 3.11.19 / 2026-07-16, not assumed
 stable indefinitely.
+
+## Optional RTK portability fragment
+
+EIF generates a compact
+[`cursor` RTK fragment](../../integrations/rtk/generated/adapters/rtk-cursor.md)
+and a non-installing
+[`preToolUse` contract](../../integrations/rtk/generated/hooks/cursor.json).
+This is separate from Cursor Rules. It documents the available rewrite shape
+but does not create or edit `hooks.json`.

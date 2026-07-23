@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/rtk-adapter-capabilities.schema.json",
+  "title": "EIF RTK adapter capability matrix",
+  "description": "Provider-specific delivery and hook capabilities for generated RTK adapter fragments. Route semantics remain canonical in command-registry.json.",
+  "type": "object",
+  "required": ["schema_version", "matrix_version", "adapters"],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "matrix_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "adapters": {
+      "type": "object",
+      "required": ["claude-code", "cursor", "codex", "hermes"],
+      "properties": {
+        "claude-code": { "$ref": "#/$defs/adapter" },
+        "cursor": { "$ref": "#/$defs/adapter" },
+        "codex": { "$ref": "#/$defs/adapter" },
+        "hermes": { "$ref": "#/$defs/adapter" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "adapter": {
+      "type": "object",
+      "required": [
+        "instruction_surface", "tested_product_versions", "hook"
+      ],
+      "properties": {
+        "instruction_surface": { "type": "string", "minLength": 1 },
+        "tested_product_versions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "hook": {
+          "type": "object",
+          "required": [
+            "template_generated", "schema_tested", "behavior", "event",
+            "input_command_path", "output_contract", "evidence",
+            "runtime_status"
+          ],
+          "properties": {
+            "template_generated": { "type": "boolean" },
+            "schema_tested": { "type": "boolean" },
+            "behavior": {
+              "type": "string",
+              "enum": ["rewrite-capable", "block-only"]
+            },
+            "event": { "type": "string", "minLength": 1 },
+            "input_command_path": { "type": "string", "minLength": 1 },
+            "output_contract": { "type": "string", "minLength": 1 },
+            "evidence": { "type": "string", "minLength": 1 },
+            "runtime_status": {
+              "type": "string",
+              "enum": ["verified", "carried-evidence", "mutation-unverified"]
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -5,10 +5,10 @@ and what its hook mechanism (if any) can and cannot do.
 
 | Adapter | Status | Notes |
 |---|---|---|
-| `claude-code/` | evidence documented, no hook scripts | [`claude-code/README.md`](claude-code/README.md) - CLI `2.1.169` re-verified 2026-07-15; instructions/skill discovery OBSERVED live; hook behavior carried over from 2026-06-16 private evidence, not re-verified end-to-end this round |
-| `codex/` | **entrypoint ported** (`eif_init` resolves and marker-merges into whichever of `AGENTS.override.md`/`AGENTS.md`/a configured fallback is actually active - `entry_strategy=dynamic-resolve`), hooks not ported | [`codex/README.md`](codex/README.md) - Codex CLI `0.144.5` verified live 2026-07-17 against the official docs and, uniquely among these adapters, real runtime proof via `codex debug prompt-input` (no auth required) - confirmed root/nested `AGENTS.md` discovery order and, critically, that a same-directory `AGENTS.override.md` makes `AGENTS.md`'s content vanish from the merged chain entirely. EIF's own write correctly follows that precedence (merges into the override file itself when one is present, never a now-dead `AGENTS.md` alongside it) - a real defect in the first version, found and fixed before merge. `hooks.json` PreToolUse hooks are a DIFFERENT, unported mechanism - hook `updatedInput` rewrite support varies by version, verify before relying on it. |
-| `cursor/` | **rules ported** (`eif_init` generates `.cursor/rules/eif/governance.mdc`), hooks not ported | [`cursor/README.md`](cursor/README.md) - Cursor CLI `3.11.19` re-verified live 2026-07-16 against the official docs (`.cursor/rules/*.mdc`, `.mdc` frontmatter: `description`/`globs`/`alwaysApply`); `.cursorrules` confirmed legacy/deprecated, not used. The `hooks.json`/`updated_input` claim below is about a DIFFERENT Cursor mechanism (tool-call hooks) than Rules, carried over from 2026-07-14/15 private evidence and NOT re-verified this round - do not read it as evidence for the Rules adapter. |
-| `hermes/` | **dynamic active-source ported** (`eif_init` resolves and marker-merges into whichever of `.hermes.md`/`HERMES.md`/`AGENTS.md`/`agents.md`/`CLAUDE.md`/`claude.md` is actually active, or STOPs if the real active source is a parent directory's file or the Cursor-format fallback - `entry_strategy=dynamic-resolve` via a Hermes-specific resolver), hooks not ported | [`hermes/README.md`](hermes/README.md) - Hermes Agent `0.18.2` verified 2026-07-18 directly against the installed Python source (a git install, not a black-box wheel) and real runtime proof via `hermes prompt-size --json` (no auth required) - confirmed the real CLI's ancestor walk has no depth cap (7 levels deep, still finds the ancestor file) and that its truncation matches this adapter's own simulator exactly. Supersedes closed, unmerged PR #12, whose own "verified" evidence (a fabricated 5-level cap, missing lowercase fallbacks, an unmodeled Cursor-format tier) is not reused - see `hermes/README.md` "What PR #12 got wrong". Terminal-tool guard hooks (block-only, not rewrite) are a DIFFERENT, unported mechanism. |
+| `claude-code/` | entrypoint ported; optional RTK fragment generated; no hook installed | [`claude-code/README.md`](claude-code/README.md) - CLI `2.1.169` re-verified 2026-07-15; instructions/skill discovery OBSERVED live; hook behavior carried over from 2026-06-16 private evidence, not re-verified end-to-end this round |
+| `codex/` | entrypoint ported; optional RTK fragment generated; hook contract is block-only | [`codex/README.md`](codex/README.md) - Codex CLI `0.144.5` has real runtime entrypoint proof. `updatedInput` mutation remains unverified, so the generated RTK contract does not claim transparent rewrite support. |
+| `cursor/` | rules ported; optional RTK fragment generated; no hook installed | [`cursor/README.md`](cursor/README.md) - Cursor CLI `3.11.19` was re-verified for Rules. The generated RTK hook contract is separate from the Rules entrypoint and remains an owner-reviewed template. |
+| `hermes/` | active source ported; optional RTK fragment generated; hook contract is block-only | [`hermes/README.md`](hermes/README.md) - Hermes Agent `0.18.2` has installed-source and offline runtime evidence. `updatedInput` was not applied, so the generated contract preserves fail-loud blocking. |
 
 None of these are required - EIF's core (ontology, playbooks, templates) is
 plain Markdown any agent can read if pointed at it. Adapters add
@@ -21,6 +21,11 @@ behavioral capability gate, keep source files authoritative over graph output,
 and use core-safe fallbacks for non-healthy providers. The smoke suite verifies
 that this pointer is present after init for every supported adapter. No adapter
 auto-installs Graphify, RTK or hooks.
+
+The optional RTK fragments and non-installing hook contracts live under
+[`../integrations/rtk/generated/`](../integrations/rtk/generated/). They are
+generated from one route registry plus the provider capability matrix and
+cannot modify an entrypoint or user configuration.
 
 **Adapter scope is frozen as of this round** (2026-07-18): these four
 adapters (two required - Claude Code, Cursor; two experimental supported -

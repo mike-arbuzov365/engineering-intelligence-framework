@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate compact public RTK routing guidance from command-registry.json."""
+"""Generate compact RTK guidance and non-installing adapter hook contracts."""
 from __future__ import annotations
 
 import argparse
@@ -13,6 +13,9 @@ FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent
 REGISTRY_PATH = FRAMEWORK_ROOT / "integrations" / "rtk" / "command-registry.json"
 SCHEMA_PATH = FRAMEWORK_ROOT / "core" / "schemas" / "rtk-command-registry.schema.json"
 OUTPUT_PATH = FRAMEWORK_ROOT / "integrations" / "rtk" / "generated-instructions.md"
+CAPABILITIES_PATH = FRAMEWORK_ROOT / "integrations" / "rtk" / "adapter-capabilities.json"
+CAPABILITIES_SCHEMA_PATH = FRAMEWORK_ROOT / "core" / "schemas" / "rtk-adapter-capabilities.schema.json"
+GENERATED_ROOT = FRAMEWORK_ROOT / "integrations" / "rtk" / "generated"
 
 
 def render(registry: dict) -> str:
@@ -39,26 +42,105 @@ def render(registry: dict) -> str:
     return "\n".join(lines)
 
 
+def render_adapter_fragment(adapter: str, capability: dict, registry: dict) -> str:
+    hook = capability["hook"]
+    lines = [
+        f"# RTK optional integration - {adapter}",
+        "",
+        "<!-- Generated from command-registry.json and adapter-capabilities.json. Do not edit by hand. -->",
+        "",
+        f"Instruction surface: `{capability['instruction_surface']}`.",
+        f"Tested product versions: `{', '.join(capability['tested_product_versions'])}`.",
+        f"Hook behavior: `{hook['behavior']}`; runtime evidence: `{hook['runtime_status']}`.",
+        "",
+        "RTK is optional. Core EIF remains valid when RTK is unavailable or degraded.",
+        "Trust a filtered route only after its required canary passes. A failed grep canary",
+        "makes an empty native search result inconclusive.",
+        "",
+        "## Canonical routes",
+        "",
+    ]
+    for route in registry["routes"]:
+        eligibility = "eligible after canary" if route["savings_eligible"] else "always zero savings"
+        lines.append(f"- `{route['id']}`: `{route['canonical_form']}` - {eligibility}.")
+    lines.extend([
+        "",
+        "The adjacent hook contract is a reviewable template, not an installation.",
+        "EIF does not mutate user hooks or configuration.",
+        "",
+    ])
+    return "\n".join(lines)
+
+
+def render_hook_contract(adapter: str, capability: dict) -> str:
+    hook = capability["hook"]
+    contract = {
+        "schema_version": 1,
+        "adapter": adapter,
+        "template_only": True,
+        "installed": False,
+        "event": hook["event"],
+        "behavior": hook["behavior"],
+        "input_command_path": hook["input_command_path"],
+        "output_contract": hook["output_contract"],
+        "runtime_status": hook["runtime_status"],
+        "safety": {
+            "active_install_requires_owner_review": True,
+            "raw_proxy_savings_eligible": False,
+            "failed_canary_savings_eligible": False,
+            "user_config_mutated_by_generator": False,
+        },
+    }
+    return json.dumps(contract, indent=2, sort_keys=True) + "\n"
+
+
+def generated_outputs(registry: dict, capabilities: dict) -> dict[Path, str]:
+    outputs = {OUTPUT_PATH: render(registry)}
+    for adapter, capability in capabilities["adapters"].items():
+        outputs[GENERATED_ROOT / "adapters" / f"rtk-{adapter}.md"] = render_adapter_fragment(
+            adapter, capability, registry
+        )
+        hook = capability["hook"]
+        if hook["template_generated"] and hook["schema_tested"]:
+            outputs[GENERATED_ROOT / "hooks" / f"{adapter}.json"] = render_hook_contract(
+                adapter, capability
+            )
+    return outputs
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true")
     args = ap.parse_args(argv)
     registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    capabilities = json.loads(CAPABILITIES_PATH.read_text(encoding="utf-8"))
+    capabilities_schema = json.loads(CAPABILITIES_SCHEMA_PATH.read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
+    Draft202012Validator.check_schema(capabilities_schema)
     errors = list(Draft202012Validator(schema).iter_errors(registry))
+    errors.extend(Draft202012Validator(capabilities_schema).iter_errors(capabilities))
     if errors:
-        print(f"eif-generate-rtk-guidance: registry invalid ({len(errors)} error(s))")
+        print(f"eif-generate-rtk-guidance: source contract invalid ({len(errors)} error(s))")
         return 1
-    expected = render(registry)
+    outputs = generated_outputs(registry, capabilities)
     if args.check:
-        if not OUTPUT_PATH.exists() or OUTPUT_PATH.read_text(encoding="utf-8") != expected:
-            print("eif-generate-rtk-guidance: generated instructions are stale")
+        stale = [
+            path.relative_to(FRAMEWORK_ROOT).as_posix()
+            for path, expected in outputs.items()
+            if not path.exists() or path.read_text(encoding="utf-8") != expected
+        ]
+        if stale:
+            print(f"eif-generate-rtk-guidance: {len(stale)} generated file(s) are stale")
+            for path in stale:
+                print(f"  {path}")
             return 1
-        print("eif-generate-rtk-guidance: generated instructions are current")
+        print(f"eif-generate-rtk-guidance: all {len(outputs)} generated files are current")
         return 0
-    OUTPUT_PATH.write_text(expected, encoding="utf-8", newline="\n")
-    print("eif-generate-rtk-guidance: wrote integrations/rtk/generated-instructions.md")
+    for path, expected in outputs.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(expected, encoding="utf-8", newline="\n")
+    print(f"eif-generate-rtk-guidance: wrote {len(outputs)} generated file(s)")
     return 0
 
 

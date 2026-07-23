@@ -606,7 +606,7 @@
               <div class="reveal__detail" data-claim-id="CLM-05">
                 <p><strong>Data boundary:</strong> local-only for AST-based extraction; external-api only if semantic labeling is explicitly enabled.</p>
                 <p><strong>Degraded mode without it:</strong> the agent falls back to source search and manual browsing; no graph-level path or impact hints.</p>
-                <p><strong>Health:</strong> fresh/stale/unknown/diverged freshness classification; a stale or unknown graph never reports healthy. Bounded to one local version and a small synthetic fixture, not a comparative navigation outcome.</p>
+                <p><strong>Health:</strong> D-08 metadata binds the graph digest to its source commit, Graphify version, explicit repository identity and reviewed scope. Only <code>fresh</code> reports healthy; code, semantic or history changes request the matching update, while invalid or intentionally suppressed artifacts remain unavailable. Bounded to one local version and a small synthetic fixture, not a comparative navigation outcome.</p>
               </div>
             </li>
             <li class="reveal">
@@ -617,7 +617,7 @@
               <div class="reveal__detail" data-claim-id="CLM-06">
                 <p><strong>Data boundary:</strong> local-only.</p>
                 <p><strong>Degraded mode without it:</strong> shell commands run unfiltered and no reduction is recorded.</p>
-                <p><strong>Health:</strong> a failed required canary reports degraded, not healthy. A raw or failed proxy route is recorded as zero savings, never a positive reduction number.</p>
+                <p><strong>Health:</strong> RTK 0.43.0 passes all 24 checks on the tested Windows host through native <code>rtk rg</code>. Any failed required canary still reports <code>degraded</code>; a raw or failed proxy route records zero savings, never a positive reduction number. This is not a cross-platform or efficiency claim.</p>
               </div>
             </li>
             <li class="reveal">
@@ -654,8 +654,8 @@
                 <span>An installable eifctl wheel with seven subcommands</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-02">
-                <p>A real wheel built from <code>pyproject.toml</code>, installed into a clean venv, gives a working <code>eifctl</code> command (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) proven through a full synthetic-task journey.</p>
-                <p><strong>Limitation:</strong> not published to PyPI; the full journey exercises the Claude Code adapter for its own bootstrap step.</p>
+                <p>A real wheel built from <code>pyproject.toml</code>, installed into a clean venv, gives a working <code>eifctl</code> command with seven subcommands and delivers the standalone benchmark C/D contract tool. The package is proven through a full synthetic-task journey.</p>
+                <p><strong>Limitation:</strong> not published to PyPI; the full journey exercises the Claude Code adapter for its own bootstrap step, and the C/D proof is deterministic contract evidence rather than a real-agent result.</p>
               </div>
             </li>
             <li class="reveal">
@@ -724,7 +724,7 @@
             <h3 class="label">Bounded proof on record</h3>
             <ul>
               <li data-claim-id="CLM-08">
-                A first bounded real-agent pilot (one model, three fixtures, six total attempts) completed with 100% task success in both baseline and EIF-governance modes. This is not a statistically powered efficiency comparison (see <a href="#limitations">limitations</a>).
+                A first bounded real-agent A/B pilot (one model, three fixtures, six total attempts) completed with 100% task success in both modes. Modes C/D now have executable integrity contracts, but no real-agent performance result. This is not a statistically powered efficiency comparison (see <a href="#limitations">limitations</a>).
               </li>
               <li data-claim-id="CLM-10">
                 Command-level timing evidence exists for specific mechanical operations in the framework's benchmark evidence. No claim is made about human authoring or review time.
@@ -772,7 +772,7 @@
             <li><strong>Not on PyPI.</strong> There is no <code>pip install</code> from a package index yet.</li>
             <li data-claim-id="CLM-09"><strong>No quality or rework claim.</strong> No comparative study has been run; this framework makes no claim about task quality, rework rate or defect count.</li>
             <li><strong>Bounded scale.</strong> Evidence comes from one synthetic vertical slice, a three-fixture benchmark pilot, and adapter-level test suites, not a large or independently-reproduced sample.</li>
-            <li><strong>Optional integrations stay optional.</strong> Graphify and RTK are never required; a stale or degraded provider is reported as such, never marketed as healthy.</li>
+            <li><strong>Optional integrations stay optional.</strong> Graphify and RTK are never required; a non-fresh or degraded provider is reported as such, never marketed as healthy.</li>
             <li>
               <strong>Explicit v0.1 non-goals:</strong> hosted SaaS, an
               autonomous multi-agent runtime, a proprietary cloud memory
@@ -812,7 +812,7 @@
         <p class="hero__promise">
           EIF перетворює перевірений інженерний досвід на придатний до
           повторного використання операційний інтелект: спільні методи,
-          пам&rsquo;ять проєкту, дисципліну сесій та інструменти типу skill,
+          пам&rsquo;ять проєкту, дисципліну сесій та виконувані навички агента,
           що не зникають разом з окремою розмовою з агентом.
         </p>
         <nav class="hero__ctas" aria-label="Основна навігація">
@@ -851,8 +851,8 @@
         <p class="section__lede" data-claim-id="CLM-15">
           EIF задає керований потік навчання: перевірений Knowledge Delta
           сесії можна класифікувати, перевірити, залишити в проєкті або
-          підвищити до рівня повторно використовуваних правил, playbook,
-          шаблонів і skill.
+          підвищити до рівня повторно використовуваних правил, сценаріїв
+          роботи, шаблонів і навичок агента.
         </p>
         <div class="methodology__definition" data-claim-id="CLM-15">
           <p class="methodology__statement">
@@ -864,7 +864,7 @@
           <dl class="methodology__parts">
             <div>
               <dt class="label label--accent">Методологія</dt>
-              <dd>Принципи, онтологія, модель повноважень, playbook і правила доказів визначають спосіб роботи.</dd>
+              <dd>Принципи, онтологія, модель повноважень, сценарії роботи й правила доказів визначають спосіб роботи.</dd>
             </div>
             <div>
               <dt class="label label--accent">Досвід</dt>
@@ -872,7 +872,7 @@
             </div>
             <div>
               <dt class="label label--accent">Спроможність</dt>
-              <dd>Шаблони роблять вдалу структуру повторюваною, а skill дають агенту змогу запускати цілі робочі процеси.</dd>
+              <dd>Шаблони роблять вдалу структуру повторюваною, а навички дають агенту змогу запускати цілі робочі процеси.</dd>
             </div>
           </dl>
         </div>
@@ -898,18 +898,18 @@
         <div class="layers__stack" data-claim-id="CLM-13">
           <article class="layers__tier layers__tier--one">
             <div class="layers__tier-id">
-              <span class="label label--accent">Tier 1</span>
+              <span class="label label--accent">Рівень 1</span>
               <span class="layers__scope">Спільний</span>
             </div>
             <div>
               <h3>Інтелект фреймворку</h3>
-              <p>Міжпроєктна методологія: онтологія, модель повноважень, глобальні правила, playbook, шаблони та skill.</p>
+              <p>Міжпроєктна методологія: онтологія, модель повноважень, глобальні правила, сценарії роботи, шаблони та навички агента.</p>
             </div>
             <p class="layers__examples">Як працювати</p>
           </article>
           <article class="layers__tier layers__tier--two">
             <div class="layers__tier-id">
-              <span class="label label--accent">Tier 2</span>
+              <span class="label label--accent">Рівень 2</span>
               <span class="layers__scope">Стійкий</span>
             </div>
             <div>
@@ -920,7 +920,7 @@
           </article>
           <article class="layers__tier layers__tier--three">
             <div class="layers__tier-id">
-              <span class="label label--accent">Tier 3</span>
+              <span class="label label--accent">Рівень 3</span>
               <span class="layers__scope">Тимчасовий</span>
             </div>
             <div>
@@ -944,7 +944,7 @@
           <ol class="knowledge-route__steps">
             <li data-tier="T3">
               <details>
-                <summary><span>01</span><strong>Докази сесії</strong><em>Tier 3</em></summary>
+                <summary><span>01</span><strong>Докази сесії</strong><em>Рівень 3</em></summary>
                 <p>Робота створює спостереження, рішення, збої та чернетку Knowledge Delta.</p>
               </details>
             </li>
@@ -956,7 +956,7 @@
             </li>
             <li data-tier="T2">
               <details>
-                <summary><span>03</span><strong>Пам&rsquo;ять проєкту</strong><em>Tier 2</em></summary>
+                <summary><span>03</span><strong>Пам&rsquo;ять проєкту</strong><em>Рівень 2</em></summary>
                 <p>Перевірені локальні факти, рішення, інциденти й уроки стають стійким інтелектом проєкту.</p>
               </details>
             </li>
@@ -968,8 +968,8 @@
             </li>
             <li data-tier="T1">
               <details>
-                <summary><span>05</span><strong>Метод фреймворку</strong><em>Tier 1</em></summary>
-                <p>Повторно використовуване правило, playbook, шаблон або skill стає доступним іншим проєктам.</p>
+                <summary><span>05</span><strong>Метод фреймворку</strong><em>Рівень 1</em></summary>
+                <p>Повторно використовуване правило, сценарій роботи, шаблон або навичка агента стає доступною іншим проєктам.</p>
               </details>
             </li>
           </ol>
@@ -980,7 +980,7 @@
           </p>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
-          <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані skill.</p>
+          <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані навички агента.</p>
           <p><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання через Knowledge Delta та явне рішення про підвищення рівня.</p>
         </div>
       </template>
@@ -1040,7 +1040,7 @@
               <h3>Знайти досвід і зорієнтуватися</h3>
               <p>Прочитати активні інструкції та вихідні файли, а потім знайти у стійкому знанні потрібні уроки, збої й відхилені підходи.</p>
             </div>
-            <span class="session__artifact">Tier 1 + Tier 2</span>
+            <span class="session__artifact">Рівень 1 + рівень 2</span>
           </li>
           <li>
             <span class="session__number label label--accent">02</span>
@@ -1056,7 +1056,7 @@
               <h3>Виконати й перевірити</h3>
               <p>Тримати спостереження окремо від припущень, працювати в межах визначеного обсягу та спиратися на оголошені оцінювачі, а не на фразу про завершення.</p>
             </div>
-            <span class="session__artifact">Tier 3</span>
+            <span class="session__artifact">Рівень 3</span>
           </li>
           <li>
             <span class="session__number label label--accent">04</span>
@@ -1068,7 +1068,7 @@
           </li>
         </ol>
         <p class="session__boundary" data-claim-id="CLM-14">
-          Tier 3 - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
+          Рівень 3 - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
           стан виконання, позначки доказів, відкриті питання й чернетка
           Knowledge Delta, але не сирі міркування ШІ. Цей шар ніколи не
           підвищують цілком.
@@ -1133,20 +1133,20 @@
       <template data-i18n-id="learning.body">
         <div class="section__head">
           <span class="label">07 &middot; Кероване навчання</span>
-          <h2 id="learning-heading">Від досвіду до повторно використовуваних знань і виконуваних skill</h2>
+          <h2 id="learning-heading">Від досвіду до повторно використовуваних знань і виконуваних навичок агента</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-15">
           Навчання стає стійким лише тоді, коли перевірений Knowledge Delta
           сесії класифікують, перевіряють, залишають у проєкті або явно
-          підвищують до рівня версійованого правила, playbook, шаблону чи
-          skill.
+          підвищують до рівня версійованого правила, сценарію роботи, шаблону
+          чи навички агента.
         </p>
         <ol class="learning__flow" data-claim-id="CLM-15">
           <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає докази: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
           <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
           <li><span class="label label--accent">Ретроспектива</span><p>Закриття сесії порівнює намір із доказами, виділяє повторювані моделі збоїв і визначає, чи придатний урок до повторного використання.</p></li>
           <li><span class="label label--accent">Класифікувати + перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
-          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається у Tier 2; загальний урок переходить у Tier 1 тільки за явним рішенням.</p></li>
+          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні 2; загальний урок переходить на рівень 1 тільки за явним рішенням.</p></li>
           <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
         </ol>
         <div class="learning__distinction" data-claim-id="CLM-15">
@@ -1164,7 +1164,7 @@
         <p class="learning__boundary" data-claim-id="CLM-15">
           Це кероване навчання на рівні системи, а не автономна
           самомодифікація. Урок можна відхилити, залишити локальним, визнати
-          простроченим або замінити новішим; локальний skill може
+          простроченим або замінити новішим; локальна навичка агента може
           спеціалізувати робочий процес, але не послаблювати правила безпеки
           фреймворку.
         </p>
@@ -1219,7 +1219,7 @@
             <div class="reveal__detail" data-claim-id="CLM-05">
               <p><strong>Межа даних:</strong> лише локально для структурного видобутку на основі AST; <code>external-api</code> - тільки якщо явно ввімкнено семантичне маркування.</p>
               <p><strong>Без неї:</strong> агент повертається до пошуку в джерелах і ручного перегляду - підказок за графом і впливом немає.</p>
-              <p><strong>Справність:</strong> свіжість класифікується як <code>fresh</code>, <code>stale</code>, <code>unknown</code> або <code>diverged</code>; застарілий чи невідомий граф ніколи не позначається як справний. Перевірено лише на одній локальній версії й невеликому синтетичному тестовому прикладі - це не порівняльний результат навігації.</p>
+              <p><strong>Справність:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, явним ідентифікатором репозиторію та перевіреною областю аналізу. Лише стан <code>fresh</code> означає справність; зміни коду, семантичної області чи історії вимагають відповідного оновлення, а пошкоджений або свідомо вимкнений артефакт лишається недоступним. Перевірено на одній локальній версії й невеликому синтетичному прикладі - це не порівняльний результат навігації.</p>
             </div>
           </li>
           <li class="reveal">
@@ -1230,7 +1230,7 @@
             <div class="reveal__detail" data-claim-id="CLM-06">
               <p><strong>Межа даних:</strong> лише локально.</p>
               <p><strong>Без неї:</strong> команди виконуються без фільтрації, скорочення не фіксується.</p>
-              <p><strong>Справність:</strong> невдала обов&rsquo;язкова контрольна перевірка означає стан <code>degraded</code>, а не справність. Нефільтрований або невдалий маршрут через proxy завжди фіксують як нульову економію, ніколи як реальне скорочення.</p>
+              <p><strong>Справність:</strong> RTK 0.43.0 проходить усі 24 перевірки на випробуваному Windows-середовищі через вбудований маршрут <code>rtk rg</code>. Невдала обов&rsquo;язкова перевірка й надалі означає стан <code>degraded</code>; нефільтрований або невдалий маршрут через <code>rtk proxy</code> фіксується як нульова економія. Це не заява про всі платформи чи ефективність.</p>
             </div>
           </li>
           <li class="reveal">
@@ -1332,8 +1332,8 @@
         <div class="evidence__proof">
           <h3 class="label">Задокументовані обмежені докази</h3>
           <ul>
-            <li data-claim-id="CLM-08">
-              Перший обмежений пілот із реальним агентом (одна модель, три фікстури, шість спроб) завершився стовідсотковим успіхом і в базовому режимі, і в режимі керування EIF. Це не статистично потужне порівняння ефективності (див. <a href="#limitations">обмеження</a>).
+              <li data-claim-id="CLM-08">
+              Перший обмежений пілот A/B із реальним агентом (одна модель, три тестові приклади, шість спроб) завершився стовідсотковим успіхом в обох режимах. Режими C/D уже мають виконувані контракти цілісності, але ще не мають результату з реальним агентом. Це не статистично потужне порівняння ефективності (див. <a href="#limitations">обмеження</a>).
             </li>
             <li data-claim-id="CLM-10">
               Хронометраж на рівні окремих команд існує для конкретних механічних операцій у бенчмарках фреймворку. Про час людини на створення чи перевірку коду заяв не робимо.
@@ -1377,9 +1377,9 @@
           <li><strong>Ще не на PyPI.</strong> Встановити через <code>pip install</code> з індексу пакетів поки не можна.</li>
           <li data-claim-id="CLM-09"><strong>Без заяв про якість чи переробку.</strong> Порівняльного дослідження не проводили; фреймворк не стверджує нічого про якість завдань, частку переробок чи кількість дефектів.</li>
           <li><strong>Обмежений масштаб.</strong> Докази спираються на один синтетичний вертикальний зріз, пілот на трьох тестових прикладах і тестові набори на рівні адаптерів - це не велика й не незалежно відтворена вибірка.</li>
-          <li><strong>Необов&rsquo;язкові інтеграції такими й лишаються.</strong> Graphify і RTK ніколи не є обов&rsquo;язковими; застарілий чи деградований постачальник так і позначають, а не видають за справний.</li>
+          <li><strong>Необов&rsquo;язкові інтеграції такими й лишаються.</strong> Graphify і RTK ніколи не є обов&rsquo;язковими; несвіжий чи деградований інструмент так і позначають, а не видають за справний.</li>
           <li>
-            <strong>Явні не-цілі v0.1:</strong> розміщений SaaS, автономний
+            <strong>Явні не-цілі v0.1:</strong> розміщений SaaS,
             автономне мультиагентне середовище виконання, власна хмарна служба пам&rsquo;яті,
             обов&rsquo;язкова залежність від графа коду чи стиснення виводу,
             або будь-яка загальна заява про економію токенів.

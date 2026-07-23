@@ -1,6 +1,6 @@
 {
   "note": "Public claim manifest for the EIF website. Every material on-page claim must cite one of these IDs. Source column points at the row topic in the framework repo's docs/product/claims-evidence.md claim register (not a private path). Do not strengthen wording beyond 'allowedWording'.",
-  "generated": "2026-07-22",
+  "generated": "2026-07-23",
   "claims": [
     {
       "id": "CLM-01",
@@ -13,10 +13,10 @@
     },
     {
       "id": "CLM-02",
-      "summary": "A seven-subcommand installable wheel passed bounded local package evidence; it is not on PyPI.",
+      "summary": "A seven-subcommand installable wheel, including the RTK, Graphify and benchmark C/D contracts, passed bounded local package evidence; it is not on PyPI.",
       "status": "OBSERVED",
-      "allowedWording": "A real, installable eifctl package exists with 7 subcommands, verified end to end - including a full synthetic-task journey (retrieval, implementation, tests, Knowledge Delta, promotion decision, cleanup) from the installed wheel.",
-      "limitations": "Not published to PyPI; the journey uses the Claude Code adapter for its own bootstrap step; does not exercise a genuine multi-source authority conflict.",
+      "allowedWording": "A real, installable eifctl package exists with 7 subcommands, verified end to end - including a full synthetic-task journey and delivery of the standalone benchmark C/D contract tool from the installed wheel.",
+      "limitations": "Not published to PyPI; the journey uses the Claude Code adapter for its own bootstrap step; it does not exercise a genuine multi-source authority conflict or a real-agent C/D benchmark.",
       "forbiddenWording": ["Published package.", "Official release.", "Proves authority-conflict resolution."],
       "source": "docs/product/claims-evidence.md - row \"An installable eifctl package works without a framework git checkout\""
     },
@@ -40,19 +40,19 @@
     },
     {
       "id": "CLM-05",
-      "summary": "Graphify structural health and freshness classification is bounded to one host, one version and a tiny fixture.",
+      "summary": "Graphify structural health and its source-bound artifact lifecycle are verified within one host, one version and a tiny fixture.",
       "status": "OBSERVED",
-      "allowedWording": "EIF has an optional Graphify adapter that behaviorally checks structural query/path/explain, local artifact policy, and commit-derived freshness. Graph output remains navigation evidence; source files remain authority.",
+      "allowedWording": "EIF has an optional Graphify adapter that behaviorally checks structural query/path/explain and validates a source-bound artifact lifecycle. Graph output remains navigation evidence; source files remain authority.",
       "limitations": "One local Graphify version and a tiny synthetic fixture; no comparative navigation outcome, no semantic/deep scan, no proof for every version in the declared candidate range.",
       "forbiddenWording": ["Graphify improves navigation.", "Faster codebase understanding.", "Semantic analysis is verified.", "All compatible versions are proven."],
-      "source": "docs/product/claims-evidence.md - row \"EIF can classify Graphify structural health and Git freshness\""
+      "source": "docs/product/claims-evidence.md - row \"EIF can classify Graphify structural health and artifact lifecycle\""
     },
     {
       "id": "CLM-06",
-      "summary": "RTK behavioral health can be reported degraded; failed or raw proxy routes record zero token reduction.",
+      "summary": "RTK 0.43.0 passes all 24 behavioral checks on the tested Windows host; failed or raw proxy routes still record zero token reduction.",
       "status": "OBSERVED",
-      "allowedWording": "EIF has an optional RTK adapter that reports compatible behavioral health or an explicit degraded state. Raw proxy is recorded as zero savings.",
-      "limitations": "Tested adapter/version/canaries only. This packet's own Windows host is itself degraded (grep alternation and space-containing patterns misbehave); no comparative token or quality result follows from that state.",
+      "allowedWording": "EIF has an optional RTK adapter that behaviorally reports compatible health or an explicit degraded state. On the tested Windows host, RTK 0.43.0 passes all 24 checks through the native rtk rg search route. Raw proxy is recorded as zero savings.",
+      "limitations": "Tested adapter/version/canaries only. The passing result applies to this Windows host and RTK 0.43.0, not every platform; no comparative token or quality result follows.",
       "forbiddenWording": ["Any specific reduction percentage.", "RTK improves quality.", "RTK is healthy on every platform."],
       "source": "docs/product/claims-evidence.md - row \"EIF can classify RTK behavioral health without treating PATH as health\""
     },
@@ -69,8 +69,8 @@
       "id": "CLM-08",
       "summary": "A six-attempt pilot exists; it is not a statistically powered comparison.",
       "status": "UNVERIFIED (first bounded pilot exists, not sufficient for a general claim)",
-      "allowedWording": "A first bounded real-agent pilot (one model, three fixtures, six total attempts) completed with 100% task success in both the baseline and EIF-governance modes; see the framework's benchmarks documentation for per-attempt token counts. This is not a statistically powered efficiency comparison.",
-      "limitations": "One model, three of ten fixtures, one attempt per cell, no repeated trials, no other providers or models, no modes C/D. Cannot support a directional efficiency claim.",
+      "allowedWording": "A first bounded real-agent A/B pilot (one model, three fixtures, six total attempts) completed with 100% task success in both modes. Modes C/D have executable integrity contracts, but no real-agent performance result. This is not a statistically powered efficiency comparison.",
+      "limitations": "One model, three of ten fixtures and one attempt per A/B cell, with no repeated trials or other providers/models. Modes C/D have deterministic integrity-contract evidence only, with token figures suppressed and no real-agent result. Cannot support a directional efficiency claim.",
       "forbiddenWording": ["Any specific \"N% savings\" or \"tokens saved\" claim.", "Benchmark proves EIF is more efficient.", "Any claim generalized beyond three fixtures, one model, one attempt each."],
       "source": "docs/product/claims-evidence.md - row \"EIF saves tokens\""
     },

@@ -41,7 +41,7 @@ deliberately single-shot (one API call per attempt, not a multi-tool
 agentic loop), reading the task prompt, `CLAUDE.md` (mode B only), and
 `src/*.py`/`tests/*.py`, and reporting DeepSeek's own token usage. A prior
 round's harness self-tests against a fake, deterministic agent remain in
-place and unaffected (`scripts/tests/test_benchmark.py`, 41/41 checks;
+place and unaffected (`scripts/tests/test_benchmark.py`, 60/60 checks;
 `scripts/tests/test_benchmark_mode_b.py`, 29/29 checks) - those prove the
 harness mechanics; this real run proves the end-to-end pilot.
 

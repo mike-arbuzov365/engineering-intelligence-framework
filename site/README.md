@@ -63,10 +63,11 @@ wording beyond what the manifest's `allowedWording` states.
 English is the static default. The Ukrainian templates are an adaptive
 localization, not a line-by-line translation: explanatory prose and UI labels
 use natural Ukrainian engineering language, while canonical artifact types
-such as `Knowledge Delta`, `playbook` and `skill`, command names and status
-values keep their precise technical spelling. The Ukrainian E2E assertion
-guards against reintroducing avoidable mixed-language phrases in rendered
-page copy.
+such as `Knowledge Delta`, command names and status values keep their precise
+technical spelling. Terms such as `playbook`, `skill` and `Tier` are expressed
+as natural Ukrainian descriptions in reader-facing prose. The Ukrainian E2E
+assertion guards against reintroducing avoidable mixed-language phrases in
+rendered page copy.
 
 ## Metadata / URLs
 

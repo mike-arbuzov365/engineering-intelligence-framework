@@ -179,6 +179,16 @@ def main() -> int:
             "(a real bug this exact assertion caught once while building this suite)",
         ))
         results.append(check(
+            "wheel contains the standalone benchmark C/D contract tool",
+            any(n.endswith("/resources/scripts/eif_benchmark.py") for n in names),
+            "the public benchmark schemas without their executable validator and harness are not a delivered contract",
+        ))
+        results.append(check(
+            "benchmark tool remains a package resource, not a project runtime bundle or eifctl implementation",
+            not any(n.endswith("/_impl/eif_benchmark.py") for n in names),
+            "benchmark execution is an explicit verification workflow, not a runtime dependency of every initialized project",
+        ))
+        results.append(check(
             "wheel does NOT contain the framework's own test suite or git metadata",
             not any("/tests/" in n or n.startswith(".git") for n in names),
             str([n for n in names if "/tests/" in n or n.startswith(".git")]),

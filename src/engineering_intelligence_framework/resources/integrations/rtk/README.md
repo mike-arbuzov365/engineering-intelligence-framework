@@ -121,9 +121,10 @@ but it was not a failure of RTK's native ripgrep filter.
 
 The portable contract now uses `rtk rg` explicitly. This route is present in
 RTK `0.43.0`, bypasses the ambiguous `grep.exe` lookup and preserves repeated
-`-e` arguments. The same host must pass the revised behavioral canary before
-the adapter may report `healthy` or count search savings. No global PATH edit
-or vendor-tool removal is required.
+`-e` arguments. The revised installed-host suite passes 24/24 on that Windows
+host and the adapter now reports `healthy`. This is evidence for the tested
+host/version/command set, not every RTK installation. No global PATH edit or
+vendor-tool removal is required.
 
 No general token-reduction or quality-improvement claim follows from these
 canaries. Comparative benchmark evidence remains a separate requirement.

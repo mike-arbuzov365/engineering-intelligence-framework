@@ -47,11 +47,19 @@ test.describe('engineering-intelligence methodology', () => {
       'workflow',
       'closeout',
       'promotion',
+      'Tier 1',
+      'Tier 2',
+      'Tier 3',
+      'playbook',
+      'skill',
     ]) {
       expect(ukrainianText).not.toContain(avoidableAnglicism);
     }
-    for (const canonicalArtifact of ['Knowledge Delta', 'playbook', 'skill']) {
+    for (const canonicalArtifact of ['Knowledge Delta']) {
       expect(ukrainianText).toContain(canonicalArtifact);
+    }
+    for (const adaptedTerm of ['сценарії роботи', 'навички агента', 'Рівень 1']) {
+      expect(ukrainianText).toContain(adaptedTerm);
     }
   });
 });

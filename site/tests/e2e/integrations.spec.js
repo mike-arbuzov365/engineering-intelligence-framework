@@ -4,14 +4,18 @@ import { test, expect } from '@playwright/test';
 // .section__lede are shared component classes reused by later sections
 // (Session 004's evidence/tasks ledger), so a bare selector here would also
 // match rows/ledes that do not belong to this section.
-test.describe('integrations', () => {
-  test('three integration rows are present with summary always visible', async ({ page }) => {
+test.describe('optional capabilities', () => {
+  test('three capability bridges and rows name their fallback paths', async ({ page }) => {
     await page.goto('/#integrations');
     const rows = page.locator('#integrations .reveal');
     await expect(rows).toHaveCount(3);
     await expect(rows.nth(0)).toContainText('Graphify');
     await expect(rows.nth(1)).toContainText('RTK');
-    await expect(rows.nth(2)).toContainText('Vendor docs');
+    await expect(rows.nth(2)).toContainText('Context7');
+    await expect(page.locator('#integrations .capability-map li')).toHaveCount(3);
+    await expect(page.locator('#integrations .capability-map')).toContainText(
+      'Core path remains available',
+    );
   });
 
   test('detail reveals on focus via CSS, before any click/JS toggle', async ({ page }) => {
@@ -38,12 +42,12 @@ test.describe('integrations', () => {
   }) => {
     await page.goto('/#integrations');
     await expect(page.locator('#integrations .section__lede')).toContainText(
-      'None of these are required',
+      'None is the methodology itself',
     );
   });
 });
 
-test.describe('integrations no-js', () => {
+test.describe('optional capabilities no-js', () => {
   test.use({ javaScriptEnabled: false });
 
   test('degraded-mode text is present for all three integrations without a script', async ({

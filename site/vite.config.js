@@ -2,7 +2,6 @@ import { defineConfig, loadEnv } from 'vite';
 import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-const HTTPS_URL_RE = /^https:\/\/\S+$/;
 const RESERVED_INVALID_RE = /\.invalid(\/|$)/i;
 const PLACEHOLDER_RE = /example\.(com|org|net)|your-domain|changeme|localhost/i;
 
@@ -11,22 +10,42 @@ const TEST_PROFILE_DEFAULTS = {
   EIF_REPOSITORY_URL: 'https://github.invalid/eif-website-test-profile',
 };
 
-function resolveProductionUrls(mode, env) {
+export function normalizePublicUrl(name, value, mode, { directory = false } = {}) {
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`[eif-site] ${name}="${value}" must be a valid https:// URL for a ${mode} build.`);
+  }
+
+  if (parsed.protocol !== 'https:' || parsed.username || parsed.password) {
+    throw new Error(
+      `[eif-site] ${name}="${value}" must be a credential-free https:// URL for a ${mode} build.`,
+    );
+  }
+  if (parsed.search || parsed.hash) {
+    throw new Error(`[eif-site] ${name}="${value}" must not contain a query or fragment.`);
+  }
+
+  if (directory && !parsed.pathname.endsWith('/')) {
+    parsed.pathname += '/';
+  }
+  return parsed.toString();
+}
+
+export function resolveProductionUrls(mode, env) {
   const isTestProduction = mode === 'test-production';
   const defaults = isTestProduction ? TEST_PROFILE_DEFAULTS : {};
 
-  const siteUrl = env.EIF_SITE_URL || defaults.EIF_SITE_URL || '';
-  const repositoryUrl = env.EIF_REPOSITORY_URL || defaults.EIF_REPOSITORY_URL || '';
+  let siteUrl = env.EIF_SITE_URL || defaults.EIF_SITE_URL || '';
+  let repositoryUrl = env.EIF_REPOSITORY_URL || defaults.EIF_REPOSITORY_URL || '';
 
-  for (const [name, value] of [
-    ['EIF_SITE_URL', siteUrl],
-    ['EIF_REPOSITORY_URL', repositoryUrl],
+  for (const [name, value, directory] of [
+    ['EIF_SITE_URL', siteUrl, true],
+    ['EIF_REPOSITORY_URL', repositoryUrl, false],
   ]) {
     if (!value) {
       throw new Error(`[eif-site] ${name} is required for a ${mode} build and was not set.`);
-    }
-    if (!HTTPS_URL_RE.test(value)) {
-      throw new Error(`[eif-site] ${name}="${value}" must be a non-placeholder https:// URL for a ${mode} build.`);
     }
     const isReservedInvalid = RESERVED_INVALID_RE.test(value);
     if (isReservedInvalid && !isTestProduction) {
@@ -35,6 +54,10 @@ function resolveProductionUrls(mode, env) {
     if (!isReservedInvalid && PLACEHOLDER_RE.test(value)) {
       throw new Error(`[eif-site] ${name}="${value}" looks like a placeholder value; refusing a ${mode} build.`);
     }
+
+    const normalized = normalizePublicUrl(name, value, mode, { directory });
+    if (name === 'EIF_SITE_URL') siteUrl = normalized;
+    if (name === 'EIF_REPOSITORY_URL') repositoryUrl = normalized;
   }
 
   return { siteUrl, repositoryUrl };
@@ -74,7 +97,10 @@ function eifMetadataPlugin(getUrls) {
 
       const tags = [];
       if (siteUrl) {
-        const canonical = new URL('/', siteUrl).toString();
+        const canonical = siteUrl;
+        const socialImage = new URL('social-card.png', siteUrl).toString();
+        out = out
+          .replaceAll('content="/social-card.png"', `content="${socialImage}"`);
         tags.push({ tag: 'link', injectTo: 'head', attrs: { rel: 'canonical', href: canonical } });
         tags.push({
           tag: 'meta',
@@ -89,12 +115,12 @@ function eifMetadataPlugin(getUrls) {
       const { siteUrl } = getUrls();
 
       const robots = siteUrl
-        ? `User-agent: *\nAllow: /\nSitemap: ${new URL('/sitemap.xml', siteUrl).toString()}\n`
+        ? `User-agent: *\nAllow: /\nSitemap: ${new URL('sitemap.xml', siteUrl).toString()}\n`
         : `User-agent: *\nDisallow: /\n`;
       writeFileSync(path.join(outDir, 'robots.txt'), robots);
 
       if (siteUrl) {
-        const loc = new URL('/', siteUrl).toString();
+        const loc = siteUrl;
         const sitemap =
           `<?xml version="1.0" encoding="UTF-8"?>\n` +
           `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
@@ -125,6 +151,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     root: '.',
+    // Production can be hosted at a sub-path (for example /eif/) without
+    // breaking Vite-emitted assets or public/ URLs. Preview keeps the normal
+    // root base because it has no owner-supplied public URL.
+    base: siteUrl ? new URL(siteUrl).pathname : '/',
     plugins: [
       eifDeployStatusPlugin(() => deployStatus),
       eifMetadataPlugin(() => ({ siteUrl, repositoryUrl })),

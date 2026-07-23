@@ -17,6 +17,7 @@
   flex-direction: column;
   gap: 0.25rem;
   width: 100%;
+  min-height: 44px;
   cursor: pointer;
   padding: var(--eif-space-1) 0;
   color: var(--eif-fg);

@@ -44,7 +44,7 @@ for (const marker of REQUIRED_HTML_MARKERS) {
 }
 
 if (/property="og:image"\s+content="https?:\/\//.test(html)) {
-  failures.push('og:image must be a relative path (resolved against the build-time site URL), not hardcoded absolute');
+  failures.push('source og:image must stay relative; the production build emits the owner URL as an absolute value');
 }
 
 const requiredAssets = ['favicon.svg', 'favicon.png', 'apple-touch-icon.png', 'social-card.png'];

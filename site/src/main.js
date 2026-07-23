@@ -41,14 +41,27 @@ function initLoopScene() {
   loopCleanup?.();
 
   const phases = Array.from(document.querySelectorAll('.loop__phase'));
+  const diagram = document.querySelector('.loop__diagram');
   const nodes = document.querySelectorAll('.loop__diagram .loop__node');
-  if (phases.length === 0) return;
+  if (phases.length === 0 || !diagram) return;
+
+  // The static diagram is decorative because no-JS visitors cannot activate
+  // its nodes. Expose it as phase navigation only after the handlers exist,
+  // avoiding dead focus targets in the progressive-enhancement path.
+  diagram.removeAttribute('aria-hidden');
+  diagram.setAttribute('role', 'group');
+  diagram.setAttribute('aria-label', diagram.dataset.label);
 
   const phaseByName = new Map();
   phases.forEach((phase) => phaseByName.set(phase.dataset.phase, phase));
 
   function setActive(phase) {
-    nodes.forEach((node) => node.classList.toggle('is-active', node.dataset.phase === phase));
+    nodes.forEach((node) => {
+      const isActive = node.dataset.phase === phase;
+      node.classList.toggle('is-active', isActive);
+      if (isActive) node.setAttribute('aria-current', 'step');
+      else node.removeAttribute('aria-current');
+    });
   }
 
   function updateActiveFromScroll() {
@@ -81,21 +94,34 @@ function initLoopScene() {
   updateActiveFromScroll();
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const clickHandlers = [];
+  const interactionHandlers = [];
   nodes.forEach((node) => {
-    const handler = () => {
+    node.setAttribute('role', 'button');
+    node.setAttribute('tabindex', '0');
+    node.setAttribute('aria-label', node.dataset.label);
+
+    const activate = () => {
       const target = phaseByName.get(node.dataset.phase);
       setActive(node.dataset.phase);
       target?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
     };
-    node.addEventListener('click', handler);
-    clickHandlers.push([node, handler]);
+    const onKeydown = (event) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      event.preventDefault();
+      activate();
+    };
+    node.addEventListener('click', activate);
+    node.addEventListener('keydown', onKeydown);
+    interactionHandlers.push([node, activate, onKeydown]);
   });
 
   loopCleanup = () => {
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', onScroll);
-    clickHandlers.forEach(([node, handler]) => node.removeEventListener('click', handler));
+    interactionHandlers.forEach(([node, activate, onKeydown]) => {
+      node.removeEventListener('click', activate);
+      node.removeEventListener('keydown', onKeydown);
+    });
   };
 }
 
@@ -131,6 +157,7 @@ const REINIT_HANDLERS = {
 // keeping the zero-storage state this site already verifies (D-08).
 function initLanguageToggle() {
   const toggle = document.getElementById('lang-toggle');
+  const skipLink = document.querySelector('.skip-link');
   const blocks = document.querySelectorAll('.i18n-block');
   if (!toggle || blocks.length === 0) return;
 
@@ -172,6 +199,10 @@ function initLanguageToggle() {
       lang === 'en' ? toggle.dataset.labelEn : toggle.dataset.labelUk,
     );
     toggle.classList.toggle('is-uk', lang === 'uk');
+    if (skipLink) {
+      skipLink.textContent = lang === 'uk' ? skipLink.dataset.labelUk : skipLink.dataset.labelEn;
+    }
+    document.title = lang === 'uk' ? toggle.dataset.titleUk : toggle.dataset.titleEn;
     applyReinit();
   }
 

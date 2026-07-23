@@ -62,6 +62,15 @@
   stroke: var(--eif-accent);
 }
 
+.js .loop__node:focus-visible {
+  outline: none;
+}
+
+.js .loop__node:focus-visible circle:not(.loop__node-hit) {
+  stroke: var(--eif-accent);
+  stroke-width: 4;
+}
+
 .loop__node.is-active circle:not(.loop__node-hit) {
   fill: var(--eif-accent);
   stroke: var(--eif-accent);

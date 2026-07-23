@@ -42,16 +42,23 @@ test('private path fails', (t) => {
   // privacy scanner before this narrower website verifier even runs.
   const fixtureDir = mkdtempSync(path.join(tmpdir(), 'eif-claims-private-path-'));
   t.after(() => rmSync(fixtureDir, { recursive: true, force: true }));
-  const privatePath = ['D:', 'Repos', 'private-instance', 'planning'].join('\\');
-  writeFileSync(
-    path.join(fixtureDir, 'bad.html'),
-    `<p data-claim-id="CLM-01">Evidence lives at ${privatePath}.</p>\n`,
-    'utf8',
-  );
+  const privatePaths = [
+    ['Q:', 'private-instance', 'planning'].join('\\'),
+    ['Q:', 'private-instance', 'planning'].join('/'),
+    ['\\\\private-host', 'private-share', 'planning'].join('\\'),
+  ];
 
-  const result = runVerifier(fixtureDir);
-  assert.notEqual(result.status, 0);
-  assert.match(result.stdout, /private-path/);
+  privatePaths.forEach((privatePath, index) => {
+    const fixturePath = path.join(fixtureDir, `bad-${index}.html`);
+    writeFileSync(
+      fixturePath,
+      `<p data-claim-id="CLM-01">Evidence lives at ${privatePath}.</p>\n`,
+      'utf8',
+    );
+    const result = runVerifier(fixturePath);
+    assert.notEqual(result.status, 0, `private path variant ${index} was accepted`);
+    assert.match(result.stdout, /private-path/);
+  });
 });
 
 test('placeholder marker fails', () => {

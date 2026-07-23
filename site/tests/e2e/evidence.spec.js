@@ -9,8 +9,16 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
+    await expect(page.locator('#learning')).toContainText('Retro');
     await expect(page.locator('#learning')).toContainText('versioned instructions, not hidden model behavior');
     await expect(page.locator('#methodology')).toContainText('does not train model weights');
+    await expect(page.locator('#layers .knowledge-route__steps li')).toHaveCount(5);
+    await expect(page.locator('#layers .knowledge-route')).toContainText('Closeout + retro');
+
+    const projectMemory = page.locator('#layers .knowledge-route details').nth(2);
+    await projectMemory.locator('summary').click();
+    await expect(projectMemory).toHaveAttribute('open', '');
+    await expect(projectMemory).toContainText('durable project intelligence');
   });
 
   test('Ukrainian mode carries the same methodology structure', async ({ page }) => {
@@ -20,6 +28,8 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
+    await expect(page.locator('#learning')).toContainText('Retro');
+    await expect(page.locator('#layers .knowledge-route')).toContainText('Пам’ять проєкту');
     await expect(page.locator('#learning')).toContainText('не прихована поведінка моделі');
   });
 });

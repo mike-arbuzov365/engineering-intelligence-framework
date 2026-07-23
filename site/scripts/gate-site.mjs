@@ -12,37 +12,79 @@
 // test-production exercises the same URL-gated code paths as a real
 // production build without inventing an owner value (D-09).
 
-import { spawnSync, spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const siteRoot = path.resolve(__dirname, '..');
 const frameworkRoot = path.resolve(siteRoot, '..');
+const npmCli = process.env.npm_execpath;
 
 const results = [];
+const activeChildren = new Set();
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+if (!npmCli) {
+  throw new Error('[gate:site] run through "npm run gate:site" so npm_execpath is available');
+}
+
+function terminateTree(child) {
+  if (!child?.pid) return;
+  if (process.platform === 'win32') {
+    spawnSync('taskkill', ['/pid', String(child.pid), '/t', '/f'], { stdio: 'ignore' });
+  } else {
+    child.kill('SIGTERM');
+  }
+}
+
 function run(label, command, args, opts = {}) {
-  const result = spawnSync(command, args, { stdio: 'inherit', ...opts });
-  const ok = result.status === 0;
-  results.push({ label, ok, status: result.status });
-  return ok;
+  return new Promise((resolve) => {
+    const child = spawn(command, args, { stdio: 'inherit', ...opts });
+    activeChildren.add(child);
+    let settled = false;
+
+    function finish(ok, status) {
+      if (settled) return;
+      settled = true;
+      activeChildren.delete(child);
+      results.push({ label, ok, status });
+      resolve(ok);
+    }
+
+    child.once('error', (error) => {
+      console.error(`[${label}] could not start: ${error.message}`);
+      finish(false, null);
+    });
+    child.once('exit', (code, signal) => finish(code === 0, code ?? signal));
+  });
 }
 
 function runNpm(label, script) {
-  return run(label, 'npm', ['run', script], { cwd: siteRoot, shell: true });
+  return run(label, process.execPath, [npmCli, 'run', script], { cwd: siteRoot });
 }
 
-runNpm('verify:claims:strict', 'verify:claims:strict');
-runNpm('verify:metadata', 'verify:metadata');
-runNpm('test:unit', 'test:unit');
-runNpm('test:e2e', 'test:e2e');
+let shuttingDown = false;
+function stopForSignal(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  for (const child of activeChildren) terminateTree(child);
+  console.error(`[gate:site] interrupted by ${signal}; active child processes were terminated`);
+  process.exit(signal === 'SIGINT' ? 130 : 143);
+}
+process.once('SIGINT', () => stopForSignal('SIGINT'));
+process.once('SIGTERM', () => stopForSignal('SIGTERM'));
+
+await runNpm('verify:claims:strict', 'verify:claims:strict');
+await runNpm('verify:metadata', 'verify:metadata');
+await runNpm('test:unit', 'test:unit');
+await runNpm('test:e2e', 'test:e2e');
 await sleep(3000); // let browser processes from test:e2e fully exit
-runNpm('test:a11y', 'test:a11y');
+await runNpm('test:a11y', 'test:a11y');
 await sleep(3000); // same, before the lighthouse step's own Chromium launch
-runNpm('build:test-production', 'build:test-production');
-runNpm('audit:assets', 'audit:assets');
+await runNpm('build:test-production', 'build:test-production');
+await runNpm('verify:bundle:test-production', 'verify:bundle');
+await runNpm('audit:assets', 'audit:assets');
 
 // The CLI `vite preview` (spawned here, same as a maintainer would run it)
 // instead of Vite's programmatic preview() JS API: isolated testing showed
@@ -52,10 +94,26 @@ runNpm('audit:assets', 'audit:assets');
 const PREVIEW_PORT = 5185;
 const previewUrl = `http://localhost:${PREVIEW_PORT}`;
 const previewProcess = spawn(
-  'npm',
-  ['run', 'preview', '--', '--mode', 'test-production', '--port', String(PREVIEW_PORT), '--strictPort'],
-  { cwd: siteRoot, shell: true, stdio: 'inherit' },
+  process.execPath,
+  [
+    npmCli,
+    'run',
+    'preview',
+    '--',
+    '--mode',
+    'test-production',
+    '--port',
+    String(PREVIEW_PORT),
+    '--strictPort',
+  ],
+  { cwd: siteRoot, stdio: 'inherit' },
 );
+activeChildren.add(previewProcess);
+previewProcess.once('exit', () => activeChildren.delete(previewProcess));
+previewProcess.once('error', (error) => {
+  activeChildren.delete(previewProcess);
+  console.error(`[preview] could not start: ${error.message}`);
+});
 
 async function waitForServer(url, timeoutMs) {
   const deadline = Date.now() + timeoutMs;
@@ -77,26 +135,26 @@ try {
     console.error('[audit:lighthouse] verification-degraded: preview server did not become ready');
     results.push({ label: 'audit:lighthouse', ok: false, degraded: true });
   } else {
-    const lhOk = run('audit:lighthouse', 'node', ['scripts/audit-lighthouse.mjs', previewUrl], {
-      cwd: siteRoot,
-    });
+    const lhOk = await run(
+      'audit:lighthouse',
+      process.execPath,
+      ['scripts/audit-lighthouse.mjs', previewUrl],
+      { cwd: siteRoot },
+    );
     if (!lhOk) results[results.length - 1].degraded = results[results.length - 1].status === 2;
   }
 } finally {
-  // `shell: true` on Windows spawns npm inside cmd.exe, which spawns vite in
-  // turn - plain .kill() only signals the shell, leaving vite preview
-  // running. taskkill /t kills the whole tree.
-  if (process.platform === 'win32' && previewProcess.pid) {
-    spawnSync('taskkill', ['/pid', String(previewProcess.pid), '/t', '/f']);
-  } else {
-    previewProcess.kill();
-  }
+  terminateTree(previewProcess);
+  activeChildren.delete(previewProcess);
 }
 
-run('eif_check_links.py', 'python', [path.join(frameworkRoot, 'scripts', 'eif_check_links.py')], {
-  cwd: frameworkRoot,
-});
-run('git diff --check', 'git', ['diff', '--check'], { cwd: frameworkRoot });
+await run(
+  'eif_check_links.py',
+  'python',
+  [path.join(frameworkRoot, 'scripts', 'eif_check_links.py')],
+  { cwd: frameworkRoot },
+);
+await run('git diff --check', 'git', ['diff', '--check'], { cwd: frameworkRoot });
 
 console.log('\n[gate:site] summary');
 let anyFailed = false;
@@ -111,4 +169,4 @@ if (anyDegraded) {
   console.log('[gate:site] DEGRADED - lighthouse could not run; deployment stays blocked');
 }
 console.log(anyFailed ? '[gate:site] FAIL' : '[gate:site] PASS');
-process.exit(anyFailed ? 1 : 0);
+process.exitCode = anyFailed ? 1 : 0;

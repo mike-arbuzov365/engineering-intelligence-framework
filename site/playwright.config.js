@@ -5,42 +5,35 @@ const PORT = 5183;
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  // Capped rather than the CPU-core default: full parallelism across three
-  // projects (two Chromium + Firefox) produced real Firefox timeouts under
-  // load when chained after other browser-heavy steps in gate-site.mjs -
-  // Firefox measured consistently slower per-test on this host even
-  // uncontended (5-15s vs 1-3s for Chromium), so it has the least headroom.
+  // Capped rather than the CPU-core default. Engine-independent content
+  // assertions run once on desktop Chromium; mobile and Firefox use bounded
+  // behavioral smoke files. This preserves D-07 coverage without tripling
+  // every static assertion or spending hosted/local browser time on copies.
   workers: 4,
   timeout: 45_000,
   reporter: [['list']],
   use: {
-    baseURL: `http://localhost:${PORT}`,
+    baseURL: process.env.EIF_TEST_BASE_URL ?? `http://127.0.0.1:${PORT}`,
     trace: 'off',
     video: 'off',
     screenshot: 'off',
   },
-  webServer: {
-    // Exercise the emitted HTML/CSS/JS contract, especially no-JS behavior.
-    // Vite dev injects imported CSS through JavaScript, which can make a
-    // broken no-JS production state look healthy when JS is disabled.
-    command: `npm run build:preview && npm run preview -- --port ${PORT} --strictPort`,
-    url: `http://localhost:${PORT}`,
-    reuseExistingServer: false,
-    timeout: 30_000,
-  },
   projects: [
     {
       name: 'desktop-1440',
+      testIgnore: [/(mobile|firefox)-smoke\.spec\.js/],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
     {
       name: 'mobile-390',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } },
+      testMatch: /mobile-smoke\.spec\.js/,
+      use: { ...devices['Pixel 5'], viewport: { width: 390, height: 844 } },
     },
     {
-      // Independent-engine coverage (D-07): same full flow set, Firefox
-      // instead of Chromium.
+      // Independent-engine coverage (D-07): targeted rendered/interactive
+      // behavior rather than duplicate content assertions.
       name: 'firefox-1440',
+      testMatch: /firefox-smoke\.spec\.js/,
       use: { ...devices['Desktop Firefox'], viewport: { width: 1440, height: 900 } },
     },
   ],

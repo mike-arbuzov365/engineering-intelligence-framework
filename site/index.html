@@ -31,7 +31,12 @@
     <meta name="twitter:image" content="/social-card.png" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    <a
+      class="skip-link"
+      href="#main"
+      data-label-en="Skip to content"
+      data-label-uk="Перейти до вмісту"
+    >Skip to content</a>
     <button
       id="lang-toggle"
       type="button"
@@ -39,9 +44,11 @@
       aria-label="Switch to Ukrainian"
       data-label-en="Switch to Ukrainian"
       data-label-uk="Switch to English"
+      data-title-en="Engineering Intelligence Framework: methodology, memory and governed learning"
+      data-title-uk="Engineering Intelligence Framework: методологія, пам'ять і кероване навчання"
       hidden
     >
-      <span aria-hidden="true">EN</span><span aria-hidden="true" class="lang-toggle__sep">/</span><span aria-hidden="true" class="lang-toggle__alt">UA</span>
+      <span aria-hidden="true">EN</span><span aria-hidden="true" class="lang-toggle__alt">UA</span>
     </button>
 
     <header class="hero">
@@ -128,11 +135,10 @@
           </p>
           <div class="methodology__definition" data-claim-id="CLM-15">
             <p class="methodology__statement">
-              <strong>Engineering Intelligence</strong> is versioned,
-              retrievable engineering experience plus the methods that decide
-              how an agent should use it. It is operational intelligence
-              because it changes the next task's preparation and execution,
-              not because it merely stores documents.
+              <strong>Engineering Intelligence</strong> is versioned
+              experience plus the methods that govern its use. It changes how
+              the next task is prepared, executed and verified - not merely
+              where knowledge is stored.
             </p>
             <dl class="methodology__parts">
               <div>
@@ -204,6 +210,55 @@
               </div>
               <p class="layers__examples">What is happening now</p>
             </article>
+          </div>
+          <div class="knowledge-route" data-claim-id="CLM-13">
+            <div class="knowledge-route__head">
+              <div>
+                <span class="label label--accent">The learning elevator</span>
+                <h3>Evidence rises. Intelligence returns.</h3>
+              </div>
+              <div class="knowledge-route__legend" aria-label="Flow directions">
+                <span>&uarr; Promotion</span>
+                <span>&darr; Retrieval</span>
+              </div>
+            </div>
+            <ol class="knowledge-route__steps">
+              <li data-tier="T3">
+                <details>
+                  <summary><span>01</span><strong>Session evidence</strong><em>Tier 3</em></summary>
+                  <p>Work produces observations, decisions, failures and a draft Knowledge Delta.</p>
+                </details>
+              </li>
+              <li data-tier="GATE" class="knowledge-route__gate">
+                <details open>
+                  <summary><span>02</span><strong>Closeout + retro</strong><em>Gate</em></summary>
+                  <p>Compare intent with evidence, name failure patterns and decide what is reusable. Unverified notes do not pass.</p>
+                </details>
+              </li>
+              <li data-tier="T2">
+                <details>
+                  <summary><span>03</span><strong>Project memory</strong><em>Tier 2</em></summary>
+                  <p>Validated local facts, decisions, incidents and lessons become durable project intelligence.</p>
+                </details>
+              </li>
+              <li data-tier="GATE" class="knowledge-route__gate">
+                <details>
+                  <summary><span>04</span><strong>Promotion decision</strong><em>Gate</em></summary>
+                  <p>Only a cross-project lesson with provenance and review can move beyond its project.</p>
+                </details>
+              </li>
+              <li data-tier="T1">
+                <details>
+                  <summary><span>05</span><strong>Framework method</strong><em>Tier 1</em></summary>
+                  <p>A reusable rule, playbook, template or skill becomes available to other projects.</p>
+                </details>
+              </li>
+            </ol>
+            <p class="knowledge-route__return">
+              <span aria-hidden="true">&darr;</span>
+              <strong>The next session retrieves downward:</strong>
+              relevant methods and project experience return before action, while the working context stays ephemeral.
+            </p>
           </div>
           <div class="layers__flows" aria-label="Knowledge flow between tiers" data-claim-id="CLM-13">
             <p><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> method, constraints, prior experience and reusable skills.</p>
@@ -360,36 +415,37 @@
               <svg
                 class="loop__diagram"
                 aria-hidden="true"
+                data-label="Bounded evidence loop phase navigation"
                 viewBox="0 0 300 300"
                 preserveAspectRatio="xMidYMid meet"
               >
                 <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
-                <g class="loop__node" data-phase="orient" transform="translate(150,40)">
+                <g class="loop__node" data-phase="orient" data-label="Show the Orient phase" transform="translate(150,40)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
                   <circle r="10" />
                   <text y="-18">Orient</text>
                 </g>
-                <g class="loop__node" data-phase="define" transform="translate(245,95)">
+                <g class="loop__node" data-phase="define" data-label="Show the Define phase" transform="translate(245,95)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
                   <circle r="10" />
                   <text y="-18">Define</text>
                 </g>
-                <g class="loop__node" data-phase="act" transform="translate(245,205)">
+                <g class="loop__node" data-phase="act" data-label="Show the Act phase" transform="translate(245,205)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
                   <circle r="10" />
                   <text y="30">Act</text>
                 </g>
-                <g class="loop__node" data-phase="observe" transform="translate(150,260)">
+                <g class="loop__node" data-phase="observe" data-label="Show the Observe phase" transform="translate(150,260)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
                   <circle r="10" />
                   <text y="30">Observe</text>
                 </g>
-                <g class="loop__node" data-phase="study" transform="translate(55,205)">
+                <g class="loop__node" data-phase="study" data-label="Show the Study phase" transform="translate(55,205)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
                   <circle r="10" />
                   <text y="30">Study</text>
                 </g>
-                <g class="loop__node" data-phase="adapt" transform="translate(55,95)">
+                <g class="loop__node" data-phase="adapt" data-label="Show the Adapt phase" transform="translate(55,95)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
                   <circle r="10" />
                   <text y="-18">Adapt</text>
@@ -473,8 +529,8 @@
           <ol class="learning__flow" data-claim-id="CLM-15">
             <li><span class="label label--accent">Observe</span><p>Real work produces evidence: a fact, incident, rejected approach, risk or repeatable method.</p></li>
             <li><span class="label label--accent">Capture</span><p>The session records a concise Knowledge Delta, including what remains unverified.</p></li>
-            <li><span class="label label--accent">Classify</span><p>Knowledge Ingest decides what deserves a durable artifact and what stays ephemeral.</p></li>
-            <li><span class="label label--accent">Validate</span><p>Knowledge Lint checks source, type, status, language, duplication and links.</p></li>
+            <li><span class="label label--accent">Retro</span><p>Closeout compares intent with evidence, extracts failure patterns and decides whether a lesson is reusable.</p></li>
+            <li><span class="label label--accent">Classify + validate</span><p>Knowledge Ingest and Lint check artifact type, source, status, language, duplication and links.</p></li>
             <li><span class="label label--accent">Promote</span><p>Project-specific knowledge remains in Tier 2; a general lesson moves to Tier 1 only by explicit decision.</p></li>
             <li><span class="label label--accent">Retrieve</span><p>The next relevant session finds the artifact before acting, closing the learning loop.</p></li>
           </ol>
@@ -502,63 +558,44 @@
       <section class="section integrations" id="integrations" aria-labelledby="integrations-heading">
         <div class="section__inner i18n-block" data-i18n-id="integrations.body" data-i18n-reinit="reveal">
           <div class="section__head">
-            <span class="label">08 &middot; Optional boundary</span>
-            <h2 id="integrations-heading">Core works with every integration absent</h2>
+            <span class="label">08 &middot; Optional capabilities</span>
+            <h2 id="integrations-heading">Three accelerators, three explicit fallbacks</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-12">
-            None of these are required. EIF&rsquo;s core (ontology,
-            playbooks, templates) is plain Markdown any agent can read if
-            pointed at it. Adapters and integrations add enforcement and
-            ergonomics, not the methodology itself.
+            Graphify, RTK and Context7 each add one bounded capability. None
+            is the methodology itself: when one is unavailable, EIF keeps a
+            named core path through source search, raw shell output or local
+            documentation.
           </p>
-
-          <svg class="integrations__diagram" aria-hidden="true" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet">
-            <text class="integrations__group-label" x="150" y="24">Adapters</text>
-            <text class="integrations__group-label" x="750" y="24">Integrations</text>
-
-            <line class="integrations__link" x1="450" y1="150" x2="150" y2="60" />
-            <line class="integrations__link" x1="450" y1="150" x2="150" y2="120" />
-            <line class="integrations__link integrations__link--experimental" x1="450" y1="150" x2="150" y2="185" />
-            <line class="integrations__link integrations__link--experimental" x1="450" y1="150" x2="150" y2="245" />
-            <line class="integrations__link" x1="450" y1="150" x2="750" y2="75" />
-            <line class="integrations__link" x1="450" y1="150" x2="750" y2="150" />
-            <line class="integrations__link integrations__link--experimental" x1="450" y1="150" x2="750" y2="225" />
-
-            <g class="integrations__core" transform="translate(450,150)">
-              <circle r="36" />
-              <text y="6">EIF</text>
-            </g>
-
-            <g class="integrations__node" transform="translate(150,60)">
-              <circle r="15" />
-              <text y="-22">Claude Code</text>
-            </g>
-            <g class="integrations__node" transform="translate(150,120)">
-              <circle r="15" />
-              <text y="-22">Cursor</text>
-            </g>
-            <g class="integrations__node integrations__node--declaration" transform="translate(150,185)">
-              <circle r="15" />
-              <text y="34">Codex</text>
-            </g>
-            <g class="integrations__node integrations__node--declaration" transform="translate(150,245)">
-              <circle r="15" />
-              <text y="34">Hermes</text>
-            </g>
-
-            <g class="integrations__node" transform="translate(750,75)">
-              <circle r="16" />
-              <text y="-24">Graphify</text>
-            </g>
-            <g class="integrations__node" transform="translate(750,150)">
-              <circle r="16" />
-              <text y="34">RTK</text>
-            </g>
-            <g class="integrations__node integrations__node--declaration" transform="translate(750,225)">
-              <circle r="16" />
-              <text y="34">Vendor docs</text>
-            </g>
-          </svg>
+          <figure class="capability-map">
+            <figcaption>
+              <span class="label label--accent">Optional capability bridges</span>
+              <span>Core path remains available underneath every bridge</span>
+            </figcaption>
+            <ol>
+              <li>
+                <span class="capability-map__index">01</span>
+                <div><strong>Understand the codebase</strong><small>paths, communities, impact hints</small></div>
+                <span class="capability-map__bridge" aria-hidden="true"></span>
+                <b>Graphify</b>
+                <em>fallback: source search</em>
+              </li>
+              <li>
+                <span class="capability-map__index">02</span>
+                <div><strong>Reduce tool noise</strong><small>compressed output, tracked reduction</small></div>
+                <span class="capability-map__bridge" aria-hidden="true"></span>
+                <b>RTK</b>
+                <em>fallback: raw shell</em>
+              </li>
+              <li>
+                <span class="capability-map__index">03</span>
+                <div><strong>Consult current vendor docs</strong><small>version-aware library and API sources</small></div>
+                <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
+                <b>Context7</b>
+                <em>fallback: local docs</em>
+              </li>
+            </ol>
+          </figure>
 
           <ul class="integrations__list">
             <li class="reveal">
@@ -585,7 +622,7 @@
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
-                <span class="label label--accent">Vendor docs</span>
+                <span class="label label--accent">Context7</span>
                 <span>Current library/API documentation instead of stale training data</span>
               </button>
               <div class="reveal__detail">
@@ -819,11 +856,10 @@
         </p>
         <div class="methodology__definition" data-claim-id="CLM-15">
           <p class="methodology__statement">
-            <strong>Engineering Intelligence</strong> - це версійований,
-            доступний для пошуку інженерний досвід разом із методами, які
-            визначають, як агент має його застосувати. Він операційний, бо
-            змінює підготовку й виконання наступного завдання, а не просто
-            накопичує документи.
+            <strong>Engineering Intelligence</strong> - це версійований досвід
+            і методи, що керують його застосуванням. Він змінює підготовку,
+            виконання та перевірку наступного завдання, а не лише місце
+            зберігання знань.
           </p>
           <dl class="methodology__parts">
             <div>
@@ -893,6 +929,55 @@
             </div>
             <p class="layers__examples">Що відбувається зараз</p>
           </article>
+        </div>
+        <div class="knowledge-route" data-claim-id="CLM-13">
+          <div class="knowledge-route__head">
+            <div>
+              <span class="label label--accent">Ліфт навчання</span>
+              <h3>Докази піднімаються. Інтелект повертається.</h3>
+            </div>
+            <div class="knowledge-route__legend" aria-label="Напрямки потоку">
+              <span>&uarr; Promotion</span>
+              <span>&darr; Retrieval</span>
+            </div>
+          </div>
+          <ol class="knowledge-route__steps">
+            <li data-tier="T3">
+              <details>
+                <summary><span>01</span><strong>Докази сесії</strong><em>Tier 3</em></summary>
+                <p>Робота створює спостереження, рішення, збої та чернетку Knowledge Delta.</p>
+              </details>
+            </li>
+            <li data-tier="GATE" class="knowledge-route__gate">
+              <details open>
+                <summary><span>02</span><strong>Closeout + retro</strong><em>Gate</em></summary>
+                <p>Порівняти намір із доказами, назвати failure patterns і вирішити, що можна повторно використати. Неперевірені нотатки не проходять.</p>
+              </details>
+            </li>
+            <li data-tier="T2">
+              <details>
+                <summary><span>03</span><strong>Пам&rsquo;ять проєкту</strong><em>Tier 2</em></summary>
+                <p>Перевірені локальні факти, рішення, інциденти й уроки стають стійким інтелектом проєкту.</p>
+              </details>
+            </li>
+            <li data-tier="GATE" class="knowledge-route__gate">
+              <details>
+                <summary><span>04</span><strong>Рішення про promotion</strong><em>Gate</em></summary>
+                <p>За межі проєкту переходить лише cross-project урок із provenance та review.</p>
+              </details>
+            </li>
+            <li data-tier="T1">
+              <details>
+                <summary><span>05</span><strong>Метод framework</strong><em>Tier 1</em></summary>
+                <p>Повторно використовуване правило, playbook, шаблон або skill стає доступним іншим проєктам.</p>
+              </details>
+            </li>
+          </ol>
+          <p class="knowledge-route__return">
+            <span aria-hidden="true">&darr;</span>
+            <strong>Наступна сесія отримує знання вниз:</strong>
+            релевантні методи й досвід проєкту повертаються до дії, а робочий контекст лишається ефемерним.
+          </p>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
           <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані skills.</p>
@@ -1002,14 +1087,14 @@
         </p>
         <div class="loop__scene">
           <div class="loop__sticky">
-            <svg class="loop__diagram" aria-hidden="true" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
+            <svg class="loop__diagram" aria-hidden="true" data-label="Навігація фазами обмеженого циклу доказів" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
               <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
-              <g class="loop__node" data-phase="orient" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Orient</text></g>
-              <g class="loop__node" data-phase="define" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Define</text></g>
-              <g class="loop__node" data-phase="act" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Act</text></g>
-              <g class="loop__node" data-phase="observe" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Observe</text></g>
-              <g class="loop__node" data-phase="study" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Study</text></g>
-              <g class="loop__node" data-phase="adapt" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Adapt</text></g>
+              <g class="loop__node" data-phase="orient" data-label="Показати фазу Orient" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Orient</text></g>
+              <g class="loop__node" data-phase="define" data-label="Показати фазу Define" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Define</text></g>
+              <g class="loop__node" data-phase="act" data-label="Показати фазу Act" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Act</text></g>
+              <g class="loop__node" data-phase="observe" data-label="Показати фазу Observe" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Observe</text></g>
+              <g class="loop__node" data-phase="study" data-label="Показати фазу Study" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Study</text></g>
+              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Adapt" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Adapt</text></g>
             </svg>
           </div>
           <ol class="loop__phases">
@@ -1058,8 +1143,8 @@
         <ol class="learning__flow" data-claim-id="CLM-15">
           <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає evidence: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
           <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
-          <li><span class="label label--accent">Класифікувати</span><p>Knowledge Ingest вирішує, що заслуговує на durable artifact, а що лишається ефемерним.</p></li>
-          <li><span class="label label--accent">Перевірити</span><p>Knowledge Lint перевіряє source, type, status, мову, дублювання й посилання.</p></li>
+          <li><span class="label label--accent">Retro</span><p>Closeout порівнює намір із доказами, виділяє failure patterns і вирішує, чи урок придатний до повторного використання.</p></li>
+          <li><span class="label label--accent">Класифікувати + перевірити</span><p>Knowledge Ingest і Lint перевіряють тип artifact, source, status, мову, дублювання й посилання.</p></li>
           <li><span class="label label--accent">Підняти</span><p>Проєктне знання лишається у Tier 2; загальний урок переходить у Tier 1 тільки за явним рішенням.</p></li>
           <li><span class="label label--accent">Знайти знову</span><p>Наступна релевантна сесія знаходить artifact до дії й замикає learning loop.</p></li>
         </ol>
@@ -1085,34 +1170,44 @@
 
       <template data-i18n-id="integrations.body">
         <div class="section__head">
-          <span class="label">08 &middot; Опційна межа</span>
-          <h2 id="integrations-heading">Ядро працює навіть без жодної інтеграції</h2>
+          <span class="label">08 &middot; Опційні спроможності</span>
+          <h2 id="integrations-heading">Три прискорювачі, три явні fallback</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
-          Жодна з них не обов&rsquo;язкова. Ядро EIF - онтологія, плейбуки,
-          шаблони - це звичайний Markdown, який прочитає будь-який агент,
-          якщо його на нього спрямувати. Адаптери та інтеграції додають
-          примусове застосування правил і зручність, а не саму методологію.
+          Graphify, RTK і Context7 додають по одній обмеженій спроможності.
+          Жодна не є самою методологією: якщо інструмент недоступний, EIF має
+          названий core path через пошук у source, сирий shell output або
+          локальну документацію.
         </p>
-        <svg class="integrations__diagram" aria-hidden="true" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet">
-          <text class="integrations__group-label" x="150" y="24">Адаптери</text>
-          <text class="integrations__group-label" x="750" y="24">Інтеграції</text>
-          <line class="integrations__link" x1="450" y1="150" x2="150" y2="60" />
-          <line class="integrations__link" x1="450" y1="150" x2="150" y2="120" />
-          <line class="integrations__link integrations__link--experimental" x1="450" y1="150" x2="150" y2="185" />
-          <line class="integrations__link integrations__link--experimental" x1="450" y1="150" x2="150" y2="245" />
-          <line class="integrations__link" x1="450" y1="150" x2="750" y2="75" />
-          <line class="integrations__link" x1="450" y1="150" x2="750" y2="150" />
-          <line class="integrations__link integrations__link--experimental" x1="450" y1="150" x2="750" y2="225" />
-          <g class="integrations__core" transform="translate(450,150)"><circle r="36" /><text y="6">EIF</text></g>
-          <g class="integrations__node" transform="translate(150,60)"><circle r="15" /><text y="-22">Claude Code</text></g>
-          <g class="integrations__node" transform="translate(150,120)"><circle r="15" /><text y="-22">Cursor</text></g>
-          <g class="integrations__node integrations__node--declaration" transform="translate(150,185)"><circle r="15" /><text y="34">Codex</text></g>
-          <g class="integrations__node integrations__node--declaration" transform="translate(150,245)"><circle r="15" /><text y="34">Hermes</text></g>
-          <g class="integrations__node" transform="translate(750,75)"><circle r="16" /><text y="-24">Graphify</text></g>
-          <g class="integrations__node" transform="translate(750,150)"><circle r="16" /><text y="34">RTK</text></g>
-          <g class="integrations__node integrations__node--declaration" transform="translate(750,225)"><circle r="16" /><text y="34">Vendor docs</text></g>
-        </svg>
+        <figure class="capability-map">
+          <figcaption>
+            <span class="label label--accent">Мости опційних спроможностей</span>
+            <span>Під кожним мостом лишається core path</span>
+          </figcaption>
+          <ol>
+            <li>
+              <span class="capability-map__index">01</span>
+              <div><strong>Зрозуміти codebase</strong><small>paths, communities, impact hints</small></div>
+              <span class="capability-map__bridge" aria-hidden="true"></span>
+              <b>Graphify</b>
+              <em>fallback: пошук у source</em>
+            </li>
+            <li>
+              <span class="capability-map__index">02</span>
+              <div><strong>Зменшити шум інструментів</strong><small>стиснений output і облік скорочення</small></div>
+              <span class="capability-map__bridge" aria-hidden="true"></span>
+              <b>RTK</b>
+              <em>fallback: сирий shell</em>
+            </li>
+            <li>
+              <span class="capability-map__index">03</span>
+              <div><strong>Звіритися з актуальною vendor docs</strong><small>version-aware джерела для library та API</small></div>
+              <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
+              <b>Context7</b>
+              <em>fallback: локальні docs</em>
+            </li>
+          </ol>
+        </figure>
         <ul class="integrations__list">
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
@@ -1138,7 +1233,7 @@
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
-              <span class="label label--accent">Vendor docs</span>
+              <span class="label label--accent">Context7</span>
               <span>Актуальна документація бібліотек і API замість застарілих даних навчання</span>
             </button>
             <div class="reveal__detail">

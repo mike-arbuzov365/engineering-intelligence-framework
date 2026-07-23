@@ -38,6 +38,24 @@ test.describe('loop', () => {
     await expect(page.locator('.loop__node[data-phase="study"]')).toHaveClass(/is-active/);
     await expect(page.locator('.loop__phase[data-phase="study"]')).toBeInViewport();
   });
+
+  test('diagram nodes expose phase navigation to keyboard users only after enhancement', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const diagram = page.locator('.loop__diagram');
+    const node = page.locator('.loop__node[data-phase="define"]');
+
+    await expect(diagram).not.toHaveAttribute('aria-hidden', 'true');
+    await expect(diagram).toHaveAttribute('role', 'group');
+    await expect(node).toHaveAttribute('role', 'button');
+    await expect(node).toHaveAttribute('tabindex', '0');
+
+    await node.focus();
+    await page.keyboard.press(' ');
+    await expect(node).toHaveAttribute('aria-current', 'step');
+    await expect(page.locator('.loop__phase[data-phase="define"]')).toBeInViewport();
+  });
 });
 
 test.describe('loop no-js', () => {
@@ -49,5 +67,7 @@ test.describe('loop no-js', () => {
     for (const word of ['Orient', 'Define', 'Act', 'Observe', 'Study', 'Adapt']) {
       expect(text.toLowerCase()).toContain(word.toLowerCase());
     }
+    await expect(page.locator('.loop__diagram')).toHaveAttribute('aria-hidden', 'true');
+    await expect(page.locator('.loop__node').first()).not.toHaveAttribute('tabindex', '0');
   });
 });

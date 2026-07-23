@@ -32,6 +32,8 @@ const MANIFEST_RELATIVE_PATH = path.join('src', 'content', 'claims.json');
 const POSIX_USER_ROOT = '/' + 'Users/';
 const PRIVATE_PATH_PATTERNS = [
   /[A-Za-z]:\\[^\s"'<>]+/, // Windows absolute path shape.
+  /[A-Za-z]:\/[^\s"'<>]+/, // Windows drive path written with POSIX separators.
+  /\\\\[^\\\s"'<>]+\\[^\s"'<>]+/, // UNC share path.
   new RegExp(`${POSIX_USER_ROOT}[^\\s"'<>]+`),
   /\/home\/[^\s"'<>]+/,
 ];
@@ -76,11 +78,16 @@ const GLOBAL_FORBIDDEN_PHRASES = [
   'requires rtk',
 ];
 
-const RUNTIME_REQUEST_ATTR_RE =
-  /<(script|img|iframe)\b[^>]*\bsrc=["'](https?:)?\/\/[^"']+["']/gi;
-const RUNTIME_STYLESHEET_RE =
-  /<link\b[^>]*\brel=["'](stylesheet|preconnect|font)["'][^>]*\bhref=["'](https?:)?\/\/[^"']+["']/gi;
-const JS_FETCH_RE = /\b(fetch|XMLHttpRequest)\s*\(\s*["'`](https?:)?\/\/[^"'`]+/g;
+const RUNTIME_RESOURCE_TAG_RE =
+  /<(script|img|iframe|link|source|video|audio|object|embed)\b[^>]*>/gi;
+const RUNTIME_RESOURCE_ATTR_RE =
+  /\b(src|href|poster|data)=["'](https?:)?\/\/[^"']+["']/i;
+const JS_RUNTIME_REQUEST_RES = [
+  /\bfetch\s*\(\s*["'`](https?:)?\/\/[^"'`]+/g,
+  /\b(WebSocket|EventSource)\s*\(\s*["'`](https?:)?\/\/[^"'`]+/g,
+  /\b(sendBeacon)\s*\(\s*["'`](https?:)?\/\/[^"'`]+/g,
+  /\.open\s*\(\s*["'`](GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)["'`]\s*,\s*["'`](https?:)?\/\/[^"'`]+/gi,
+];
 const CSS_REMOTE_URL_RE = /url\(\s*["']?(https?:)?\/\/[^)'"]+/gi;
 
 const VANITY_COUNT_RE =
@@ -184,7 +191,18 @@ function scanFile(file, content, ids, violations, usedIds) {
     }
   }
 
-  for (const re of [RUNTIME_REQUEST_ATTR_RE, RUNTIME_STYLESHEET_RE, JS_FETCH_RE, CSS_REMOTE_URL_RE]) {
+  RUNTIME_RESOURCE_TAG_RE.lastIndex = 0;
+  for (const match of content.matchAll(RUNTIME_RESOURCE_TAG_RE)) {
+    if (!RUNTIME_RESOURCE_ATTR_RE.test(match[0])) continue;
+    violations.push({
+      rule: 'runtime-external-request',
+      file: rel,
+      line: findLineNumber(content, match.index),
+      detail: match[0].slice(0, 80),
+    });
+  }
+
+  for (const re of [...JS_RUNTIME_REQUEST_RES, CSS_REMOTE_URL_RE]) {
     re.lastIndex = 0;
     let m;
     while ((m = re.exec(content))) {

@@ -30,6 +30,8 @@ FRESHNESS_STATES = {
     "blocked",
     "suppressed",
 }
+MAX_GRAPH_ARTIFACT_BYTES = 256 * 1024 * 1024
+_ARCHIVE_READ_CHUNK_BYTES = 1024 * 1024
 
 
 def framework_root() -> Path:
@@ -64,6 +66,103 @@ def _sha256_bytes(data: bytes) -> str:
 
 def _sha256_file(path: Path) -> str:
     return _sha256_bytes(path.read_bytes())
+
+
+def _read_graph_archive(path: Path) -> bytes:
+    """Read a raw or gzip graph artifact without allowing unbounded expansion."""
+    if path.suffix.lower() != ".gz":
+        if path.stat().st_size > MAX_GRAPH_ARTIFACT_BYTES:
+            raise ValueError(
+                f"archive graph exceeds the {MAX_GRAPH_ARTIFACT_BYTES}-byte safety limit"
+            )
+        data = path.read_bytes()
+        if len(data) > MAX_GRAPH_ARTIFACT_BYTES:
+            raise ValueError(
+                f"archive graph exceeds the {MAX_GRAPH_ARTIFACT_BYTES}-byte safety limit"
+            )
+        return data
+
+    chunks: list[bytes] = []
+    total = 0
+    with gzip.open(path, "rb") as handle:
+        while True:
+            chunk = handle.read(_ARCHIVE_READ_CHUNK_BYTES)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > MAX_GRAPH_ARTIFACT_BYTES:
+                raise ValueError(
+                    f"expanded archive graph exceeds the {MAX_GRAPH_ARTIFACT_BYTES}-byte safety limit"
+                )
+            chunks.append(chunk)
+    return b"".join(chunks)
+
+
+def _reserved_backup_path(parent: Path, prefix: str) -> Path:
+    """Reserve a unique same-directory path for an atomic rollback backup."""
+    with tempfile.NamedTemporaryFile(delete=False, dir=parent, prefix=prefix) as handle:
+        candidate = Path(handle.name)
+    candidate.unlink()
+    return candidate
+
+
+def _replace_pair_transactionally(
+    staged_graph: Path,
+    artifact: Path,
+    staged_metadata: Path,
+    metadata_target: Path,
+) -> None:
+    """Replace graph and metadata as one recoverable filesystem transaction."""
+    graph_backup: Path | None = None
+    metadata_backup: Path | None = None
+    graph_installed = False
+    metadata_installed = False
+    completed = False
+    try:
+        if artifact.exists():
+            graph_backup = _reserved_backup_path(
+                artifact.parent, ".eif-restore-graph-backup-"
+            )
+            artifact.replace(graph_backup)
+        if metadata_target.exists():
+            metadata_backup = _reserved_backup_path(
+                metadata_target.parent, ".eif-restore-metadata-backup-"
+            )
+            metadata_target.replace(metadata_backup)
+
+        staged_graph.replace(artifact)
+        graph_installed = True
+        staged_metadata.replace(metadata_target)
+        metadata_installed = True
+        completed = True
+    except OSError as exc:
+        rollback_errors: list[str] = []
+        try:
+            if graph_installed:
+                artifact.unlink(missing_ok=True)
+            if graph_backup is not None and graph_backup.exists():
+                graph_backup.replace(artifact)
+        except OSError as rollback_exc:
+            rollback_errors.append(f"graph rollback failed: {rollback_exc}")
+        try:
+            if metadata_installed:
+                metadata_target.unlink(missing_ok=True)
+            if metadata_backup is not None and metadata_backup.exists():
+                metadata_backup.replace(metadata_target)
+        except OSError as rollback_exc:
+            rollback_errors.append(f"metadata rollback failed: {rollback_exc}")
+        if rollback_errors:
+            raise RuntimeError(
+                "Graphify restore failed and rollback was incomplete: "
+                + "; ".join(rollback_errors)
+            ) from exc
+        raise
+    finally:
+        if completed:
+            if graph_backup is not None:
+                graph_backup.unlink(missing_ok=True)
+            if metadata_backup is not None:
+                metadata_backup.unlink(missing_ok=True)
 
 
 def _scope_hash(scope: dict) -> str:
@@ -346,7 +445,21 @@ def capture_metadata(
     if errors:
         raise ValueError(errors[0])
     metadata_path.parent.mkdir(parents=True, exist_ok=True)
-    metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    staged_metadata: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            delete=False,
+            dir=metadata_path.parent,
+            prefix=".eif-metadata-",
+        ) as handle:
+            handle.write(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
+            staged_metadata = Path(handle.name)
+        staged_metadata.replace(metadata_path)
+    finally:
+        if staged_metadata is not None:
+            staged_metadata.unlink(missing_ok=True)
     return metadata
 
 
@@ -385,11 +498,7 @@ def restore_artifact(
         raise ValueError("metadata repo_id does not match the explicit scope manifest")
     if metadata["manifest_hash"] != _sha256_file(scope_path) or metadata["scope_hash"] != _scope_hash(scope):
         raise ValueError("metadata hashes do not match the current scope manifest")
-    if archive_path.suffix.lower() == ".gz":
-        with gzip.open(archive_path, "rb") as handle:
-            graph_bytes = handle.read()
-    else:
-        graph_bytes = archive_path.read_bytes()
+    graph_bytes = _read_graph_archive(archive_path)
     if _sha256_bytes(graph_bytes) != metadata["graph_sha256"]:
         raise ValueError("archive graph digest does not match artifact metadata")
     try:
@@ -400,17 +509,33 @@ def restore_artifact(
     if not isinstance(graph.get("nodes"), list) or not isinstance(links, list):
         raise ValueError("archive graph lacks nodes and links/edges arrays")
     artifact.parent.mkdir(parents=True, exist_ok=True)
+    metadata_target.parent.mkdir(parents=True, exist_ok=True)
     staged_graph: Path | None = None
     staged_metadata: Path | None = None
     try:
-        with tempfile.NamedTemporaryFile("wb", delete=False, dir=artifact.parent) as handle:
+        with tempfile.NamedTemporaryFile(
+            "wb",
+            delete=False,
+            dir=artifact.parent,
+            prefix=".eif-restore-graph-",
+        ) as handle:
             handle.write(graph_bytes)
             staged_graph = Path(handle.name)
-        with tempfile.NamedTemporaryFile("w", encoding="utf-8", delete=False, dir=artifact.parent) as handle:
+        with tempfile.NamedTemporaryFile(
+            "w",
+            encoding="utf-8",
+            delete=False,
+            dir=metadata_target.parent,
+            prefix=".eif-restore-metadata-",
+        ) as handle:
             handle.write(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
             staged_metadata = Path(handle.name)
-        staged_graph.replace(artifact)
-        staged_metadata.replace(metadata_target)
+        _replace_pair_transactionally(
+            staged_graph,
+            artifact,
+            staged_metadata,
+            metadata_target,
+        )
     finally:
         if staged_graph is not None:
             staged_graph.unlink(missing_ok=True)

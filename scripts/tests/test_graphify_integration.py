@@ -11,6 +11,7 @@ import sys
 import tempfile
 from pathlib import Path
 from subprocess import CompletedProcess
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import eif_graphify as lifecycle  # noqa: E402
@@ -405,6 +406,73 @@ def unit_results() -> list[bool]:
             restored["state"] == "fresh"
             and restored["repo_id"] == "portable-canary"
             and graph_path.read_bytes() == original_graph,
+        ))
+
+        current_graph = b'{"nodes":[{"id":"current"}],"links":[]}\n'
+        current_metadata = b'{"current":"metadata"}\n'
+        graph_path.write_bytes(current_graph)
+        metadata_path.write_bytes(current_metadata)
+        oversized_archive = Path(raw_tmp) / "oversized-graph.json.gz"
+        with gzip.open(oversized_archive, "wb") as handle:
+            handle.write(original_graph + b" " * 128)
+        with patch.object(lifecycle, "MAX_GRAPH_ARTIFACT_BYTES", len(original_graph) + 16):
+            try:
+                lifecycle.restore_artifact(
+                    instance,
+                    graph_entry(),
+                    oversized_archive,
+                    metadata_source,
+                    root=FRAMEWORK_ROOT,
+                )
+                oversized_rejected = False
+            except ValueError as exc:
+                oversized_rejected = "safety limit" in str(exc)
+        results.append(check(
+            "restore rejects an oversized expanded archive without altering current files",
+            oversized_rejected
+            and graph_path.read_bytes() == current_graph
+            and metadata_path.read_bytes() == current_metadata,
+        ))
+
+        concrete_path_type = type(metadata_path)
+        replace_original = concrete_path_type.replace
+        metadata_replace_failed = False
+
+        def fail_metadata_install_once(source: Path, target: Path) -> Path:
+            nonlocal metadata_replace_failed
+            if (
+                source.name.startswith(".eif-restore-metadata-")
+                and not metadata_replace_failed
+            ):
+                metadata_replace_failed = True
+                raise OSError("synthetic metadata replace failure")
+            return replace_original(source, target)
+
+        try:
+            with patch.object(concrete_path_type, "replace", fail_metadata_install_once):
+                lifecycle.restore_artifact(
+                    instance,
+                    graph_entry(),
+                    archive,
+                    metadata_source,
+                    root=FRAMEWORK_ROOT,
+                )
+            replace_failure_raised = False
+        except OSError as exc:
+            replace_failure_raised = "synthetic metadata replace failure" in str(exc)
+        restore_debris = list((instance / "graphify-out").glob(".eif-restore-*"))
+        results.append(check(
+            "pair replacement rolls both files back when metadata installation fails",
+            replace_failure_raised
+            and graph_path.read_bytes() == current_graph
+            and metadata_path.read_bytes() == current_metadata
+            and not restore_debris,
+            (
+                f"raised={replace_failure_raised}; "
+                f"graph_restored={graph_path.read_bytes() == current_graph}; "
+                f"metadata_restored={metadata_path.read_bytes() == current_metadata}; "
+                f"debris={restore_debris}"
+            ),
         ))
     return results
 

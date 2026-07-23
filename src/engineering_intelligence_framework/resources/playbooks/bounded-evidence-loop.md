@@ -16,6 +16,8 @@ related:
 <!-- Knowledge source: SYNTHESIZE of PDSA, ReAct, Reflexion,
 evaluator-optimizer, agent-eval, and bounded Ralph-style loop patterns;
 research digest and primary sources in docs/research/bounded-evidence-loops.md. -->
+<!-- Knowledge source: Argyris double-loop learning, MAPE-K and NIST AI RMF
+reconciliation in docs/research/bounded-evidence-loops.md, 2026-07-23. -->
 
 Use this playbook when a task benefits from iterative action and feedback.
 It makes the feedback loop explicit, bounded, evidence-driven, and resumable.
@@ -62,6 +64,22 @@ or include its fields in a task-scope/session-launch artifact.
   never satisfies a behavioral success condition.
 - A remote run consumes budget even if it fails before tests start. Do not use
   hosted CI as an iterative debugger when a local check is available.
+
+## When the loop itself is wrong
+
+Most iterations are single-loop: keep the goal, policy and evaluator fixed,
+then change the implementation or experiment.
+
+Use a double-loop change only when evidence shows that an underlying
+assumption, rule or evaluator is wrong. Preserve the failed observation, name
+the challenged artifact, record the authority for the change, update that
+artifact explicitly, then rerun behavioral validation. Never weaken a test
+only to obtain a pass.
+
+The loop's knowledge is external and inspectable. Tier 3 holds temporary
+observations; validated project experience promotes to Tier 2; reusable
+cross-project rules or skills may promote to Tier 1. This is governed artifact
+learning, not model training or silent self-modification.
 
 ## Checkpoint format
 

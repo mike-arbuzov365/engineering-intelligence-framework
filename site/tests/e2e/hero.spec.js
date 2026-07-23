@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('hero', () => {
-  test('product name is the loudest element and three CTAs are present', async ({ page }) => {
+  test('product name is the loudest element and four CTAs are present', async ({ page }) => {
     await page.goto('/');
     const h1Text = (await page.textContent('h1.hero__name'))?.replace(/\s+/g, ' ').trim();
     expect(h1Text).toContain('Engineering Intelligence Framework');
-    await expect(page.locator('.hero__ctas a')).toHaveCount(3);
+    await expect(page.locator('.hero__ctas a')).toHaveCount(4);
   });
 
   test('no horizontal overflow at the configured viewport', async ({ page }) => {
@@ -30,7 +30,7 @@ test.describe('hero', () => {
     expect(animationName).toBe('none');
   });
 
-  test('keyboard: skip link, then the language toggle, then the three hero CTAs are reachable in order', async ({
+  test('keyboard: skip link, then the language toggle, then the four hero CTAs are reachable in order', async ({
     page,
   }) => {
     await page.goto('/');
@@ -40,7 +40,7 @@ test.describe('hero', () => {
     await page.keyboard.press('Tab');
     await expect(page.locator(':focus')).toHaveId('lang-toggle');
 
-    for (const label of ['The control plane', 'The evidence loop', 'Current evidence']) {
+    for (const label of ['What EIF is', 'The three layers', 'How it learns', 'Current evidence']) {
       await page.keyboard.press('Tab');
       await expect(page.locator(':focus')).toHaveText(label);
     }
@@ -70,6 +70,6 @@ test.describe('hero no-js', () => {
     const hrefs = await page
       .locator('.hero__ctas a')
       .evaluateAll((els) => els.map((el) => el.getAttribute('href')));
-    expect(hrefs).toEqual(['#control-plane', '#loop', '#evidence']);
+    expect(hrefs).toEqual(['#methodology', '#layers', '#learning', '#evidence']);
   });
 });

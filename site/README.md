@@ -2,7 +2,16 @@
 
 Local, deploy-ready presentation site for the Engineering Intelligence
 Framework. Vite + vanilla HTML/CSS/JS, no framework/CMS/backend dependency
-(see the private planning packet's D-02 for the ratified rationale).
+and no third-party runtime requests.
+
+The narrative follows the canonical framework architecture:
+
+1. why chat history is not engineering memory;
+2. what Engineering Intelligence and the methodology mean;
+3. the three intelligence tiers;
+4. the control plane and session lifecycle;
+5. bounded execution and governed learning;
+6. optional integrations, current evidence, quickstart and limitations.
 
 ## Commands
 

@@ -90,7 +90,7 @@
       "allowedWording": "Command-level timing evidence exists for specific mechanical operations recorded in the framework's benchmark evidence. No claim is made about human task duration.",
       "limitations": "Timing evidence covers mechanical command execution only; it does not measure or estimate human working time, review time, or end-to-end delivery time.",
       "forbiddenWording": ["Saves developer hours.", "Faster than a human.", "Any specific human time-saved figure."],
-      "source": "PACKET-2026-08-eif-website/02-FACTS-001-baseline-and-carry-over.md (private planning repo) - Public claim boundary CLM-10, cross-referenced against docs/benchmarks/README.md"
+      "source": "docs/product/claims-evidence.md - row \"The quickstart's mechanical execution time is known\""
     },
     {
       "id": "CLM-11",
@@ -108,7 +108,34 @@
       "allowedWording": "Graphify and RTK are optional adapters with an explicit degraded/unavailable state; core EIF behavior does not require either integration to be present.",
       "limitations": "Optionality is verified structurally for the two named integrations in this repository's own tests, not as a claim about every possible external provider or future integration.",
       "forbiddenWording": ["Requires Graphify.", "Requires RTK.", "All integrations are equally verified."],
-      "source": "docs/product/claims-evidence.md - rows \"EIF can classify Graphify structural health and Git freshness\", \"EIF can classify RTK behavioral health without treating PATH as health\"; PACKET-2026-08-eif-website/02-FACTS-001 carry-over ledger (\"mandatory Graphify/RTK dependency\" -> closed)"
+      "source": "docs/product/claims-evidence.md - rows \"EIF can classify Graphify structural health and Git freshness\", \"EIF can classify RTK behavioral health without treating PATH as health\""
+    },
+    {
+      "id": "CLM-13",
+      "summary": "EIF separates reusable methodology, durable project knowledge and ephemeral session context into three explicit tiers.",
+      "status": "OBSERVED (methodology contract only)",
+      "allowedWording": "EIF separates reusable framework methodology, durable project knowledge and ephemeral session context into three tiers, with Knowledge Delta governing promotion between them.",
+      "limitations": "This proves the model and its workflow artifacts are present and structurally connected. It does not prove that an agent never forgets, always retrieves the right lesson or improves task outcomes.",
+      "forbiddenWording": ["Agents never forget.", "Persistent memory guaranteed.", "Self-learning model."],
+      "source": "docs/product/claims-evidence.md - row \"EIF defines a three-tier engineering-intelligence model\""
+    },
+    {
+      "id": "CLM-14",
+      "summary": "EIF connects experience retrieval to a defined session lifecycle and durable closeout.",
+      "status": "OBSERVED",
+      "allowedWording": "EIF requires relevant prior-knowledge retrieval before non-trivial work and defines preparation, controlled execution, verification and closeout as the session lifecycle.",
+      "limitations": "The workflow contract is structurally tested and one synthetic journey exercises retrieval and closeout. It does not prove perfect recall or prevention of every repeated mistake.",
+      "forbiddenWording": ["Always retrieves the right answer.", "Prevents repeated mistakes.", "Perfect engineering memory."],
+      "source": "docs/product/claims-evidence.md - row \"EIF connects experience retrieval to the session lifecycle\""
+    },
+    {
+      "id": "CLM-15",
+      "summary": "Validated session learning can be promoted into reusable knowledge and invokable workflows without changing model weights.",
+      "status": "OBSERVED (methodology contract only)",
+      "allowedWording": "EIF defines a governed learning flow in which a session's validated Knowledge Delta can be classified, linted, retained locally or promoted into reusable artifacts such as rules, playbooks, templates and skills.",
+      "limitations": "This is externalized system-level learning through versioned artifacts. It is not model training, fine-tuning, autonomous self-modification or evidence that task outcomes improve over time.",
+      "forbiddenWording": ["Self-learning AI.", "Agents improve automatically.", "The model learns from every session."],
+      "source": "docs/product/claims-evidence.md - row \"EIF defines governed learning and reusable skills\""
     }
   ]
 }

@@ -1,5 +1,29 @@
 import { test, expect } from '@playwright/test';
 
+test.describe('engineering-intelligence methodology', () => {
+  test('explains layers, session lifecycle, learning and skills without an outcome claim', async ({
+    page,
+  }) => {
+    await page.goto('/#methodology');
+    await expect(page.locator('#methodology')).toContainText('Engineering Intelligence');
+    await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
+    await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
+    await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
+    await expect(page.locator('#learning')).toContainText('versioned instructions, not hidden model behavior');
+    await expect(page.locator('#methodology')).toContainText('does not train model weights');
+  });
+
+  test('Ukrainian mode carries the same methodology structure', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#lang-toggle').click();
+    await expect(page.locator('#methodology')).toContainText('Інженерний інтелект');
+    await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
+    await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
+    await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
+    await expect(page.locator('#learning')).toContainText('не прихована поведінка моделі');
+  });
+});
+
 test.describe('evidence', () => {
   test('seven task rows are present', async ({ page }) => {
     await page.goto('/#evidence');

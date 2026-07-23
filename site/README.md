@@ -58,6 +58,16 @@ evidence in the framework repo's `docs/product/claims-evidence.md`. Do not
 add a claim-shaped sentence without a `data-claim-id`, and do not strengthen
 wording beyond what the manifest's `allowedWording` states.
 
+## Language and terminology
+
+English is the static default. The Ukrainian templates are an adaptive
+localization, not a line-by-line translation: explanatory prose and UI labels
+use natural Ukrainian engineering language, while canonical artifact types
+such as `Knowledge Delta`, `playbook` and `skill`, command names and status
+values keep their precise technical spelling. The Ukrainian E2E assertion
+guards against reintroducing avoidable mixed-language phrases in rendered
+page copy.
+
 ## Metadata / URLs
 
 `EIF_SITE_URL` and `EIF_REPOSITORY_URL` are the only two owner-supplied

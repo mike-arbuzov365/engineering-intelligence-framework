@@ -28,9 +28,31 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
-    await expect(page.locator('#learning')).toContainText('Retro');
+    await expect(page.locator('#learning')).toContainText('Ретроспектива');
     await expect(page.locator('#layers .knowledge-route')).toContainText('Пам’ять проєкту');
+    await expect(page.locator('#layers .knowledge-route')).toContainText(
+      'Закриття + ретроспектива',
+    );
     await expect(page.locator('#learning')).toContainText('не прихована поведінка моделі');
+
+    const ukrainianText = await page.locator('main').innerText();
+    for (const avoidableAnglicism of [
+      'scope',
+      'progress',
+      'failure patterns',
+      'fallback',
+      'core path',
+      'vendor docs',
+      'codebase',
+      'workflow',
+      'closeout',
+      'promotion',
+    ]) {
+      expect(ukrainianText).not.toContain(avoidableAnglicism);
+    }
+    for (const canonicalArtifact of ['Knowledge Delta', 'playbook', 'skill']) {
+      expect(ukrainianText).toContain(canonicalArtifact);
+    }
   });
 });
 

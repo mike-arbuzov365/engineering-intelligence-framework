@@ -81,12 +81,12 @@
         </h1>
         <div class="i18n-block" data-i18n-id="hero.body">
           <p class="hero__descriptor">
-            An operating methodology for engineering work that compounds.
+            A governed methodology that lets engineering experience compound.
           </p>
           <p class="hero__promise">
-            EIF turns engineering work into reusable operational intelligence:
-            methodology, project experience, session discipline and invokable
-            skills that survive beyond one agent conversation.
+            EIF turns validated engineering experience into reusable
+            operational intelligence: shared methods, project memory, session
+            discipline and invokable skills that outlive one agent conversation.
           </p>
           <nav class="hero__ctas" aria-label="Primary">
             <a href="#methodology">What EIF is</a>
@@ -106,8 +106,8 @@
             <h2 id="problem-heading">Chat history is not engineering memory</h2>
           </div>
           <p class="section__lede">
-            AI coding agents are powerful, but most agentic workflows still
-            treat a conversation as if it were durable engineering knowledge.
+            AI coding agents are powerful, but most workflows still treat a
+            conversation as if it were durable engineering knowledge.
           </p>
           <ol class="problem__list">
             <li>Previous decisions live only in a conversation that gets compacted or lost.</li>
@@ -115,7 +115,7 @@
             <li>Local lessons never resurface before a new, similar task.</li>
             <li>Command output floods the context window without filtering.</li>
             <li>Architecture decisions and scope get mixed up with unverified assumptions.</li>
-            <li>A merged PR gets treated as proof of working behavior, without evidence.</li>
+            <li>A merged PR gets treated as proof of working behavior, even when behavioral evidence is missing.</li>
             <li>Quality, privacy and token-efficiency are governed by separate, sometimes contradictory rules.</li>
           </ol>
         </div>
@@ -147,7 +147,7 @@
               </div>
               <div>
                 <dt class="label label--accent">Experience</dt>
-                <dd>Validated facts, decisions, incidents, failure patterns and rejected approaches are retrieved before implementation.</dd>
+                <dd>Validated facts, decisions, incidents, failure patterns and rejected approaches become retrievable before implementation.</dd>
               </div>
               <div>
                 <dt class="label label--accent">Capability</dt>
@@ -215,7 +215,7 @@
             <div class="knowledge-route__head">
               <div>
                 <span class="label label--accent">The learning elevator</span>
-                <h3>Evidence rises. Intelligence returns.</h3>
+                <h3>Evidence moves up. Intelligence comes back down.</h3>
               </div>
               <div class="knowledge-route__legend" aria-label="Flow directions">
                 <span>&uarr; Promotion</span>
@@ -256,8 +256,8 @@
             </ol>
             <p class="knowledge-route__return">
               <span aria-hidden="true">&darr;</span>
-              <strong>The next session retrieves downward:</strong>
-              relevant methods and project experience return before action, while the working context stays ephemeral.
+              <strong>The next session retrieves from the durable layers:</strong>
+              relevant methods and project experience return before action, while working context stays ephemeral.
             </p>
           </div>
           <div class="layers__flows" aria-label="Knowledge flow between tiers" data-claim-id="CLM-13">
@@ -271,7 +271,7 @@
         <div class="section__inner i18n-block" data-i18n-id="control-plane.body">
           <div class="section__head">
             <span class="label">04 &middot; The control plane</span>
-            <h2 id="control-plane-heading">One governed loop, source to durable knowledge</h2>
+            <h2 id="control-plane-heading">One governed loop, from intent to durable knowledge</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-01">
             EIF is a control plane that coordinates tools and agents without
@@ -350,7 +350,7 @@
             <h2 id="session-heading">A session is the unit of controlled work and learning</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-14">
-            EIF requires relevant prior-knowledge retrieval before non-trivial
+            EIF requires retrieval of relevant prior knowledge before non-trivial
             work and defines preparation, controlled execution, verification
             and closeout as the session lifecycle.
           </p>
@@ -400,7 +400,7 @@
         <div class="section__inner i18n-block" data-i18n-id="loop.body" data-i18n-reinit="loop">
           <div class="section__head">
             <span class="label">06 &middot; The evidence loop</span>
-            <h2 id="loop-heading">Bounded, not autonomous</h2>
+            <h2 id="loop-heading">Bounded iteration, not open-ended autonomy</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-04">
             EIF includes a bounded evidence-loop contract for iterative agent
@@ -521,10 +521,10 @@
             <h2 id="learning-heading">From experience to reusable knowledge and skills</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-15">
-            EIF defines a governed learning flow in which a session's
-            validated Knowledge Delta can be classified, linted, retained
-            locally or promoted into reusable artifacts such as rules,
-            playbooks, templates and skills.
+            Learning becomes durable only when a session's validated
+            Knowledge Delta is classified, linted, retained locally or
+            explicitly promoted into a versioned rule, playbook, template or
+            skill.
           </p>
           <ol class="learning__flow" data-claim-id="CLM-15">
             <li><span class="label label--accent">Observe</span><p>Real work produces evidence: a fact, incident, rejected approach, risk or repeatable method.</p></li>
@@ -559,7 +559,7 @@
         <div class="section__inner i18n-block" data-i18n-id="integrations.body" data-i18n-reinit="reveal">
           <div class="section__head">
             <span class="label">08 &middot; Optional capabilities</span>
-            <h2 id="integrations-heading">Three accelerators, three explicit fallbacks</h2>
+            <h2 id="integrations-heading">Three accelerators. A fallback for each.</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-12">
             Graphify, RTK and Context7 each add one bounded capability. None
@@ -639,7 +639,7 @@
         <div class="section__inner i18n-block" data-i18n-id="evidence.body" data-i18n-reinit="reveal">
           <div class="section__head">
             <span class="label">09 &middot; Current tasks and evidence</span>
-            <h2 id="evidence-heading">What is bounded and observed today</h2>
+            <h2 id="evidence-heading">What has been observed within clear boundaries</h2>
           </div>
           <p class="section__lede">
             Seven tasks a governed agent actually performs with this
@@ -748,12 +748,11 @@
           </p>
           <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale en</code></pre>
           <p>
-            That one command initializes a separate, runnable project
-            instance. The bundled demo then seeds and retrieves real
-            knowledge, makes one change informed by that retrieval, verifies
-            it with a real failing-before/passing-after test, and closes out
-            in Ukrainian, via a config-driven locale layer, in the reference
-            walkthrough.
+            That command initializes a separate, runnable project instance.
+            In the reference walkthrough, the bundled demo seeds and retrieves
+            real knowledge, makes one retrieval-informed change, verifies it
+            with a real failing-before/passing-after test, and closes the
+            session in Ukrainian through a config-driven locale layer.
           </p>
           <p class="label">
             No PyPI package yet. No claim about how long any of this takes a
@@ -766,7 +765,7 @@
         <div class="section__inner i18n-block" data-i18n-id="limitations.body">
           <div class="section__head">
             <span class="label">11 &middot; Limitations</span>
-            <h2 id="limitations-heading">What this is not, yet</h2>
+            <h2 id="limitations-heading">What EIF is not yet</h2>
           </div>
           <ul class="limitations__list">
             <li><strong>Pre-release.</strong> v0.1 is in progress; this repository is being extracted from a private production instance. Expect gaps.</li>
@@ -808,12 +807,13 @@
     <div id="i18n-templates" hidden>
       <template data-i18n-id="hero.body">
         <p class="hero__descriptor">
-          Операційна методологія для інженерної роботи, досвід якої накопичується.
+          Керована методологія, завдяки якій інженерний досвід накопичується.
         </p>
         <p class="hero__promise">
-          EIF перетворює інженерну роботу на повторно використовуваний
-          операційний інтелект: методологію, досвід проєкту, дисципліну сесій
-          та skills, які переживають окрему розмову з агентом.
+          EIF перетворює перевірений інженерний досвід на придатний до
+          повторного використання операційний інтелект: спільні методи,
+          пам&rsquo;ять проєкту, дисципліну сесій та інструменти типу skill,
+          що не зникають разом з окремою розмовою з агентом.
         </p>
         <nav class="hero__ctas" aria-label="Основна навігація">
           <a href="#methodology">Що таке EIF</a>
@@ -829,7 +829,7 @@
           <h2 id="problem-heading">Історія чату не замінює інженерну пам&rsquo;ять</h2>
         </div>
         <p class="section__lede">
-          AI-агенти для розробки потужні, але в більшості агентних процесів
+          Агенти ШІ для розробки потужні, але в більшості робочих процесів
           розмову досі трактують як стійке інженерне знання.
         </p>
         <ol class="problem__list">
@@ -838,8 +838,8 @@
           <li>Локальні уроки не спливають перед новим, схожим завданням.</li>
           <li>Вивід команд заповнює контекстне вікно без фільтрації.</li>
           <li>Архітектурні рішення змішуються з неперевіреними припущеннями.</li>
-          <li>Змерджений PR вважають доказом робочої поведінки без жодних доказів.</li>
-          <li>Якість, приватність і токен-ефективність підпорядковані різним, часто суперечливим правилам.</li>
+          <li>PR після злиття вважають доказом робочої поведінки, навіть коли поведінкових доказів немає.</li>
+          <li>Якість, приватність і ефективність використання токенів підпорядковані різним, часто суперечливим правилам.</li>
         </ol>
       </template>
 
@@ -850,9 +850,9 @@
         </div>
         <p class="section__lede" data-claim-id="CLM-15">
           EIF задає керований потік навчання: перевірений Knowledge Delta
-          сесії можна класифікувати, перевірити лінтером, залишити локально
-          або підняти до повторно використовуваних правил, playbooks,
-          шаблонів і skills.
+          сесії можна класифікувати, перевірити, залишити в проєкті або
+          підвищити до рівня повторно використовуваних правил, playbook,
+          шаблонів і skill.
         </p>
         <div class="methodology__definition" data-claim-id="CLM-15">
           <p class="methodology__statement">
@@ -864,24 +864,24 @@
           <dl class="methodology__parts">
             <div>
               <dt class="label label--accent">Методологія</dt>
-              <dd>Принципи, онтологія, модель авторитету, playbooks і правила доказів визначають спосіб роботи.</dd>
+              <dd>Принципи, онтологія, модель повноважень, playbook і правила доказів визначають спосіб роботи.</dd>
             </div>
             <div>
               <dt class="label label--accent">Досвід</dt>
-              <dd>Перевірені факти, рішення, інциденти, failure patterns і відхилені підходи шукають до реалізації.</dd>
+              <dd>Перевірені факти, рішення, інциденти, повторювані моделі збоїв і відхилені підходи стають доступними до початку реалізації.</dd>
             </div>
             <div>
               <dt class="label label--accent">Спроможність</dt>
-              <dd>Шаблони роблять добру структуру повторюваною, а skills - цілі workflows доступними для виклику агентом.</dd>
+              <dd>Шаблони роблять вдалу структуру повторюваною, а skill дають агенту змогу запускати цілі робочі процеси.</dd>
             </div>
           </dl>
         </div>
         <p class="methodology__boundary" data-claim-id="CLM-15">
           <strong>Що тут означає &ldquo;навчання&rdquo;:</strong> інженерна
-          система виносить перевірений досвід у reviewed і версійовані
-          artifacts, які знаходить наступна сесія. EIF не тренує ваги моделі,
-          не робить fine-tuning LLM і не дозволяє агенту переписувати власні
-          safety rules.
+          система виносить перевірений досвід у переглянуті й версійовані
+          артефакти, які може знайти наступна сесія. EIF не тренує ваги
+          моделі, не донавчає LLM і не дозволяє агенту переписувати власні
+          правила безпеки.
         </p>
       </template>
 
@@ -891,8 +891,8 @@
           <h2 id="layers-heading">Три шари відокремлюють метод, пам&rsquo;ять і поточну роботу</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-13">
-          EIF відокремлює повторно використовувану методологію framework,
-          стійке знання проєкту та ефемерний контекст сесії у три рівні;
+          EIF відокремлює повторно використовувану методологію фреймворку,
+          стійке знання проєкту та тимчасовий контекст сесії у три рівні;
           Knowledge Delta керує переходом знання між ними.
         </p>
         <div class="layers__stack" data-claim-id="CLM-13">
@@ -902,8 +902,8 @@
               <span class="layers__scope">Спільний</span>
             </div>
             <div>
-              <h3>Інтелект framework</h3>
-              <p>Cross-project методологія: онтологія, авторитет, глобальні правила, playbooks, шаблони та skills.</p>
+              <h3>Інтелект фреймворку</h3>
+              <p>Міжпроєктна методологія: онтологія, модель повноважень, глобальні правила, playbook, шаблони та skill.</p>
             </div>
             <p class="layers__examples">Як працювати</p>
           </article>
@@ -914,18 +914,18 @@
             </div>
             <div>
               <h3>Інтелект проєкту</h3>
-              <p>Архітектура, рішення, доменні факти, інциденти, ризики й локальні конвенції одного проєкту.</p>
+              <p>Архітектура, рішення, доменні факти, інциденти, ризики й локальні правила одного проєкту.</p>
             </div>
             <p class="layers__examples">Що знає ця система</p>
           </article>
           <article class="layers__tier layers__tier--three">
             <div class="layers__tier-id">
               <span class="label label--accent">Tier 3</span>
-              <span class="layers__scope">Ефемерний</span>
+              <span class="layers__scope">Тимчасовий</span>
             </div>
             <div>
               <h3>Інтелект сесії</h3>
-              <p>Поточний scope, progress, спостереження, припущення, відкриті питання та чернетка Knowledge Delta.</p>
+              <p>Поточний обсяг і стан роботи, спостереження, припущення, відкриті питання та чернетка Knowledge Delta.</p>
             </div>
             <p class="layers__examples">Що відбувається зараз</p>
           </article>
@@ -934,11 +934,11 @@
           <div class="knowledge-route__head">
             <div>
               <span class="label label--accent">Ліфт навчання</span>
-              <h3>Докази піднімаються. Інтелект повертається.</h3>
+              <h3>Докази рухаються вгору. Інтелект повертається вниз.</h3>
             </div>
             <div class="knowledge-route__legend" aria-label="Напрямки потоку">
-              <span>&uarr; Promotion</span>
-              <span>&darr; Retrieval</span>
+              <span>&uarr; Підвищення рівня</span>
+              <span>&darr; Пошук досвіду</span>
             </div>
           </div>
           <ol class="knowledge-route__steps">
@@ -950,8 +950,8 @@
             </li>
             <li data-tier="GATE" class="knowledge-route__gate">
               <details open>
-                <summary><span>02</span><strong>Closeout + retro</strong><em>Gate</em></summary>
-                <p>Порівняти намір із доказами, назвати failure patterns і вирішити, що можна повторно використати. Неперевірені нотатки не проходять.</p>
+                <summary><span>02</span><strong>Закриття + ретроспектива</strong><em>Перевірка</em></summary>
+                <p>Порівняти намір із доказами, виявити повторювані моделі збоїв і вирішити, що можна використати знову. Неперевірені нотатки не проходять.</p>
               </details>
             </li>
             <li data-tier="T2">
@@ -962,26 +962,26 @@
             </li>
             <li data-tier="GATE" class="knowledge-route__gate">
               <details>
-                <summary><span>04</span><strong>Рішення про promotion</strong><em>Gate</em></summary>
-                <p>За межі проєкту переходить лише cross-project урок із provenance та review.</p>
+                <summary><span>04</span><strong>Рішення про підвищення рівня</strong><em>Перевірка</em></summary>
+                <p>За межі проєкту переходить лише міжпроєктний урок із зафіксованим походженням і результатом перевірки.</p>
               </details>
             </li>
             <li data-tier="T1">
               <details>
-                <summary><span>05</span><strong>Метод framework</strong><em>Tier 1</em></summary>
+                <summary><span>05</span><strong>Метод фреймворку</strong><em>Tier 1</em></summary>
                 <p>Повторно використовуване правило, playbook, шаблон або skill стає доступним іншим проєктам.</p>
               </details>
             </li>
           </ol>
           <p class="knowledge-route__return">
             <span aria-hidden="true">&darr;</span>
-            <strong>Наступна сесія отримує знання вниз:</strong>
-            релевантні методи й досвід проєкту повертаються до дії, а робочий контекст лишається ефемерним.
+            <strong>Наступна сесія шукає знання у стійких шарах:</strong>
+            потрібні методи й досвід проєкту повертаються до початку дії, а робочий контекст лишається тимчасовим.
           </p>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
-          <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані skills.</p>
-          <p><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання через Knowledge Delta та явне рішення про promotion.</p>
+          <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані skill.</p>
+          <p><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання через Knowledge Delta та явне рішення про підвищення рівня.</p>
         </div>
       </template>
 
@@ -997,20 +997,20 @@
         </p>
         <svg class="control-plane__diagram" aria-hidden="true" viewBox="0 0 1240 220" preserveAspectRatio="xMidYMid meet">
           <path class="control-plane__path" fill="none" d="M 60 150 L 220 90 L 380 170 L 540 90 L 700 170 L 860 90 L 1020 170 L 1180 130" />
-          <g class="control-plane__node" transform="translate(60,150)"><circle r="8" /><text y="-24">Intent</text></g>
-          <g class="control-plane__node" transform="translate(220,90)"><circle r="8" /><text y="-24">Retrieval</text></g>
-          <g class="control-plane__node" transform="translate(380,170)"><circle r="8" /><text y="34">Authority</text></g>
-          <g class="control-plane__node" transform="translate(540,90)"><circle r="8" /><text y="-24">Navigation</text></g>
-          <g class="control-plane__node" transform="translate(700,170)"><circle r="8" /><text y="34">Execution</text></g>
-          <g class="control-plane__node" transform="translate(860,90)"><circle r="8" /><text y="-24">Evidence</text></g>
+          <g class="control-plane__node" transform="translate(60,150)"><circle r="8" /><text y="-24">Намір</text></g>
+          <g class="control-plane__node" transform="translate(220,90)"><circle r="8" /><text y="-24">Пошук</text></g>
+          <g class="control-plane__node" transform="translate(380,170)"><circle r="8" /><text y="34">Повноваження</text></g>
+          <g class="control-plane__node" transform="translate(540,90)"><circle r="8" /><text y="-24">Навігація</text></g>
+          <g class="control-plane__node" transform="translate(700,170)"><circle r="8" /><text y="34">Виконання</text></g>
+          <g class="control-plane__node" transform="translate(860,90)"><circle r="8" /><text y="-24">Докази</text></g>
           <g class="control-plane__node" transform="translate(1020,170)"><circle r="8" /><text y="34">Knowledge Delta</text></g>
-          <g class="control-plane__node control-plane__node--terminal" transform="translate(1180,130)"><circle r="9" /><text y="-26">Durable</text></g>
+          <g class="control-plane__node control-plane__node--terminal" transform="translate(1180,130)"><circle r="9" /><text y="-26">Стійке</text></g>
         </svg>
         <ol class="control-plane__list">
           <li><span class="label label--accent">01 &middot; Намір користувача</span><p>У циклі з&rsquo;являється завдання або питання.</p></li>
           <li><span class="label label--accent">02 &middot; Здобуття досвіду</span><p>Раніше перевірене знання підвантажується в контекст ще до початку роботи.</p></li>
           <li><span class="label label--accent">03 &middot; Повноваження й межі</span><p>Що має відбутися, що відбувається насправді і що можна цитувати - три різні питання.</p></li>
-          <li><span class="label label--accent">04 &middot; Структурна навігація</span><p>Опційний граф коду допомагає швидше знаходити потрібне. Це доказ для навігації, не джерело повноважень.</p></li>
+          <li><span class="label label--accent">04 &middot; Структурна навігація</span><p>Необов&rsquo;язковий граф коду допомагає швидше знаходити потрібне. Це доказ для навігації, не джерело повноважень.</p></li>
           <li><span class="label label--accent">05 &middot; Контрольоване виконання</span><p>Робота триває в межах чітко визначеного обсягу, бюджетів і умов зупинки.</p></li>
           <li><span class="label label--accent">06 &middot; Тести й докази</span><p>Змерджену зміну не вважають доказом робочої поведінки саму собою.</p></li>
           <li><span class="label label--accent">07 &middot; Knowledge Delta</span><p>Здобуте знання фіксують у тій самій сесії, а не залишають у чаті.</p></li>
@@ -1018,7 +1018,7 @@
         </ol>
         <p class="control-plane__note label" data-claim-id="CLM-12">
           Файли джерела лишаються головним джерелом повноважень завжди.
-          Опційний структурний граф - це доказ для навігації, він не замінює
+          Необов&rsquo;язковий структурний граф - це доказ для навігації, він не замінює
           перевірку джерела.
         </p>
       </template>
@@ -1030,31 +1030,31 @@
         </div>
         <p class="section__lede" data-claim-id="CLM-14">
           EIF вимагає пошуку релевантного попереднього знання до нетривіальної
-          роботи й визначає preparation, контрольоване виконання, verification
-          та closeout як lifecycle сесії.
+          роботи й визначає підготовку, контрольоване виконання, перевірку
+          та закриття як життєвий цикл сесії.
         </p>
         <ol class="session__timeline" data-claim-id="CLM-14">
           <li>
             <span class="session__number label label--accent">01</span>
             <div>
               <h3>Знайти досвід і зорієнтуватися</h3>
-              <p>Прочитати активні інструкції та source, а потім знайти у durable knowledge релевантні уроки, збої й відхилені підходи.</p>
+              <p>Прочитати активні інструкції та вихідні файли, а потім знайти у стійкому знанні потрібні уроки, збої й відхилені підходи.</p>
             </div>
             <span class="session__artifact">Tier 1 + Tier 2</span>
           </li>
           <li>
             <span class="session__number label label--accent">02</span>
             <div>
-              <h3>Визначити scope й підготуватися</h3>
+              <h3>Визначити обсяг і підготуватися</h3>
               <p>Обрати одну сесію або execution packet. Назвати мету, докази, обмеження, бюджети й умови зупинки.</p>
             </div>
-            <span class="session__artifact">Task scope</span>
+            <span class="session__artifact">Обсяг завдання</span>
           </li>
           <li>
             <span class="session__number label label--accent">03</span>
             <div>
               <h3>Виконати й перевірити</h3>
-              <p>Тримати спостереження окремо від припущень, працювати в scope та спиратися на оголошені evaluators, а не на фразу про завершення.</p>
+              <p>Тримати спостереження окремо від припущень, працювати в межах визначеного обсягу та спиратися на оголошені оцінювачі, а не на фразу про завершення.</p>
             </div>
             <span class="session__artifact">Tier 3</span>
           </li>
@@ -1064,20 +1064,21 @@
               <h3>Закрити й підняти знання</h3>
               <p>Записати реальні докази, відкриту роботу й Knowledge Delta. Зберегти перевірене знання, а ефемерний стан сесії видалити.</p>
             </div>
-            <span class="session__artifact">Durable delta</span>
+            <span class="session__artifact">Стійка зміна знань</span>
           </li>
         </ol>
         <p class="session__boundary" data-claim-id="CLM-14">
-          Tier 3 - це checkpoint, а не пам&rsquo;ять: тут можуть бути progress,
-          evidence labels, відкриті питання й чернетка delta, але не сирий AI
-          reasoning. Його ніколи не піднімають цілком.
+          Tier 3 - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
+          стан виконання, позначки доказів, відкриті питання й чернетка
+          Knowledge Delta, але не сирі міркування ШІ. Цей шар ніколи не
+          підвищують цілком.
         </p>
       </template>
 
       <template data-i18n-id="loop.body">
         <div class="section__head">
           <span class="label">06 &middot; Цикл доказів</span>
-          <h2 id="loop-heading">Обмежений, не автономний</h2>
+          <h2 id="loop-heading">Обмежені ітерації замість безмежної автономності</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-04">
           EIF задає контракт обмеженого циклу для ітеративної роботи агента:
@@ -1089,21 +1090,21 @@
           <div class="loop__sticky">
             <svg class="loop__diagram" aria-hidden="true" data-label="Навігація фазами обмеженого циклу доказів" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
               <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
-              <g class="loop__node" data-phase="orient" data-label="Показати фазу Orient" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Orient</text></g>
-              <g class="loop__node" data-phase="define" data-label="Показати фазу Define" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Define</text></g>
-              <g class="loop__node" data-phase="act" data-label="Показати фазу Act" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Act</text></g>
-              <g class="loop__node" data-phase="observe" data-label="Показати фазу Observe" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Observe</text></g>
-              <g class="loop__node" data-phase="study" data-label="Показати фазу Study" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Study</text></g>
-              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Adapt" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Adapt</text></g>
+              <g class="loop__node" data-phase="orient" data-label="Показати фазу Орієнтація" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Орієнтація</text></g>
+              <g class="loop__node" data-phase="define" data-label="Показати фазу Визначення" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Визначення</text></g>
+              <g class="loop__node" data-phase="act" data-label="Показати фазу Дія" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Дія</text></g>
+              <g class="loop__node" data-phase="observe" data-label="Показати фазу Спостереження" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Спостереження</text></g>
+              <g class="loop__node" data-phase="study" data-label="Показати фазу Аналіз" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Аналіз</text></g>
+              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Коригування" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Коригування</text></g>
             </svg>
           </div>
           <ol class="loop__phases">
-            <li class="loop__phase" data-phase="orient"><span class="label label--accent">01 &middot; Orient</span><p>Прочитати поточне джерело й здобуте знання, що стосується справи. Факти фіксувати окремо від припущень.</p></li>
-            <li class="loop__phase" data-phase="define"><span class="label label--accent">02 &middot; Define</span><p>Сформулювати найменшу наступну гіпотезу і спостереження, яке її підтвердить або спростує.</p></li>
-            <li class="loop__phase" data-phase="act"><span class="label label--accent">03 &middot; Act</span><p>Внести одну оборотну зміну або провести один діагностичний експеримент.</p></li>
-            <li class="loop__phase" data-phase="observe"><span class="label label--accent">04 &middot; Observe</span><p>Запустити задекларований оцінювач і зафіксувати його реальний результат.</p></li>
-            <li class="loop__phase" data-phase="study"><span class="label label--accent">05 &middot; Study</span><p>Порівняти очікуване з фактичним. Якщо не вийшло - зафіксувати стислу сигнатуру збою, яку можна порівняти з іншими спробами.</p></li>
-            <li class="loop__phase" data-phase="adapt"><span class="label label--accent">06 &middot; Adapt</span><p>Обрати наступний крок, спираючись на спостереження. Дію, що вже не спрацювала, без нових доказів не повторюють.</p></li>
+            <li class="loop__phase" data-phase="orient"><span class="label label--accent">01 &middot; Орієнтація</span><p>Прочитати поточне джерело й здобуте знання, що стосується справи. Факти фіксувати окремо від припущень.</p></li>
+            <li class="loop__phase" data-phase="define"><span class="label label--accent">02 &middot; Визначення</span><p>Сформулювати найменшу наступну гіпотезу і спостереження, яке її підтвердить або спростує.</p></li>
+            <li class="loop__phase" data-phase="act"><span class="label label--accent">03 &middot; Дія</span><p>Внести одну оборотну зміну або провести один діагностичний експеримент.</p></li>
+            <li class="loop__phase" data-phase="observe"><span class="label label--accent">04 &middot; Спостереження</span><p>Запустити оголошений оцінювач і зафіксувати його реальний результат.</p></li>
+            <li class="loop__phase" data-phase="study"><span class="label label--accent">05 &middot; Аналіз</span><p>Порівняти очікуване з фактичним. Якщо не вийшло - зафіксувати стислу сигнатуру збою, яку можна порівняти з іншими спробами.</p></li>
+            <li class="loop__phase" data-phase="adapt"><span class="label label--accent">06 &middot; Коригування</span><p>Обрати наступний крок, спираючись на спостереження. Дію, що вже не спрацювала, без нових доказів не повторюють.</p></li>
           </ol>
         </div>
         <div class="loop__control">
@@ -1121,9 +1122,9 @@
           <div>
             <h3 class="label">Виходи</h3>
             <dl class="loop__exits">
-              <div class="loop__exits-row loop__exits-row--pass"><dt>Pass</dt><dd>Тільки коли доказ успіху справді існує.</dd></div>
-              <div class="loop__exits-row loop__exits-row--blocked"><dt>Blocked</dt><dd>Настала умова зупинки, оцінювач недоступний і немає гідної заміни, вичерпано бюджет ітерацій, або та сама сигнатура збою повторилася б утретє без змін.</dd></div>
-              <div class="loop__exits-row loop__exits-row--deferred"><dt>Deferred</dt><dd>Тільки коли решта роботи явно належить власнику або виходить за межі затвердженого обсягу - із названим місцем призначення.</dd></div>
+              <div class="loop__exits-row loop__exits-row--pass"><dt>Пройдено</dt><dd>Тільки коли доказ успіху справді існує.</dd></div>
+              <div class="loop__exits-row loop__exits-row--blocked"><dt>Заблоковано</dt><dd>Настала умова зупинки, оцінювач недоступний і немає гідної заміни, вичерпано бюджет ітерацій, або та сама сигнатура збою повторилася б утретє без змін.</dd></div>
+              <div class="loop__exits-row loop__exits-row--deferred"><dt>Відкладено</dt><dd>Тільки коли решта роботи явно належить власнику або виходить за межі затвердженого обсягу - із названим місцем призначення.</dd></div>
             </dl>
           </div>
         </div>
@@ -1132,79 +1133,80 @@
       <template data-i18n-id="learning.body">
         <div class="section__head">
           <span class="label">07 &middot; Кероване навчання</span>
-          <h2 id="learning-heading">Від досвіду до повторно використовуваних знань і skills</h2>
+          <h2 id="learning-heading">Від досвіду до повторно використовуваних знань і виконуваних skill</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-15">
-          EIF задає керований потік навчання: перевірений Knowledge Delta
-          сесії можна класифікувати, перевірити лінтером, залишити локально
-          або підняти до повторно використовуваних правил, playbooks,
-          шаблонів і skills.
+          Навчання стає стійким лише тоді, коли перевірений Knowledge Delta
+          сесії класифікують, перевіряють, залишають у проєкті або явно
+          підвищують до рівня версійованого правила, playbook, шаблону чи
+          skill.
         </p>
         <ol class="learning__flow" data-claim-id="CLM-15">
-          <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає evidence: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
+          <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає докази: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
           <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
-          <li><span class="label label--accent">Retro</span><p>Closeout порівнює намір із доказами, виділяє failure patterns і вирішує, чи урок придатний до повторного використання.</p></li>
-          <li><span class="label label--accent">Класифікувати + перевірити</span><p>Knowledge Ingest і Lint перевіряють тип artifact, source, status, мову, дублювання й посилання.</p></li>
-          <li><span class="label label--accent">Підняти</span><p>Проєктне знання лишається у Tier 2; загальний урок переходить у Tier 1 тільки за явним рішенням.</p></li>
-          <li><span class="label label--accent">Знайти знову</span><p>Наступна релевантна сесія знаходить artifact до дії й замикає learning loop.</p></li>
+          <li><span class="label label--accent">Ретроспектива</span><p>Закриття сесії порівнює намір із доказами, виділяє повторювані моделі збоїв і визначає, чи придатний урок до повторного використання.</p></li>
+          <li><span class="label label--accent">Класифікувати + перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
+          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається у Tier 2; загальний урок переходить у Tier 1 тільки за явним рішенням.</p></li>
+          <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
         </ol>
         <div class="learning__distinction" data-claim-id="CLM-15">
           <div>
             <span class="label">Досвід</span>
             <h3>Що система дізналася</h3>
-            <p>Факти, рішення, інциденти, edge cases, failure patterns і lessons із provenance та lifecycle status.</p>
+            <p>Факти, рішення, інциденти, граничні випадки, повторювані моделі збоїв та уроки із зафіксованим походженням і станом у життєвому циклі.</p>
           </div>
           <div>
             <span class="label">Skill</span>
             <h3>Як система може діяти</h3>
-            <p>Повторно використовуваний workflow для planning, execution, review, retrieval або curation. Це версійовані інструкції, не прихована поведінка моделі.</p>
+            <p>Повторно використовуваний робочий процес для планування, виконання, перевірки, пошуку досвіду або впорядкування знань. Це версійовані інструкції, а не прихована поведінка моделі.</p>
           </div>
         </div>
         <p class="learning__boundary" data-claim-id="CLM-15">
           Це кероване навчання на рівні системи, а не автономна
           самомодифікація. Урок можна відхилити, залишити локальним, визнати
-          простроченим або superseded; локальний skill може спеціалізувати
-          workflow, але не знижувати safety rules framework.
+          простроченим або замінити новішим; локальний skill може
+          спеціалізувати робочий процес, але не послаблювати правила безпеки
+          фреймворку.
         </p>
       </template>
 
       <template data-i18n-id="integrations.body">
         <div class="section__head">
-          <span class="label">08 &middot; Опційні спроможності</span>
-          <h2 id="integrations-heading">Три прискорювачі, три явні fallback</h2>
+          <span class="label">08 &middot; Необов&rsquo;язкові спроможності</span>
+          <h2 id="integrations-heading">Три прискорювачі. Для кожного є резервний шлях.</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
           Graphify, RTK і Context7 додають по одній обмеженій спроможності.
           Жодна не є самою методологією: якщо інструмент недоступний, EIF має
-          названий core path через пошук у source, сирий shell output або
-          локальну документацію.
+          визначений базовий шлях через пошук у вихідних файлах, нефільтрований
+          вивід команд або локальну документацію.
         </p>
         <figure class="capability-map">
           <figcaption>
-            <span class="label label--accent">Мости опційних спроможностей</span>
-            <span>Під кожним мостом лишається core path</span>
+            <span class="label label--accent">Мости необов&rsquo;язкових спроможностей</span>
+            <span>Під кожним мостом лишається базовий шлях</span>
           </figcaption>
           <ol>
             <li>
               <span class="capability-map__index">01</span>
-              <div><strong>Зрозуміти codebase</strong><small>paths, communities, impact hints</small></div>
+              <div><strong>Зрозуміти кодову базу</strong><small>зв&rsquo;язки, групи компонентів, підказки щодо впливу</small></div>
               <span class="capability-map__bridge" aria-hidden="true"></span>
               <b>Graphify</b>
-              <em>fallback: пошук у source</em>
+              <em>резерв: пошук у вихідних файлах</em>
             </li>
             <li>
               <span class="capability-map__index">02</span>
-              <div><strong>Зменшити шум інструментів</strong><small>стиснений output і облік скорочення</small></div>
+              <div><strong>Зменшити шум інструментів</strong><small>стиснений вивід і облік скорочення</small></div>
               <span class="capability-map__bridge" aria-hidden="true"></span>
               <b>RTK</b>
-              <em>fallback: сирий shell</em>
+              <em>резерв: нефільтрований командний рядок</em>
             </li>
             <li>
               <span class="capability-map__index">03</span>
-              <div><strong>Звіритися з актуальною vendor docs</strong><small>version-aware джерела для library та API</small></div>
+              <div><strong>Звіритися з актуальною документацією постачальника</strong><small>джерела для відповідної версії бібліотеки чи API</small></div>
               <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
               <b>Context7</b>
-              <em>fallback: локальні docs</em>
+              <em>резерв: локальна документація</em>
             </li>
           </ol>
         </figure>
@@ -1215,9 +1217,9 @@
               <span>Навігація графом коду, аналіз впливу змін</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-05">
-              <p><strong>Межа даних:</strong> лише локально для видобутку на основі AST; external-api тільки якщо явно ввімкнено семантичне маркування.</p>
+              <p><strong>Межа даних:</strong> лише локально для структурного видобутку на основі AST; <code>external-api</code> - тільки якщо явно ввімкнено семантичне маркування.</p>
               <p><strong>Без неї:</strong> агент повертається до пошуку в джерелах і ручного перегляду - підказок за графом і впливом немає.</p>
-              <p><strong>Стан здоров&rsquo;я:</strong> класифікація свіжості fresh/stale/unknown/diverged; застарілий або невідомий граф ніколи не позначається як healthy. Перевірено лише на одній локальній версії й невеликій синтетичній фікстурі - це не порівняльний результат навігації.</p>
+              <p><strong>Справність:</strong> свіжість класифікується як <code>fresh</code>, <code>stale</code>, <code>unknown</code> або <code>diverged</code>; застарілий чи невідомий граф ніколи не позначається як справний. Перевірено лише на одній локальній версії й невеликому синтетичному тестовому прикладі - це не порівняльний результат навігації.</p>
             </div>
           </li>
           <li class="reveal">
@@ -1228,7 +1230,7 @@
             <div class="reveal__detail" data-claim-id="CLM-06">
               <p><strong>Межа даних:</strong> лише локально.</p>
               <p><strong>Без неї:</strong> команди виконуються без фільтрації, скорочення не фіксується.</p>
-              <p><strong>Стан здоров&rsquo;я:</strong> невдала обов&rsquo;язкова канарка означає degraded, не healthy. Сирий або невдалий проксі-маршрут завжди фіксують як нульову економію, ніколи як реальне скорочення.</p>
+              <p><strong>Справність:</strong> невдала обов&rsquo;язкова контрольна перевірка означає стан <code>degraded</code>, а не справність. Нефільтрований або невдалий маршрут через proxy завжди фіксують як нульову економію, ніколи як реальне скорочення.</p>
             </div>
           </li>
           <li class="reveal">
@@ -1237,9 +1239,9 @@
               <span>Актуальна документація бібліотек і API замість застарілих даних навчання</span>
             </button>
             <div class="reveal__detail">
-              <p><strong>Межа даних:</strong> external-api - звернення до сторонньої служби документації.</p>
+              <p><strong>Межа даних:</strong> <code>external-api</code> - звернення до зовнішньої служби документації.</p>
               <p><strong>Без неї:</strong> агент покладається на локальну документацію або власні знання з навчання, які можуть застаріти.</p>
-              <p><strong>Стан здоров&rsquo;я:</strong> поки що лише декларація - адаптер провайдера ще не пройшов власну сесію й ворота доказів.</p>
+              <p><strong>Справність:</strong> поки що лише декларація - адаптер постачальника ще не пройшов власну сесію й перевірку доказів.</p>
             </div>
           </li>
         </ul>
@@ -1248,7 +1250,7 @@
       <template data-i18n-id="evidence.body">
         <div class="section__head">
           <span class="label">09 &middot; Поточні завдання й докази</span>
-          <h2 id="evidence-heading">Що вже обмежено перевірено сьогодні</h2>
+          <h2 id="evidence-heading">Що вже перевірено у чітко визначених межах</h2>
         </div>
         <p class="section__lede">
           Сім завдань, які керований агент справді виконує з цим
@@ -1259,10 +1261,10 @@
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Встановлення</span>
-              <span>Придатний до встановлення wheel eifctl із сімома підкомандами</span>
+              <span>Пакет eifctl, придатний до встановлення, із сімома підкомандами</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-02">
-              <p>Справжній wheel, зібраний із <code>pyproject.toml</code> і встановлений у чисте venv, дає робочу команду <code>eifctl</code> (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) - перевірено повним синтетичним завданням від початку до кінця.</p>
+              <p>Справжній wheel, зібраний із <code>pyproject.toml</code> і встановлений у чисте віртуальне середовище, дає робочу команду <code>eifctl</code> (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) - перевірено повним синтетичним завданням від початку до кінця.</p>
               <p><strong>Обмеження:</strong> пакета ще немає на PyPI; весь прохід спирається на адаптер Claude Code для власного запуску.</p>
             </div>
           </li>
@@ -1272,7 +1274,7 @@
               <span>Співіснування з уже налаштованим репозиторієм</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-11">
-              <p>Перевірка перед впровадженням виявляє наявне керування проєктом ще до першого запису й не продовжує роботу без явного рішення про співіснування; у режимі coexist згенерований блок поступається наявним правилам, а не оголошує себе єдиним джерелом повноважень.</p>
+              <p>Перевірка перед впровадженням виявляє наявне керування проєктом ще до першого запису й не продовжує роботу без явного рішення про співіснування; у режимі <code>coexist</code> згенерований блок поступається наявним правилам, а не оголошує себе єдиним джерелом повноважень.</p>
               <p><strong>Обмеження:</strong> виявлення керування спирається на евристику за довжиною вмісту, а не на семантику; перевірено на одній синтетичній фікстурі та повторних запусках проти однієї реальної приватної цілі.</p>
             </div>
           </li>
@@ -1282,7 +1284,7 @@
               <span>Здобуття досвіду ще до початку реалізації</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Офлайн-пошук за ключовими словами, чутливий до життєвого циклу знання й схеми, показує релевантні перевірені факти (зокрема українською), за замовчуванням приховує відхилене чи замінене та окремо розрізняє unparseable, schema-invalid і not-found.</p>
+              <p>Офлайн-пошук за ключовими словами, чутливий до життєвого циклу знання й схеми, показує релевантні перевірені факти (зокрема українською), за замовчуванням приховує відхилене чи замінене та окремо розрізняє стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code>.</p>
               <p><strong>Обмеження:</strong> це офлайн-оцінка за ключовими словами й підрядками, не семантичний пошук; перевірено на невеликих тестових індексах.</p>
             </div>
           </li>
@@ -1299,10 +1301,10 @@
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Перевірка</span>
-              <span>Інстанс проєкту перевіряє власну цілісність</span>
+              <span>Екземпляр проєкту перевіряє власну цілісність</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Вбудований верифікатор перевіряє коректність схеми конфігурації й lock-файлу, звіряє дайджести маніфесту з реальним перерахунком, узгодженість адаптера з конфігурацією, цілісність маркерів і розбіжності між конфігурацією та згенерованою точкою входу.</p>
+              <p>Вбудований засіб перевірки звіряє коректність схеми конфігурації й lock-файлу, дайджести маніфесту з новим обчисленням, узгодженість адаптера з конфігурацією, цілісність маркерів і розбіжності між конфігурацією та згенерованою точкою входу.</p>
               <p><strong>Обмеження:</strong> перевірка обмежена власним маніфестом пакета, це не інструмент загальної перевірки цілісності файлів.</p>
             </div>
           </li>
@@ -1322,7 +1324,7 @@
               <span>Українські поверхні проєкту, ще не повна локалізація відповідей</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-07">
-              <p>Пошук, рендеринг Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською - мову задає конфігурація кожного окремого інстансу.</p>
+              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською - мову задає конфігурація кожного окремого екземпляра.</p>
               <p><strong>Обмеження:</strong> це не стосується довільних розмовних відповідей самого агента.</p>
             </div>
           </li>
@@ -1347,17 +1349,17 @@
         </div>
         <p class="section__lede">
           Клонування репозиторію дає онтологію, схеми, документи керування,
-          пакет джерела <code>eifctl</code> і один відтворений вертикальний
+          вихідний пакет <code>eifctl</code> і один відтворений вертикальний
           зріз - це не стабільний реліз і не репрезентативна вибірка
           реальних інженерних завдань.
         </p>
         <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale uk</code></pre>
         <p>
-          Ця одна команда створює окремий інстанс проєкту, готовий до
-          запуску. Далі вбудоване демо здобуває й отримує реальне знання,
-          вносить одну зміну на основі цього знання, перевіряє її справжнім
-          тестом failing-before/passing-after і закриває сесію українською
-          через конфігурований шар локалі - просто в еталонному проході.
+          Ця команда створює окремий екземпляр проєкту, готовий до запуску.
+          В еталонному проході вбудований приклад додає і знаходить реальне
+          знання, вносить одну зміну на його основі, перевіряє її справжнім
+          тестом, який спочатку падає, а після зміни проходить, і закриває
+          сесію українською через мову, задану в конфігурації.
         </p>
         <p class="label">
           Пакета на PyPI ще немає. Про те, скільки часу це займає в людини,
@@ -1371,14 +1373,14 @@
           <h2 id="limitations-heading">Чого тут ще немає</h2>
         </div>
         <ul class="limitations__list">
-          <li><strong>Pre-release.</strong> v0.1 ще в розробці: репозиторій витягують із приватного продакшн-інстансу. Можливі прогалини.</li>
+          <li><strong>Попередня версія.</strong> v0.1 ще в розробці: репозиторій відокремлюють від приватного робочого екземпляра. Можливі прогалини.</li>
           <li><strong>Ще не на PyPI.</strong> Встановити через <code>pip install</code> з індексу пакетів поки не можна.</li>
           <li data-claim-id="CLM-09"><strong>Без заяв про якість чи переробку.</strong> Порівняльного дослідження не проводили; фреймворк не стверджує нічого про якість завдань, частку переробок чи кількість дефектів.</li>
-          <li><strong>Обмежений масштаб.</strong> Докази спираються на один синтетичний вертикальний зріз, пілот на трьох фікстурах і тестові набори на рівні адаптерів - це не велика й не незалежно відтворена вибірка.</li>
-          <li><strong>Опційні інтеграції лишаються опційними.</strong> Graphify і RTK ніколи не є обов&rsquo;язковими; застарілий чи деградований провайдер так і позначають, а не видають за справний.</li>
+          <li><strong>Обмежений масштаб.</strong> Докази спираються на один синтетичний вертикальний зріз, пілот на трьох тестових прикладах і тестові набори на рівні адаптерів - це не велика й не незалежно відтворена вибірка.</li>
+          <li><strong>Необов&rsquo;язкові інтеграції такими й лишаються.</strong> Graphify і RTK ніколи не є обов&rsquo;язковими; застарілий чи деградований постачальник так і позначають, а не видають за справний.</li>
           <li>
             <strong>Явні не-цілі v0.1:</strong> розміщений SaaS, автономний
-            мультиагентний рантайм, власна хмарна служба пам&rsquo;яті,
+            автономне мультиагентне середовище виконання, власна хмарна служба пам&rsquo;яті,
             обов&rsquo;язкова залежність від графа коду чи стиснення виводу,
             або будь-яка загальна заява про економію токенів.
           </li>

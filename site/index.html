@@ -260,12 +260,11 @@
           <figure class="ledger" data-claim-id="CLM-15">
             <figcaption class="ledger__caption">
               <span class="label label--accent">Traced: two sessions of one packet</span>
-              <h3>Experience arrives before the work, not after it</h3>
+              <h3>Experience arrives before implementation, not after it</h3>
               <p>
-                A packet is planned, two sessions run against it, and each one
-                starts by retrieving what is already known. Follow what enters
-                a session, what survives its closeout, and what is still
-                carried when the next session begins.
+                Follow one packet across two sessions: what each session is
+                given before it starts, what survives its closeout, and what
+                is still carried when the next one begins.
               </p>
             </figcaption>
 
@@ -280,10 +279,10 @@
               <line class="ledger__lane ledger__lane--packet" x1="180" y1="256" x2="836" y2="256" />
               <line class="ledger__lane" x1="128" y1="352" x2="936" y2="352" />
 
-              <text class="ledger__lane-label" x="4" y="52">T1 METHOD</text>
-              <text class="ledger__lane-label" x="4" y="148">T2 PROJECT</text>
+              <text class="ledger__lane-label" x="4" y="52">L1 FRAMEWORK</text>
+              <text class="ledger__lane-label" x="4" y="148">L2 PROJECT</text>
               <text class="ledger__lane-label" x="4" y="244">PACKET</text>
-              <text class="ledger__lane-label" x="4" y="340">T3 SESSION</text>
+              <text class="ledger__lane-label" x="4" y="340">L3 SESSION</text>
 
               <line class="ledger__gate" x1="256" y1="40" x2="256" y2="392" />
               <line class="ledger__gate" x1="492" y1="40" x2="492" y2="392" />
@@ -693,6 +692,30 @@
             or local documentation. None of the three is installed by the
             framework.
           </p>
+          <div class="token-economics" data-claim-id="CLM-06">
+            <span class="label label--accent">What this costs</span>
+            <p>
+              Governance is not free in tokens. Retrieval before work, packet
+              artifacts, a Knowledge Delta and a real closeout all consume
+              context that an ungoverned agent would spend on the task
+              itself. The intent is that controllability repays it: fewer
+              wrong paths taken confidently, fewer rediscoveries, fewer
+              retries of an approach already recorded as rejected.
+            </p>
+            <p>
+              What is <strong>measured</strong>: compression. RTK filters
+              command output before it reaches the model, and its adapter
+              records a reduction per route, with raw or failed routes
+              counted as zero rather than estimated.
+            </p>
+            <p>
+              What is <strong>not measured</strong>: the net. No study here
+              compares governed against ungoverned work end to end, so this
+              site does not claim the balance comes out positive. It states
+              the cost, states what is counted, and leaves the rest open
+              until there is evidence for it.
+            </p>
+          </div>
           <figure class="capability-map">
             <figcaption>
               <span class="label label--accent">Optional capability bridges</span>
@@ -738,7 +761,7 @@
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">RTK</span>
-                <span>Shell-output compression and tracked reduction</span>
+                <span>Rust Token Killer: shell-output compression with tracked reduction</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-06">
                 <p><strong>Data boundary:</strong> local-only.</p>
@@ -1015,7 +1038,7 @@
       <template data-i18n-id="layers.body">
         <div class="section__head">
           <span class="label">03 &middot; Рівні інтелекту</span>
-          <h2 id="layers-heading">Три рівні відокремлюють метод, пам&rsquo;ять і поточну роботу</h2>
+          <h2 id="layers-heading">Три рівні: як працювати, що знає проєкт, що відбувається зараз</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-13">
           EIF відокремлює повторно використовувану методологію фреймворку,
@@ -1025,33 +1048,33 @@
         <div class="layers__stack" data-claim-id="CLM-13">
           <article class="layers__tier layers__tier--one">
             <div class="layers__tier-id">
-              <span class="label label--accent">Рівень 1</span>
+              <span class="label label--accent">Р1</span>
               <span class="layers__scope">Спільний</span>
             </div>
             <div>
-              <h3>Інтелект фреймворку</h3>
-              <p>Міжпроєктна методологія: онтологія, модель повноважень, глобальні правила, сценарії роботи, шаблони та навички агента.</p>
+              <h3>Рівень фреймворку</h3>
+              <p>Операційна основа роботи агента, спільна для всіх проєктів: онтологія, модель повноважень, глобальні правила, сценарії роботи, шаблони та виконувані навички агента. Це більше, ніж метод.</p>
             </div>
             <p class="layers__examples">Як працювати</p>
           </article>
           <article class="layers__tier layers__tier--two">
             <div class="layers__tier-id">
-              <span class="label label--accent">Рівень 2</span>
+              <span class="label label--accent">Р2</span>
               <span class="layers__scope">Стійкий</span>
             </div>
             <div>
-              <h3>Інтелект проєкту</h3>
+              <h3>Рівень проєкту</h3>
               <p>Архітектура, рішення, доменні факти, інциденти, ризики й локальні правила одного проєкту.</p>
             </div>
             <p class="layers__examples">Що знає ця система</p>
           </article>
           <article class="layers__tier layers__tier--three">
             <div class="layers__tier-id">
-              <span class="label label--accent">Рівень 3</span>
+              <span class="label label--accent">Р3</span>
               <span class="layers__scope">Тимчасовий</span>
             </div>
             <div>
-              <h3>Інтелект сесії</h3>
+              <h3>Рівень сесії</h3>
               <p>Поточний обсяг і стан роботи, спостереження, припущення, відкриті питання та чернетка Knowledge Delta.</p>
             </div>
             <p class="layers__examples">Що відбувається зараз</p>
@@ -1065,12 +1088,11 @@
         <figure class="ledger" data-claim-id="CLM-15">
           <figcaption class="ledger__caption">
             <span class="label label--accent">Простежено: дві сесії одного пакета</span>
-            <h3>Досвід приходить до роботи, а не після неї</h3>
+            <h3>Досвід надходить до реалізації, а не після неї</h3>
             <p>
-              Пакет спланували, дві сесії працюють за ним, і кожна починається
-              з пошуку того, що вже відомо. Простежте, що входить у сесію, що
-              переживає її закриття і що досі несуть, коли починається
-              наступна.
+              Простежте один пакет через дві сесії: що кожна сесія отримує ще
+              до старту, що переживає її закриття і що переходить далі, коли
+              починається наступна.
             </p>
           </figcaption>
 
@@ -1085,7 +1107,7 @@
             <line class="ledger__lane ledger__lane--packet" x1="180" y1="256" x2="836" y2="256" />
             <line class="ledger__lane" x1="128" y1="352" x2="936" y2="352" />
 
-            <text class="ledger__lane-label" x="4" y="52">Р1 МЕТОД</text>
+            <text class="ledger__lane-label" x="4" y="52">Р1 ФРЕЙМВОРК</text>
             <text class="ledger__lane-label" x="4" y="148">Р2 ПРОЄКТ</text>
             <text class="ledger__lane-label" x="4" y="244">ПАКЕТ</text>
             <text class="ledger__lane-label" x="4" y="340">Р3 СЕСІЯ</text>
@@ -1244,7 +1266,7 @@
               <h3>Знайти досвід і зорієнтуватися</h3>
               <p>Прочитати активні інструкції та вихідні файли, а потім знайти у стійкому знанні потрібні уроки, збої й відхилені підходи.</p>
             </div>
-            <span class="session__artifact">Рівень 1 + рівень 2</span>
+            <span class="session__artifact">Р1 + Р2</span>
           </li>
           <li>
             <span class="session__number label label--accent">02</span>
@@ -1260,7 +1282,7 @@
               <h3>Виконати й перевірити</h3>
               <p>Тримати спостереження окремо від припущень, працювати в межах визначеного обсягу та спиратися на оголошені оцінювачі, а не на фразу про завершення.</p>
             </div>
-            <span class="session__artifact">Рівень 3</span>
+            <span class="session__artifact">Р3</span>
           </li>
           <li>
             <span class="session__number label label--accent">04</span>
@@ -1272,7 +1294,7 @@
           </li>
         </ol>
         <p class="session__boundary" data-claim-id="CLM-14">
-          Рівень 3 - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
+          Рівень сесії - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
           стан виконання, позначки доказів, відкриті питання й чернетка
           Knowledge Delta, але не сирі міркування ШІ. Цей рівень ніколи не
           підвищують цілком.
@@ -1357,7 +1379,7 @@
           <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
           <li><span class="label label--accent">Ретроспектива</span><p>Зовнішній цикл, на межі пакета або раз на кілька тижнів: спершу вивести активність періоду з репозиторію, потім знайти те, що повторюється. Ретро над однією сесією не знаходить нічого, і це закладено навмисно.</p></li>
           <li><span class="label label--accent">Класифікувати + перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
-          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні 2; загальний урок переходить на рівень 1 тільки за явним рішенням.</p></li>
+          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні проєкту; загальний урок доходить до рівня фреймворку тільки за явним рішенням.</p></li>
           <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
         </ol>
         <div class="learning__distinction" data-claim-id="CLM-15">
@@ -1393,6 +1415,30 @@
           вивід команд або локальну документацію. Жодного з трьох фреймворк
           не встановлює сам.
         </p>
+        <div class="token-economics" data-claim-id="CLM-06">
+          <span class="label label--accent">Чого це коштує</span>
+          <p>
+            Керованість не безкоштовна в токенах. Пошук досвіду до роботи,
+            артефакти пакета, Knowledge Delta й повноцінне закриття сесії
+            з&rsquo;їдають контекст, який некерований агент витратив би на саме
+            завдання. Задум у тому, що керованість це окупає: менше впевнено
+            обраних хибних шляхів, менше повторних відкриттів, менше спроб
+            підходу, який уже записано як відхилений.
+          </p>
+          <p>
+            Що <strong>виміряно</strong>: стиснення. RTK фільтрує вивід команд
+            до того, як він дійде до моделі, а його адаптер фіксує скорочення
+            для кожного маршруту, причому сирі чи невдалі маршрути рахуються
+            як нуль, а не оцінюються приблизно.
+          </p>
+          <p>
+            Що <strong>не виміряно</strong>: підсумковий баланс. Тут немає
+            дослідження, яке порівняло б керовану й некеровану роботу від
+            початку до кінця, тож сайт не стверджує, що баланс додатний. Він
+            називає ціну, називає те, що рахують, і лишає решту відкритою,
+            доки не буде доказів.
+          </p>
+        </div>
         <figure class="capability-map">
           <figcaption>
             <span class="label label--accent">Мости необов&rsquo;язкових спроможностей</span>
@@ -1437,7 +1483,7 @@
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">RTK</span>
-              <span>Стиснення виводу командного рядка з відстежуваним скороченням</span>
+              <span>Rust Token Killer: стиснення виводу командного рядка з відстежуваним скороченням</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-06">
               <p><strong>Межа даних:</strong> лише локально.</p>

@@ -71,6 +71,24 @@
   color: var(--eif-fg-muted);
 }
 
+/* Cost statement beside the optional capabilities. Amber rather than the
+   accent: this is a caveat, not a feature. */
+.token-economics {
+  max-width: var(--eif-measure);
+  margin-top: var(--eif-space-4);
+  padding: var(--eif-space-2) 0 var(--eif-space-2) var(--eif-space-2);
+  border-left: 2px solid var(--eif-warn);
+  color: var(--eif-fg-muted);
+}
+
+.token-economics p {
+  margin-top: var(--eif-space-1);
+}
+
+.token-economics strong {
+  color: var(--eif-fg);
+}
+
 .learning__loops {
   max-width: var(--eif-measure);
   margin-top: var(--eif-space-3);

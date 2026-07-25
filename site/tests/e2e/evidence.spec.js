@@ -69,7 +69,15 @@ test.describe('engineering-intelligence methodology', () => {
     // transformed casing. The assertion is about the adapted Ukrainian term
     // being used instead of an anglicism, not about how it is cased.
     const ukrainianLower = ukrainianText.toLowerCase();
-    for (const adaptedTerm of ['сценарії роботи', 'навички агента', 'рівень 1']) {
+    // Layers are named, not numbered: numbering is navigational shorthand
+    // only (Р1/Р2/Р3), so asserting "рівень 1" would lock in the wording the
+    // rename deliberately removed.
+    for (const adaptedTerm of [
+      'сценарії роботи',
+      'навички агента',
+      'рівень фреймворку',
+      'рівень проєкту',
+    ]) {
       expect(ukrainianLower).toContain(adaptedTerm);
     }
   });

@@ -86,7 +86,7 @@
           <p class="hero__promise">
             EIF turns validated engineering experience into reusable
             operational intelligence: shared methods, project memory, session
-            discipline and invokable skills that outlive one agent conversation.
+            discipline and invokable skills that outlive any single session.
           </p>
           <nav class="hero__ctas" aria-label="Primary">
             <a href="#methodology">What EIF is</a>
@@ -107,10 +107,10 @@
           </div>
           <p class="section__lede">
             AI coding agents are powerful, but most workflows still treat a
-            conversation as if it were durable engineering knowledge.
+            session as if it were durable engineering knowledge.
           </p>
           <ol class="problem__list">
-            <li>Previous decisions live only in a conversation that gets compacted or lost.</li>
+            <li>Previous decisions live only inside one session and are lost when its context is compacted or the session ends.</li>
             <li>The agent re-discovers the same files and re-derives the same conclusions every session.</li>
             <li>Local lessons never resurface before a new, similar task.</li>
             <li>Command output floods the context window without filtering.</li>
@@ -210,55 +210,6 @@
               </div>
               <p class="layers__examples">What is happening now</p>
             </article>
-          </div>
-          <div class="knowledge-route" data-claim-id="CLM-13">
-            <div class="knowledge-route__head">
-              <div>
-                <span class="label label--accent">The learning elevator</span>
-                <h3>Evidence moves up. Intelligence comes back down.</h3>
-              </div>
-              <div class="knowledge-route__legend" aria-label="Flow directions">
-                <span>&uarr; Promotion</span>
-                <span>&darr; Retrieval</span>
-              </div>
-            </div>
-            <ol class="knowledge-route__steps">
-              <li data-tier="T3">
-                <details open>
-                  <summary><span>01</span><strong>Session evidence</strong><em>Tier 3</em></summary>
-                  <p>Work produces observations, decisions, failures and a draft Knowledge Delta.</p>
-                </details>
-              </li>
-              <li data-tier="GATE" class="knowledge-route__gate">
-                <details>
-                  <summary><span>02</span><strong>Closeout + retro</strong><em>Gate</em></summary>
-                  <p>Compare intent with evidence, name failure patterns and decide what is reusable. Unverified notes do not pass.</p>
-                </details>
-              </li>
-              <li data-tier="T2">
-                <details>
-                  <summary><span>03</span><strong>Project memory</strong><em>Tier 2</em></summary>
-                  <p>Validated local facts, decisions, incidents and lessons become durable project intelligence.</p>
-                </details>
-              </li>
-              <li data-tier="GATE" class="knowledge-route__gate">
-                <details>
-                  <summary><span>04</span><strong>Promotion decision</strong><em>Gate</em></summary>
-                  <p>Only a cross-project lesson with provenance and review can move beyond its project.</p>
-                </details>
-              </li>
-              <li data-tier="T1">
-                <details>
-                  <summary><span>05</span><strong>Framework method</strong><em>Tier 1</em></summary>
-                  <p>A reusable rule, playbook, template or skill becomes available to other projects.</p>
-                </details>
-              </li>
-            </ol>
-            <p class="knowledge-route__return">
-              <span aria-hidden="true">&darr;</span>
-              <strong>The next session retrieves from the durable layers:</strong>
-              relevant methods and project experience return before action, while working context stays ephemeral.
-            </p>
           </div>
           <div class="layers__flows" aria-label="Knowledge flow between tiers" data-claim-id="CLM-13">
             <p><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> method, constraints, prior experience and reusable skills.</p>
@@ -652,10 +603,17 @@
             explicitly promoted into a versioned rule, playbook, template or
             skill.
           </p>
+          <p class="learning__loops" data-claim-id="CLM-15">
+            <strong>Two loops, not one.</strong> The inner loop runs inside a
+            session and asks what this session learned. The outer loop runs
+            across many sessions and asks a question no single closeout can
+            answer: what keeps happening? A lesson seen once is an incident.
+            The same failure signature seen repeatedly is a missing rule.
+          </p>
           <ol class="learning__flow" data-claim-id="CLM-15">
             <li><span class="label label--accent">Observe</span><p>Real work produces evidence: a fact, incident, rejected approach, risk or repeatable method.</p></li>
             <li><span class="label label--accent">Capture</span><p>The session records a concise Knowledge Delta, including what remains unverified.</p></li>
-            <li><span class="label label--accent">Retro</span><p>Closeout compares intent with evidence, extracts failure patterns and decides whether a lesson is reusable.</p></li>
+            <li><span class="label label--accent">Retro</span><p>The outer loop, across a packet or several weeks: derive the period from the repository, then find what repeats. Running it over one session finds nothing, by design.</p></li>
             <li><span class="label label--accent">Classify + validate</span><p>Knowledge Ingest and Lint check artifact type, source, status, language, duplication and links.</p></li>
             <li><span class="label label--accent">Promote</span><p>Project-specific knowledge remains in Tier 2; a general lesson moves to Tier 1 only by explicit decision.</p></li>
             <li><span class="label label--accent">Retrieve</span><p>The next relevant session finds the artifact before acting, closing the learning loop.</p></li>
@@ -688,10 +646,11 @@
             <h2 id="integrations-heading">Three accelerators. A fallback for each.</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-12">
-            Graphify, RTK and Vendor docs each add one bounded capability.
+            Graphify, RTK and Context7 each add one bounded capability.
             None is the methodology itself: when one is unavailable, EIF
             keeps a named core path through source search, raw shell output
-            or local documentation.
+            or local documentation. None of the three is installed by the
+            framework.
           </p>
           <figure class="capability-map">
             <figcaption>
@@ -717,7 +676,7 @@
                 <span class="capability-map__index">03</span>
                 <div><strong>Consult current vendor docs</strong><small>version-aware library and API sources</small></div>
                 <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
-                <b>Vendor docs</b>
+                <b>Context7</b>
                 <em>fallback: local docs</em>
               </li>
             </ol>
@@ -748,13 +707,14 @@
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
-                <span class="label label--accent">Vendor docs</span>
+                <span class="label label--accent">Context7</span>
                 <span>Current library/API documentation instead of stale training data</span>
               </button>
               <div class="reveal__detail">
-                <p><strong>Data boundary:</strong> external-api; queries a hosted documentation service.</p>
-                <p><strong>Degraded mode without it:</strong> the agent relies on local docs or training-data knowledge, which may be outdated.</p>
-                <p><strong>Health:</strong> declaration-only until its provider adapter passes its own session and evidence gate.</p>
+                <p><strong>Data boundary:</strong> external-api; the query text leaves the machine to reach a hosted documentation service. Source code is not sent by the framework.</p>
+                <p><strong>Degraded mode without it:</strong> the agent relies on local docs or training-data recall, which may describe a different version than the one installed. An unavailable provider is reported, never silently replaced by recall.</p>
+                <p><strong>EIF does not install it.</strong> An MCP server is configured at the user level, outside the project instance, and this framework never mutates user-level configuration. It ships generated routing guidance and a reviewable per-adapter template whose provider command stays owner-supplied.</p>
+                <p><strong>Health:</strong> the declaration, routing guidance and template shape are tested; live provider behavior is not. EIF generates configuration for the agent to load and does not itself speak MCP, so reachability is reported by the agent and marked unverified rather than claimed.</p>
               </div>
             </li>
           </ul>
@@ -841,7 +801,7 @@
               </button>
               <div class="reveal__detail" data-claim-id="CLM-07">
                 <p>Retrieval, Knowledge Delta rendering, session-closeout rendering and generated entrypoint content have been verified in Ukrainian, config-driven per project instance.</p>
-                <p><strong>Limitation:</strong> does not cover an agent's own free-form conversational responses.</p>
+                <p><strong>Limitation:</strong> does not cover an agent's own free-form responses inside a session.</p>
               </div>
             </li>
           </ul>
@@ -956,7 +916,7 @@
         </div>
         <p class="section__lede">
           Агенти ШІ для розробки потужні, але в більшості робочих процесів
-          розмову досі трактують як стійке інженерне знання.
+          сесію з агентом досі трактують як стійке інженерне знання.
         </p>
         <ol class="problem__list">
           <li>Попередні рішення живуть лише в межах однієї сесії й губляться, коли контекст стискають або сесія завершується.</li>
@@ -1055,55 +1015,6 @@
             </div>
             <p class="layers__examples">Що відбувається зараз</p>
           </article>
-        </div>
-        <div class="knowledge-route" data-claim-id="CLM-13">
-          <div class="knowledge-route__head">
-            <div>
-              <span class="label label--accent">Ліфт навчання</span>
-              <h3>Докази рухаються вгору. Інтелект повертається вниз.</h3>
-            </div>
-            <div class="knowledge-route__legend" aria-label="Напрямки потоку">
-              <span>&uarr; Підвищення рівня</span>
-              <span>&darr; Пошук досвіду</span>
-            </div>
-          </div>
-          <ol class="knowledge-route__steps">
-            <li data-tier="T3">
-              <details open>
-                <summary><span>01</span><strong>Докази сесії</strong><em>Рівень 3</em></summary>
-                <p>Робота створює спостереження, рішення, збої та чернетку Knowledge Delta.</p>
-              </details>
-            </li>
-            <li data-tier="GATE" class="knowledge-route__gate">
-              <details>
-                <summary><span>02</span><strong>Закриття + ретроспектива</strong><em>Перевірка</em></summary>
-                <p>Порівняти намір із доказами, виявити повторювані моделі збоїв і вирішити, що можна використати знову. Неперевірені нотатки не проходять.</p>
-              </details>
-            </li>
-            <li data-tier="T2">
-              <details>
-                <summary><span>03</span><strong>Пам&rsquo;ять проєкту</strong><em>Рівень 2</em></summary>
-                <p>Перевірені локальні факти, рішення, інциденти й уроки стають стійким інтелектом проєкту.</p>
-              </details>
-            </li>
-            <li data-tier="GATE" class="knowledge-route__gate">
-              <details>
-                <summary><span>04</span><strong>Рішення про підвищення рівня</strong><em>Перевірка</em></summary>
-                <p>За межі проєкту переходить лише міжпроєктний урок із зафіксованим походженням і результатом перевірки.</p>
-              </details>
-            </li>
-            <li data-tier="T1">
-              <details>
-                <summary><span>05</span><strong>Метод фреймворку</strong><em>Рівень 1</em></summary>
-                <p>Повторно використовуване правило, сценарій роботи, шаблон або навичка агента стає доступною іншим проєктам.</p>
-              </details>
-            </li>
-          </ol>
-          <p class="knowledge-route__return">
-            <span aria-hidden="true">&darr;</span>
-            <strong>Наступна сесія шукає знання у стійких рівнях:</strong>
-            потрібні методи й досвід проєкту повертаються до початку дії, а робочий контекст лишається тимчасовим.
-          </p>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
           <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані навички агента.</p>
@@ -1393,10 +1304,17 @@
           підвищують до рівня версійованого правила, сценарію роботи, шаблону
           чи навички агента.
         </p>
+        <p class="learning__loops" data-claim-id="CLM-15">
+          <strong>Два цикли, а не один.</strong> Внутрішній працює всередині
+          сесії й питає, чого навчила саме ця сесія. Зовнішній охоплює багато
+          сесій і питає те, на що жодне окреме закриття відповісти не може: що
+          повторюється? Урок, побачений один раз, це інцидент. Та сама
+          сигнатура збою, побачена знову і знову, це правило, якого бракує.
+        </p>
         <ol class="learning__flow" data-claim-id="CLM-15">
           <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає докази: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
           <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
-          <li><span class="label label--accent">Ретроспектива</span><p>Закриття сесії порівнює намір із доказами, виділяє повторювані моделі збоїв і визначає, чи придатний урок до повторного використання.</p></li>
+          <li><span class="label label--accent">Ретроспектива</span><p>Зовнішній цикл, на межі пакета або раз на кілька тижнів: спершу вивести активність періоду з репозиторію, потім знайти те, що повторюється. Ретро над однією сесією не знаходить нічого, і це закладено навмисно.</p></li>
           <li><span class="label label--accent">Класифікувати + перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
           <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні 2; загальний урок переходить на рівень 1 тільки за явним рішенням.</p></li>
           <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
@@ -1428,11 +1346,11 @@
           <h2 id="integrations-heading">Три прискорювачі. Для кожного є резервний шлях.</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
-          Graphify, RTK і документація постачальника додають по одній
-          обмеженій спроможності.
+          Graphify, RTK і Context7 додають по одній обмеженій спроможності.
           Жодна не є самою методологією: якщо інструмент недоступний, EIF має
           визначений базовий шлях через пошук у вихідних файлах, нефільтрований
-          вивід команд або локальну документацію.
+          вивід команд або локальну документацію. Жодного з трьох фреймворк
+          не встановлює сам.
         </p>
         <figure class="capability-map">
           <figcaption>
@@ -1458,7 +1376,7 @@
               <span class="capability-map__index">03</span>
               <div><strong>Звіритися з актуальною документацією постачальника</strong><small>джерела для відповідної версії бібліотеки чи API</small></div>
               <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
-              <b>Документація</b>
+              <b>Context7</b>
               <em>резерв: локальна документація</em>
             </li>
           </ol>
@@ -1488,13 +1406,14 @@
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
-              <span class="label label--accent">Документація</span>
+              <span class="label label--accent">Context7</span>
               <span>Актуальна документація бібліотек і API замість застарілих даних навчання</span>
             </button>
             <div class="reveal__detail">
-              <p><strong>Межа даних:</strong> <code>external-api</code> - звернення до зовнішньої служби документації.</p>
-              <p><strong>Без неї:</strong> агент покладається на локальну документацію або власні знання з навчання, які можуть застаріти.</p>
-              <p><strong>Справність:</strong> поки що лише декларація - адаптер постачальника ще не пройшов власну сесію й перевірку доказів.</p>
+              <p><strong>Межа даних:</strong> <code>external-api</code> - текст запиту залишає машину й іде до зовнішньої служби документації. Сам код фреймворк не надсилає.</p>
+              <p><strong>Без неї:</strong> агент покладається на локальну документацію або власні знання з навчання, які можуть описувати іншу версію, ніж встановлена. Недоступність провайдера повідомляють явно, а не підміняють тихо знаннями з навчання.</p>
+              <p><strong>Фреймворк не встановлює його.</strong> MCP-сервер налаштовують на рівні користувача, поза інстансом проєкту, а фреймворк ніколи не змінює конфігурацію рівня користувача. Він дає згенеровані правила застосування й придатний до перегляду шаблон для кожного адаптера, де команду провайдера вписує власник.</p>
+              <p><strong>Справність:</strong> декларацію, правила застосування й форму шаблона перевірено тестами; реальну поведінку провайдера - ні. EIF готує конфігурацію, яку завантажує агент, і сам не спілкується по MCP, тому доступність повідомляє агент, а не фреймворк.</p>
             </div>
           </li>
         </ul>
@@ -1578,7 +1497,7 @@
             </button>
             <div class="reveal__detail" data-claim-id="CLM-07">
               <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською - мову задає конфігурація кожного окремого екземпляра.</p>
-              <p><strong>Обмеження:</strong> це не стосується довільних розмовних відповідей самого агента.</p>
+              <p><strong>Обмеження:</strong> це не стосується довільних відповідей самого агента в сесії.</p>
             </div>
           </li>
         </ul>

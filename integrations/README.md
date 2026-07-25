@@ -19,8 +19,24 @@ Implementation status:
   portable restore/status commands, a Git-and-hash-derived artifact lifecycle,
   local raw-artifact policy and an explicit semantic provider/boundary/cost gate.
   Any non-fresh state preserves the source-navigation fallback.
-- Vendor-docs remains declaration-only until its provider adapter passes its
-  own session and evidence gate.
+- Vendor-docs now names a declared provider (Context7, reached over MCP),
+  ships generated routing guidance and a reviewable per-adapter MCP
+  configuration template, and states its authority position: vendor
+  documentation is a normative source and does not outrank an empirical
+  observation. It is still not behaviorally canaried the way RTK and
+  Graphify are - EIF generates configuration for the agent to load and does
+  not itself speak MCP, so `transport-reachable` is reported by the agent
+  and is marked `"verified": false` in its manifest rather than claiming a
+  probe that does not happen.
+
+None of the three is installed by EIF. RTK and Graphify are executables you
+install; a vendor-docs MCP server is configured at the **user level**, in
+your agent's own config file outside the project instance. EIF generates
+project-local guidance and reviewable templates and never mutates
+user-level configuration - the same boundary that applies to agent hooks.
+Every generated artifact records `installed: false` and
+`user_config_mutated_by_generator: false` so that claim is
+machine-checkable.
 
 The `data_boundary` values here are the declared, expected boundary for a
 typical provider in that integration slot - see

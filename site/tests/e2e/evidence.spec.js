@@ -12,17 +12,12 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#learning')).toContainText('Retro');
     await expect(page.locator('#learning')).toContainText('versioned instructions, not hidden model behavior');
     await expect(page.locator('#methodology')).toContainText('does not train model weights');
-    await expect(page.locator('#layers .knowledge-route__steps li')).toHaveCount(5);
-    await expect(page.locator('#layers .knowledge-route')).toContainText('Closeout + retro');
-
-    const routeDetails = page.locator('#layers .knowledge-route details');
-    await expect(routeDetails.nth(0)).toHaveAttribute('open', '');
-    await expect(routeDetails.nth(1)).not.toHaveAttribute('open', '');
-
-    const projectMemory = page.locator('#layers .knowledge-route details').nth(2);
-    await projectMemory.locator('summary').click();
-    await expect(projectMemory).toHaveAttribute('open', '');
-    await expect(projectMemory).toContainText('durable project intelligence');
+    // The traced packet diagram carries the tier story now: four written
+    // outcomes plus a drawn map, both present without any script running.
+    await expect(page.locator('#layers .ledger__outcome')).toHaveCount(4);
+    await expect(page.locator('#layers .ledger')).toContainText('CLOSEOUT + RETRO');
+    await expect(page.locator('#layers .ledger')).toContainText('Packet memory');
+    await expect(page.locator('#layers .ledger')).toContainText('Retrieval, not recall');
   });
 
   test('Ukrainian mode carries the same methodology structure', async ({ page }) => {
@@ -33,13 +28,9 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
     await expect(page.locator('#learning')).toContainText('Ретроспектива');
-    await expect(page.locator('#layers .knowledge-route')).toContainText('Пам’ять проєкту');
-    await expect(page.locator('#layers .knowledge-route')).toContainText(
-      'Закриття + ретроспектива',
-    );
-    const routeDetails = page.locator('#layers .knowledge-route details');
-    await expect(routeDetails.nth(0)).toHaveAttribute('open', '');
-    await expect(routeDetails.nth(1)).not.toHaveAttribute('open', '');
+    await expect(page.locator('#layers .ledger__outcome')).toHaveCount(4);
+    await expect(page.locator('#layers .ledger')).toContainText('ЗАКРИТТЯ + РЕТРО');
+    await expect(page.locator('#layers .ledger')).toContainText('Пам’ять пакета');
     await expect(page.locator('#learning')).toContainText('не прихована поведінка моделі');
     await expect(page.locator('#loop')).toContainText('Контекст');
     await expect(page.locator('#loop')).toContainText('Уточнення');
@@ -73,8 +64,13 @@ test.describe('engineering-intelligence methodology', () => {
     for (const canonicalArtifact of ['Knowledge Delta']) {
       expect(ukrainianText).toContain(canonicalArtifact);
     }
-    for (const adaptedTerm of ['сценарії роботи', 'навички агента', 'Рівень 1']) {
-      expect(ukrainianText).toContain(adaptedTerm);
+    // Compared case-insensitively on purpose: several of these render inside
+    // .label, which is text-transform: uppercase, so innerText returns the
+    // transformed casing. The assertion is about the adapted Ukrainian term
+    // being used instead of an anglicism, not about how it is cased.
+    const ukrainianLower = ukrainianText.toLowerCase();
+    for (const adaptedTerm of ['сценарії роботи', 'навички агента', 'рівень 1']) {
+      expect(ukrainianLower).toContain(adaptedTerm);
     }
   });
 });

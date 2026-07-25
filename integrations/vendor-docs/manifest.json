@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "integration": "vendor-docs",
+  "adapter_version": "0.1.0",
+  "transport": "mcp",
+  "providers": [
+    {
+      "id": "context7",
+      "display_name": "Context7",
+      "class": "hosted-documentation-service",
+      "data_boundary": "external-api",
+      "install_scope": "user-level",
+      "installed_by_eif": false,
+      "quota_bearing": true,
+      "notes": "Queries a hosted documentation service. The query text leaves the local machine; source code is not sent by the framework, but review the provider's own terms before enabling."
+    }
+  ],
+  "capabilities": [
+    {
+      "id": "provider-declared",
+      "required_for_healthy": true,
+      "description": "A named provider is configured and its declared data_boundary matches the known provider class."
+    },
+    {
+      "id": "cost-cap-explicit",
+      "required_for_healthy": true,
+      "description": "A quota-bearing external provider has an explicit non-negative cost cap; it is never inferred."
+    },
+    {
+      "id": "transport-reachable",
+      "required_for_healthy": true,
+      "description": "The configured MCP transport answers a resolve/query probe from the calling agent.",
+      "verified": false,
+      "verification_gap": "EIF generates configuration for the agent to load; it does not itself speak MCP, so this capability is reported by the agent adapter, not probed by eifctl doctor."
+    },
+    {
+      "id": "usage-routing",
+      "required_for_healthy": false,
+      "description": "Project-local routing guidance tells the agent when a vendor-docs lookup outranks training-data recall, and when it does not apply."
+    }
+  ],
+  "data_boundaries": ["external-api"],
+  "default_mode": "on-demand",
+  "failure_modes": ["degrade", "fail-closed"],
+  "artifact_policy": {
+    "query_text_leaves_machine": true,
+    "raw_response_committed": false,
+    "user_config_mutated_by_generator": false
+  },
+  "authority_position": {
+    "axis": "normative",
+    "rule": "Current vendor documentation is a normative source about intended behavior. It does not outrank an empirical observation of what the code actually does; a disagreement between them is a discrepancy to record, not a tie to break by rank.",
+    "reference": "core/ontology/authority-model.md"
+  }
+}

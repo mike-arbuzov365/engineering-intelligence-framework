@@ -22,24 +22,25 @@ for the authoritative status of every piece.
 6. [Authority model](#authority-model)
 7. [Experience retrieval](#experience-retrieval)
 8. [Session lifecycle](#session-lifecycle)
-9. [Bounded evidence loops](#bounded-evidence-loops)
-10. [Execution packets](#execution-packets)
-11. [Knowledge Delta](#knowledge-delta)
-12. [Skills and agent adapters](#skills-and-agent-adapters)
-13. [Structural-graph integration](#structural-graph-integration)
-14. [Shell-output compression integration](#shell-output-compression-integration)
-15. [Vendor-documentation integration](#vendor-documentation-integration)
-16. [Language configuration](#language-configuration)
-17. [CI and quality gates](#ci-and-quality-gates)
-18. [Privacy and security](#privacy-and-security)
-19. [Degraded modes](#degraded-modes)
-20. [Extension model](#extension-model)
-21. [End-to-end example](#end-to-end-example)
-22. [Metrics and benchmark methodology](#metrics-and-benchmark-methodology)
-23. [Limitations](#limitations)
-24. [Roadmap](#roadmap)
-25. [Definition of Public-Ready](#definition-of-public-ready)
-26. [FAQ](#faq)
+9. [The two loops](#the-two-loops)
+10. [Bounded evidence loops](#bounded-evidence-loops)
+11. [Execution packets](#execution-packets)
+12. [Knowledge Delta](#knowledge-delta)
+13. [Skills and agent adapters](#skills-and-agent-adapters)
+14. [Structural-graph integration](#structural-graph-integration)
+15. [Shell-output compression integration](#shell-output-compression-integration)
+16. [Vendor-documentation integration](#vendor-documentation-integration)
+17. [Language configuration](#language-configuration)
+18. [CI and quality gates](#ci-and-quality-gates)
+19. [Privacy and security](#privacy-and-security)
+20. [Degraded modes](#degraded-modes)
+21. [Extension model](#extension-model)
+22. [End-to-end example](#end-to-end-example)
+23. [Metrics and benchmark methodology](#metrics-and-benchmark-methodology)
+24. [Limitations](#limitations)
+25. [Roadmap](#roadmap)
+26. [Definition of Public-Ready](#definition-of-public-ready)
+27. [FAQ](#faq)
 
 ## Executive summary
 
@@ -202,6 +203,26 @@ See [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md)
 [`session-closeout.md`](../../playbooks/session-closeout.md) for the
 step-by-step workflow.
 
+## The two loops
+
+Knowledge moves through two loops running at different speeds, and
+conflating them is why "the agent should just learn from experience" tends
+not to work in practice:
+
+- **Solve loop (inner, per session).** Retrieve prior knowledge, work,
+  observe evidence, close out with a Knowledge Delta. Its question is *what
+  did this session learn?*
+- **Evolve loop (outer, across many sessions).** Its question is a
+  different one that no single closeout can answer: *what keeps
+  happening?* A lesson seen once is an incident; the same failure signature
+  seen repeatedly is a rule the framework is missing. See
+  [`playbooks/run-retro.md`](../../playbooks/run-retro.md).
+
+Promotion between tiers is driven by the outer loop, not by the inner one.
+This is deliberate: a single session has no evidence that its lesson
+generalizes, so a session closeout can propose a promotion candidate but
+cannot establish that something recurs.
+
 ## Bounded evidence loops
 
 Iterative work is not an instruction to keep trying until the agent says it is
@@ -317,8 +338,29 @@ installs hooks or changes user-level configuration. See
 Optional. Pulls current, versioned library/API/framework documentation into
 context on demand, instead of relying on a model's training-data knowledge
 of a library's API surface, which is frequently stale for fast-moving
-libraries. The generic external-provider declaration exists; provider-specific
-retrieval and health behavior is not ported or tested yet. See
+libraries.
+
+The declared provider is Context7, reached over MCP. **EIF does not install
+it.** An MCP server is configured at the user level, in the agent's own
+config file outside the project instance EIF was pointed at, and this
+framework's ratified boundary is that it generates project-local guidance
+and never mutates user-level configuration - the same rule that keeps it
+from installing agent hooks. What it does ship: a declared provider class
+and data boundary, generated routing guidance (when a lookup outranks
+recall and when it does not apply), and a reviewable per-adapter MCP
+configuration template whose provider command is deliberately
+owner-supplied rather than asserted from recall.
+
+Authority position, which is the part most often gotten wrong: vendor
+documentation is **normative** (what is supposed to happen) and does not
+outrank an **empirical** observation of what the code actually does. A
+disagreement between a doc page and a reproducible test is a discrepancy to
+record, not a tie to break by rank - see [Authority model](#authority-model).
+
+Not verified: live provider behavior. EIF generates configuration for an
+agent to load and does not itself speak MCP, so `transport-reachable` is
+reported by the agent adapter and is marked unverified in the manifest
+rather than claiming a health probe that does not happen. See
 [`integrations/vendor-docs/`](../../integrations/vendor-docs/).
 
 ## Language configuration
@@ -541,8 +583,11 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    seven fixtures, additional models, and repeated trials for a real
    confidence interval remain open).
 7. ~~Port a bounded v0.1 operating set of playbooks/templates/skills,
-   including the Bounded Evidence Loop~~ (done). Curator/retro/customer and
-   other broader workflows remain post-v0.1 scope.
+   including the Bounded Evidence Loop~~ (done) -> ~~port the outer
+   (retro) loop, so cross-session pattern detection is part of v0.1 rather
+   than a later addition~~ (done - `playbooks/run-retro.md`,
+   `skills/run-retro/`, `templates/retro.md`). Curator/knowledge-health and
+   customer-facing workflows remain post-v0.1 scope.
 8. ~~Add optional RTK and Graphify behavioral adapters with explicit degraded
    modes~~ (done). Vendor-docs remains declaration-only.
 9. Final local release gate + refreshed fresh-history candidate -> owner-gated

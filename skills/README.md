@@ -11,9 +11,10 @@ Slash-command-style skills for AI coding agents.
 | [`knowledge-search/`](knowledge-search/SKILL.md) | `playbooks/knowledge-search.md` |
 | [`knowledge-ingest/`](knowledge-ingest/SKILL.md) | `playbooks/knowledge-ingest.md` |
 | [`knowledge-lint/`](knowledge-lint/SKILL.md) | `playbooks/knowledge-lint.md` |
+| [`run-retro/`](run-retro/SKILL.md) | `playbooks/run-retro.md` |
 
 Each skill is a thin `<skill-name>/SKILL.md` pointer to its playbook (one
 canonical source per D-007, not a second copy of the workflow) with the
 native `name`/`description` skill-manifest frontmatter agent adapters
-expect. Not yet ported: curator, retro, and customer-facing skills - no
-equivalent need in a single-project-instance v0.1 adopter.
+expect. Not yet ported: curator, knowledge-health, and customer-facing
+skills - no equivalent need in a single-project-instance v0.1 adopter.

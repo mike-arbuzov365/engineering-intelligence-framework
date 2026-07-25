@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "policy_version": "0.1.0",
+  "note": "Source for scripts/eif_generate_vendor_docs_guidance.py. Edit here, regenerate; do not hand-edit generated/.",
+  "use_when": [
+    {
+      "id": "library-api-surface",
+      "trigger": "A question about a library, framework, SDK, API or CLI tool's actual surface: a signature, option, configuration key or migration step.",
+      "rationale": "Training data has a cutoff; a fast-moving library's API does not."
+    },
+    {
+      "id": "version-specific-behavior",
+      "trigger": "Behavior that differs between versions of a dependency the project actually pins.",
+      "rationale": "Recalled behavior is frequently the behavior of a different version than the one installed."
+    },
+    {
+      "id": "contradicting-recall",
+      "trigger": "An answer is about to be given from recall and it would be expensive to be wrong.",
+      "rationale": "Confidence in recall is not evidence about the current version."
+    }
+  ],
+  "do_not_use_when": [
+    {
+      "id": "own-business-logic",
+      "trigger": "Debugging or refactoring the project's own logic.",
+      "rationale": "No vendor documents this project's code; the source files do."
+    },
+    {
+      "id": "general-concepts",
+      "trigger": "General programming concepts with no vendor surface.",
+      "rationale": "Spends external quota for something no provider is authoritative about."
+    },
+    {
+      "id": "eif-methodology",
+      "trigger": "Questions about this framework's own methodology, Knowledge Delta, packets or retrieval.",
+      "rationale": "That is Tier 1/Tier 2 knowledge in this repository, not vendor documentation."
+    }
+  ],
+  "boundaries": [
+    "The query text leaves the local machine. Do not put private repository names, customer names, credentials or proprietary code into a vendor-docs query.",
+    "A quota-bearing provider needs an explicit cost cap in .eif/config.yaml before it is enabled.",
+    "When the provider is unavailable or its quota is exhausted, say so explicitly and fall back to local documentation or the source itself. A silent fallback to recall is the failure mode this integration exists to prevent.",
+    "Vendor documentation is normative, not empirical. If the docs and an observed test result disagree, record the discrepancy; do not overwrite the observation."
+  ]
+}

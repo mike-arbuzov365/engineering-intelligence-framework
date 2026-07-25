@@ -50,25 +50,6 @@
     animation-delay: 200ms;
   }
 
-  /* A single point of evidence traveling Tier 3 -> Tier 1 along the
-     learning-elevator connector, echoing the hero/control-plane path
-     motion. The static gradient line already conveys direction without
-     motion, so this pulse exists only in this block - nothing to fall
-     back from for reduced-motion visitors. */
-  .knowledge-route__steps::after {
-    content: "";
-    position: absolute;
-    top: calc(2.45rem - 4px);
-    left: 3%;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--eif-accent);
-    box-shadow: 0 0 10px 2px color-mix(in srgb, var(--eif-accent) 55%, transparent);
-    animation: eif-route-pulse 7s var(--eif-ease) infinite;
-    animation-delay: 1600ms;
-  }
-
   /* Traced knowledge flow. All four dots share one 16s cycle so their
      relative order stays fixed: an item is discarded at closeout before the
      next one is even evaluated for promotion. Each dot's visible window is
@@ -219,22 +200,4 @@
   94% { offset-distance: 100%; opacity: 1; }
   98% { offset-distance: 100%; opacity: 0; }
   100% { offset-distance: 100%; opacity: 0; }
-}
-
-@keyframes eif-route-pulse {
-  0%, 6% {
-    left: 3%;
-    opacity: 0;
-  }
-  14% {
-    opacity: 1;
-  }
-  86% {
-    left: 97%;
-    opacity: 1;
-  }
-  94%, 100% {
-    left: 97%;
-    opacity: 0;
-  }
 }

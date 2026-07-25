@@ -11,7 +11,10 @@ test.describe('optional capabilities', () => {
     await expect(rows).toHaveCount(3);
     await expect(rows.nth(0)).toContainText('Graphify');
     await expect(rows.nth(1)).toContainText('RTK');
-    await expect(rows.nth(2)).toContainText('Vendor docs');
+    await expect(rows.nth(2)).toContainText('Context7');
+    // The install boundary is the load-bearing claim for this row: EIF ships
+    // guidance and a template, it does not configure the MCP server.
+    await expect(rows.nth(2)).toContainText('EIF does not install it');
     await expect(page.locator('#integrations .capability-map li')).toHaveCount(3);
     await expect(page.locator('#integrations .capability-map')).toContainText(
       'Core path remains available',

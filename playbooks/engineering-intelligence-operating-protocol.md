@@ -69,6 +69,7 @@ Record the classification before implementation starts, not after.
 | Executing a prepared packet | [`execution-packet-execution.md`](execution-packet-execution.md) |
 | Ending any session | [`session-closeout.md`](session-closeout.md) |
 | Auditing a packet claimed done | [`execution-packet-review.md`](execution-packet-review.md) |
+| Finding what repeats across many sessions | [`run-retro.md`](run-retro.md) |
 | Before non-trivial work | [`knowledge-search.md`](knowledge-search.md) |
 | New durable knowledge surfaced | [`knowledge-ingest.md`](knowledge-ingest.md) |
 | Before proposing shared-knowledge promotion | [`knowledge-lint.md`](knowledge-lint.md) |

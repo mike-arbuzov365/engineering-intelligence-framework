@@ -78,33 +78,51 @@
      crosses a gate onto a branch. */
   .ledger__dot {
     offset-rotate: 0deg;
-    animation-duration: 16s;
+    animation-duration: 20s;
     animation-timing-function: linear;
     animation-iteration-count: infinite;
   }
 
-  .ledger__dot--dropped {
-    offset-path: path("M 120 290 C 210 292 300 302 385 312");
-    animation-name: eif-ledger-dropped;
+  /* Retrieval runs first and from two tiers at once: method from T1 and
+     prior experience from T2 both land in the session before it starts. */
+  .ledger__dot--retrieval {
+    offset-path: path("M 160 64 C 214 76 244 214 254 344");
+    animation-name: eif-ledger-retrieval;
   }
 
+  .ledger__dot--retrieval-b {
+    offset-path: path("M 172 160 C 220 172 246 250 255 344");
+    animation-name: eif-ledger-retrieval-b;
+  }
+
+  /* Session 1 work, then the two things closeout separates: validated
+     learning upward, raw reasoning off the edge. */
   .ledger__dot--local {
     offset-path: path(
-      "M 120 290 L 360 290 C 420 290 410 180 470 180 L 660 180 C 700 180 695 122 730 122 C 766 122 760 180 800 180 L 845 180"
+      "M 256 352 L 492 352 C 516 300 522 208 548 160 L 836 160"
     );
     animation-name: eif-ledger-local;
   }
 
-  .ledger__dot--promoted {
-    offset-path: path(
-      "M 120 290 L 360 290 C 420 290 410 180 470 180 L 660 180 C 715 180 705 70 765 70 L 845 70"
-    );
-    animation-name: eif-ledger-promoted;
+  .ledger__dot--dropped {
+    offset-path: path("M 256 352 L 470 356 C 492 362 508 378 524 392");
+    animation-name: eif-ledger-dropped;
   }
 
-  .ledger__dot--retrieval {
-    offset-path: path("M 848 70 C 900 82 900 130 890 180 C 882 222 890 258 886 276");
-    animation-name: eif-ledger-retrieval;
+  /* Packet memory: up out of session 1, across the gap, back down into
+     session 2, which then runs its own work segment. */
+  .ledger__dot--packet {
+    offset-path: path(
+      "M 256 352 L 496 344 C 520 316 536 262 566 256 L 582 256 C 602 256 608 300 614 344 L 616 352 L 730 352"
+    );
+    animation-name: eif-ledger-packet;
+  }
+
+  .ledger__dot--promoted {
+    offset-path: path(
+      "M 732 346 C 754 300 760 206 786 160 L 836 160 C 872 150 880 92 906 74 L 936 74"
+    );
+    animation-name: eif-ledger-promoted;
   }
 }
 
@@ -148,37 +166,57 @@
   }
 }
 
-/* Each dot travels, then holds invisibly at its endpoint until the shared
-   cycle restarts. The dropped item stops short and fades where it is: it is
-   not carried to a tier, it simply ends. */
-@keyframes eif-ledger-dropped {
+/* One 20s cycle, read left to right as the packet's own timeline: retrieval
+   feeds session 1, closeout sorts its output, packet memory bridges into
+   session 2, and only then is anything considered for promotion. Each dot's
+   window lives in its own keyframes rather than in a delay, so the order
+   cannot drift apart over repeated cycles. */
+@keyframes eif-ledger-retrieval {
   0% { offset-distance: 0%; opacity: 0; }
-  3% { opacity: 0.75; }
-  15% { offset-distance: 100%; opacity: 0.75; }
-  21% { offset-distance: 100%; opacity: 0; }
+  2% { opacity: 0.8; }
+  14% { offset-distance: 100%; opacity: 0.8; }
+  18% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-ledger-retrieval-b {
+  0%, 4% { offset-distance: 0%; opacity: 0; }
+  6% { opacity: 0.8; }
+  18% { offset-distance: 100%; opacity: 0.8; }
+  22% { offset-distance: 100%; opacity: 0; }
   100% { offset-distance: 100%; opacity: 0; }
 }
 
 @keyframes eif-ledger-local {
-  0%, 12% { offset-distance: 0%; opacity: 0; }
-  15% { opacity: 1; }
+  0%, 20% { offset-distance: 0%; opacity: 0; }
+  23% { opacity: 1; }
   52% { offset-distance: 100%; opacity: 1; }
-  58% { offset-distance: 100%; opacity: 0; }
+  57% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* Starts with the same session-1 segment as the others, then ends short:
+   it is not carried anywhere, it simply stops. */
+@keyframes eif-ledger-dropped {
+  0%, 22% { offset-distance: 0%; opacity: 0; }
+  25% { opacity: 0.75; }
+  46% { offset-distance: 100%; opacity: 0.75; }
+  52% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-ledger-packet {
+  0%, 26% { offset-distance: 0%; opacity: 0; }
+  29% { opacity: 1; }
+  72% { offset-distance: 100%; opacity: 1; }
+  77% { offset-distance: 100%; opacity: 0; }
   100% { offset-distance: 100%; opacity: 0; }
 }
 
 @keyframes eif-ledger-promoted {
-  0%, 30% { offset-distance: 0%; opacity: 0; }
-  33% { opacity: 1; }
-  70% { offset-distance: 100%; opacity: 1; }
-  76% { offset-distance: 100%; opacity: 0; }
-  100% { offset-distance: 100%; opacity: 0; }
-}
-
-@keyframes eif-ledger-retrieval {
-  0%, 78% { offset-distance: 0%; opacity: 0; }
-  81% { opacity: 0.85; }
-  94% { offset-distance: 100%; opacity: 0.85; }
+  0%, 76% { offset-distance: 0%; opacity: 0; }
+  79% { opacity: 1; }
+  94% { offset-distance: 100%; opacity: 1; }
   98% { offset-distance: 100%; opacity: 0; }
   100% { offset-distance: 100%; opacity: 0; }
 }

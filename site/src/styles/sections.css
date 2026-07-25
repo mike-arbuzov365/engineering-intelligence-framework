@@ -315,18 +315,6 @@
   color: var(--eif-fg);
 }
 
-.knowledge-route__example {
-  max-width: 58rem;
-  margin: var(--eif-space-3) 0 0 auto;
-  padding: var(--eif-space-2) 0 0 var(--eif-space-2);
-  border-left: 2px solid var(--eif-accent);
-  color: var(--eif-fg-muted);
-}
-
-.knowledge-route__example strong {
-  color: var(--eif-fg);
-}
-
 /* Traced knowledge flow: three real artifacts, three different fates. The
    drawn map is complete without any motion - the dots only re-walk paths
    that are already there, so reduced-motion and no-JS lose nothing. */
@@ -357,6 +345,13 @@
 .ledger__lane {
   stroke: var(--eif-rule);
   stroke-width: 1;
+}
+
+/* The packet lane is bounded on purpose: a packet starts when it is planned
+   and ends at its closeout, unlike the tiers, which outlive it. */
+.ledger__lane--packet {
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
 }
 
 .ledger__gate {
@@ -414,6 +409,16 @@
   stroke-dasharray: 2 6;
 }
 
+/* Packet memory is durable within the packet but not a tier, so it reads as
+   a third weight: solid like project knowledge, dimmer than the accent. */
+.ledger__flow--packet {
+  stroke: var(--eif-accent-dim);
+}
+
+.ledger__flow--work {
+  stroke-width: 3;
+}
+
 .ledger__node {
   fill: var(--eif-bg);
   stroke: var(--eif-accent);
@@ -436,12 +441,14 @@
   opacity: 0;
 }
 
-.ledger__dot--dropped {
+.ledger__dot--dropped,
+.ledger__dot--retrieval,
+.ledger__dot--retrieval-b {
   fill: var(--eif-fg-muted);
 }
 
-.ledger__dot--retrieval {
-  fill: var(--eif-fg-muted);
+.ledger__dot--packet {
+  fill: var(--eif-accent-dim);
 }
 
 .ledger__fates {
@@ -467,8 +474,17 @@
   color: var(--eif-fg);
 }
 
+.ledger__fates--four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--eif-space-3);
+}
+
 .ledger__outcome--local {
   border-top-color: var(--eif-accent);
+}
+
+.ledger__outcome--packet {
+  border-top-color: var(--eif-accent-dim);
 }
 
 .ledger__outcome--promoted {
@@ -479,8 +495,15 @@
   color: var(--eif-accent);
 }
 
+@media (max-width: 1040px) {
+  .ledger__fates--four {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 860px) {
-  .ledger__fates {
+  .ledger__fates,
+  .ledger__fates--four {
     grid-template-columns: 1fr;
     gap: var(--eif-space-3);
   }

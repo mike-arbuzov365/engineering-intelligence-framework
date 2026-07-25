@@ -817,7 +817,13 @@ formally ratified (the file is explicit about which is which).
 - [ ] Website is live.
 - [ ] Article published.
 - [ ] Launch sequence prepared.
-- [ ] Feedback/issue intake ready.
+- [x] Feedback/issue intake ready: `.github/ISSUE_TEMPLATE/` ships a bug
+      template that requires the exact command and real output (not a
+      recollection), an **evidence report** template for contributing
+      verification of anything this repository lists as unverified, and a
+      config that routes vulnerabilities to private disclosure and
+      methodology questions to discussions. Blank issues are disabled on
+      purpose. Not yet exercised by a real external reporter.
 
 ## FAQ
 

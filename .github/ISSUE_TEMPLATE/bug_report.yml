@@ -1,0 +1,91 @@
+name: Bug report
+description: Something behaves differently from what the documentation says.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        This framework's own rule is that a completion phrase is not evidence
+        and neither is a recollection. The fields below ask for what you
+        actually ran and what it actually printed, because a report without
+        that usually cannot be acted on.
+
+  - type: textarea
+    id: expected-vs-actual
+    attributes:
+      label: Expected vs. actual
+      description: >-
+        What did you expect, and what happened instead? Link the documentation
+        line that set the expectation if there is one - a doc that promises
+        the wrong thing is also a bug.
+      placeholder: |
+        Expected: `eifctl doctor` reports degraded when the provider is absent.
+        Actual: it reported healthy.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Exact commands
+      description: >-
+        The commands you ran, in order, from a state someone else can reach.
+        "Ran the tests" is not reproducible; the command line is.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Actual output
+      description: >-
+        Paste the real output, not a summary of it. Redact private paths,
+        repository names and credentials - this repository must never contain
+        them, including in issues.
+      render: text
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Framework commit or version
+      description: Output of `git rev-parse --short HEAD`, or the installed `eifctl version`.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: Adapter in use
+      options:
+        - claude-code
+        - cursor
+        - codex
+        - hermes
+        - none / not adapter-specific
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Python version
+      placeholder: "Windows 11 / Python 3.12.4"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Before submitting
+      options:
+        - label: >-
+            I checked this is not an already-documented limitation in
+            HOW-EIF-WORKS.md#limitations.
+          required: true
+        - label: >-
+            The output above contains no private paths, customer data or
+            credentials.
+          required: true

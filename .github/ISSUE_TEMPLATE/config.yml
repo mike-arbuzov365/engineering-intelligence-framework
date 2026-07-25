@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/mike-arbuzov365/engineering-intelligence-framework/security/advisories/new
+    about: >-
+      Do not open a public issue for a vulnerability. Report it privately -
+      see SECURITY.md for the disclosure process and what is in scope.
+  - name: Question about the methodology
+    url: https://github.com/mike-arbuzov365/engineering-intelligence-framework/discussions
+    about: >-
+      For "how should I model this?" or "does EIF cover X?", start a
+      discussion. Issues here are for defects, evidence and scoped proposals.

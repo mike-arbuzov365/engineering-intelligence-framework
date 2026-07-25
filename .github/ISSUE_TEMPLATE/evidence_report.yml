@@ -1,0 +1,102 @@
+name: Evidence report
+description: >-
+  Contribute a verification result for something this repository currently
+  lists as unverified, or report that a documented claim does not hold.
+labels: ["evidence"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Several claims here are deliberately marked partial or unverified -
+        see HOW-EIF-WORKS.md#definition-of-public-ready and
+        docs/product/claims-evidence.md. Independent evidence is the specific
+        thing this project cannot generate for itself, so this template
+        exists to make contributing it easy.
+
+
+        Open examples: the Cursor adapter's generated rule has never been
+        confirmed to reach a real Agent-chat response
+        (examples/demo-cursor-workspace/MANUAL-RUNTIME-CHECK.md has the exact
+        procedure); the benchmark has one model and three of ten fixtures;
+        the vendor-docs transport is not probed by this framework.
+
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of evidence
+      options:
+        - Confirms a currently-unverified claim
+        - Contradicts a claim the docs make
+        - Reproduces a documented result on a different platform
+        - New limitation found
+    validations:
+      required: true
+
+  - type: input
+    id: claim
+    attributes:
+      label: Which claim
+      description: >-
+        Quote the line or name the row in docs/product/claims-evidence.md,
+        the checklist item, or the manifest capability id.
+      placeholder: 'claims-evidence.md row "The Cursor adapter''s generated file is actually consumed by Cursor at runtime"'
+    validations:
+      required: true
+
+  - type: textarea
+    id: procedure
+    attributes:
+      label: What you did
+      description: >-
+        The exact procedure. If you followed a documented one, say which and
+        note any step you had to change.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: result
+    attributes:
+      label: What you observed
+      description: >-
+        Real output. For a runtime-consumption check, include the
+        unguessable probe value and where it appeared, since a plausible-
+        looking response is not proof the file was read.
+      render: text
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: >-
+        OS, Python version, agent product and version, and any provider
+        version involved. Version matters: most claims here are scoped to
+        the version they were observed against.
+    validations:
+      required: true
+
+  - type: textarea
+    id: bounds
+    attributes:
+      label: What this does NOT show
+      description: >-
+        Required. Every claim in this repository carries its own limits, and
+        a contribution without them tends to get over-generalized later. One
+        run on one machine is not a cross-platform result.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Before submitting
+      options:
+        - label: >-
+            The output above contains no private paths, customer data or
+            credentials.
+          required: true
+        - label: >-
+            I am reporting what I observed, not what I expected to observe.
+          required: true

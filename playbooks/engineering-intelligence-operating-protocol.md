@@ -70,6 +70,7 @@ Record the classification before implementation starts, not after.
 | Ending any session | [`session-closeout.md`](session-closeout.md) |
 | Auditing a packet claimed done | [`execution-packet-review.md`](execution-packet-review.md) |
 | Finding what repeats across many sessions | [`run-retro.md`](run-retro.md) |
+| Finding what in the knowledge base needs maintenance | [`knowledge-curator.md`](knowledge-curator.md) |
 | Before non-trivial work | [`knowledge-search.md`](knowledge-search.md) |
 | New durable knowledge surfaced | [`knowledge-ingest.md`](knowledge-ingest.md) |
 | Before proposing shared-knowledge promotion | [`knowledge-lint.md`](knowledge-lint.md) |

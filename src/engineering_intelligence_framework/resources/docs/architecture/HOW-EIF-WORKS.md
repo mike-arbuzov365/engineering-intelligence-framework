@@ -599,8 +599,13 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    including the Bounded Evidence Loop~~ (done) -> ~~port the outer
    (retro) loop, so cross-session pattern detection is part of v0.1 rather
    than a later addition~~ (done - `playbooks/run-retro.md`,
-   `skills/run-retro/`, `templates/retro.md`). Curator/knowledge-health and
-   customer-facing workflows remain post-v0.1 scope.
+   `skills/run-retro/`, `templates/retro.md`) -> ~~port the knowledge
+   curator, so knowledge-base maintenance is a governed operation rather
+   than an occasional manual sweep~~ (done - `playbooks/knowledge-curator.md`,
+   `skills/knowledge-curator/`, `templates/curator-report.md`; as a
+   procedure, not automation - the private instance's scripted collectors
+   are not ported). Knowledge-health metrics and customer-facing workflows
+   remain post-v0.1 scope.
 8. ~~Add optional RTK and Graphify behavioral adapters with explicit degraded
    modes~~ (done). Vendor-docs remains declaration-only.
 9. Final local release gate + refreshed fresh-history candidate -> owner-gated

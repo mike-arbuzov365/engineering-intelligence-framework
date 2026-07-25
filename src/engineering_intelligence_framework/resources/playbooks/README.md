@@ -16,6 +16,7 @@ Step-by-step instructions for recurring engineering-intelligence operations.
 | [`knowledge-ingest.md`](knowledge-ingest.md) | Turning evidence into durable knowledge |
 | [`knowledge-lint.md`](knowledge-lint.md) | Reviewing knowledge-artifact quality |
 | [`run-retro.md`](run-retro.md) | Finding patterns that repeat across many sessions |
+| [`knowledge-curator.md`](knowledge-curator.md) | Ranking what in the knowledge base needs maintenance |
 
 The two loops these implement: the inner one runs inside a session
 (prepare, execute, close out, Knowledge Delta); the outer one runs across
@@ -27,7 +28,8 @@ production instance's ~24 playbooks with private repo names, examples,
 and instance-specific tooling removed - see each file's own
 `Knowledge source` comment for what was kept, dropped, and why. Not
 ported: parallel-session coordination, customer-facing playbooks
-(customer intake, engagement workflow), and knowledge-health automation -
-these have no equivalent need in a single-project-instance v0.1 adopter;
+(customer intake, engagement workflow), and the private instance's
+scripted signal collectors - the curator here is a procedure an agent
+follows, not automation, because no equivalent scripts exist publicly;
 see [`docs/architecture/HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md#session-lifecycle)
 for the concepts every playbook here implements.

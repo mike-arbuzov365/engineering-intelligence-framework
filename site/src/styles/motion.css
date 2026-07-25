@@ -110,12 +110,12 @@
   /* Retrieval runs first and from two tiers at once: method from T1 and
      prior experience from T2 both land in the session before it starts. */
   .ledger__dot--retrieval {
-    offset-path: path("M 160 64 C 214 76 244 214 254 344");
+    offset-path: path("M 160 64 C 214 76 244 220 254 352");
     animation-name: eif-ledger-retrieval;
   }
 
   .ledger__dot--retrieval-b {
-    offset-path: path("M 172 160 C 220 172 246 250 255 344");
+    offset-path: path("M 172 160 C 220 172 246 258 255 352");
     animation-name: eif-ledger-retrieval-b;
   }
 
@@ -129,7 +129,7 @@
   }
 
   .ledger__dot--dropped {
-    offset-path: path("M 256 352 L 470 356 C 492 362 508 378 524 392");
+    offset-path: path("M 256 352 L 470 352 C 492 360 508 376 524 392");
     animation-name: eif-ledger-dropped;
   }
 
@@ -137,14 +137,14 @@
      session 2, which then runs its own work segment. */
   .ledger__dot--packet {
     offset-path: path(
-      "M 256 352 L 496 344 C 520 316 536 262 566 256 L 582 256 C 602 256 608 300 614 344 L 616 352 L 730 352"
+      "M 256 352 L 496 352 C 520 318 536 262 566 256 L 582 256 C 602 256 608 306 614 352 L 730 352"
     );
     animation-name: eif-ledger-packet;
   }
 
   .ledger__dot--promoted {
     offset-path: path(
-      "M 732 346 C 754 300 760 206 786 160 L 836 160 C 872 150 880 92 906 74 L 936 74"
+      "M 732 352 C 754 300 760 206 786 160 L 836 160 C 872 150 880 84 906 64 L 936 64"
     );
     animation-name: eif-ledger-promoted;
   }

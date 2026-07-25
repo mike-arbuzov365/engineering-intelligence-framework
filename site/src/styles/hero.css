@@ -33,10 +33,20 @@
   width: 100%;
 }
 
-/* Two columns only when there is genuinely room beside the wordmark. Below
-   that the figure is dropped rather than stacked: it restates the
-   descriptor it sits next to, so on a phone it would cost a screen of
-   scrolling to repeat what the paragraph already said. */
+/* The figure is shown at every width, not hidden on small screens. On a
+   phone it sits under the CTAs as a short wide band rather than the tall
+   column used beside the wordmark - the same three layers, re-proportioned,
+   so a phone reader gets the idea instead of a blank space.
+   The Ukrainian strings are longer than the English ones, which is why the
+   lane labels are kept to Р1/Р2/Р3 rather than spelled out inside the SVG. */
+.hero__figure {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  height: auto;
+  margin: var(--eif-space-5) auto 0;
+}
+
 @media (min-width: 1080px) {
   .hero__content {
     display: grid;
@@ -57,19 +67,9 @@
   .hero__figure {
     grid-column: 2;
     grid-row: 1 / span 3;
-    width: 100%;
-    height: auto;
+    max-width: none;
+    margin: 0;
     align-self: center;
-  }
-}
-
-.hero__figure {
-  display: none;
-}
-
-@media (min-width: 1080px) {
-  .hero__figure {
-    display: block;
   }
 }
 
@@ -87,14 +87,6 @@
 
 .hero__shelf--session {
   stroke-dasharray: 2 5;
-}
-
-.hero__shelf-label {
-  font-family: var(--eif-font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  fill: var(--eif-fg-muted);
-  text-anchor: end;
 }
 
 .hero__return {

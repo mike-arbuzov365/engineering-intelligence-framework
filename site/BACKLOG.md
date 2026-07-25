@@ -15,8 +15,16 @@ Status: `open` | `in-progress` | `done` | `dropped` (with a reason).
 
 ## SB-001 - Strengthen the hero figure
 
-**Status:** open
+**Status:** done (2026-07-25)
 **Raised:** 2026-07-25, owner review
+
+Resolved by making the figure work everywhere rather than hiding it: shown
+at all widths, as a compact centred mark under the CTAs on phones and the
+tall column beside the wordmark from 1080px up. The `T1/T2/T3` labels were
+removed entirely - the figure sits outside the i18n block, so any text in
+it would have been frozen in one language, and it is a mark rather than a
+diagram. That fixed the bilingual problem and the small-screen legibility
+problem in one move.
 
 The three-layer hero figure works but is thin. There is room beside the
 wordmark for something more expressive, and the accumulation idea could
@@ -33,8 +41,15 @@ stays at 100 with the visibility pause in place.
 
 ## SB-002 - Traced-diagram polish
 
-**Status:** open
+**Status:** done (2026-07-25)
 **Raised:** 2026-07-25, owner review (with screenshots)
+
+Root cause of the lines not meeting the lanes was systematic, not visual:
+flows terminated at y=344/346/74 while the lanes sit at 352/64. Every flow
+now ends exactly on its lane, in the drawn paths and in the matching
+`offset-path` values the dots travel, which have to stay byte-identical or
+the dots drift off the line. The one real label overlap ("reusable
+elsewhere" sitting on the L1 lane) was moved clear.
 
 Two concrete defects in the packet-trace diagram:
 
@@ -202,3 +217,7 @@ implementation" too.
   percentage.
 - **SB-009** caption reworded in both languages; "before implementation"
   replaces "before the work".
+- **SB-001** hero figure shown at every width, compact on phones, and made
+  language-neutral by dropping its labels.
+- **SB-002** every flow now terminates on its lane; the one real label
+  overlap moved clear.

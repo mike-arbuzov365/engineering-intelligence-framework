@@ -12,12 +12,18 @@ tool integrations.
 > [Definition of Public-Ready](docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready)
 > checklist is complete.
 
+A presentation website source lives in [`site/`](site/README.md), buildable
+and previewable locally (`npm ci && npm run build:preview && npm run preview`
+from that directory). It is **not deployed** - domain, hosting and
+publication are owner-gated decisions that have not been made.
+
 ## The problem
 
 AI coding agents are powerful, but most agentic workflows still treat chat
 history as engineering memory:
 
-- Previous decisions live only in a conversation that gets compacted or lost.
+- Previous decisions live only inside one session and are lost when its
+  context is compacted or the session ends.
 - The agent re-discovers the same files and re-derives the same conclusions
   every session.
 - Local lessons never resurface before a new, similar task.
@@ -62,6 +68,11 @@ User intent
    [Authority model](core/ontology/authority-model.md).
 2. **Experience retrieval before implementation.** Knowledge isn't just
    stored, it's actively pulled into context before new work starts.
+   Learning runs as [two loops](docs/architecture/HOW-EIF-WORKS.md#the-two-loops),
+   not one: the inner loop asks what a session learned, the outer
+   ([retro](playbooks/run-retro.md)) asks what keeps happening across many
+   of them. Promotion is driven by the outer loop, because a single session
+   has no evidence that its lesson generalizes.
 3. **Ephemeral and durable context are separated.** Session-scoped state is
    never mistaken for validated, durable knowledge.
 4. **Execution is governed and iterative work is bounded.** Scope, observable
@@ -102,9 +113,9 @@ that isn't runnable is worse than not having the row. -->
 | Instance contract / upgrade / adoption | **Available (experimental)** | [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md) - provenance, upgrade-by-re-init, and safe adoption of an existing repo, hardened against a real external pilot: adoption preflight, `coexist` mode, repository-origin provenance (an existing repo with no `CLAUDE.md` is recorded `adopted`, not `greenfield`), configurable knowledge paths, path-escape validation, finding-specific privacy suppressions, tested with a realistic sanitized fixture (`scripts/tests/test_adoption.py`, 67 checks) |
 | Knowledge index / lifecycle + schema-aware retrieval | **Available (experimental)** | [`scripts/eif_generate_index.py`](scripts/eif_generate_index.py), [`scripts/eif_search_knowledge.py`](scripts/eif_search_knowledge.py) - offline, Unicode-aware keyword search that returns only eligible statuses by default (excludes rejected/superseded), and reports three honest outcomes for anything wrong: unparseable YAML, schema-invalid (parses fine, violates the ontology), or status-ineligible - never conflated with "no results." No embeddings; not tested at scale |
 | Locale layer (Ukrainian project docs + retrieval) | **Available (experimental)**, 4 surfaces | [`locales/`](locales/), [`scripts/eif_locale.py`](scripts/eif_locale.py), [`scripts/eif_render.py`](scripts/eif_render.py) - status messages, Knowledge Delta, closeout headings, and Ukrainian knowledge retrieval, with a real render command and English fallback; not full agent-response localization; D-06/D-07 remain open |
-| Playbooks, templates, skills | **Available (v0.1 operating set)** | 11 playbooks, 13 templates, and 7 skills, including planning/execution/review, knowledge operations, and the [Bounded Evidence Loop](playbooks/bounded-evidence-loop.md); curator/retro/customer workflows remain out of v0.1 scope |
+| Playbooks, templates, skills | **Available (v0.1 operating set)** | 12 playbooks, 14 templates, and 8 skills, including planning/execution/review, knowledge operations, the [Bounded Evidence Loop](playbooks/bounded-evidence-loop.md), and the outer [retro loop](playbooks/run-retro.md) that finds patterns repeating across many sessions; curator/knowledge-health/customer workflows remain out of v0.1 scope |
 | Agent adapters | **2 of 2 required for v0.1 (Claude Code, Cursor) + 2 experimental-supported (Codex, Hermes) - adapter scope now FROZEN at 4, entrypoints generated for all** | [`adapters/claude-code/README.md`](adapters/claude-code/README.md) - `eif_init` generates the correct `CLAUDE.md` entrypoint (the file Claude Code loads, per official docs + CLI `2.1.169`); instruction/skill discovery verified live; hooks not re-verified this round; no hook scripts shipped. [`adapters/cursor/README.md`](adapters/cursor/README.md) - `eif_init` generates `.cursor/rules/eif/governance.mdc` (Cursor's current Rules format, per official docs + installed `3.11.19`); code/test-validated (74 acceptance checks); real Cursor runtime consumption not yet manually confirmed - see that README's "Runtime-validation status". [`adapters/codex/README.md`](adapters/codex/README.md) - dynamic active-entrypoint resolution, re-verified against Codex's own primary Rust source (not documentation) and real installed-CLI runtime proof from an isolated `CODEX_HOME` (123 checks). [`adapters/hermes/README.md`](adapters/hermes/README.md) - dynamic active-source resolution, verified against Hermes's own installed Python source and real installed-CLI runtime proof from an isolated `HERMES_HOME` (77 checks). All 12 directed adapter-switching pairs proven - see [`adapters/switch-matrix.json`](adapters/switch-matrix.json) (81 checks). Codex and Hermes remain experimental-supported, not required v0.1 adapters (D-09), and neither is a claim of production readiness. See [`adapters/README.md`](adapters/README.md) |
-| Optional integration contract | **Behavioral adapters built (experimental)** | RTK has version/argv/native-`rg`/diff canaries, a command registry and content-free local telemetry; Graphify has version/query/path/explain canaries plus a D-08 artifact lifecycle bound to source commit, graph digest, explicit repository identity and reviewed scope. Both remain optional and degrade to core-safe fallbacks. Focused evidence is provider/version bounded, not a general performance claim; see [`integrations/README.md`](integrations/README.md). Vendor-docs remains declaration-only. |
+| Optional integration contract | **Behavioral adapters built (experimental)** | RTK has version/argv/native-`rg`/diff canaries, a command registry and content-free local telemetry; Graphify has version/query/path/explain canaries plus a D-08 artifact lifecycle bound to source commit, graph digest, explicit repository identity and reviewed scope. Both remain optional and degrade to core-safe fallbacks. Focused evidence is provider/version bounded, not a general performance claim; see [`integrations/README.md`](integrations/README.md). Vendor-docs now declares a named provider (Context7, over MCP) with generated routing guidance and a reviewable per-adapter config template, but EIF does not install it and cannot probe it - see that integration's own README for the stated verification gap. |
 | Demo workspace | **Built** | [`examples/demo-workspace/`](examples/demo-workspace/) - reproduced from a clean checkout, see its own README for captured command output |
 | Benchmark | **Bounded A/B pilot published; C/D attempt contracts executable** | The existing real-agent pilot remains 6/6 attempts across three synthetic tasks and modes A/B, n=1 per cell. Modes C/D now require integrity-bound Graphify consumption and, for D, attempt-attributed RTK telemetry. Their deterministic runs are contract tests with token figures suppressed, not new performance evidence; see [`docs/benchmarks/README.md`](docs/benchmarks/README.md). |
 | Public claims evidence ledger | **Available** | [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md) - what's OBSERVED vs. UNVERIFIED vs. NOT TESTED, and the allowed/forbidden wording for each |
@@ -164,7 +175,11 @@ them, with explicit tradeoffs documented in
 - **Shell-output compression** - token-efficient command output filtering
   with tracked savings (`integrations/rtk/`).
 - **Vendor documentation retrieval** - current, versioned library/API docs
-  instead of stale training data (`integrations/vendor-docs/`).
+  instead of stale training data (`integrations/vendor-docs/`). Declared
+  provider: Context7, over MCP. EIF ships routing guidance and a reviewable
+  config template but **does not install it**: an MCP server is configured
+  at the user level, outside the project instance, and this framework never
+  mutates user-level configuration.
 
 ## Language configuration
 

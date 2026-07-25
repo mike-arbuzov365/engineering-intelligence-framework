@@ -95,6 +95,47 @@
             <a href="#evidence">Current evidence</a>
           </nav>
         </div>
+
+        <!-- Decorative restatement of the descriptor above: most of a
+             session evaporates, a little settles, and what settled is
+             still there when the next one starts. aria-hidden because the
+             prose already carries it; without motion it reads as a plain
+             three-tier mark. -->
+        <svg
+          class="hero__figure"
+          aria-hidden="true"
+          viewBox="0 0 360 400"
+          preserveAspectRatio="xMidYMid meet"
+        >
+          <line class="hero__shelf" x1="72" y1="92" x2="330" y2="92" />
+          <line class="hero__shelf" x1="72" y1="202" x2="330" y2="202" />
+          <line class="hero__shelf hero__shelf--session" x1="72" y1="312" x2="330" y2="312" />
+
+          <text class="hero__shelf-label" x="58" y="88">T1</text>
+          <text class="hero__shelf-label" x="58" y="198">T2</text>
+          <text class="hero__shelf-label" x="58" y="308">T3</text>
+
+          <path class="hero__return" fill="none"
+            d="M 326 96 C 348 130 348 260 330 302" />
+
+          <g class="hero__lost">
+            <circle cx="104" cy="312" r="3.5" />
+            <circle cx="152" cy="312" r="3.5" />
+            <circle cx="214" cy="312" r="3.5" />
+            <circle cx="268" cy="312" r="3.5" />
+            <circle cx="300" cy="312" r="3.5" />
+          </g>
+
+          <circle class="hero__kept hero__kept--1" cx="128" cy="312" r="4" />
+          <circle class="hero__kept hero__kept--2" cx="186" cy="312" r="4" />
+          <circle class="hero__kept hero__kept--3" cx="244" cy="312" r="4" />
+          <circle class="hero__promoted" cx="186" cy="202" r="4" />
+
+          <rect class="hero__settled hero__settled--1" x="121" y="196" width="14" height="6" rx="1" />
+          <rect class="hero__settled hero__settled--2" x="179" y="196" width="14" height="6" rx="1" />
+          <rect class="hero__settled hero__settled--3" x="237" y="196" width="14" height="6" rx="1" />
+          <rect class="hero__settled hero__settled--top" x="179" y="86" width="14" height="6" rx="1" />
+        </svg>
       </div>
     </header>
 

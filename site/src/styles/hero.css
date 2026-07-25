@@ -33,6 +33,97 @@
   width: 100%;
 }
 
+/* Two columns only when there is genuinely room beside the wordmark. Below
+   that the figure is dropped rather than stacked: it restates the
+   descriptor it sits next to, so on a phone it would cost a screen of
+   scrolling to repeat what the paragraph already said. */
+@media (min-width: 1080px) {
+  .hero__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    gap: var(--eif-space-5);
+    align-items: center;
+  }
+
+  .hero__content > .label,
+  .hero__name {
+    grid-column: 1;
+  }
+
+  .hero__content > .i18n-block {
+    grid-column: 1;
+  }
+
+  .hero__figure {
+    grid-column: 2;
+    grid-row: 1 / span 3;
+    width: 100%;
+    height: auto;
+    align-self: center;
+  }
+}
+
+.hero__figure {
+  display: none;
+}
+
+@media (min-width: 1080px) {
+  .hero__figure {
+    display: block;
+  }
+}
+
+.hero__shelf {
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1;
+}
+
+.hero__shelf--session {
+  stroke-dasharray: 2 5;
+}
+
+.hero__shelf-label {
+  font-family: var(--eif-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  fill: var(--eif-fg-muted);
+  text-anchor: end;
+}
+
+.hero__return {
+  stroke: var(--eif-fg-muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+  opacity: 0;
+}
+
+/* Settled marks and the dots that produce them start invisible. Without
+   motion the figure is just the three tiers, which is the honest static
+   reading: nothing has accumulated yet. */
+.hero__settled {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
+.hero__settled--top {
+  fill: var(--eif-accent-dim);
+}
+
+.hero__lost circle {
+  fill: var(--eif-fg-muted);
+  opacity: 0;
+}
+
+.hero__kept {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
+.hero__promoted {
+  fill: var(--eif-accent-dim);
+  opacity: 0;
+}
+
 .hero__name {
   font-size: var(--eif-size-h1);
   color: var(--eif-fg);

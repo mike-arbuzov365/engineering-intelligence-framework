@@ -142,6 +142,47 @@
     animation-name: eif-ledger-packet;
   }
 
+  /* Scale figures: a lesson climbs out of its packet to the framework
+     layer, then reaches one other project. Two beats on one 12s cycle so
+     the order reads as cause and effect rather than two things happening
+     at once. The curator marker orbits independently - it watches
+     continuously, it is not part of the promotion. */
+  .scale__pulse {
+    offset-rotate: 0deg;
+    animation-duration: 12s;
+    animation-timing-function: var(--eif-ease);
+    animation-iteration-count: infinite;
+  }
+
+  .scale__pulse--up {
+    offset-path: path("M 310 424 C 300 380 300 320 310 292");
+    animation-name: eif-scale-up;
+  }
+
+  .scale__pulse--out {
+    offset-path: path("M 310 240 C 322 208 400 196 452 190");
+    animation-name: eif-scale-out;
+  }
+
+  .scale__pulse--trunk-up {
+    offset-path: path("M 434 292 C 452 250 448 140 434 96");
+    animation-name: eif-scale-up;
+  }
+
+  .scale__pulse--trunk-out {
+    offset-path: path("M 440 86 L 620 86 C 636 100 638 150 638 174");
+    animation-name: eif-scale-out;
+  }
+
+  .scale--radial .scale__curator-dot {
+    transform-origin: 310px 266px;
+    animation: eif-scale-curator 24s linear infinite;
+  }
+
+  .scale--trunk .scale__curator-dot {
+    animation: eif-scale-curator-sweep 18s var(--eif-ease) infinite;
+  }
+
   .ledger__dot--promoted {
     offset-path: path(
       "M 732 352 C 754 300 760 206 786 160 L 836 160 C 872 150 880 84 906 64 L 936 64"
@@ -219,6 +260,33 @@
   60% { opacity: 0.7; }
   90% { opacity: 0; }
   100% { opacity: 0; }
+}
+
+@keyframes eif-scale-up {
+  0% { offset-distance: 0%; opacity: 0; }
+  4% { opacity: 1; }
+  34% { offset-distance: 100%; opacity: 1; }
+  40% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-scale-out {
+  0%, 40% { offset-distance: 0%; opacity: 0; }
+  44% { opacity: 1; }
+  74% { offset-distance: 100%; opacity: 1; }
+  80% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-scale-curator {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes eif-scale-curator-sweep {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(740px); }
+  100% { transform: translateX(0); }
 }
 
 @keyframes eif-draw-plane {

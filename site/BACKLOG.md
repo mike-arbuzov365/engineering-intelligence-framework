@@ -63,8 +63,30 @@ breakpoint, in both languages.
 
 ## SB-003 - Show the multi-project and curator picture
 
-**Status:** open
+**Status:** in-progress - two variants built, awaiting selection
 **Raised:** 2026-07-25, owner review
+
+Two compositions of the same model are now on the page for comparison:
+
+- **Variant A, orbit.** Projects orbit one framework core; the packet hangs
+  below the active project; the curator is a ring around the core.
+- **Variant B, spine.** The framework layer is a horizontal spine, projects
+  branch down from it, one branch opens into a packet of sessions, and the
+  curator sweeps the spine.
+
+Both show: one shared framework, several projects, a packet of sessions
+inside one project, learning climbing out of it, and reaching another
+project only when relevant (drawn dashed, because it is conditional).
+
+**Known limitation, must be fixed before ship:** both figures live inside
+the English `.i18n-block`, so they disappear in Ukrainian mode. The SVGs
+themselves are language-neutral by design (EIF / P1..P4 / PACKET), so the
+fix is to move the chosen one into both templates with a translated
+caption. Deliberately not done twice for two variants when one is going to
+be deleted.
+
+**Next:** pick one, delete the other, translate its caption, add it to the
+Ukrainian template.
 
 The site currently shows one project. The real shape is: one global
 framework layer, many project repositories connected to it, packets inside

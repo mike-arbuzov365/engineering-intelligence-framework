@@ -380,6 +380,136 @@
               </li>
             </ol>
           </figure>
+
+          <!-- SB-003, two variants for selection. Both SVGs are
+               language-neutral on purpose (EIF / P1..P4 / PACKET read the
+               same in both languages), so only the captions translate and
+               the markup is not duplicated per language. One of these is
+               meant to be deleted once chosen. -->
+          <figure class="scale scale--radial" data-claim-id="CLM-13">
+            <figcaption class="ledger__caption">
+              <span class="label label--accent">Variant A &middot; one framework, many projects</span>
+              <h3>The framework is shared. Every project keeps its own memory.</h3>
+              <p>
+                Projects orbit one framework layer. Work too large for a
+                single session becomes a packet of sessions inside its own
+                project. What that packet learns travels inward only if it
+                generalizes, and reaches another project only if it is
+                relevant there.
+              </p>
+            </figcaption>
+
+            <svg class="scale__map" aria-hidden="true" viewBox="0 0 620 560" preserveAspectRatio="xMidYMid meet">
+              <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+
+              <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+              <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+              <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+              <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+
+              <path class="scale__lift" fill="none" d="M 310 424 C 300 380 300 320 310 292" />
+              <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+
+              <circle class="scale__core" cx="310" cy="266" r="42" />
+              <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+
+              <g class="scale__project scale__project--active">
+                <circle cx="310" cy="442" r="17" />
+                <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+              </g>
+              <g class="scale__project">
+                <circle cx="158" cy="178" r="15" />
+                <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
+              </g>
+              <g class="scale__project scale__project--receiving">
+                <circle cx="462" cy="178" r="15" />
+                <text class="scale__node-label" x="462" y="183" text-anchor="middle">P3</text>
+              </g>
+              <g class="scale__project">
+                <circle cx="310" cy="90" r="15" />
+                <text class="scale__node-label" x="310" y="95" text-anchor="middle">P4</text>
+              </g>
+
+              <line class="scale__packet-rule" x1="196" y1="492" x2="424" y2="492" />
+              <text class="scale__section-label" x="196" y="482">PACKET</text>
+              <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+              <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
+              <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
+              <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
+              <circle class="scale__session" cx="238" cy="522" r="6" />
+              <circle class="scale__session" cx="310" cy="522" r="6" />
+              <circle class="scale__session" cx="382" cy="522" r="6" />
+              <text class="scale__section-label" x="196" y="546">SESSIONS</text>
+
+              <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
+              <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+              <text class="scale__section-label scale__section-label--curator" x="310" y="188" text-anchor="middle">CURATOR</text>
+
+              <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
+              <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+            </svg>
+          </figure>
+
+          <figure class="scale scale--trunk" data-claim-id="CLM-13">
+            <figcaption class="ledger__caption">
+              <span class="label label--accent">Variant B &middot; one framework, many projects</span>
+              <h3>The same shape, read as a spine instead of an orbit</h3>
+              <p>
+                Identical model, different composition: the framework layer
+                is a spine, projects branch off it, and one branch opens into
+                a packet of sessions. Learning climbs its own branch first,
+                then crosses the spine to another project only when it
+                applies there.
+              </p>
+            </figcaption>
+
+            <svg class="scale__map" aria-hidden="true" viewBox="0 0 940 400" preserveAspectRatio="xMidYMid meet">
+              <line class="scale__spine" x1="80" y1="86" x2="880" y2="86" />
+              <text class="scale__section-label" x="80" y="70">FRAMEWORK LAYER</text>
+
+              <circle class="scale__curator-dot" cx="120" cy="86" r="4" />
+              <text class="scale__section-label scale__section-label--curator" x="880" y="70" text-anchor="end">CURATOR WATCHES THIS LINE</text>
+
+              <line class="scale__spoke" x1="200" y1="86" x2="200" y2="176" />
+              <line class="scale__spoke" x1="420" y1="86" x2="420" y2="176" />
+              <line class="scale__spoke" x1="640" y1="86" x2="640" y2="176" />
+              <line class="scale__spoke" x1="840" y1="86" x2="840" y2="176" />
+
+              <g class="scale__project">
+                <circle cx="200" cy="190" r="14" />
+                <text class="scale__node-label" x="200" y="195" text-anchor="middle">P1</text>
+              </g>
+              <g class="scale__project scale__project--active">
+                <circle cx="420" cy="190" r="16" />
+                <text class="scale__node-label" x="420" y="195" text-anchor="middle">P2</text>
+              </g>
+              <g class="scale__project scale__project--receiving">
+                <circle cx="640" cy="190" r="14" />
+                <text class="scale__node-label" x="640" y="195" text-anchor="middle">P3</text>
+              </g>
+              <g class="scale__project">
+                <circle cx="840" cy="190" r="14" />
+                <text class="scale__node-label" x="840" y="195" text-anchor="middle">P4</text>
+              </g>
+
+              <line class="scale__stem" x1="420" y1="206" x2="420" y2="252" />
+              <line class="scale__packet-rule" x1="316" y1="252" x2="524" y2="252" />
+              <text class="scale__section-label" x="316" y="242">PACKET</text>
+              <line class="scale__stem" x1="352" y1="252" x2="352" y2="292" />
+              <line class="scale__stem" x1="420" y1="252" x2="420" y2="292" />
+              <line class="scale__stem" x1="488" y1="252" x2="488" y2="292" />
+              <circle class="scale__session" cx="352" cy="298" r="6" />
+              <circle class="scale__session" cx="420" cy="298" r="6" />
+              <circle class="scale__session" cx="488" cy="298" r="6" />
+              <text class="scale__section-label" x="316" y="326">SESSIONS</text>
+
+              <path class="scale__lift" fill="none" d="M 434 292 C 452 250 448 140 434 96" />
+              <path class="scale__lift scale__lift--relay" fill="none" d="M 440 86 L 620 86 C 636 100 638 150 638 174" />
+
+              <circle class="scale__pulse scale__pulse--trunk-up" cx="0" cy="0" r="5" />
+              <circle class="scale__pulse scale__pulse--trunk-out" cx="0" cy="0" r="5" />
+            </svg>
+          </figure>
         </div>
       </section>
 

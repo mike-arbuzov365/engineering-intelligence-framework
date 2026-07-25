@@ -71,6 +71,124 @@
   color: var(--eif-fg-muted);
 }
 
+/* SB-003 scale figures: one framework layer, many projects, packets of
+   sessions inside them. Two compositions of the same model, kept side by
+   side for selection - one of them is meant to be deleted. */
+.scale {
+  margin: var(--eif-space-6) 0 0;
+  padding-top: var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.scale__map {
+  display: block;
+  width: 100%;
+  max-width: 46rem;
+  height: auto;
+  margin: var(--eif-space-4) auto 0;
+}
+
+.scale--trunk .scale__map {
+  max-width: none;
+}
+
+.scale__orbit {
+  stroke: var(--eif-rule);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+
+.scale__spine {
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+}
+
+.scale__spoke,
+.scale__stem {
+  stroke: var(--eif-rule);
+  stroke-width: 1;
+}
+
+.scale__packet-rule {
+  stroke: var(--eif-accent-dim);
+  stroke-width: 1.5;
+}
+
+.scale__core {
+  fill: var(--eif-bg);
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+}
+
+.scale__core-label {
+  font-family: var(--eif-font-mono);
+  font-size: 17px;
+  letter-spacing: 0.08em;
+  fill: var(--eif-fg);
+}
+
+.scale__project circle {
+  fill: var(--eif-bg);
+  stroke: var(--eif-fg-muted);
+  stroke-width: 1.5;
+}
+
+/* The project the traced packet belongs to, and the one a promoted lesson
+   reaches. Everything else stays neutral so the two stand out. */
+.scale__project--active circle {
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+}
+
+.scale__project--receiving circle {
+  stroke: var(--eif-accent-dim);
+  stroke-dasharray: 4 3;
+}
+
+.scale__node-label,
+.scale__section-label {
+  font-family: var(--eif-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  fill: var(--eif-fg-muted);
+}
+
+.scale__section-label--curator {
+  fill: var(--eif-warn);
+}
+
+.scale__session {
+  fill: var(--eif-accent);
+}
+
+.scale__lift {
+  stroke: var(--eif-accent);
+  stroke-width: 1.5;
+}
+
+/* Dashed on the way out: reaching another project is conditional on the
+   lesson actually applying there, not automatic. */
+.scale__lift--relay {
+  stroke: var(--eif-accent-dim);
+  stroke-dasharray: 5 4;
+}
+
+.scale__curator-ring {
+  stroke: var(--eif-warn);
+  stroke-width: 1;
+  stroke-dasharray: 1 6;
+  opacity: 0.8;
+}
+
+.scale__curator-dot {
+  fill: var(--eif-warn);
+}
+
+.scale__pulse {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
 /* Cost statement beside the optional capabilities. Amber rather than the
    accent: this is a caveat, not a feature. */
 .token-economics {

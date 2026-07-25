@@ -315,6 +315,18 @@
   color: var(--eif-fg);
 }
 
+.knowledge-route__example {
+  max-width: 58rem;
+  margin: var(--eif-space-3) 0 0 auto;
+  padding: var(--eif-space-2) 0 0 var(--eif-space-2);
+  border-left: 2px solid var(--eif-accent);
+  color: var(--eif-fg-muted);
+}
+
+.knowledge-route__example strong {
+  color: var(--eif-fg);
+}
+
 /* Control plane section. */
 .control-plane__diagram {
   width: 100%;

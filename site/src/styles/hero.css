@@ -54,7 +54,7 @@
   margin-top: var(--eif-space-4);
   display: flex;
   flex-wrap: wrap;
-  gap: var(--eif-space-2) var(--eif-space-4);
+  gap: var(--eif-space-2);
 }
 
 .hero__ctas a {
@@ -67,10 +67,13 @@
   text-transform: uppercase;
   text-decoration: none;
   color: var(--eif-fg);
-  padding-bottom: 2px;
-  border-bottom: 1px solid var(--eif-rule);
+  padding: 0.5em 0.85em;
+  border: 1px solid var(--eif-rule);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--eif-fg) 3%, transparent);
   transition: color var(--eif-duration-fast) var(--eif-ease),
-    border-color var(--eif-duration-fast) var(--eif-ease);
+    border-color var(--eif-duration-fast) var(--eif-ease),
+    background-color var(--eif-duration-fast) var(--eif-ease);
 }
 
 .hero__ctas a::after {
@@ -88,6 +91,7 @@
 .hero__ctas a:focus-visible {
   color: var(--eif-accent);
   border-color: var(--eif-accent);
+  background: color-mix(in srgb, var(--eif-accent) 8%, transparent);
 }
 
 .hero__ctas a:hover::after,

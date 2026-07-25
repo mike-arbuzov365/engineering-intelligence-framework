@@ -44,7 +44,7 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#loop')).toContainText('Контекст');
     await expect(page.locator('#loop')).toContainText('Уточнення');
     await expect(page.locator('body')).toContainText(
-      'після завершення окремої робочої сесії з агентом',
+      'переживають кожну окрему сесію',
     );
 
     const ukrainianText = await page.locator('main').innerText();

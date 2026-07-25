@@ -68,6 +68,44 @@
     animation: eif-route-pulse 7s var(--eif-ease) infinite;
     animation-delay: 1600ms;
   }
+
+  /* Traced knowledge flow. All four dots share one 16s cycle so their
+     relative order stays fixed: an item is discarded at closeout before the
+     next one is even evaluated for promotion. Each dot's visible window is
+     encoded in its own keyframes rather than in a delay, so the sequence
+     cannot drift apart over repeated cycles. The paths below are the exact
+     `d` values of the drawn flows in index.html, concatenated where a dot
+     crosses a gate onto a branch. */
+  .ledger__dot {
+    offset-rotate: 0deg;
+    animation-duration: 16s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+
+  .ledger__dot--dropped {
+    offset-path: path("M 120 290 C 210 292 300 302 385 312");
+    animation-name: eif-ledger-dropped;
+  }
+
+  .ledger__dot--local {
+    offset-path: path(
+      "M 120 290 L 360 290 C 420 290 410 180 470 180 L 660 180 C 700 180 695 122 730 122 C 766 122 760 180 800 180 L 845 180"
+    );
+    animation-name: eif-ledger-local;
+  }
+
+  .ledger__dot--promoted {
+    offset-path: path(
+      "M 120 290 L 360 290 C 420 290 410 180 470 180 L 660 180 C 715 180 705 70 765 70 L 845 70"
+    );
+    animation-name: eif-ledger-promoted;
+  }
+
+  .ledger__dot--retrieval {
+    offset-path: path("M 848 70 C 900 82 900 130 890 180 C 882 222 890 258 886 276");
+    animation-name: eif-ledger-retrieval;
+  }
 }
 
 @keyframes eif-rise {
@@ -108,6 +146,41 @@
     stroke-dashoffset: 0;
     stroke: var(--eif-accent);
   }
+}
+
+/* Each dot travels, then holds invisibly at its endpoint until the shared
+   cycle restarts. The dropped item stops short and fades where it is: it is
+   not carried to a tier, it simply ends. */
+@keyframes eif-ledger-dropped {
+  0% { offset-distance: 0%; opacity: 0; }
+  3% { opacity: 0.75; }
+  15% { offset-distance: 100%; opacity: 0.75; }
+  21% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-ledger-local {
+  0%, 12% { offset-distance: 0%; opacity: 0; }
+  15% { opacity: 1; }
+  52% { offset-distance: 100%; opacity: 1; }
+  58% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-ledger-promoted {
+  0%, 30% { offset-distance: 0%; opacity: 0; }
+  33% { opacity: 1; }
+  70% { offset-distance: 100%; opacity: 1; }
+  76% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+@keyframes eif-ledger-retrieval {
+  0%, 78% { offset-distance: 0%; opacity: 0; }
+  81% { opacity: 0.85; }
+  94% { offset-distance: 100%; opacity: 0.85; }
+  98% { offset-distance: 100%; opacity: 0; }
+  100% { offset-distance: 100%; opacity: 0; }
 }
 
 @keyframes eif-route-pulse {

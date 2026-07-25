@@ -327,6 +327,165 @@
   color: var(--eif-fg);
 }
 
+/* Traced knowledge flow: three real artifacts, three different fates. The
+   drawn map is complete without any motion - the dots only re-walk paths
+   that are already there, so reduced-motion and no-JS lose nothing. */
+.ledger {
+  margin: var(--eif-space-6) 0 0;
+  padding-top: var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.ledger__caption h3 {
+  margin-top: 0.4rem;
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+}
+
+.ledger__caption p {
+  max-width: var(--eif-measure);
+  margin-top: var(--eif-space-1);
+  color: var(--eif-fg-muted);
+}
+
+.ledger__map {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: var(--eif-space-4);
+}
+
+.ledger__lane {
+  stroke: var(--eif-rule);
+  stroke-width: 1;
+}
+
+.ledger__gate {
+  stroke: var(--eif-warn);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  opacity: 0.75;
+}
+
+.ledger__lane-label,
+.ledger__gate-label,
+.ledger__node-label,
+.ledger__fate {
+  font-family: var(--eif-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  fill: var(--eif-fg-muted);
+}
+
+.ledger__gate-label {
+  fill: var(--eif-warn);
+  text-anchor: middle;
+}
+
+.ledger__fate {
+  fill: var(--eif-fg);
+}
+
+.ledger__fate--muted {
+  fill: var(--eif-fg-muted);
+}
+
+.ledger__node-label--end {
+  text-anchor: end;
+}
+
+.ledger__flow {
+  stroke: var(--eif-accent);
+  stroke-width: 1.5;
+}
+
+.ledger__flow--dropped,
+.ledger__fate--dropped {
+  stroke: var(--eif-fg-muted);
+  fill: var(--eif-fg-muted);
+  opacity: 0.7;
+}
+
+.ledger__flow--candidate {
+  stroke-dasharray: 6 5;
+}
+
+.ledger__flow--retrieval {
+  stroke: var(--eif-fg-muted);
+  stroke-dasharray: 2 6;
+}
+
+.ledger__node {
+  fill: var(--eif-bg);
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+}
+
+.ledger__node--origin {
+  fill: var(--eif-accent);
+}
+
+.ledger__stop {
+  fill: none;
+  stroke: var(--eif-fg-muted);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.ledger__dot {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
+.ledger__dot--dropped {
+  fill: var(--eif-fg-muted);
+}
+
+.ledger__dot--retrieval {
+  fill: var(--eif-fg-muted);
+}
+
+.ledger__fates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--eif-space-4);
+  list-style: none;
+  margin: var(--eif-space-5) 0 0;
+  padding: 0;
+}
+
+.ledger__outcome {
+  padding-top: var(--eif-space-2);
+  border-top: 2px solid var(--eif-rule);
+  color: var(--eif-fg-muted);
+}
+
+.ledger__outcome p {
+  margin-top: var(--eif-space-1);
+}
+
+.ledger__outcome strong {
+  color: var(--eif-fg);
+}
+
+.ledger__outcome--local {
+  border-top-color: var(--eif-accent);
+}
+
+.ledger__outcome--promoted {
+  border-top-color: var(--eif-accent-dim);
+}
+
+.ledger__outcome--local .label {
+  color: var(--eif-accent);
+}
+
+@media (max-width: 860px) {
+  .ledger__fates {
+    grid-template-columns: 1fr;
+    gap: var(--eif-space-3);
+  }
+}
+
 /* Control plane section. */
 .control-plane__diagram {
   width: 100%;

@@ -271,6 +271,111 @@
             <p><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> method, constraints, prior experience and reusable skills.</p>
             <p><span aria-hidden="true">&uarr;</span><strong>Flows up:</strong> only validated learning, through Knowledge Delta and an explicit promotion decision.</p>
           </div>
+
+          <figure class="ledger" data-claim-id="CLM-15">
+            <figcaption class="ledger__caption">
+              <span class="label label--accent">Traced: what actually moves</span>
+              <h3>Most of a session never becomes knowledge</h3>
+              <p>
+                Three items leave the same session and reach three different
+                fates. Every one is taken from this repository's own demo
+                instance, including the promotion the gate declined.
+              </p>
+            </figcaption>
+
+            <svg
+              class="ledger__map"
+              aria-hidden="true"
+              viewBox="0 0 940 356"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <line class="ledger__lane" x1="120" y1="70" x2="900" y2="70" />
+              <line class="ledger__lane" x1="120" y1="180" x2="900" y2="180" />
+              <line class="ledger__lane" x1="120" y1="290" x2="900" y2="290" />
+
+              <text class="ledger__lane-label" x="6" y="58">T1 FRAMEWORK</text>
+              <text class="ledger__lane-label" x="6" y="168">T2 PROJECT</text>
+              <text class="ledger__lane-label" x="6" y="278">T3 SESSION</text>
+
+              <line class="ledger__gate" x1="400" y1="46" x2="400" y2="316" />
+              <line class="ledger__gate" x1="660" y1="46" x2="660" y2="316" />
+              <text class="ledger__gate-label" x="400" y="34">CLOSEOUT + DELTA</text>
+              <text class="ledger__gate-label" x="660" y="34">PROMOTION DECISION</text>
+
+              <path
+                class="ledger__flow ledger__flow--dropped"
+                fill="none"
+                d="M 120 290 C 210 292 300 302 385 312"
+              />
+              <path
+                class="ledger__flow"
+                fill="none"
+                d="M 120 290 L 360 290 C 420 290 410 180 470 180 L 660 180"
+              />
+              <path
+                class="ledger__flow"
+                fill="none"
+                d="M 660 180 C 700 180 695 122 730 122 C 766 122 760 180 800 180 L 845 180"
+              />
+              <path
+                class="ledger__flow ledger__flow--candidate"
+                fill="none"
+                d="M 660 180 C 715 180 705 70 765 70 L 845 70"
+              />
+              <path
+                class="ledger__flow ledger__flow--retrieval"
+                fill="none"
+                d="M 848 70 C 900 82 900 130 890 180 C 882 222 890 258 886 276"
+              />
+
+              <circle class="ledger__node ledger__node--origin" cx="120" cy="290" r="7" />
+              <circle class="ledger__node" cx="890" cy="290" r="7" />
+              <circle class="ledger__stop" cx="385" cy="312" r="4" />
+
+              <text class="ledger__node-label" x="112" y="318">session work</text>
+              <text class="ledger__node-label ledger__node-label--end" x="934" y="316">next session</text>
+
+              <text class="ledger__fate ledger__fate--dropped" x="150" y="340">raw reasoning, discarded</text>
+              <text class="ledger__fate" x="770" y="208" text-anchor="middle">PATTERN-0001</text>
+              <text class="ledger__fate ledger__fate--muted" x="770" y="222" text-anchor="middle">stays local</text>
+              <text class="ledger__fate" x="845" y="58" text-anchor="end">promoted candidate</text>
+              <text class="ledger__fate ledger__fate--muted" x="838" y="248" text-anchor="end">retrieved before the next task</text>
+
+              <circle class="ledger__dot ledger__dot--dropped" cx="0" cy="0" r="6" />
+              <circle class="ledger__dot ledger__dot--local" cx="0" cy="0" r="6" />
+              <circle class="ledger__dot ledger__dot--promoted" cx="0" cy="0" r="6" />
+              <circle class="ledger__dot ledger__dot--retrieval" cx="0" cy="0" r="5" />
+            </svg>
+
+            <ol class="ledger__fates">
+              <li class="ledger__outcome ledger__outcome--dropped">
+                <span class="label">Discarded</span>
+                <p>
+                  <strong>Raw reasoning.</strong> Closeout keeps the structured
+                  result and drops the chain of thought. It never becomes an
+                  artifact, so it can never be retrieved as if it were evidence.
+                </p>
+              </li>
+              <li class="ledger__outcome ledger__outcome--local">
+                <span class="label">Stays local</span>
+                <p>
+                  <strong>A naive leap-year check.</strong> Real, validated
+                  against the calendar specification, and still declined at the
+                  promotion gate on purpose: it is a lesson about calendars, not
+                  about the framework. Useful does not mean reusable everywhere.
+                </p>
+              </li>
+              <li class="ledger__outcome ledger__outcome--promoted">
+                <span class="label">Promoted candidate</span>
+                <p>
+                  <strong>A console-encoding crash.</strong> It would recur in
+                  any new instance, so it clears the gate as a framework-level
+                  candidate. It stays dashed until an owner ratifies it, because
+                  passing a gate is not the same as being adopted.
+                </p>
+              </li>
+            </ol>
+          </figure>
         </div>
       </section>
 
@@ -997,6 +1102,112 @@
           <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані навички агента.</p>
           <p><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання через Knowledge Delta та явне рішення про підвищення рівня.</p>
         </div>
+
+        <figure class="ledger" data-claim-id="CLM-15">
+          <figcaption class="ledger__caption">
+            <span class="label label--accent">Простежено: що справді рухається</span>
+            <h3>Більша частина сесії ніколи не стає знанням</h3>
+            <p>
+              Три елементи виходять з однієї сесії й отримують три різні долі.
+              Кожен узято з демонстраційного екземпляра цього ж репозиторію,
+              разом із підвищенням рівня, яке перевірка відхилила.
+            </p>
+          </figcaption>
+
+          <svg
+            class="ledger__map"
+            aria-hidden="true"
+            viewBox="0 0 940 356"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <line class="ledger__lane" x1="120" y1="70" x2="900" y2="70" />
+            <line class="ledger__lane" x1="120" y1="180" x2="900" y2="180" />
+            <line class="ledger__lane" x1="120" y1="290" x2="900" y2="290" />
+
+            <text class="ledger__lane-label" x="6" y="58">Р1 ФРЕЙМВОРК</text>
+            <text class="ledger__lane-label" x="6" y="168">Р2 ПРОЄКТ</text>
+            <text class="ledger__lane-label" x="6" y="278">Р3 СЕСІЯ</text>
+
+            <line class="ledger__gate" x1="400" y1="46" x2="400" y2="316" />
+            <line class="ledger__gate" x1="660" y1="46" x2="660" y2="316" />
+            <text class="ledger__gate-label" x="400" y="34">ЗАКРИТТЯ СЕСІЇ</text>
+            <text class="ledger__gate-label" x="660" y="34">РІШЕННЯ ПРО РІВЕНЬ</text>
+
+            <path
+              class="ledger__flow ledger__flow--dropped"
+              fill="none"
+              d="M 120 290 C 210 292 300 302 385 312"
+            />
+            <path
+              class="ledger__flow"
+              fill="none"
+              d="M 120 290 L 360 290 C 420 290 410 180 470 180 L 660 180"
+            />
+            <path
+              class="ledger__flow"
+              fill="none"
+              d="M 660 180 C 700 180 695 122 730 122 C 766 122 760 180 800 180 L 845 180"
+            />
+            <path
+              class="ledger__flow ledger__flow--candidate"
+              fill="none"
+              d="M 660 180 C 715 180 705 70 765 70 L 845 70"
+            />
+            <path
+              class="ledger__flow ledger__flow--retrieval"
+              fill="none"
+              d="M 848 70 C 900 82 900 130 890 180 C 882 222 890 258 886 276"
+            />
+
+            <circle class="ledger__node ledger__node--origin" cx="120" cy="290" r="7" />
+            <circle class="ledger__node" cx="890" cy="290" r="7" />
+            <circle class="ledger__stop" cx="385" cy="312" r="4" />
+
+            <text class="ledger__node-label" x="112" y="318">робота сесії</text>
+            <text class="ledger__node-label ledger__node-label--end" x="934" y="316">наступна сесія</text>
+
+            <text class="ledger__fate ledger__fate--dropped" x="150" y="340">сирі міркування, відкинуто</text>
+            <text class="ledger__fate" x="770" y="208" text-anchor="middle">PATTERN-0001</text>
+            <text class="ledger__fate ledger__fate--muted" x="770" y="222" text-anchor="middle">лишається в проєкті</text>
+            <text class="ledger__fate" x="845" y="58" text-anchor="end">кандидат на рівень 1</text>
+            <text class="ledger__fate ledger__fate--muted" x="838" y="248" text-anchor="end">знайдено до наступного завдання</text>
+
+            <circle class="ledger__dot ledger__dot--dropped" cx="0" cy="0" r="6" />
+            <circle class="ledger__dot ledger__dot--local" cx="0" cy="0" r="6" />
+            <circle class="ledger__dot ledger__dot--promoted" cx="0" cy="0" r="6" />
+            <circle class="ledger__dot ledger__dot--retrieval" cx="0" cy="0" r="5" />
+          </svg>
+
+          <ol class="ledger__fates">
+            <li class="ledger__outcome ledger__outcome--dropped">
+              <span class="label">Відкинуто</span>
+              <p>
+                <strong>Сирі міркування.</strong> Закриття сесії зберігає
+                структурований результат і відкидає сам ланцюжок міркувань. Він
+                ніколи не стає артефактом, тому його не можна знайти потім і
+                видати за доказ.
+              </p>
+            </li>
+            <li class="ledger__outcome ledger__outcome--local">
+              <span class="label">Лишається в проєкті</span>
+              <p>
+                <strong>Наївна перевірка високосного року.</strong> Справжня,
+                підтверджена специфікацією календаря, і все одно свідомо
+                відхилена на етапі підвищення рівня: це урок про календарі, а не
+                про фреймворк. Корисне не означає придатне всюди.
+              </p>
+            </li>
+            <li class="ledger__outcome ledger__outcome--promoted">
+              <span class="label">Кандидат на підвищення</span>
+              <p>
+                <strong>Збій кодування консолі.</strong> Він повториться в
+                будь-якому новому екземплярі, тому проходить перевірку як
+                кандидат рівня 1. Лінія лишається пунктирною, доки власник не
+                затвердить його: пройти перевірку й бути прийнятим це різні речі.
+              </p>
+            </li>
+          </ol>
+        </figure>
       </template>
 
       <template data-i18n-id="control-plane.body">

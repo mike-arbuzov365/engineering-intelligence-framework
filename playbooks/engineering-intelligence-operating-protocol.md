@@ -14,7 +14,7 @@ related:
 
 <!-- Knowledge source: GENERALIZE of the private EI's
 engineering-intelligence-operating-protocol.md. This version is
-deliberately an index/entry-point, not a restatement - the three-tier
+deliberately an index/entry-point, not a restatement - the three-layer
 model, authority model, and experience retrieval it used to explain
 inline now have their own canonical explanation in
 docs/architecture/HOW-EIF-WORKS.md, so this playbook links to that
@@ -41,7 +41,7 @@ whose scope or verification isn't self-evident from the request itself.
 ## Read this first
 
 [`docs/architecture/HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md)
-for the concepts this protocol assumes: the three-tier context model,
+for the concepts this protocol assumes: the three-layer context model,
 the authority model, experience retrieval, and Knowledge Delta. This
 playbook is the procedural index over those concepts, not a second copy
 of them.
@@ -81,9 +81,9 @@ skill invocation directly.
 ## Agent workflow, in order
 
 1. Routing checkpoint (above).
-2. Read Tier 1 (this framework - only what's relevant) then Tier 2 (this
-   project instance's persistent agent-instruction file and relevant
-   `knowledge/`).
+2. Read the framework layer (this repository, only what's relevant), then
+   the project layer (this project instance's persistent
+   agent-instruction file and relevant `knowledge/`).
 3. Experience retrieval preflight
    ([`knowledge-search.md`](knowledge-search.md)).
 4. Execute against the task-scope or session-launch file's declared

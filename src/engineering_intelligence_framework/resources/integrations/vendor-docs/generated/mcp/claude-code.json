@@ -1,0 +1,29 @@
+{
+  "adapter": "claude-code",
+  "config_format": "json",
+  "config_key": "mcpServers",
+  "config_path": "~/.claude.json",
+  "installed": false,
+  "integration": "vendor-docs",
+  "provider": "context7",
+  "review_before_install": [
+    "Supply the provider command from the provider's own documentation, not from recall.",
+    "Keep credentials in the agent's own config or environment, never in this repository.",
+    "Confirm the provider's data boundary matches integrations.vendor_docs.data_boundary in .eif/config.yaml.",
+    "Set a non-zero cost_cap_usd before enabling a quota-bearing provider."
+  ],
+  "safety": {
+    "active_install_requires_owner_review": true,
+    "credentials_in_generated_artifact": false,
+    "query_text_leaves_machine": true,
+    "user_config_mutated_by_generator": false
+  },
+  "schema_version": 1,
+  "server_entry": {
+    "args": [],
+    "command": "<owner-supplied: see your provider's own installation docs>",
+    "env": {}
+  },
+  "template_only": true,
+  "transport": "mcp"
+}

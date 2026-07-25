@@ -14,7 +14,7 @@ related:
 # Playbook: Session Execution
 
 <!-- Knowledge source: GENERALIZE of the private EI's session-execution.md.
-Kept: the three-tier read order, the experience-retrieval preflight, the
+Kept: the three-layer read order, the experience-retrieval preflight, the
 start-state check before the first change, the pause-vs-fail distinction.
 Dropped: worktree/parallel-session-specific steps with no equivalent in a
 single-agent, single-worktree v0.1 project instance. -->
@@ -31,15 +31,15 @@ this playbook does not depend on the preparation chat's history.
 
 ## Step 1 - Read in tier order
 
-Per the framework's three-tier model
-([`docs/architecture/HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md#the-three-tier-context-model)):
+Per the framework's three-layer model
+([`docs/architecture/HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md#the-three-layer-context-model)):
 
-1. **Tier 1** - this framework: only the playbooks/templates/ontology
+1. **L1 - framework layer** - this framework: only the playbooks/templates/ontology
    actually relevant to the task at hand, not everything.
-2. **Tier 2** - this project instance: its persistent agent-instruction
+2. **L2 - project layer** - this project instance: its persistent agent-instruction
    file, relevant `knowledge/` artifacts, the task-scope or launch file
    itself.
-3. **Tier 3** - nothing yet; this step creates it next.
+3. **L3 - session layer** - nothing yet; this step creates it next.
 
 ## Step 2 - Experience retrieval preflight
 

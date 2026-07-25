@@ -15,7 +15,7 @@ related:
 <!-- Knowledge source: GENERALIZE of the private EI's knowledge-ingest.md.
 Kept: the source-hierarchy check, the artifact-type classification step,
 the deprecate-don't-delete rule for superseded guidance. Dropped: the
-Tier-1-PR-to-a-separate-methodology-repository routing (replaced with the
+framework-layer-PR-to-a-separate-methodology-repository routing (replaced with the
 generic "propose for the shared knowledge base" question this framework's
 own templates/knowledge-delta.md already asks) and the
 Ukrainian-language requirement (a private-instance convention, not part

@@ -112,12 +112,12 @@
     },
     {
       "id": "CLM-13",
-      "summary": "EIF separates reusable methodology, durable project knowledge and ephemeral session context into three explicit tiers.",
+      "summary": "EIF separates reusable methodology, durable project knowledge and ephemeral session context into three explicit layers.",
       "status": "OBSERVED (methodology contract only)",
-      "allowedWording": "EIF separates reusable framework methodology, durable project knowledge and ephemeral session context into three tiers, with Knowledge Delta governing promotion between them.",
+      "allowedWording": "EIF separates reusable framework methodology, durable project knowledge and ephemeral session context into three layers, with Knowledge Delta governing promotion between them.",
       "limitations": "This proves the model and its workflow artifacts are present and structurally connected. It does not prove that an agent never forgets, always retrieves the right lesson or improves task outcomes.",
       "forbiddenWording": ["Agents never forget.", "Persistent memory guaranteed.", "Self-learning model."],
-      "source": "docs/product/claims-evidence.md - row \"EIF defines a three-tier engineering-intelligence model\""
+      "source": "docs/product/claims-evidence.md - row \"EIF defines a three-layer engineering-intelligence model\""
     },
     {
       "id": "CLM-14",

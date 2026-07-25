@@ -55,5 +55,5 @@ loop_result:
   residual_risk: "<risk or none>"
 ```
 
-The checkpoint is Tier 3: gitignored, factual, and deleted at closeout. Never
+The checkpoint lives in the session layer: gitignored, factual, and deleted at closeout. Never
 persist raw chain-of-thought or use a completion phrase as success evidence.

@@ -109,13 +109,13 @@ def check_bounded_loop_contract() -> list[Result]:
         "bounded-evidence-loop.md" in packet_execution,
     ))
     results.append(check(
-        "Tier 3: .session-context is gitignored",
+        "Session layer: .session-context is gitignored",
         ".session-context/" in gitignore,
     ))
     session_context = FRAMEWORK_ROOT / ".session-context"
     committed_like_files = list(session_context.glob("*.md")) if session_context.exists() else []
     results.append(check(
-        "Tier 3: repository contains no durable session-context files",
+        "Session layer: repository contains no durable session-context files",
         not committed_like_files,
         ", ".join(p.name for p in committed_like_files),
     ))

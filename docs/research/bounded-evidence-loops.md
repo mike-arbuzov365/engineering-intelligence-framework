@@ -24,7 +24,7 @@ spending an unbounded CI/API budget?
 |---|---|---|
 | PDSA | Plan, execute, study the result, and use the learning to adapt the next cycle; "Study" tests the theory rather than merely checking a pass/fail box | Every iteration declares an expected observation, then compares it with actual evidence before adapting |
 | Double-loop learning | Correct an action in the first loop; question a governing assumption, objective, policy, or evaluator when the evidence shows the frame itself is wrong | EIF distinguishes an implementation fix from an explicit evaluator/rule change; the latter needs evidence, a recorded decision, and a new validation run |
-| MAPE-K | Monitor, analyze, plan, and execute around a shared knowledge base | EIF separates the operating loop from durable knowledge: observations stay in Tier 3 until validation promotes them to Tier 2 or Tier 1 |
+| MAPE-K | Monitor, analyze, plan, and execute around a shared knowledge base | EIF separates the operating loop from durable knowledge: observations stay in the session layer until validation promotes them to the project or framework layer |
 | NIST AI RMF | Iterative Govern, Map, Measure, and Manage functions connect feedback, measurement, accountability, and risk response | Every autonomous loop has policy boundaries, measurement evidence, explicit risk/stop conditions, and owner-only gates |
 | ReAct | Interleave action with observations from tools or an environment | A tool result, test, source file, or runtime trace grounds each plan update |
 | Reflexion | Use feedback from a failed attempt to improve the next attempt | Persist only a compact failure signature, verified facts, decision, and next experiment - never raw chain-of-thought |
@@ -90,11 +90,11 @@ evaluator, and weakening the evaluator merely to obtain a green result.
 MAPE-K is useful here as an architectural analogy, not as a claim that EIF is
 an autonomic runtime. EIF's "K" is external and inspectable:
 
-- Tier 3 holds temporary observations and hypotheses for the active session;
-- Tier 2 holds validated project facts, decisions, incidents and experience;
-- Tier 1 holds reusable cross-project rules, playbooks, templates and skills.
+- The session layer holds temporary observations and hypotheses for the active session;
+- The project layer holds validated project facts, decisions, incidents and experience;
+- The framework layer holds reusable cross-project rules, playbooks, templates and skills.
 
-Promotion between tiers is gated by validation and provenance. No model
+Promotion between layers is gated by validation and provenance. No model
 weights are changed, and no provider is allowed to silently learn from or
 publish the stored artifacts.
 
@@ -111,7 +111,7 @@ publish the stored artifacts.
   completion token is not sufficient behavioral evidence.
 - Human judgment remains the evaluator for ambiguous product taste, public
   commitments, security exceptions, and irreversible decisions.
-- Checkpoints are Tier 3: gitignored, factual, compact, and removed at closeout.
+- Checkpoints live in the session layer: gitignored, factual, compact, and removed at closeout.
   Durable promotion happens through Knowledge Delta.
 - Never store hidden chain-of-thought or a verbatim reflection trace. Store
   observations, a short reasoning digest, decisions, and evidence references.

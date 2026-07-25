@@ -50,7 +50,7 @@ test.describe('engineering-intelligence methodology', () => {
       'workflow',
       'closeout',
       'promotion',
-      'Tier 1',
+      'Tier 1',  // English must not regress to tier wording
       'Tier 2',
       'Tier 3',
       'playbook',

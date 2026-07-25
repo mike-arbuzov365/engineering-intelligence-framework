@@ -18,28 +18,29 @@ for the authoritative status of every piece.
 2. [The problem EIF solves](#the-problem-eif-solves)
 3. [Design principles](#design-principles)
 4. [Framework vs. project instance](#framework-vs-project-instance)
-5. [The three-tier context model](#the-three-tier-context-model)
+5. [The three-layer context model](#the-three-layer-context-model)
 6. [Authority model](#authority-model)
 7. [Experience retrieval](#experience-retrieval)
 8. [Session lifecycle](#session-lifecycle)
-9. [Bounded evidence loops](#bounded-evidence-loops)
-10. [Execution packets](#execution-packets)
-11. [Knowledge Delta](#knowledge-delta)
-12. [Skills and agent adapters](#skills-and-agent-adapters)
-13. [Structural-graph integration](#structural-graph-integration)
-14. [Shell-output compression integration](#shell-output-compression-integration)
-15. [Vendor-documentation integration](#vendor-documentation-integration)
-16. [Language configuration](#language-configuration)
-17. [CI and quality gates](#ci-and-quality-gates)
-18. [Privacy and security](#privacy-and-security)
-19. [Degraded modes](#degraded-modes)
-20. [Extension model](#extension-model)
-21. [End-to-end example](#end-to-end-example)
-22. [Metrics and benchmark methodology](#metrics-and-benchmark-methodology)
-23. [Limitations](#limitations)
-24. [Roadmap](#roadmap)
-25. [Definition of Public-Ready](#definition-of-public-ready)
-26. [FAQ](#faq)
+9. [The two loops](#the-two-loops)
+10. [Bounded evidence loops](#bounded-evidence-loops)
+11. [Execution packets](#execution-packets)
+12. [Knowledge Delta](#knowledge-delta)
+13. [Skills and agent adapters](#skills-and-agent-adapters)
+14. [Structural-graph integration](#structural-graph-integration)
+15. [Shell-output compression integration](#shell-output-compression-integration)
+16. [Vendor-documentation integration](#vendor-documentation-integration)
+17. [Language configuration](#language-configuration)
+18. [CI and quality gates](#ci-and-quality-gates)
+19. [Privacy and security](#privacy-and-security)
+20. [Degraded modes](#degraded-modes)
+21. [Extension model](#extension-model)
+22. [End-to-end example](#end-to-end-example)
+23. [Metrics and benchmark methodology](#metrics-and-benchmark-methodology)
+24. [Limitations](#limitations)
+25. [Roadmap](#roadmap)
+26. [Definition of Public-Ready](#definition-of-public-ready)
+27. [FAQ](#faq)
 
 ## Executive summary
 
@@ -121,26 +122,39 @@ A project instance should never need to fork the framework to use it -
 project-specific content lives in the instance's own repository/registry,
 declared via `.eif/config.yaml`, not by editing framework source in place.
 
-## The three-tier context model
+## The three-layer context model
 
-- **Tier 1 - framework / global methodology.** This repository. Rules,
-  ontology, playbooks, templates, and skills that apply to any project
-  instance, independent of tech stack.
-- **Tier 2 - project instance.** A specific project or set of related
-  projects. Project-specific knowledge cards, registry, ADRs, and
-  configuration. References Tier 1 via the persistent agent-instruction
-  file; contributes generalizable lessons back to Tier 1 via a Knowledge
-  Delta and promotion decision.
-- **Tier 3 - session.** Ephemeral, single-session working state (current
+Three layers, named by what they hold rather than by rank. `L1`/`L2`/`L3`
+are navigational shorthand, not the concepts' names:
+
+- **L1 - framework layer.** This repository: the reusable operating
+  system for agent work. Not just "method" in the abstract - ontology,
+  the authority model, global rules, playbooks, templates and invokable
+  skills that apply to any project instance, independent of tech stack.
+- **L2 - project layer.** A specific project or set of related projects.
+  Architecture, decisions, domain facts, incidents, risks and local
+  conventions. References the framework layer via the persistent
+  agent-instruction file; contributes generalizable lessons back to it
+  through a Knowledge Delta and an explicit promotion decision.
+- **L3 - session layer.** Ephemeral, single-session working state (current
   task plan, in-progress reasoning, scratch files). Never treated as
-  durable knowledge on its own - it either gets promoted into a Tier 2
-  artifact through the Knowledge Delta process, or it's discarded when the
-  session ends.
+  durable knowledge on its own - it either gets promoted into a project
+  layer artifact through the Knowledge Delta process, or it is discarded
+  when the session ends.
 
-Mixing these tiers is the single most common failure mode this framework
+Mixing these layers is the single most common failure mode this framework
 exists to prevent: session-scoped assumptions leaking into project-level
 "facts" without going through validation, or project-specific detail
 leaking into what should be reusable, tech-stack-agnostic methodology.
+
+**Layer, not tier, is deliberate.** These are not storage classes ordered
+by durability alone; each holds a different *kind* of thing and answers a
+different question - how to work, what this system knows, what is
+happening now. "Tier" would imply a ranking; the relationship is
+containment and promotion, not precedence. (The authority model does use
+ranked precedence, on its own axis - see
+[Authority model](#authority-model) - which is exactly why the two are
+kept verbally distinct.)
 
 ## Authority model
 
@@ -195,12 +209,32 @@ check for relevant prior knowledge, confirm scope), a middle (controlled
 execution against that scope, with explicit stop conditions for anything
 outside it), and an end (closeout: record what changed, what was learned,
 what's still open, and whether anything should be promoted from
-session-scoped state into durable Tier 2 knowledge).
+session-scoped state into durable project-layer knowledge).
 
 See [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md),
 [`session-execution.md`](../../playbooks/session-execution.md), and
 [`session-closeout.md`](../../playbooks/session-closeout.md) for the
 step-by-step workflow.
+
+## The two loops
+
+Knowledge moves through two loops running at different speeds, and
+conflating them is why "the agent should just learn from experience" tends
+not to work in practice:
+
+- **Solve loop (inner, per session).** Retrieve prior knowledge, work,
+  observe evidence, close out with a Knowledge Delta. Its question is *what
+  did this session learn?*
+- **Evolve loop (outer, across many sessions).** Its question is a
+  different one that no single closeout can answer: *what keeps
+  happening?* A lesson seen once is an incident; the same failure signature
+  seen repeatedly is a rule the framework is missing. See
+  [`playbooks/run-retro.md`](../../playbooks/run-retro.md).
+
+Promotion between layers is driven by the outer loop, not by the inner one.
+This is deliberate: a single session has no evidence that its lesson
+generalizes, so a session closeout can propose a promotion candidate but
+cannot establish that something recurs.
 
 ## Bounded evidence loops
 
@@ -214,7 +248,7 @@ Every autonomous loop names a real evaluator, `max_iterations`, a
 The same unchanged failure signature cannot be retried indefinitely, hosted CI
 is not used as a debugger when a local evaluator exists, and a completion
 phrase is never behavioral proof. Interrupted state lives in a gitignored
-Tier 3 checkpoint; only validated facts and reusable learning move through
+session-layer checkpoint; only validated facts and reusable learning move through
 Knowledge Delta.
 
 The procedure is
@@ -250,7 +284,7 @@ used by a single-session task are a separate, simpler path - see
 Every pull request that changes methodology, adds a rule, or records a
 reusable lesson includes a Knowledge Delta section: what was added, what
 changed, what's still unratified, and an explicit promotion decision (does
-this belong in Tier 1, or does it stay Tier 2/project-specific). Purely
+this belong in the framework layer, or does it stay project-specific). Purely
 mechanical changes (typo fixes, formatting) use an explicit
 `<!-- no-knowledge-delta: mechanical task -->` marker instead, so the
 distinction between "no delta because nothing changed" and "delta omitted
@@ -317,8 +351,29 @@ installs hooks or changes user-level configuration. See
 Optional. Pulls current, versioned library/API/framework documentation into
 context on demand, instead of relying on a model's training-data knowledge
 of a library's API surface, which is frequently stale for fast-moving
-libraries. The generic external-provider declaration exists; provider-specific
-retrieval and health behavior is not ported or tested yet. See
+libraries.
+
+The declared provider is Context7, reached over MCP. **EIF does not install
+it.** An MCP server is configured at the user level, in the agent's own
+config file outside the project instance EIF was pointed at, and this
+framework's ratified boundary is that it generates project-local guidance
+and never mutates user-level configuration - the same rule that keeps it
+from installing agent hooks. What it does ship: a declared provider class
+and data boundary, generated routing guidance (when a lookup outranks
+recall and when it does not apply), and a reviewable per-adapter MCP
+configuration template whose provider command is deliberately
+owner-supplied rather than asserted from recall.
+
+Authority position, which is the part most often gotten wrong: vendor
+documentation is **normative** (what is supposed to happen) and does not
+outrank an **empirical** observation of what the code actually does. A
+disagreement between a doc page and a reproducible test is a discrepancy to
+record, not a tie to break by rank - see [Authority model](#authority-model).
+
+Not verified: live provider behavior. EIF generates configuration for an
+agent to load and does not itself speak MCP, so `transport-reachable` is
+reported by the agent adapter and is marked unverified in the manifest
+rather than claiming a health probe that does not happen. See
 [`integrations/vendor-docs/`](../../integrations/vendor-docs/).
 
 ## Language configuration
@@ -515,7 +570,7 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    ~~existing-repository adoption hardening (preflight, coexistence mode,
    configurable knowledge paths, privacy-scan suppression baseline),
    driven directly by a real throwaway-copy pilot against a private
-   Tier-2 repository~~ (done - see [Limitations](#limitations) for what
+   project-layer repository~~ (done - see [Limitations](#limitations) for what
    the pilot found and what remains a heuristic, not a solved problem).
 3. ~~Repeat the slice against a second adapter (Cursor) to prove the
    framework/adapter boundary holds~~ (done) -> ~~two further,
@@ -541,8 +596,11 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    seven fixtures, additional models, and repeated trials for a real
    confidence interval remain open).
 7. ~~Port a bounded v0.1 operating set of playbooks/templates/skills,
-   including the Bounded Evidence Loop~~ (done). Curator/retro/customer and
-   other broader workflows remain post-v0.1 scope.
+   including the Bounded Evidence Loop~~ (done) -> ~~port the outer
+   (retro) loop, so cross-session pattern detection is part of v0.1 rather
+   than a later addition~~ (done - `playbooks/run-retro.md`,
+   `skills/run-retro/`, `templates/retro.md`). Curator/knowledge-health and
+   customer-facing workflows remain post-v0.1 scope.
 8. ~~Add optional RTK and Graphify behavioral adapters with explicit degraded
    modes~~ (done). Vendor-docs remains declaration-only.
 9. Final local release gate + refreshed fresh-history candidate -> owner-gated
@@ -772,7 +830,13 @@ formally ratified (the file is explicit about which is which).
 - [ ] Website is live.
 - [ ] Article published.
 - [ ] Launch sequence prepared.
-- [ ] Feedback/issue intake ready.
+- [x] Feedback/issue intake ready: `.github/ISSUE_TEMPLATE/` ships a bug
+      template that requires the exact command and real output (not a
+      recollection), an **evidence report** template for contributing
+      verification of anything this repository lists as unverified, and a
+      config that routes vulnerabilities to private disclosure and
+      methodology questions to discussions. Blank issues are disabled on
+      purpose. Not yet exercised by a real external reporter.
 
 ## FAQ
 

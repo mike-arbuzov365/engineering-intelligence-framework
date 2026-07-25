@@ -32,7 +32,7 @@ Do not start a loop until all of these are known:
 - `max_iterations` - a positive integer, default 5 if no narrower limit exists;
 - `remote_run_budget` - default 0 unless explicitly authorized;
 - `stop_conditions` - safety, ambiguity, budget, or owner-only boundaries;
-- `checkpoint` - a gitignored Tier 3 path if interruption is possible.
+- `checkpoint` - a gitignored session-layer path if interruption is possible.
 
 Fill [`templates/bounded-evidence-loop.md`](../templates/bounded-evidence-loop.md)
 or include its fields in a task-scope/session-launch artifact.
@@ -76,9 +76,9 @@ the challenged artifact, record the authority for the change, update that
 artifact explicitly, then rerun behavioral validation. Never weaken a test
 only to obtain a pass.
 
-The loop's knowledge is external and inspectable. Tier 3 holds temporary
-observations; validated project experience promotes to Tier 2; reusable
-cross-project rules or skills may promote to Tier 1. This is governed artifact
+The loop's knowledge is external and inspectable. The session layer holds temporary
+observations; validated project experience promotes to the project layer; reusable
+cross-project rules or skills may promote to the framework layer. This is governed artifact
 learning, not model training or silent self-modification.
 
 ## Checkpoint format
@@ -118,4 +118,4 @@ that evidence with a summary assertion.
 
 Record iteration count, final status, success evidence, failure signatures,
 budget used, adaptations made, and residual risk. Promote only validated,
-reusable learning. Delete the Tier 3 checkpoint.
+reusable learning. Delete the session-layer checkpoint.

@@ -42,7 +42,7 @@ A locale-rendered version of this template's headings lives at
 - [ ] Iterations and remote runs used are recorded against their budgets.
 - [ ] Success evidence and encountered failure signatures are recorded.
 - [ ] Adaptations explain how the method changed after negative evidence.
-- [ ] The Tier 3 checkpoint is deleted; only validated learning is routed to
+- [ ] The session-layer checkpoint is deleted; only validated learning is routed to
       Knowledge Delta.
 
 ## Step 3 - Fill the Knowledge Delta

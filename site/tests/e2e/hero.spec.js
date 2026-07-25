@@ -46,6 +46,26 @@ test.describe('hero', () => {
     }
   });
 
+  test('hero figure stops animating once the hero is scrolled away', async ({ page }) => {
+    await page.goto('/');
+    const mark = page.locator('.hero__settled--1');
+    const playState = () =>
+      mark.evaluate((el) => getComputedStyle(el).animationPlayState);
+
+    expect(await playState()).toBe('running');
+
+    // Far enough that no part of the full-height hero is intersecting.
+    await page.evaluate(() => window.scrollTo(0, 4000));
+    await expect(page.locator('.hero__figure')).toHaveClass(/is-paused/);
+    expect(await playState()).toBe('paused');
+
+    // Resumes rather than restarting, so returning to the top does not
+    // replay the accumulation from empty.
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.locator('.hero__figure')).not.toHaveClass(/is-paused/);
+    expect(await playState()).toBe('running');
+  });
+
   test('no third-party network requests on hero load', async ({ page }) => {
     const external = [];
     page.on('request', (req) => {

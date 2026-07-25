@@ -73,6 +73,13 @@
   }
 }
 
+/* Set by main.js once the hero leaves the viewport. Paused rather than
+   removed so returning to the top resumes mid-cycle instead of restarting
+   the accumulation from empty. */
+.hero__figure.is-paused * {
+  animation-play-state: paused;
+}
+
 .hero__shelf {
   stroke: var(--eif-charcoal-600);
   stroke-width: 1;

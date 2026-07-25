@@ -144,6 +144,32 @@ function initRevealRows() {
   });
 }
 
+// --- Hero figure: stop the looping figure once the hero is off screen.
+// It restates the descriptor it sits next to, so once neither is visible it
+// is spending frames on nothing. IntersectionObserver is the right tool here
+// (unlike the loop scene above): the question is a genuine binary, is any
+// part of the hero on screen, with no tie to break between candidates.
+//
+// Progressive enhancement only. Without this the animation simply keeps
+// running, which is the pre-existing behavior, and prefers-reduced-motion
+// still wins over both since the animation is only ever declared inside
+// that query.
+function initHeroFigure() {
+  const hero = document.querySelector('.hero');
+  const figure = document.querySelector('.hero__figure');
+  if (!hero || !figure || typeof IntersectionObserver !== 'function') return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        figure.classList.toggle('is-paused', !entry.isIntersecting);
+      }
+    },
+    { threshold: 0 },
+  );
+  observer.observe(hero);
+}
+
 const REINIT_HANDLERS = {
   loop: initLoopScene,
   reveal: initRevealRows,
@@ -212,3 +238,4 @@ function initLanguageToggle() {
 initLoopScene();
 initRevealRows();
 initLanguageToggle();
+initHeroFigure();

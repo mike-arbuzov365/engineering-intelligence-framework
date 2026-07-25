@@ -242,6 +242,11 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). This project is not yet accepting
 external contributions while the public/private extraction is in progress -
 the file explains current status.
 
+## Changelog
+
+[`CHANGELOG.md`](CHANGELOG.md) - what each version added, and the known
+limitations stated alongside rather than discovered later.
+
 ## License
 
 [Apache License 2.0](LICENSE). Third-party Python dependencies and their

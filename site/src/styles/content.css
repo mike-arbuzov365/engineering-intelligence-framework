@@ -31,26 +31,19 @@
   max-width: var(--eif-content-max);
 }
 
-.limitations__list {
-  list-style: none;
-  margin: var(--eif-space-4) 0 0;
-  padding: 0;
-  max-width: var(--eif-content-max);
-  display: grid;
-  gap: var(--eif-space-3);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.limitations__list li {
-  padding: var(--eif-space-2) 0;
+/* The one caveat the quickstart has to carry. It used to be a .label, so a
+   two-sentence disclaimer rendered as uppercase mono - technically a caption,
+   practically unreadable. */
+.quickstart__caveat {
+  margin-top: var(--eif-space-3);
+  padding-top: var(--eif-space-2);
   border-top: 1px solid var(--eif-rule);
+  max-width: var(--eif-measure);
   color: var(--eif-fg-muted);
 }
 
-.limitations__list strong {
-  display: block;
+.quickstart__caveat strong {
   color: var(--eif-fg);
-  margin-bottom: 0.25rem;
 }
 
 .final-cta__links {
@@ -75,8 +68,83 @@
   border-color: var(--eif-accent);
 }
 
+/* Substituted to an empty string by the eif-metadata plugin as soon as a
+   repository URL exists, so the published build has no stray blank line
+   where a pre-publication caveat used to be. */
+.final-cta__pending {
+  margin-top: var(--eif-space-2);
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  color: var(--eif-fg-muted);
+}
+
+.final-cta__pending:empty {
+  display: none;
+}
+
+/* Contact. Two channels, each one a row that says what it is, where it goes
+   and what it is for - the same three-part shape the evidence rows use, so
+   the page ends in its own idiom rather than a social-icon strip. */
+.final-cta__contact {
+  margin-top: var(--eif-space-6);
+  padding-top: var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.final-cta__contact h3 {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  max-width: var(--eif-measure);
+}
+
+.final-cta__contact-lede {
+  margin-top: var(--eif-space-1);
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
+}
+
+.final-cta__channels {
+  list-style: none;
+  margin: var(--eif-space-4) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--eif-space-4);
+  max-width: var(--eif-content-max);
+}
+
+.final-cta__channels li {
+  padding-top: var(--eif-space-2);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.final-cta__channels a {
+  display: inline-block;
+  margin-top: 0.4rem;
+  font-family: var(--eif-font-mono);
+  font-size: 1.05rem;
+  color: var(--eif-fg);
+  text-decoration: none;
+  border-bottom: 1px solid var(--eif-rule);
+  padding-bottom: 0.15rem;
+  overflow-wrap: anywhere;
+  transition: color var(--eif-duration-fast) var(--eif-ease),
+    border-color var(--eif-duration-fast) var(--eif-ease);
+}
+
+.final-cta__channels a:hover,
+.final-cta__channels a:focus-visible {
+  color: var(--eif-accent);
+  border-color: var(--eif-accent);
+}
+
+.final-cta__channels p {
+  margin-top: var(--eif-space-1);
+  color: var(--eif-fg-muted);
+}
+
 @media (max-width: 720px) {
-  .limitations__list {
+  .final-cta__channels {
     grid-template-columns: 1fr;
+    gap: var(--eif-space-3);
   }
 }

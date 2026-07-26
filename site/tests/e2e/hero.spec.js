@@ -46,6 +46,28 @@ test.describe('hero', () => {
     }
   });
 
+  test('the figure key is bound to the figure it explains', async ({ page }) => {
+    await page.goto('/');
+    const geometry = await page.evaluate(() => {
+      const figure = document.querySelector('.hero__figure').getBoundingClientRect();
+      const legend = document.querySelector('.hero__legend');
+      const legendBox = legend.getBoundingClientRect();
+      const firstItem = legend
+        .querySelector('.figure-legend__item')
+        .getBoundingClientRect();
+      return {
+        figureWidth: figure.width,
+        legendWidth: legendBox.width,
+        ruleToFirstLine: firstItem.top - legendBox.top,
+      };
+    });
+    // main.js imports sections.css after hero.css, so at equal specificity
+    // .figure-legend's own `padding: 0` and `max-width` used to win here: the
+    // rule sat 1px above the first line and ran 48px wider than the figure.
+    expect(Math.abs(geometry.legendWidth - geometry.figureWidth)).toBeLessThan(1);
+    expect(geometry.ruleToFirstLine).toBeGreaterThanOrEqual(24);
+  });
+
   test('hero figure stops animating once the hero is scrolled away', async ({ page }) => {
     await page.goto('/');
     const mark = page.locator('.hero__settled--1');

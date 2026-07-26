@@ -16,10 +16,40 @@
   height: auto;
 }
 
+/* Drawn at the weight every other figure on this page uses. It had been the
+   odd one out: a 1.5px ring, 20px dots and 18px labels inside a 300-unit
+   viewBox rendered at 320px, so its type came out around 19 CSS pixels while
+   the traced map, the orbit and the knowledge graph all annotate themselves
+   between 10 and 13. Same geometry, same interaction, page weights. */
 .loop__ring {
-  stroke: var(--eif-rule);
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+
+/* Amber, dashed, ending in an open stop mark: the same three signs the
+   traced figure uses for a gate and for a result that goes no further. */
+.loop__exit {
+  stroke: var(--eif-warn);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  opacity: 0.75;
+}
+
+.loop__exit-stop {
+  stroke: var(--eif-warn);
   stroke-width: 1.5;
-  stroke-dasharray: 4 6;
+  opacity: 0.75;
+}
+
+/* Same pulse as every other figure on the page, so the oldest diagram here
+   stops looking like it came from a different site. It marks the direction
+   of travel; the active phase is still chosen by scroll position, not by
+   where this dot happens to be. */
+.loop__pulse {
+  fill: var(--eif-accent);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .js .loop__node {
@@ -42,18 +72,22 @@
   pointer-events: none;
   fill: var(--eif-bg);
   stroke: var(--eif-fg-muted);
-  stroke-width: 2;
-  r: 10px;
+  stroke-width: 1.5;
+  r: 7px;
   transition: fill var(--eif-duration-fast) var(--eif-ease),
     stroke var(--eif-duration-fast) var(--eif-ease),
     r var(--eif-duration-fast) var(--eif-ease);
 }
 
+/* 11px in a 300-unit box shown at 320px lands on the same rendered size as
+   the traced map's lane labels, which are 11px in a 960-unit box shown at
+   1152px. Matched on purpose. */
 .loop__node text {
   pointer-events: none;
   fill: var(--eif-fg-muted);
   font-family: var(--eif-font-mono);
-  font-size: 18px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
   text-anchor: middle;
   transition: fill var(--eif-duration-fast) var(--eif-ease);
 }
@@ -68,13 +102,13 @@
 
 .js .loop__node:focus-visible circle:not(.loop__node-hit) {
   stroke: var(--eif-accent);
-  stroke-width: 4;
+  stroke-width: 3;
 }
 
 .loop__node.is-active circle:not(.loop__node-hit) {
   fill: var(--eif-accent);
   stroke: var(--eif-accent);
-  r: 13px;
+  r: 9px;
 }
 
 .loop__node.is-active text {
@@ -102,26 +136,56 @@
   color: var(--eif-fg-muted);
 }
 
+/* The contract around the loop. Two halves that had read as noise for three
+   separate reasons, all fixed here rather than by moving things around:
+
+   1. Inverted hierarchy. The two headings were .label - small, uppercase,
+      muted mono - sitting above terms in the same mono at the same size but
+      painted accent green, so every heading was the quietest thing in its
+      own column. They are ordinary headings now, and the terms are quieter
+      than the heading that governs them.
+   2. Accent as decoration. Six preconditions in signal green said nothing;
+      the colour now appears only in Exits, where PASS/BLOCKED/DEFERRED
+      actually carry the page's green/amber/muted state vocabulary.
+   3. Ragged axis. `flex: 0 0 9rem` plus `flex-wrap` let a long term push its
+      own definition onto the next line, so definitions started at a
+      different x in almost every row. A two-track grid gives one axis for
+      the whole block. */
 .loop__control {
   margin-top: var(--eif-space-6);
+  padding-top: var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--eif-space-5);
+  align-items: start;
+}
+
+.loop__control-title {
+  font-size: 1.2rem;
+  color: var(--eif-fg);
+}
+
+.loop__control-note {
+  margin-top: 0.4rem;
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
 }
 
 .loop__precondition-list,
 .loop__exits {
-  margin: var(--eif-space-2) 0 0;
+  margin: var(--eif-space-3) 0 0;
 }
 
 .loop__precondition-list > div,
 .loop__exits-row {
   padding: var(--eif-space-2) 0;
   border-top: 1px solid var(--eif-rule);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 8.5rem) minmax(0, 1fr);
+  column-gap: var(--eif-space-2);
+  row-gap: 0.3rem;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0.25rem var(--eif-space-2);
 }
 
 .loop__precondition-list dt,
@@ -130,15 +194,17 @@
   font-size: var(--eif-size-label);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--eif-accent);
-  flex: 0 0 9rem;
+  color: var(--eif-fg);
 }
 
 .loop__precondition-list dd,
 .loop__exits-row dd {
   margin: 0;
-  flex: 1 1 16rem;
   color: var(--eif-fg-muted);
+}
+
+.loop__exits-row--pass dt {
+  color: var(--eif-accent);
 }
 
 .loop__exits-row--blocked dt {
@@ -162,5 +228,15 @@
 
   .loop__control {
     grid-template-columns: 1fr;
+    gap: var(--eif-space-4);
+  }
+}
+
+/* Below this the fixed term column starts eating the definition, so the term
+   sits on its own line instead of squeezing what it defines. */
+@media (max-width: 560px) {
+  .loop__precondition-list > div,
+  .loop__exits-row {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

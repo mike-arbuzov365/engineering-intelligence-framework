@@ -33,7 +33,7 @@ const SOCIAL_CARD_HTML = `<!doctype html><html><head><meta charset="utf-8" />
     <div class="mark">${faviconSvg}</div>
     <p class="eyebrow">Engineering Intelligence Framework &middot; pre-release</p>
     <h1>A quality-first control plane<br />for governed AI-agent<br />software development.</h1>
-    <p>Persistent engineering knowledge, explicit source identity, controlled execution and evidence &mdash; not chat history.</p>
+    <p>Persistent engineering knowledge, explicit source identity, controlled execution and evidence, not chat history.</p>
   </div>
 </body></html>`;
 

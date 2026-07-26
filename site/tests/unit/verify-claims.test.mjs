@@ -61,6 +61,20 @@ test('private path fails', (t) => {
   });
 });
 
+test('an ordinary https link is not read as a Windows drive path', (t) => {
+  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'eif-claims-https-link-'));
+  t.after(() => rmSync(fixtureDir, { recursive: true, force: true }));
+  const fixturePath = path.join(fixtureDir, 'link.html');
+  writeFileSync(
+    fixturePath,
+    '<p data-claim-id="CLM-01">Reach me on ' +
+      '<a href="https://www.linkedin.com/in/preosvan/">LinkedIn</a>.</p>\n',
+    'utf8',
+  );
+  const result = runVerifier(fixturePath);
+  assert.doesNotMatch(result.stdout, /private-path/, result.stdout);
+});
+
 test('placeholder marker fails', () => {
   const result = runVerifier('tests/fixtures/claims/negative-placeholder');
   assert.notEqual(result.status, 0);

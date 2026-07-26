@@ -6,13 +6,13 @@ test.describe('engineering-intelligence methodology', () => {
   }) => {
     await page.goto('/#methodology');
     await expect(page.locator('#methodology')).toContainText('Engineering Intelligence');
-    await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
+    await expect(page.locator('#layers .layers__layer')).toHaveCount(3);
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
     await expect(page.locator('#learning')).toContainText('Retro');
     await expect(page.locator('#learning')).toContainText('versioned instructions, not hidden model behavior');
     await expect(page.locator('#methodology')).toContainText('does not train model weights');
-    // The traced packet diagram carries the tier story now: four written
+    // The traced packet diagram carries the layer story now: four written
     // outcomes plus a drawn map, both present without any script running.
     await expect(page.locator('#layers .ledger__outcome')).toHaveCount(4);
     await expect(page.locator('#layers .ledger')).toContainText('CLOSEOUT + RETRO');
@@ -20,11 +20,43 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#layers .ledger')).toContainText('Retrieval, not recall');
   });
 
+  test('the two knowledge directions read as a matched pair', async ({ page }) => {
+    await page.goto('/#layers');
+    const up = page.locator('.layers__flow--up');
+    await expect(page.locator('.layers__flow--down')).toBeVisible();
+    await expect(up).toContainText('Most of it stays where it was found');
+
+    // Each flow is a two-row grid stretched to the taller column's height,
+    // and auto rows stretch by default: the shorter half used to push its
+    // spare height into the gap under its own "Flows up:" lead-in.
+    const alignContent = await up.evaluate((el) => getComputedStyle(el).alignContent);
+    expect(alignContent).toBe('start');
+  });
+
+  test('no outcome column under the traced map is coloured louder than its neighbours', async ({
+    page,
+  }) => {
+    await page.goto('/#layers');
+    const columns = await page.evaluate(() =>
+      [...document.querySelectorAll('#layers .ledger__outcome')].map((el) => ({
+        border: getComputedStyle(el).borderTopColor,
+        hasMarker:
+          getComputedStyle(el.querySelector('.label'), '::before').content !== 'none',
+      })),
+    );
+    expect(columns).toHaveLength(4);
+    // One uniform hairline: the per-outcome tint made "At closeout" look
+    // promoted above the other three for a reason nothing on the page stated.
+    expect(new Set(columns.map((c) => c.border)).size).toBe(1);
+    // The colour moved to a marker that matches the mark in the drawing.
+    expect(columns.every((c) => c.hasMarker)).toBe(true);
+  });
+
   test('Ukrainian mode carries the same methodology structure', async ({ page }) => {
     await page.goto('/');
     await page.locator('#lang-toggle').click();
     await expect(page.locator('#methodology')).toContainText('Інженерний інтелект');
-    await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
+    await expect(page.locator('#layers .layers__layer')).toHaveCount(3);
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
     await expect(page.locator('#learning')).toContainText('Ретроспектива');
@@ -102,22 +134,35 @@ test.describe('evidence', () => {
 });
 
 test.describe('quickstart', () => {
-  test('shows the real init command and no PyPI/human-duration promise', async ({ page }) => {
+  test('shows the real init command, the package-index caveat and no human-duration promise', async ({
+    page,
+  }) => {
     await page.goto('/#quickstart');
     await expect(page.locator('.quickstart__command')).toContainText('eif_init.py');
     const section = page.locator('#quickstart');
     await expect(section).not.toContainText('pip install eifctl');
-    await expect(section).toContainText('No PyPI package yet');
+    // The standalone limitations section is gone; the two guardrails it
+    // carried had to land somewhere real, not just disappear with it.
+    await expect(section).toContainText('Not installable from a package index yet');
+    await expect(section).toContainText('No claim is made about how long any of this takes a human');
+    // The reference run's locale is stated as a configuration outcome, not
+    // as an unexplained "closes in Ukrainian".
+    await expect(section).toContainText('whichever language the instance');
   });
 });
 
-test.describe('limitations', () => {
-  test('states pre-release, no-PyPI and the no-quality-claim explicitly', async ({ page }) => {
-    await page.goto('/#limitations');
-    const section = page.locator('#limitations');
-    await expect(section).toContainText('Pre-release');
-    await expect(section).toContainText('Not on PyPI');
-    await expect(section).toContainText('makes no claim about task quality');
+test.describe('honesty guardrails after the limitations section was removed', () => {
+  test('the no-quality-claim now lives with the evidence it qualifies', async ({ page }) => {
+    await page.goto('/#evidence');
+    const proof = page.locator('.evidence__proof');
+    await expect(proof).toContainText('makes no claim about task quality');
+    await expect(proof).toContainText('no baseline, no control group');
+  });
+
+  test('no section, anchor or link to a limitations section survives', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('#limitations')).toHaveCount(0);
+    await expect(page.locator('a[href="#limitations"]')).toHaveCount(0);
   });
 });
 
@@ -128,7 +173,12 @@ test.describe('final CTA', () => {
     await page.goto('/');
     const repoLink = page.locator('.final-cta__repo');
     await expect(repoLink).toHaveAttribute('href', '#evidence');
-    await expect(repoLink).toContainText('link added at publication');
+    // The label is the promise; the pre-publication caveat is its own line,
+    // not a parenthetical inside the call to action.
+    await expect(repoLink).toHaveText('Public repository');
+    await expect(page.locator('.final-cta__pending')).toContainText(
+      'added at publication',
+    );
   });
 
   test('architecture and evidence links point on-page', async ({ page }) => {
@@ -136,6 +186,34 @@ test.describe('final CTA', () => {
     const links = page.locator('.final-cta__links a');
     await expect(links.nth(0)).toHaveAttribute('href', '#control-plane');
     await expect(links.nth(1)).toHaveAttribute('href', '#evidence');
+  });
+
+  test('both contact channels are real, reachable links', async ({ page }) => {
+    await page.goto('/');
+    const channels = page.locator('.final-cta__channels li');
+    await expect(channels).toHaveCount(2);
+    await expect(page.locator('.final-cta__channels a').nth(0)).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/preosvan/',
+    );
+    await expect(page.locator('.final-cta__channels a').nth(1)).toHaveAttribute(
+      'href',
+      'mailto:mike.arbuzov365@gmail.com',
+    );
+  });
+
+  test('the repository CTA and the contact block translate with the page', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('#lang-toggle').click();
+    await expect(page.locator('.final-cta__repo')).toHaveText('Публічний репозиторій');
+    await expect(page.locator('.final-cta__channels a').nth(0)).toHaveAttribute(
+      'href',
+      'https://www.linkedin.com/in/preosvan/',
+    );
+    await expect(page.locator('.final-cta__channels a').nth(1)).toHaveAttribute(
+      'href',
+      'mailto:mike.arbuzov365@gmail.com',
+    );
   });
 });
 

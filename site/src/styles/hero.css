@@ -9,13 +9,16 @@
   isolation: isolate;
 }
 
+/* Atmosphere, not content. It was drawn at a weight that competed with the
+   13px key beside it: a 2px rule running through mono text at that size
+   costs more legibility than the texture is worth. */
 .hero__path {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
-  opacity: 0.55;
+  opacity: 0.34;
 }
 
 .hero__path-line {
@@ -39,37 +42,76 @@
    so a phone reader gets the idea instead of a blank space.
    The Ukrainian strings are longer than the English ones, which is why the
    lane labels are kept to Р1/Р2/Р3 rather than spelled out inside the SVG. */
+/* Figure and key are one object, not two things that happen to be stacked:
+   a single column, one hairline between them, and the pair centred against
+   the wordmark rather than each half floating in its own grid row. */
+.hero__aside {
+  display: grid;
+  justify-items: center;
+  gap: var(--eif-space-3);
+  margin-top: var(--eif-space-5);
+}
+
 .hero__figure {
   display: block;
   width: 100%;
-  max-width: 15rem;
+  max-width: 21rem;
   height: auto;
-  margin: var(--eif-space-5) auto 0;
+  margin: 0;
 }
 
+/* Five short lines naming what the figure does, in the reader's language.
+   Uses the page-wide .figure-legend component; only its placement and the
+   rule tying it to the figure are local.
+
+   Scoped to .hero__aside on purpose. .figure-legend lives in sections.css,
+   which main.js imports after this file, so at equal specificity its own
+   `margin`, `padding: 0` and `max-width: var(--eif-measure)` won every
+   conflict here: the rule ended up sitting 1px above the first line of the
+   key, and the key ran 48px wider than the figure it explains. One extra
+   class settles both - the rule now spans exactly the figure's width, and
+   there is real air under it. */
+.hero__aside .hero__legend {
+  margin: 0;
+  width: 100%;
+  max-width: 21rem;
+  padding-top: var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
+}
+
+/* Rows are declared explicitly so the aside can span all three of them:
+   with an implicit grid, `grid-row: 1 / -1` resolves against a single row
+   line and silently collapses to one row, which drops the aside into the
+   flow above the wordmark. */
 @media (min-width: 1080px) {
   .hero__content {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
-    gap: var(--eif-space-5);
+    grid-template-rows: auto auto auto;
+    gap: var(--eif-space-2) var(--eif-space-5);
     align-items: center;
   }
 
-  .hero__content > .label,
+  .hero__content > .label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
   .hero__name {
     grid-column: 1;
+    grid-row: 2;
   }
 
-  .hero__content > .i18n-block {
+  .hero__content > .i18n-block[data-i18n-id="hero.body"] {
     grid-column: 1;
+    grid-row: 3;
   }
 
-  .hero__figure {
+  .hero__aside {
     grid-column: 2;
-    grid-row: 1 / span 3;
-    max-width: none;
-    margin: 0;
+    grid-row: 1 / 4;
     align-self: center;
+    margin-top: 0;
   }
 }
 
@@ -82,23 +124,64 @@
 
 .hero__shelf {
   stroke: var(--eif-charcoal-600);
-  stroke-width: 1;
+  stroke-width: 1.5;
 }
 
+/* The session lane is dashed because it does not persist; the two layers
+   above it do. */
 .hero__shelf--session {
   stroke-dasharray: 2 5;
 }
 
-.hero__return {
+.hero__descent {
   stroke: var(--eif-fg-muted);
   stroke-width: 1;
   stroke-dasharray: 2 6;
+  opacity: 0.45;
+}
+
+/* Dashed and dimmer: a lesson reaches the framework layer only by an
+   explicit decision, so the route is drawn as conditional. */
+.hero__ascent {
+  stroke: var(--eif-accent-dim);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+  opacity: 0.55;
+}
+
+.hero__packet line {
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1.5;
+}
+
+.hero__packet-rule {
+  stroke: var(--eif-accent-dim);
+  stroke-width: 1.5;
+  opacity: 0.8;
+}
+
+.hero__pulse {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
+.hero__pulse--method,
+.hero__pulse--experience {
+  fill: var(--eif-fg-muted);
+}
+
+.hero__pulse--promoted {
+  fill: var(--eif-accent-dim);
+}
+
+.hero__curator {
+  fill: var(--eif-warn);
   opacity: 0;
 }
 
 /* Settled marks and the dots that produce them start invisible. Without
-   motion the figure is just the three tiers, which is the honest static
-   reading: nothing has accumulated yet. */
+   motion the figure is just the three layers and one packet, which is the
+   honest static reading: nothing has accumulated yet. */
 .hero__settled {
   fill: var(--eif-accent);
   opacity: 0;
@@ -115,11 +198,6 @@
 
 .hero__kept {
   fill: var(--eif-accent);
-  opacity: 0;
-}
-
-.hero__promoted {
-  fill: var(--eif-accent-dim);
   opacity: 0;
 }
 
@@ -145,6 +223,26 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--eif-space-2);
+}
+
+/* Below 720px, four wrapped pills produce a ragged 2 + 1 + 1 stack whose
+   widths are set by label length, and Ukrainian labels are longer than the
+   English ones, so the ragged edge moves when the language changes. A
+   repeat(auto-fit, minmax(min(100%, …), 1fr)) grid gives equal-width cells
+   that fill the row and collapse to one full-width column on a phone -
+   identical in both languages. min() inside minmax() is what keeps it from
+   overflowing when the track floor is wider than the container. */
+@media (max-width: 720px) {
+  .hero__ctas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: 0.6rem;
+  }
+
+  .hero__ctas a {
+    justify-content: space-between;
+    padding: 0.7em 0.95em;
+  }
 }
 
 .hero__ctas a {

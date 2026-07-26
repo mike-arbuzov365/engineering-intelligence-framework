@@ -42,7 +42,7 @@ test.describe('mobile no-js', () => {
   test('methodology and evidence remain readable without enhancement', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#lang-toggle')).toBeHidden();
-    await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
+    await expect(page.locator('#layers .layers__layer')).toHaveCount(3);
     await expect(page.locator('#evidence .reveal__detail')).toHaveCount(7);
     await expect(page.locator('#evidence .reveal__detail').first()).toBeVisible();
     await expect(page.locator('.loop__diagram')).toHaveAttribute('aria-hidden', 'true');

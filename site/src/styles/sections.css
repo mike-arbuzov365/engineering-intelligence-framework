@@ -5,6 +5,122 @@
   margin-bottom: var(--eif-space-4);
 }
 
+/* One legend component for every figure on the page, so a marker means the
+   same thing wherever it appears and the whole page reads as one system.
+
+   Two rules make it read as a key rather than a bulleted list:
+
+   1. Markers are drawn at the weight they have in the figure they explain,
+      not at list-bullet weight. A legend marker heavier than the mark it
+      stands for reads as a different, more important object - the curator
+      dot especially, which is the smallest thing in every drawing and had
+      become the largest thing in the key. Sizes and stroke widths here are
+      matched to the rendered SVG rather than chosen for the list.
+   2. Markers are centred on the first line's optical middle: with
+      line-height 1.5 that sits at 0.75em, so translateY(-50%) lands a
+      circle, a rule and a bracket on the same axis as each other and as
+      the text beside them. */
+.figure-legend {
+  list-style: none;
+  margin: var(--eif-space-3) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.7rem;
+  max-width: var(--eif-measure);
+  font-size: var(--eif-size-label);
+  line-height: 1.5;
+  color: var(--eif-fg-muted);
+}
+
+.figure-legend__item {
+  position: relative;
+  padding-left: 1.4rem;
+}
+
+.figure-legend__item strong,
+.figure-legend__item em {
+  font-style: normal;
+  color: var(--eif-fg);
+}
+
+.figure-legend__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  transform: translateY(-50%);
+  box-sizing: border-box;
+  width: 0.85rem;
+  height: 0;
+  border-bottom: 1.5px solid var(--eif-charcoal-600);
+}
+
+.figure-legend__item--dotted::before {
+  border-bottom-style: dotted;
+  border-bottom-color: var(--eif-fg-muted);
+}
+
+.figure-legend__item--dashed::before {
+  border-bottom-style: dashed;
+}
+
+.figure-legend__item--dashed-accent::before {
+  border-bottom-style: dashed;
+  border-bottom-color: var(--eif-accent-dim);
+}
+
+.figure-legend__item--dotted-warn::before {
+  border-bottom-style: dotted;
+  border-bottom-color: var(--eif-warn);
+}
+
+/* Sides turned up, like the packet bracket under the session lane: it
+   groups what is inside it rather than just underlining it. */
+.figure-legend__item--bracket::before {
+  height: 0.32rem;
+  border: 1.5px solid var(--eif-accent-dim);
+  border-top: 0;
+}
+
+.figure-legend__item--mark::before {
+  width: 0.55rem;
+  height: 0.3rem;
+  border: 0;
+  border-radius: 1px;
+  background: var(--eif-accent);
+  margin-left: 0.15rem;
+}
+
+.figure-legend__item--dot::before,
+.figure-legend__item--dot-muted::before,
+.figure-legend__item--dot-warn::before,
+.figure-legend__item--dot-excluded::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-left: 0.18rem;
+  border: 1.5px solid var(--eif-accent);
+  border-radius: 50%;
+}
+
+.figure-legend__item--dot-muted::before {
+  border-color: var(--eif-fg-muted);
+}
+
+/* Filled and small, exactly as it is drawn: the curator is a 3-unit dot in
+   every figure, so it must not become the largest thing in the key. */
+.figure-legend__item--dot-warn::before {
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-left: 0.23rem;
+  border: 0;
+  background: var(--eif-warn);
+}
+
+.figure-legend__item--dot-excluded::before {
+  border-color: var(--eif-warn);
+  border-style: dashed;
+}
+
 /* Problem section: a rule-separated editorial list, not cards. */
 .problem__list {
   list-style: none;
@@ -44,6 +160,15 @@
   margin-top: var(--eif-space-5);
   padding-top: var(--eif-space-3);
   border-top: 1px solid var(--eif-rule);
+  align-items: start;
+}
+
+/* The boundary note used to run full width below both columns, leaving a
+   tall hole under the short statement. It belongs with the statement: both
+   answer "what this is and is not". */
+.methodology__lead {
+  display: flex;
+  flex-direction: column;
 }
 
 .methodology__statement {
@@ -71,36 +196,102 @@
   color: var(--eif-fg-muted);
 }
 
-/* SB-003 scale figures: one framework layer, many projects, packets of
-   sessions inside them. Two compositions of the same model, kept side by
-   side for selection - one of them is meant to be deleted. */
+/* SB-003 scale figure: one framework layer, many projects, packets of
+   sessions inside them. Read as a pair - the explanation on the left, the
+   figure on the right - so the figure can stay small enough to take in at
+   once instead of running the width of the page. */
 .scale {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 21rem);
+  gap: var(--eif-space-5);
+  align-items: center;
   margin: var(--eif-space-6) 0 0;
   padding-top: var(--eif-space-4);
   border-top: 1px solid var(--eif-rule);
 }
 
+.scale__caption h3 {
+  margin-top: 0.4rem;
+  font-size: clamp(1.35rem, 2.3vw, 2rem);
+}
+
+.scale__caption p {
+  max-width: var(--eif-measure);
+  margin-top: var(--eif-space-1);
+  color: var(--eif-fg-muted);
+}
+
+.scale__legend {
+  list-style: none;
+  margin: var(--eif-space-3) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--eif-space-2);
+  max-width: var(--eif-measure);
+}
+
+.scale__legend-item {
+  position: relative;
+  padding-left: 1.5rem;
+  color: var(--eif-fg-muted);
+}
+
+.scale__legend-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.45em;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: 2px solid var(--eif-accent);
+}
+
+.scale__legend-item--packet::before {
+  border-color: var(--eif-fg-muted);
+}
+
+.scale__legend-item--relay::before {
+  border-radius: 0;
+  height: 0;
+  border-width: 0 0 2px;
+  border-bottom-style: dashed;
+  border-color: var(--eif-accent-dim);
+  width: 1rem;
+  top: 0.75em;
+}
+
+.scale__legend-item--curator::before {
+  border-color: var(--eif-warn);
+}
+
+.scale__legend-item strong {
+  color: var(--eif-fg);
+}
+
 .scale__map {
   display: block;
   width: 100%;
-  max-width: 46rem;
   height: auto;
-  margin: var(--eif-space-4) auto 0;
+  margin: 0;
 }
 
-.scale--trunk .scale__map {
-  max-width: none;
+@media (max-width: 900px) {
+  .scale {
+    grid-template-columns: 1fr;
+    gap: var(--eif-space-4);
+  }
+
+  .scale__map {
+    max-width: 19rem;
+    margin: 0 auto;
+  }
 }
 
 .scale__orbit {
-  stroke: var(--eif-rule);
+  stroke: var(--eif-charcoal-600);
   stroke-width: 1;
   stroke-dasharray: 2 6;
-}
-
-.scale__spine {
-  stroke: var(--eif-accent);
-  stroke-width: 2;
 }
 
 .scale__spoke,
@@ -148,13 +339,38 @@
 .scale__node-label,
 .scale__section-label {
   font-family: var(--eif-font-mono);
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.05em;
   fill: var(--eif-fg-muted);
 }
 
-.scale__section-label--curator {
+/* In-figure annotations. The traced-packet figure names its own flows and
+   reads far better for it, so the rest do the same: a legend explains a
+   vocabulary, a label on the line says what that particular line is. Kept
+   one step below the structural labels in size and weight so they annotate
+   rather than compete. */
+.scale__note,
+.kb-map__note,
+.cap-flow__note {
+  font-family: var(--eif-font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  fill: var(--eif-fg-muted);
+}
+
+.scale__note--up {
+  fill: var(--eif-accent-dim);
+}
+
+.scale__note--relay,
+.kb-map__note--excluded,
+.cap-flow__note {
   fill: var(--eif-warn);
+}
+
+.kb-map__note--excluded,
+.scale__note--relay {
+  opacity: 0.9;
 }
 
 .scale__session {
@@ -164,6 +380,27 @@
 .scale__lift {
   stroke: var(--eif-accent);
   stroke-width: 1.5;
+}
+
+/* Method going down is a different thing from a lesson coming up, so it is
+   drawn differently: muted and dotted, like retrieval elsewhere on the
+   page. */
+.scale__descend {
+  stroke: var(--eif-fg-muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+}
+
+.scale__ripple {
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+}
+
+.scale__ripple--p3 {
+  stroke: var(--eif-accent-dim);
 }
 
 /* Dashed on the way out: reaching another project is conditional on the
@@ -176,8 +413,8 @@
 .scale__curator-ring {
   stroke: var(--eif-warn);
   stroke-width: 1;
-  stroke-dasharray: 1 6;
-  opacity: 0.8;
+  stroke-dasharray: 1 5;
+  opacity: 0.65;
 }
 
 .scale__curator-dot {
@@ -190,13 +427,30 @@
 }
 
 /* Cost statement beside the optional capabilities. Amber rather than the
-   accent: this is a caveat, not a feature. */
+   accent: this is a caveat, not a feature. Paired with the one measured
+   thing it can honestly show, so the column beside it is not dead space. */
+/* Figure on the left here, on the right for the two figures above it: the
+   page alternates sides so a reader's eye is not walking down one rail. DOM
+   order still puts the prose first, for reading order and no-CSS. */
 .token-economics {
-  max-width: var(--eif-measure);
+  display: grid;
+  grid-template-columns: minmax(0, 24rem) minmax(0, 1fr);
+  gap: var(--eif-space-5);
+  align-items: center;
   margin-top: var(--eif-space-4);
   padding: var(--eif-space-2) 0 var(--eif-space-2) var(--eif-space-2);
   border-left: 2px solid var(--eif-warn);
   color: var(--eif-fg-muted);
+}
+
+.token-economics__body {
+  grid-column: 2;
+  max-width: var(--eif-measure);
+}
+
+.token-economics .cap-flow {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .token-economics p {
@@ -205,6 +459,94 @@
 
 .token-economics strong {
   color: var(--eif-fg);
+}
+
+.cap-flow {
+  margin: 0;
+}
+
+.cap-flow__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.cap-flow__label {
+  font-family: var(--eif-font-mono);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  fill: var(--eif-fg-muted);
+}
+
+.cap-flow__route {
+  stroke: var(--eif-accent);
+  stroke-width: 1.5;
+}
+
+/* The one segment on this page that is outside the machine. */
+.cap-flow__route--external {
+  stroke: var(--eif-warn);
+  stroke-dasharray: 6 4;
+}
+
+/* Dashed, like every other fallback here: the path that runs when the
+   optional thing is not there. */
+.cap-flow__core {
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.cap-flow__gate {
+  stroke: var(--eif-warn);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+
+.cap-flow__waypoint {
+  fill: var(--eif-bg);
+  stroke: var(--eif-accent);
+  stroke-width: 1.5;
+}
+
+.cap-flow__context {
+  fill: none;
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1.5;
+}
+
+.cap-flow__tick {
+  fill: var(--eif-fg-muted);
+  opacity: 0.5;
+}
+
+.cap-flow__tick--kept {
+  fill: var(--eif-accent);
+  opacity: 1;
+}
+
+.cap-flow__pulse {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
+.cap-flow__pulse--g-core,
+.cap-flow__pulse--r-core,
+.cap-flow__pulse--c-core,
+.cap-flow__pulse--r-stop {
+  fill: var(--eif-fg-muted);
+}
+
+@media (max-width: 980px) {
+  .token-economics {
+    grid-template-columns: 1fr;
+    gap: var(--eif-space-4);
+  }
+
+  .token-economics__body,
+  .cap-flow {
+    grid-column: 1;
+  }
 }
 
 .learning__loops {
@@ -240,7 +582,7 @@
   border-bottom: 1px solid var(--eif-rule);
 }
 
-.layers__tier {
+.layers__layer {
   display: grid;
   grid-template-columns: minmax(8rem, 0.45fr) minmax(0, 1.5fr) minmax(9rem, 0.55fr);
   gap: var(--eif-space-3);
@@ -249,18 +591,18 @@
   border-top: 1px solid var(--eif-rule);
 }
 
-.layers__tier h3,
+.layers__layer h3,
 .session__timeline h3,
 .learning__distinction h3 {
   font-size: clamp(1.15rem, 2vw, 1.55rem);
 }
 
-.layers__tier p {
+.layers__layer p {
   margin: 0.35rem 0 0;
   color: var(--eif-fg-muted);
 }
 
-.layers__tier-id {
+.layers__layer-id {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -278,29 +620,60 @@
   text-align: right;
 }
 
+/* The two directions are a matched pair, so they are drawn as one: same rule
+   above each, same arrow column, same first-line baseline.
+
+   `align-content: start` is load-bearing. Each <p> is its own two-row grid
+   stretched to the taller column's height, and auto rows stretch by default,
+   so the shorter half silently distributed its spare height into the gap
+   between "Flows up:" and its own first line - the up column read as if it
+   had lost a paragraph. */
 .layers__flows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--eif-space-4);
   margin-top: var(--eif-space-4);
+  align-items: start;
 }
 
-.layers__flows p {
+.layers__flow {
   display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: var(--eif-space-1);
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: var(--eif-space-2);
+  row-gap: 0.3rem;
+  align-content: start;
+  padding-top: var(--eif-space-2);
+  border-top: 1px solid var(--eif-rule);
   color: var(--eif-fg-muted);
 }
 
+/* Weighted the way the figures above weight them: descent is the routine
+   move and stays quiet, ascent is the governed exception and carries the
+   accent. */
 .layers__flows span {
   grid-row: 1 / span 2;
-  color: var(--eif-accent);
+  color: var(--eif-fg-muted);
   font-size: 1.6rem;
   line-height: 1;
 }
 
+.layers__flow--up {
+  border-top-color: var(--eif-accent-dim);
+}
+
+.layers__flow--up span {
+  color: var(--eif-accent);
+}
+
 .layers__flows strong {
   color: var(--eif-fg);
+}
+
+@media (max-width: 720px) {
+  .layers__flows {
+    grid-template-columns: 1fr;
+    gap: var(--eif-space-3);
+  }
 }
 
 /* Traced knowledge flow: three real artifacts, three different fates. The
@@ -336,7 +709,7 @@
 }
 
 /* The packet lane is bounded on purpose: a packet starts when it is planned
-   and ends at its closeout, unlike the tiers, which outlive it. */
+   and ends at its closeout, unlike the layers, which outlive it. */
 .ledger__lane--packet {
   stroke-dasharray: 1 5;
   stroke-linecap: round;
@@ -376,16 +749,28 @@
   text-anchor: end;
 }
 
+/* Rounded caps and joins: every flow now terminates exactly on its lane or
+   on the node it forks from, and a round cap makes those junctions read as
+   one continuous route instead of two lines that happen to touch. */
 .ledger__flow {
   stroke: var(--eif-accent);
   stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.ledger__flow--dropped,
-.ledger__fate--dropped {
+/* The flow gets the stroke; the label must not. Sharing one rule between a
+   <path> and a <text> painted the glyphs with a stroke as well as a fill,
+   which renders as a soft outline around every letter: the label looked
+   out of focus rather than de-emphasised. De-emphasis belongs to colour,
+   not to blur. */
+.ledger__flow--dropped {
   stroke: var(--eif-fg-muted);
-  fill: var(--eif-fg-muted);
   opacity: 0.7;
+}
+
+.ledger__fate--dropped {
+  fill: var(--eif-fg-muted);
 }
 
 .ledger__flow--candidate {
@@ -397,8 +782,8 @@
   stroke-dasharray: 2 6;
 }
 
-/* Packet memory is durable within the packet but not a tier, so it reads as
-   a third weight: solid like project knowledge, dimmer than the accent. */
+/* Packet memory is durable within the packet but not a layer, so it reads
+   as a third weight: solid like project knowledge, dimmer than the accent. */
 .ledger__flow--packet {
   stroke: var(--eif-accent-dim);
 }
@@ -431,7 +816,8 @@
 
 .ledger__dot--dropped,
 .ledger__dot--retrieval,
-.ledger__dot--retrieval-b {
+.ledger__dot--retrieval-b,
+.ledger__dot--retrieval-c {
   fill: var(--eif-fg-muted);
 }
 
@@ -448,10 +834,62 @@
   padding: 0;
 }
 
+/* Each column carries the mark of the thing it describes, not a coloured
+   rule of its own.
+
+   The rules used to be tinted per outcome and one heading was painted green,
+   which made "At closeout" look promoted above its three neighbours for no
+   stated reason - the colour was really the colour of the dot in the drawing
+   above, but nothing said so. Uniform hairlines plus the page's own legend
+   marker say it directly: this column is that mark. */
 .ledger__outcome {
   padding-top: var(--eif-space-2);
-  border-top: 2px solid var(--eif-rule);
+  border-top: 1px solid var(--eif-rule);
   color: var(--eif-fg-muted);
+}
+
+.ledger__outcome .label {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.ledger__outcome .label::before {
+  content: "";
+  flex: none;
+  box-sizing: border-box;
+  width: 0.85rem;
+  height: 0;
+  border-bottom: 1.5px solid var(--eif-charcoal-600);
+}
+
+/* Dotted and muted, like every retrieval route on the page. */
+.ledger__outcome--retrieval .label::before {
+  border-bottom-style: dotted;
+  border-bottom-color: var(--eif-fg-muted);
+}
+
+/* The packet bracket, sides turned up, as it is drawn under the lane. */
+.ledger__outcome--packet .label::before {
+  width: 0.6rem;
+  height: 0.32rem;
+  border: 1.5px solid var(--eif-accent-dim);
+  border-top: 0;
+}
+
+/* Filled accent: the one dot in the figure that settles and stays. */
+.ledger__outcome--local .label::before {
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--eif-accent);
+}
+
+/* Dashed, because promotion is conditional wherever it appears. */
+.ledger__outcome--promoted .label::before {
+  border-bottom-style: dashed;
+  border-bottom-color: var(--eif-accent-dim);
 }
 
 .ledger__outcome p {
@@ -465,22 +903,6 @@
 .ledger__fates--four {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--eif-space-3);
-}
-
-.ledger__outcome--local {
-  border-top-color: var(--eif-accent);
-}
-
-.ledger__outcome--packet {
-  border-top-color: var(--eif-accent-dim);
-}
-
-.ledger__outcome--promoted {
-  border-top-color: var(--eif-accent-dim);
-}
-
-.ledger__outcome--local .label {
-  color: var(--eif-accent);
 }
 
 @media (max-width: 1040px) {
@@ -522,6 +944,11 @@
 .control-plane__node--terminal circle {
   fill: var(--eif-accent);
   stroke: var(--eif-accent);
+}
+
+.control-plane__pulse {
+  fill: var(--eif-accent);
+  opacity: 0;
 }
 
 .control-plane__node text {
@@ -625,6 +1052,200 @@
   color: var(--eif-fg-muted);
 }
 
+/* The knowledge base itself: the one concrete thing a reader can picture.
+   Paired the same way as the multi-project figure - explanation and legend
+   on one side, figure on the other - so the two read as the same kind of
+   object rather than two different treatments. */
+.knowledge-base {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  column-gap: var(--eif-space-5);
+  row-gap: var(--eif-space-3);
+  margin-top: var(--eif-space-5);
+  padding-top: var(--eif-space-3);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.knowledge-base__lead {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.knowledge-base .kb-map {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.knowledge-base > .figure-legend {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: start;
+  margin-top: 0;
+}
+
+.knowledge-base__facts {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
+@media (max-width: 900px) {
+  .knowledge-base {
+    grid-template-columns: 1fr;
+  }
+
+  .knowledge-base__lead,
+  .knowledge-base .kb-map,
+  .knowledge-base > .figure-legend,
+  .knowledge-base__facts {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .knowledge-base .kb-map {
+    max-width: 20rem;
+    margin: 0 auto;
+  }
+}
+
+.knowledge-base h3 {
+  margin-top: 0.4rem;
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+}
+
+.knowledge-base > p {
+  max-width: var(--eif-measure);
+  margin-top: var(--eif-space-1);
+  color: var(--eif-fg-muted);
+}
+
+/* Same visual language as the other figures: charcoal rules, one accent for
+   what is live, muted for what is excluded, amber for what the curator has
+   flagged. Complete without motion - the pulse only re-walks links that are
+   already drawn. */
+.kb-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+.kb-map__lane {
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1.5;
+}
+
+.kb-map__link {
+  stroke: var(--eif-charcoal-600);
+  stroke-width: 1.5;
+}
+
+/* The link into an excluded artifact still exists - the artifact stays
+   readable - but retrieval does not follow it by default. */
+.kb-map__link--dead {
+  stroke: var(--eif-charcoal-700);
+  stroke-dasharray: 3 5;
+}
+
+.kb-map__query {
+  stroke: var(--eif-fg-muted);
+  stroke-width: 1;
+  stroke-dasharray: 2 6;
+  opacity: 0.6;
+}
+
+.kb-map__node {
+  fill: var(--eif-bg);
+  stroke: var(--eif-accent);
+  stroke-width: 2;
+}
+
+/* Larger, not differently coloured: it is the most-linked artifact, not a
+   different kind of thing. */
+.kb-map__node--hub {
+  stroke-width: 2.5;
+}
+
+.kb-map__legend {
+  list-style: none;
+  margin: var(--eif-space-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+  max-width: var(--eif-measure);
+  font-size: var(--eif-size-label);
+  line-height: 1.5;
+  color: var(--eif-fg-muted);
+}
+
+.kb-map__legend-item {
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.kb-map__legend-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.4em;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  border: 2px solid var(--eif-accent);
+}
+
+.kb-map__legend-item--query::before {
+  border-radius: 0;
+  height: 0;
+  width: 1rem;
+  border-width: 0 0 1px;
+  border-bottom-style: dotted;
+  border-color: var(--eif-fg-muted);
+  top: 0.75em;
+}
+
+.kb-map__legend-item--excluded::before {
+  border-style: dashed;
+  border-color: var(--eif-warn);
+}
+
+.kb-map__node--excluded {
+  stroke: var(--eif-fg-muted);
+  stroke-dasharray: 3 3;
+  opacity: 0.7;
+}
+
+.kb-map__flag {
+  stroke: var(--eif-warn);
+  stroke-width: 1;
+  stroke-dasharray: 1 5;
+  opacity: 0;
+}
+
+.kb-map__pulse {
+  fill: var(--eif-accent);
+  opacity: 0;
+}
+
+.knowledge-base__facts {
+  list-style: none;
+  margin: var(--eif-space-3) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--eif-space-2) var(--eif-space-4);
+}
+
+.knowledge-base__facts li {
+  padding-top: var(--eif-space-1);
+  border-top: 1px solid var(--eif-rule);
+  color: var(--eif-fg-muted);
+}
+
+.knowledge-base__facts strong {
+  color: var(--eif-fg);
+}
+
 .learning__distinction {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -649,6 +1270,7 @@
 @media (max-width: 720px) {
   .methodology__definition,
   .layers__flows,
+  .knowledge-base__facts,
   .learning__distinction {
     grid-template-columns: 1fr;
     gap: var(--eif-space-3);
@@ -659,7 +1281,7 @@
   }
 
 
-  .layers__tier {
+  .layers__layer {
     grid-template-columns: 5.5rem minmax(0, 1fr);
   }
 

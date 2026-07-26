@@ -11,7 +11,12 @@ The narrative follows the canonical framework architecture:
 3. the three intelligence layers;
 4. the control plane and session lifecycle;
 5. bounded execution and governed learning;
-6. optional integrations, current evidence, quickstart and limitations.
+6. optional integrations, current evidence, quickstart and contact.
+
+Boundaries are not a section of their own. Every limit is stated where the
+claim it limits is made: each evidence row carries its own `Limitation:`
+line, the bounded-proof list carries the no-quality/no-rework claim, and the
+quickstart carries the no-package-index and no-human-duration caveats.
 
 ## Commands
 

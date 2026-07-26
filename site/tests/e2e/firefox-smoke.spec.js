@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Firefox renders the full methodology without overflow', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#layers .layers__tier')).toHaveCount(3);
+  await expect(page.locator('#layers .layers__layer')).toHaveCount(3);
   await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
   await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
   const overflow = await page.evaluate(

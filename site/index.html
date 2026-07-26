@@ -85,8 +85,9 @@
           </p>
           <p class="hero__promise">
             EIF turns validated engineering experience into reusable
-            operational intelligence: shared methods, project memory, session
-            discipline and invokable skills that outlive any single session.
+            operational intelligence: one shared operating layer, project
+            memory, session discipline and invokable skills that outlive any
+            single session.
           </p>
           <nav class="hero__ctas" aria-label="Primary">
             <a href="#methodology">What EIF is</a>
@@ -96,45 +97,94 @@
           </nav>
         </div>
 
-        <!-- Decorative restatement of the descriptor above: most of a
-             session evaporates, a little settles, and what settled is
-             still there when the next one starts. aria-hidden because the
-             prose already carries it; without motion it reads as a plain
-             three-layer mark.
+        <!-- Decorative restatement of the descriptor above, and the whole
+             model in one mark: knowledge descends on the left before any
+             work starts, three sessions of one packet run along the bottom,
+             most of what they produce evaporates, a little settles on the
+             project layer, and rarely one lesson climbs the right arc to the
+             framework layer. aria-hidden because the prose already carries
+             it; without motion it reads as a plain three-layer diagram with
+             a packet under it - nothing has accumulated yet, which is the
+             honest static state.
              Deliberately unlabelled. It sits outside the i18n block, so any
              text in it would be stuck in one language, and the section
              below names the layers properly anyway. A mark, not a diagram. -->
+        <div class="hero__aside">
         <svg
           class="hero__figure"
           aria-hidden="true"
-          viewBox="0 0 360 400"
+          viewBox="20 64 340 292"
           preserveAspectRatio="xMidYMid meet"
         >
-          <line class="hero__shelf" x1="72" y1="92" x2="330" y2="92" />
-          <line class="hero__shelf" x1="72" y1="202" x2="330" y2="202" />
-          <line class="hero__shelf hero__shelf--session" x1="72" y1="312" x2="330" y2="312" />
+          <line class="hero__shelf" x1="84" y1="92" x2="330" y2="92" />
+          <line class="hero__shelf" x1="84" y1="202" x2="330" y2="202" />
+          <line class="hero__shelf hero__shelf--session" x1="84" y1="312" x2="330" y2="312" />
 
-          <path class="hero__return" fill="none"
-            d="M 326 96 C 348 130 348 260 330 302" />
+          <!-- Retrieval: method from the framework layer and prior
+               experience from the project layer arrive before the session
+               that uses them. Drawn descending on the left so the figure
+               reads as one circuit: down, across, up. -->
+          <path class="hero__descent" fill="none"
+            d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
+          <path class="hero__descent hero__descent--project" fill="none"
+            d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
 
-          <g class="hero__lost">
-            <circle cx="104" cy="312" r="3.5" />
-            <circle cx="152" cy="312" r="3.5" />
-            <circle cx="214" cy="312" r="3.5" />
-            <circle cx="268" cy="312" r="3.5" />
-            <circle cx="300" cy="312" r="3.5" />
+          <!-- Promotion: dashed, because it is conditional and rare. It
+               lands exactly on the end of the framework lane rather than
+               short of it, so the circuit closes instead of leaving a
+               stub. -->
+          <path class="hero__ascent" fill="none"
+            d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
+
+          <!-- One packet, three sessions: an open bracket under the lane
+               rather than a closed box, so it groups the sessions without
+               reading as a second container. -->
+          <g class="hero__packet">
+            <line x1="140" y1="306" x2="140" y2="318" />
+            <line x1="208" y1="306" x2="208" y2="318" />
+            <line x1="276" y1="306" x2="276" y2="318" />
+            <path class="hero__packet-rule" fill="none"
+              d="M 128 332 L 128 342 L 288 342 L 288 332" />
           </g>
 
-          <circle class="hero__kept hero__kept--1" cx="128" cy="312" r="4" />
-          <circle class="hero__kept hero__kept--2" cx="186" cy="312" r="4" />
-          <circle class="hero__kept hero__kept--3" cx="244" cy="312" r="4" />
-          <circle class="hero__promoted" cx="186" cy="202" r="4" />
+          <g class="hero__lost">
+            <circle cx="112" cy="312" r="3.5" />
+            <circle cx="172" cy="312" r="3.5" />
+            <circle cx="240" cy="312" r="3.5" />
+            <circle cx="304" cy="312" r="3.5" />
+          </g>
 
-          <rect class="hero__settled hero__settled--1" x="121" y="196" width="14" height="6" rx="1" />
-          <rect class="hero__settled hero__settled--2" x="179" y="196" width="14" height="6" rx="1" />
-          <rect class="hero__settled hero__settled--3" x="237" y="196" width="14" height="6" rx="1" />
-          <rect class="hero__settled hero__settled--top" x="179" y="86" width="14" height="6" rx="1" />
+          <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
+          <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
+          <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
+
+          <rect class="hero__settled hero__settled--1" x="133" y="196" width="14" height="6" rx="1" />
+          <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
+          <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
+          <rect class="hero__settled hero__settled--top" x="300" y="86" width="14" height="6" rx="1" />
+
+          <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
+          <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
+          <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
+
+          <!-- The curator watches the framework layer continuously; it is
+               not part of any single promotion, which is why it moves on its
+               own slower rhythm. -->
+          <circle class="hero__curator" cx="0" cy="0" r="3" />
         </svg>
+
+        <!-- The figure is legible to someone who already knows the model;
+             this names its four moves for everyone else. Its own i18n block
+             so it translates while the SVG, which carries no text at all,
+             stays a single copy. -->
+        <ul class="figure-legend hero__legend i18n-block" data-i18n-id="hero.legend">
+          <li class="figure-legend__item figure-legend__item--dotted">Method and prior experience descend into a session <em>before</em> it implements anything</li>
+          <li class="figure-legend__item figure-legend__item--bracket">One packet, three sessions</li>
+          <li class="figure-legend__item figure-legend__item--mark">Most of a session evaporates; what is validated settles as project memory</li>
+          <li class="figure-legend__item figure-legend__item--dashed-accent">Rarely, a lesson climbs to the framework layer</li>
+          <li class="figure-legend__item figure-legend__item--dot-warn">The curator, watching that layer's health on its own rhythm</li>
+        </ul>
+        </div>
       </div>
     </header>
 
@@ -174,12 +224,21 @@
             playbooks, templates and skills.
           </p>
           <div class="methodology__definition" data-claim-id="CLM-15">
+            <div class="methodology__lead">
             <p class="methodology__statement">
               <strong>Engineering Intelligence</strong> is versioned
               experience plus the methods that govern its use. It changes how
               the next task is prepared, executed and verified - not merely
               where knowledge is stored.
             </p>
+            <p class="methodology__boundary" data-claim-id="CLM-15">
+              <strong>What “learning” means here:</strong> the engineering
+              system externalizes validated experience into reviewed,
+              versioned artifacts that the next session can retrieve. EIF does
+              not train model weights, fine-tune an LLM or let an agent rewrite
+              its own safeguards.
+            </p>
+            </div>
             <dl class="methodology__parts">
               <div>
                 <dt class="label label--accent">Methodology</dt>
@@ -195,13 +254,6 @@
               </div>
             </dl>
           </div>
-          <p class="methodology__boundary" data-claim-id="CLM-15">
-            <strong>What “learning” means here:</strong> the engineering
-            system externalizes validated experience into reviewed,
-            versioned artifacts that the next session can retrieve. EIF does
-            not train model weights, fine-tune an LLM or let an agent rewrite
-            its own safeguards.
-          </p>
         </div>
       </section>
 
@@ -217,8 +269,8 @@
             Knowledge Delta governing promotion between them.
           </p>
           <div class="layers__stack" data-claim-id="CLM-13">
-            <article class="layers__tier layers__tier--one">
-              <div class="layers__tier-id">
+            <article class="layers__layer layers__layer--one">
+              <div class="layers__layer-id">
                 <span class="label label--accent">L1</span>
                 <span class="layers__scope">Reusable</span>
               </div>
@@ -228,8 +280,8 @@
               </div>
               <p class="layers__examples">How to work</p>
             </article>
-            <article class="layers__tier layers__tier--two">
-              <div class="layers__tier-id">
+            <article class="layers__layer layers__layer--two">
+              <div class="layers__layer-id">
                 <span class="label label--accent">L2</span>
                 <span class="layers__scope">Durable</span>
               </div>
@@ -239,8 +291,8 @@
               </div>
               <p class="layers__examples">What this system knows</p>
             </article>
-            <article class="layers__tier layers__tier--three">
-              <div class="layers__tier-id">
+            <article class="layers__layer layers__layer--three">
+              <div class="layers__layer-id">
                 <span class="label label--accent">L3</span>
                 <span class="layers__scope">Ephemeral</span>
               </div>
@@ -252,18 +304,18 @@
             </article>
           </div>
           <div class="layers__flows" aria-label="Knowledge flow between layers" data-claim-id="CLM-13">
-            <p><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> method, constraints, prior experience and reusable skills.</p>
-            <p><span aria-hidden="true">&uarr;</span><strong>Flows up:</strong> only validated learning, through Knowledge Delta and an explicit promotion decision.</p>
+            <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> the whole operating layer - ontology, authority, rules, playbooks, templates and skills - together with the project's own prior experience, retrieved before implementation starts.</p>
+            <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Flows up:</strong> only validated learning, through Knowledge Delta and an explicit promotion decision. Most of it stays where it was found: a lesson leaves its own project only if it holds beyond it, and it is the rare case, not the closing step of every session.</p>
           </div>
 
           <figure class="ledger" data-claim-id="CLM-15">
             <figcaption class="ledger__caption">
               <span class="label label--accent">Traced: two sessions of one packet</span>
-              <h3>Experience arrives before implementation, not after it</h3>
+              <h3>Experience arrives before implementation, not written up after it</h3>
               <p>
-                Follow one packet across two sessions: what each session is
-                given before it starts, what survives its closeout, and what
-                is still carried when the next one begins.
+                One packet, two sessions, three questions: what each session
+                is given before it writes anything, what survives its
+                closeout, and what session 2 finds already waiting for it.
               </p>
             </figcaption>
 
@@ -283,37 +335,43 @@
               <text class="ledger__lane-label" x="4" y="244">PACKET</text>
               <text class="ledger__lane-label" x="4" y="340">L3 SESSION</text>
 
-              <line class="ledger__gate" x1="256" y1="40" x2="256" y2="392" />
-              <line class="ledger__gate" x1="492" y1="40" x2="492" y2="392" />
-              <line class="ledger__gate" x1="836" y1="40" x2="836" y2="392" />
+              <line class="ledger__gate ledger__gate--retrieval" x1="256" y1="40" x2="256" y2="392" />
+              <line class="ledger__gate ledger__gate--closeout" x1="492" y1="40" x2="492" y2="392" />
+              <line class="ledger__gate ledger__gate--promotion" x1="836" y1="40" x2="836" y2="392" />
               <text class="ledger__gate-label" x="256" y="28">RETRIEVAL</text>
               <text class="ledger__gate-label" x="492" y="28">CLOSEOUT + RETRO</text>
               <text class="ledger__gate-label" x="836" y="28">PROMOTION DECISION</text>
 
               <path class="ledger__flow ledger__flow--retrieval" fill="none"
-                d="M 160 64 C 214 76 244 220 254 352" />
+                d="M 160 64 C 214 80 246 210 256 352" />
               <path class="ledger__flow ledger__flow--retrieval" fill="none"
-                d="M 172 160 C 220 172 246 258 255 352" />
+                d="M 172 160 C 222 176 250 250 256 352" />
+
+              <!-- Session 2 opens the same way session 1 did, but the project
+                   layer it searches now contains session 1's own validated
+                   result. That is the compounding, drawn. -->
+              <path class="ledger__flow ledger__flow--retrieval" fill="none"
+                d="M 700 160 C 712 220 660 300 616 352" />
 
               <path class="ledger__flow ledger__flow--packet" fill="none"
-                d="M 180 256 C 210 258 236 304 254 352" />
+                d="M 180 256 C 212 260 240 300 256 352" />
 
-              <path class="ledger__flow ledger__flow--work" fill="none"
+              <path class="ledger__flow ledger__flow--work ledger__flow--work-1" fill="none"
                 d="M 256 352 L 492 352" />
-              <path class="ledger__flow ledger__flow--work" fill="none"
+              <path class="ledger__flow ledger__flow--work ledger__flow--work-2" fill="none"
                 d="M 616 352 L 730 352" />
 
               <path class="ledger__flow ledger__flow--dropped" fill="none"
-                d="M 470 352 C 492 360 508 376 524 392" />
+                d="M 492 352 C 506 366 516 380 524 392" />
 
               <path class="ledger__flow" fill="none"
-                d="M 494 352 C 516 300 522 208 548 160 L 836 160" />
+                d="M 492 352 C 516 300 522 208 548 160 L 836 160" />
 
               <path class="ledger__flow ledger__flow--packet" fill="none"
-                d="M 496 352 C 520 318 536 262 566 256 L 582 256 C 602 256 608 306 614 352" />
+                d="M 492 352 C 512 324 522 256 540 256 L 568 256 C 586 256 596 324 616 352" />
 
               <path class="ledger__flow" fill="none"
-                d="M 732 352 C 754 300 760 206 786 160" />
+                d="M 730 352 C 754 300 760 206 786 160 L 836 160" />
 
               <path class="ledger__flow ledger__flow--candidate" fill="none"
                 d="M 836 160 C 872 150 880 84 906 64 L 936 64" />
@@ -328,13 +386,15 @@
               <text class="ledger__node-label" x="610" y="376">session 2</text>
 
               <text class="ledger__fate ledger__fate--dropped" x="536" y="396">raw reasoning, dropped</text>
-              <text class="ledger__fate ledger__fate--muted" x="574" y="240" text-anchor="middle">facts and decisions carried forward</text>
-              <text class="ledger__fate ledger__fate--muted" x="660" y="148" text-anchor="middle">validated learning</text>
+              <text class="ledger__fate ledger__fate--muted" x="620" y="200" text-anchor="middle">facts and decisions</text>
+              <text class="ledger__fate ledger__fate--muted" x="620" y="214" text-anchor="middle">carried forward</text>
+              <text class="ledger__fate ledger__fate--muted" x="620" y="138" text-anchor="middle">validated learning</text>
               <text class="ledger__fate" x="936" y="48" text-anchor="end">reusable elsewhere</text>
               <text class="ledger__fate ledger__fate--muted" x="128" y="300">retrieval</text>
 
               <circle class="ledger__dot ledger__dot--retrieval" cx="0" cy="0" r="5" />
               <circle class="ledger__dot ledger__dot--retrieval-b" cx="0" cy="0" r="5" />
+              <circle class="ledger__dot ledger__dot--retrieval-c" cx="0" cy="0" r="5" />
               <circle class="ledger__dot ledger__dot--dropped" cx="0" cy="0" r="6" />
               <circle class="ledger__dot ledger__dot--local" cx="0" cy="0" r="6" />
               <circle class="ledger__dot ledger__dot--packet" cx="0" cy="0" r="6" />
@@ -343,7 +403,7 @@
 
             <ol class="ledger__fates ledger__fates--four">
               <li class="ledger__outcome ledger__outcome--retrieval">
-                <span class="label">Before the work</span>
+                <span class="label">Before implementation</span>
                 <p>
                   <strong>Retrieval, not recall.</strong> A session opens by
                   searching durable knowledge for prior lessons, rejected
@@ -354,10 +414,10 @@
               <li class="ledger__outcome ledger__outcome--packet">
                 <span class="label">Between sessions</span>
                 <p>
-                  <strong>Packet memory.</strong> Work spanning several sessions
-                  gets a packet: charter, facts, decisions and roadmap written
-                  before implementation. That is what carries across the gap, so
-                  session 2 does not reopen what session 1 settled.
+                  <strong>Packet memory.</strong> A task spanning several
+                  sessions gets a packet: charter, facts, decisions and roadmap
+                  written before implementation. That is what carries across
+                  the gap, so session 2 does not reopen what session 1 settled.
                 </p>
               </li>
               <li class="ledger__outcome ledger__outcome--local">
@@ -381,25 +441,45 @@
             </ol>
           </figure>
 
-          <!-- SB-003, two variants for selection. Both SVGs are
-               language-neutral on purpose (EIF / P1..P4 / PACKET read the
-               same in both languages), so only the captions translate and
-               the markup is not duplicated per language. One of these is
-               meant to be deleted once chosen. -->
-          <figure class="scale scale--radial" data-claim-id="CLM-13">
-            <figcaption class="ledger__caption">
-              <span class="label label--accent">Variant A &middot; one framework, many projects</span>
+          <!-- SB-003. The SVG is language-neutral on purpose (EIF / P1..P4 /
+               PACKET / SESSIONS read the same in both languages), so the
+               markup is identical in both templates and only the caption and
+               its legend translate. The curator has no label inside the
+               figure for the same reason - the legend names it. -->
+          <figure class="scale" data-claim-id="CLM-13">
+            <figcaption class="scale__caption">
+              <span class="label label--accent">One framework, many projects</span>
               <h3>The framework is shared. Every project keeps its own memory.</h3>
               <p>
-                Projects orbit one framework layer. Work too large for a
-                single session becomes a packet of sessions inside its own
-                project. What that packet learns travels inward only if it
-                generalizes, and reaches another project only if it is
-                relevant there.
+                Projects orbit one framework layer. A task too large for one
+                session becomes a packet of sessions inside its own project.
+                What descends before the first line of implementation is more
+                than method: ontology and the authority model, rules and
+                constraints, playbooks, templates and skills, and with them
+                the project's own prior experience. What climbs back is only
+                what the packet validated and what generalizes past it - and
+                it reaches another project only where it applies.
               </p>
+              <ul class="figure-legend">
+                <li class="figure-legend__item figure-legend__item--dot">
+                  <strong>EIF, the framework layer.</strong> One shared operating layer, retrieved into a session before implementation, not written up after it.
+                </li>
+                <li class="figure-legend__item figure-legend__item--dot-muted">
+                  <strong>P1 to P4, project repositories.</strong> One packet of three sessions is open in P1, with its own open and close rules.
+                </li>
+                <li class="figure-legend__item figure-legend__item--bracket">
+                  <strong>The packet groups its sessions.</strong> They run in order, and the packet closes before anything it learned is offered upward.
+                </li>
+                <li class="figure-legend__item figure-legend__item--dashed-accent">
+                  <strong>Dashed routes are conditional.</strong> A lesson leaves its project only by an explicit decision, and lands in another only where it applies.
+                </li>
+                <li class="figure-legend__item figure-legend__item--dot-warn">
+                  <strong>The curator.</strong> It watches the framework's own health continuously, on its own rhythm, outside any single promotion.
+                </li>
+              </ul>
             </figcaption>
 
-            <svg class="scale__map" aria-hidden="true" viewBox="0 0 620 560" preserveAspectRatio="xMidYMid meet">
+            <svg class="scale__map" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
               <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
 
               <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
@@ -407,8 +487,13 @@
               <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
               <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
 
-              <path class="scale__lift" fill="none" d="M 310 424 C 300 380 300 320 310 292" />
+              <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
+              <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
               <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+
+              <text class="scale__note" x="274" y="334" text-anchor="end">method + experience</text>
+              <text class="scale__note scale__note--up" x="346" y="334">validated lesson</text>
+              <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle">if it applies</text>
 
               <circle class="scale__core" cx="310" cy="266" r="42" />
               <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
@@ -423,91 +508,33 @@
               </g>
               <g class="scale__project scale__project--receiving">
                 <circle cx="462" cy="178" r="15" />
-                <text class="scale__node-label" x="462" y="183" text-anchor="middle">P3</text>
+                <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
               </g>
               <g class="scale__project">
                 <circle cx="310" cy="90" r="15" />
-                <text class="scale__node-label" x="310" y="95" text-anchor="middle">P4</text>
+                <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
               </g>
 
-              <line class="scale__packet-rule" x1="196" y1="492" x2="424" y2="492" />
+              <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
+              <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+
+              <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
               <text class="scale__section-label" x="196" y="482">PACKET</text>
               <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
               <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
               <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
               <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-              <circle class="scale__session" cx="238" cy="522" r="6" />
-              <circle class="scale__session" cx="310" cy="522" r="6" />
-              <circle class="scale__session" cx="382" cy="522" r="6" />
+              <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
+              <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
+              <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
               <text class="scale__section-label" x="196" y="546">SESSIONS</text>
 
               <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
               <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
-              <text class="scale__section-label scale__section-label--curator" x="310" y="188" text-anchor="middle">CURATOR</text>
 
+              <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
               <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
               <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
-            </svg>
-          </figure>
-
-          <figure class="scale scale--trunk" data-claim-id="CLM-13">
-            <figcaption class="ledger__caption">
-              <span class="label label--accent">Variant B &middot; one framework, many projects</span>
-              <h3>The same shape, read as a spine instead of an orbit</h3>
-              <p>
-                Identical model, different composition: the framework layer
-                is a spine, projects branch off it, and one branch opens into
-                a packet of sessions. Learning climbs its own branch first,
-                then crosses the spine to another project only when it
-                applies there.
-              </p>
-            </figcaption>
-
-            <svg class="scale__map" aria-hidden="true" viewBox="0 0 940 400" preserveAspectRatio="xMidYMid meet">
-              <line class="scale__spine" x1="80" y1="86" x2="880" y2="86" />
-              <text class="scale__section-label" x="80" y="70">FRAMEWORK LAYER</text>
-
-              <circle class="scale__curator-dot" cx="120" cy="86" r="4" />
-              <text class="scale__section-label scale__section-label--curator" x="880" y="70" text-anchor="end">CURATOR WATCHES THIS LINE</text>
-
-              <line class="scale__spoke" x1="200" y1="86" x2="200" y2="176" />
-              <line class="scale__spoke" x1="420" y1="86" x2="420" y2="176" />
-              <line class="scale__spoke" x1="640" y1="86" x2="640" y2="176" />
-              <line class="scale__spoke" x1="840" y1="86" x2="840" y2="176" />
-
-              <g class="scale__project">
-                <circle cx="200" cy="190" r="14" />
-                <text class="scale__node-label" x="200" y="195" text-anchor="middle">P1</text>
-              </g>
-              <g class="scale__project scale__project--active">
-                <circle cx="420" cy="190" r="16" />
-                <text class="scale__node-label" x="420" y="195" text-anchor="middle">P2</text>
-              </g>
-              <g class="scale__project scale__project--receiving">
-                <circle cx="640" cy="190" r="14" />
-                <text class="scale__node-label" x="640" y="195" text-anchor="middle">P3</text>
-              </g>
-              <g class="scale__project">
-                <circle cx="840" cy="190" r="14" />
-                <text class="scale__node-label" x="840" y="195" text-anchor="middle">P4</text>
-              </g>
-
-              <line class="scale__stem" x1="420" y1="206" x2="420" y2="252" />
-              <line class="scale__packet-rule" x1="316" y1="252" x2="524" y2="252" />
-              <text class="scale__section-label" x="316" y="242">PACKET</text>
-              <line class="scale__stem" x1="352" y1="252" x2="352" y2="292" />
-              <line class="scale__stem" x1="420" y1="252" x2="420" y2="292" />
-              <line class="scale__stem" x1="488" y1="252" x2="488" y2="292" />
-              <circle class="scale__session" cx="352" cy="298" r="6" />
-              <circle class="scale__session" cx="420" cy="298" r="6" />
-              <circle class="scale__session" cx="488" cy="298" r="6" />
-              <text class="scale__section-label" x="316" y="326">SESSIONS</text>
-
-              <path class="scale__lift" fill="none" d="M 434 292 C 452 250 448 140 434 96" />
-              <path class="scale__lift scale__lift--relay" fill="none" d="M 440 86 L 620 86 C 636 100 638 150 638 174" />
-
-              <circle class="scale__pulse scale__pulse--trunk-up" cx="0" cy="0" r="5" />
-              <circle class="scale__pulse scale__pulse--trunk-out" cx="0" cy="0" r="5" />
             </svg>
           </figure>
         </div>
@@ -568,6 +595,7 @@
               <circle r="9" />
               <text y="-26">Durable</text>
             </g>
+            <circle class="control-plane__pulse" cx="0" cy="0" r="7" />
           </svg>
 
           <ol class="control-plane__list">
@@ -666,35 +694,46 @@
                 preserveAspectRatio="xMidYMid meet"
               >
                 <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
+
+                <!-- The one thing a bare ring never says: this loop has a way
+                     out. An amber gate on the arc back to Orient, ending in an
+                     open stop mark - the same vocabulary the traced figure
+                     uses for its gates and its dropped result, and the same
+                     amber the Exits table below gives to BLOCKED. Carries no
+                     text, like every other mark in these figures. -->
+                <line class="loop__exit" x1="95" y1="55" x2="80" y2="29" />
+                <circle class="loop__exit-stop" cx="77" cy="23" r="4" fill="none" />
+
+                <circle class="loop__pulse" cx="0" cy="0" r="5" />
                 <g class="loop__node" data-phase="orient" data-label="Show the Orient phase" transform="translate(150,40)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
-                  <circle r="10" />
-                  <text y="-18">Orient</text>
+                  <circle r="7" />
+                  <text y="-15">Orient</text>
                 </g>
                 <g class="loop__node" data-phase="define" data-label="Show the Define phase" transform="translate(245,95)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
-                  <circle r="10" />
-                  <text y="-18">Define</text>
+                  <circle r="7" />
+                  <text y="-15">Define</text>
                 </g>
                 <g class="loop__node" data-phase="act" data-label="Show the Act phase" transform="translate(245,205)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
-                  <circle r="10" />
-                  <text y="30">Act</text>
+                  <circle r="7" />
+                  <text y="24">Act</text>
                 </g>
                 <g class="loop__node" data-phase="observe" data-label="Show the Observe phase" transform="translate(150,260)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
-                  <circle r="10" />
-                  <text y="30">Observe</text>
+                  <circle r="7" />
+                  <text y="24">Observe</text>
                 </g>
                 <g class="loop__node" data-phase="study" data-label="Show the Study phase" transform="translate(55,205)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
-                  <circle r="10" />
-                  <text y="30">Study</text>
+                  <circle r="7" />
+                  <text y="24">Study</text>
                 </g>
                 <g class="loop__node" data-phase="adapt" data-label="Show the Adapt phase" transform="translate(55,95)">
                   <circle class="loop__node-hit" r="26" fill="transparent" />
-                  <circle r="10" />
-                  <text y="-18">Adapt</text>
+                  <circle r="7" />
+                  <text y="-15">Adapt</text>
                 </g>
               </svg>
             </div>
@@ -728,8 +767,12 @@
           </div>
 
           <div class="loop__control">
-            <div>
-              <h3 class="label">Preconditions</h3>
+            <div class="loop__control-group">
+              <h3 class="loop__control-title">Preconditions</h3>
+              <p class="loop__control-note">
+                Declared before the first iteration. Without them an agent is
+                not iterating, it is retrying.
+              </p>
               <dl class="loop__precondition-list">
                 <div><dt>Goal</dt><dd>One observable outcome.</dd></div>
                 <div><dt>Success evidence</dt><dd>What proves the outcome behaviorally.</dd></div>
@@ -739,8 +782,12 @@
                 <div><dt>Stop conditions</dt><dd>Safety, ambiguity, budget or owner-only boundaries.</dd></div>
               </dl>
             </div>
-            <div>
-              <h3 class="label">Exits</h3>
+            <div class="loop__control-group">
+              <h3 class="loop__control-title">Exits</h3>
+              <p class="loop__control-note">
+                Three ways out and no fourth. Each one names the evidence or
+                the boundary that ended the loop.
+              </p>
               <dl class="loop__exits">
                 <div class="loop__exits-row loop__exits-row--pass">
                   <dt>Pass</dt>
@@ -787,6 +834,64 @@
             <li><span class="label label--accent">Promote</span><p>Project-specific knowledge stays in the project layer; a general lesson reaches the framework layer only by explicit decision.</p></li>
             <li><span class="label label--accent">Retrieve</span><p>The next relevant session finds the artifact before acting, closing the learning loop.</p></li>
           </ol>
+
+          <div class="knowledge-base" data-claim-id="CLM-01">
+            <div class="knowledge-base__lead">
+            <span class="label label--accent">What that knowledge actually lives in</span>
+            <h3>A linked, indexed, wiki-like base - not a folder of notes</h3>
+            <p>
+              Every artifact is a plain file with structured front matter:
+              type, scope, status, confidence, source, and
+              <code>related:</code> links to its neighbours. Those links are
+              what make it a graph instead of a pile - a decision points at
+              the incident that caused it, a lesson at the rule it became.
+            </p>
+            </div>
+
+            <!-- Language-neutral by design, like the other figures: no text
+                 inside, because the shape is the whole statement. A query
+                 enters from the index lane, walks the links, and stops at
+                 the node the curator has flagged rather than passing
+                 through it. -->
+            <svg class="kb-map" aria-hidden="true" viewBox="0 0 420 300" preserveAspectRatio="xMidYMid meet">
+              <line class="kb-map__lane" x1="20" y1="272" x2="400" y2="272" />
+
+              <path class="kb-map__link" fill="none" d="M 70 190 L 120 90" />
+              <path class="kb-map__link" fill="none" d="M 70 190 L 215 150" />
+              <path class="kb-map__link" fill="none" d="M 120 90 L 215 150" />
+              <path class="kb-map__link" fill="none" d="M 215 150 L 320 80" />
+              <path class="kb-map__link" fill="none" d="M 320 80 L 370 190" />
+              <path class="kb-map__link" fill="none" d="M 215 150 L 370 190" />
+              <path class="kb-map__link kb-map__link--dead" fill="none" d="M 215 150 L 272 232" />
+
+              <path class="kb-map__query" fill="none" d="M 26 266 C 56 260 50 226 70 190" />
+
+              <circle class="kb-map__node kb-map__node--s1" cx="70" cy="190" r="8" />
+              <circle class="kb-map__node kb-map__node--s2" cx="120" cy="90" r="8" />
+              <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" cx="215" cy="150" r="10" />
+              <circle class="kb-map__node kb-map__node--s4" cx="320" cy="80" r="8" />
+              <circle class="kb-map__node kb-map__node--s5" cx="370" cy="190" r="8" />
+              <circle class="kb-map__node kb-map__node--excluded" cx="272" cy="232" r="8" />
+
+              <circle class="kb-map__flag" cx="272" cy="232" r="15" fill="none" />
+              <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
+
+              <text class="kb-map__note" x="20" y="292">index</text>
+              <text class="kb-map__note kb-map__note--excluded" x="294" y="237">superseded</text>
+            </svg>
+
+            <ul class="figure-legend">
+              <li class="figure-legend__item figure-legend__item--dot">Each circle is one artifact; each line between two of them is a <code>related:</code> link.</li>
+              <li class="figure-legend__item figure-legend__item--dotted">A search enters from the index lane below and walks those links, instead of reading every file.</li>
+              <li class="figure-legend__item figure-legend__item--dot-excluded">The dashed node is rejected or superseded: still readable, kept out of results by default, and flagged by the curator.</li>
+            </ul>
+            <ul class="knowledge-base__facts">
+              <li><strong>Indexed.</strong> An index is generated over every artifact under the configured knowledge root, and retrieval searches that index offline: keyword and substring scoring, no embedding service, nothing leaving the machine.</li>
+              <li><strong>Lifecycle-aware.</strong> Each node carries a status. Rejected and superseded artifacts stay readable but are excluded from retrieval by default, so a closed question does not quietly reopen itself.</li>
+              <li><strong>Honest about gaps.</strong> Unparseable, schema-invalid and not-found are reported as three distinct outcomes. An empty result never gets to look like a clean one.</li>
+              <li><strong>Maintained.</strong> The knowledge curator reads the same base and ranks what has rotted in it - stale artifacts, orphans, broken links, findings that were closed and came back - into one list with an owner for each. It never merges anything.</li>
+            </ul>
+          </div>
           <div class="learning__distinction" data-claim-id="CLM-15">
             <div>
               <span class="label">Experience</span>
@@ -812,7 +917,7 @@
         <div class="section__inner i18n-block" data-i18n-id="integrations.body" data-i18n-reinit="reveal">
           <div class="section__head">
             <span class="label">08 &middot; Optional capabilities</span>
-            <h2 id="integrations-heading">Three accelerators. A fallback for each.</h2>
+            <h2 id="integrations-heading">Three tools that help. None of them is the method.</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-12">
             Graphify, RTK and Context7 each add one bounded capability.
@@ -822,6 +927,7 @@
             framework.
           </p>
           <div class="token-economics" data-claim-id="CLM-06">
+            <div class="token-economics__body">
             <span class="label label--accent">What this costs</span>
             <p>
               Governance is not free in tokens. Retrieval before work, packet
@@ -832,10 +938,13 @@
               retries of an approach already recorded as rejected.
             </p>
             <p>
-              What is <strong>measured</strong>: compression. RTK filters
-              command output before it reaches the model, and its adapter
-              records a reduction per route, with raw or failed routes
-              counted as zero rather than estimated.
+              What is <strong>measured</strong>: compression. RTK - Rust
+              Token Killer - filters command output before it reaches the
+              model, and its adapter records a reduction per route, with raw
+              or failed routes counted as zero rather than estimated. EIF
+              also generates a reviewable pre-tool-call contract that routes
+              commands through it, but never installs that hook itself: the
+              owner does, or nothing happens.
             </p>
             <p>
               What is <strong>not measured</strong>: the net. No study here
@@ -844,6 +953,59 @@
               the cost, states what is counted, and leaves the rest open
               until there is evidence for it.
             </p>
+            </div>
+
+            <!-- All three capabilities in one shape: a solid route with the
+                 tool, a dashed core path without it, both arriving at the
+                 same place. The tool names are proper nouns and read the
+                 same in both languages, so the SVG needs no translation.
+                 Deliberately shows no quantity anywhere: CLM-06 permits
+                 saying compression is measured, not how much. -->
+            <figure class="cap-flow">
+              <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
+                <text class="cap-flow__label" x="4" y="50">Graphify</text>
+                <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
+                <circle class="cap-flow__waypoint" cx="170" cy="46" r="4" />
+                <circle class="cap-flow__waypoint" cx="230" cy="46" r="4" />
+                <circle class="cap-flow__waypoint" cx="290" cy="46" r="4" />
+                <line class="cap-flow__core" x1="92" y1="74" x2="392" y2="74" />
+
+                <text class="cap-flow__label" x="4" y="130">RTK</text>
+                <line class="cap-flow__route" x1="92" y1="126" x2="392" y2="126" />
+                <line class="cap-flow__gate" x1="234" y1="106" x2="234" y2="140" />
+                <text class="cap-flow__note" x="234" y="98" text-anchor="middle">dropped here</text>
+                <circle class="cap-flow__tick" cx="120" cy="126" r="3" />
+                <circle class="cap-flow__tick" cx="146" cy="126" r="3" />
+                <circle class="cap-flow__tick" cx="172" cy="126" r="3" />
+                <circle class="cap-flow__tick" cx="198" cy="126" r="3" />
+                <circle class="cap-flow__tick cap-flow__tick--kept" cx="286" cy="126" r="3" />
+                <circle class="cap-flow__tick cap-flow__tick--kept" cx="330" cy="126" r="3" />
+                <line class="cap-flow__core" x1="92" y1="154" x2="392" y2="154" />
+
+                <text class="cap-flow__label" x="4" y="210">Context7</text>
+                <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
+                <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
+                <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
+                <text class="cap-flow__note" x="300" y="178" text-anchor="middle">leaves the machine</text>
+                <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
+
+                <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
+
+                <circle class="cap-flow__pulse cap-flow__pulse--g" cx="0" cy="0" r="5" />
+                <circle class="cap-flow__pulse cap-flow__pulse--g-core" cx="0" cy="0" r="5" />
+                <circle class="cap-flow__pulse cap-flow__pulse--r-stop" cx="0" cy="0" r="5" />
+                <circle class="cap-flow__pulse cap-flow__pulse--r" cx="0" cy="0" r="5" />
+                <circle class="cap-flow__pulse cap-flow__pulse--r-core" cx="0" cy="0" r="5" />
+                <circle class="cap-flow__pulse cap-flow__pulse--c" cx="0" cy="0" r="5" />
+                <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
+              </svg>
+
+              <ul class="figure-legend">
+                <li class="figure-legend__item">The solid route is the work with the tool available. Graphify follows structure it already mapped; RTK filters command output; Context7 answers from current library docs.</li>
+                <li class="figure-legend__item figure-legend__item--dashed">The dashed route below each one is the named core path that runs without it: source search, raw shell output, local documentation. Both arrive.</li>
+                <li class="figure-legend__item figure-legend__item--dotted-warn">Amber marks the two boundaries: what RTK drops before it ever costs context, and the point where a Context7 query leaves the machine. It is the only one of the three that does.</li>
+              </ul>
+            </figure>
           </div>
           <figure class="capability-map">
             <figcaption>
@@ -1003,10 +1165,13 @@
             <h3 class="label">Bounded proof on record</h3>
             <ul>
               <li data-claim-id="CLM-08">
-                A first bounded real-agent A/B pilot (one model, three fixtures, six total attempts) completed with 100% task success in both modes. Modes C/D now have executable integrity contracts, but no real-agent performance result. This is not a statistically powered efficiency comparison (see <a href="#limitations">limitations</a>).
+                A first bounded real-agent A/B pilot (one model, three fixtures, six total attempts) completed with 100% task success in both modes. Modes C/D now have executable integrity contracts, but no real-agent performance result. This is not a statistically powered efficiency comparison: one model, three of ten fixtures, one attempt per cell.
               </li>
               <li data-claim-id="CLM-10">
                 Command-level timing evidence exists for specific mechanical operations in the framework's benchmark evidence. No claim is made about human authoring or review time.
+              </li>
+              <li data-claim-id="CLM-09">
+                No comparative study has been run, so this framework makes no claim about task quality, rework rate or defect count. That measurement has no baseline, no control group and no defined methodology yet, and until it does, the silence is deliberate.
               </li>
             </ul>
           </div>
@@ -1029,50 +1194,59 @@
           <p>
             That command initializes a separate, runnable project instance.
             In the reference walkthrough, the bundled demo seeds and retrieves
-            real knowledge, makes one retrieval-informed change, verifies it
-            with a real failing-before/passing-after test, and closes the
-            session in Ukrainian through a config-driven locale layer.
+            real knowledge, makes one retrieval-informed change, and verifies
+            it with a real test that fails before the change and passes after
+            it. It then closes the session in whichever language the instance
+            config declares. That run declares Ukrainian, because a closeout
+            rendered in English would have proved nothing about the locale
+            layer: the point is that the language is configuration, not a
+            hardcoded default.
           </p>
-          <p class="label">
-            No PyPI package yet. No claim about how long any of this takes a
-            human.
+          <p class="quickstart__caveat">
+            <strong>Not installable from a package index yet.</strong>
+            There is no <code>pip install</code> from PyPI; the entry point is
+            the repository and the command above. No claim is made about how
+            long any of this takes a human.
           </p>
-        </div>
-      </section>
-
-      <section class="section limitations" id="limitations" aria-labelledby="limitations-heading">
-        <div class="section__inner i18n-block" data-i18n-id="limitations.body">
-          <div class="section__head">
-            <span class="label">11 &middot; Limitations</span>
-            <h2 id="limitations-heading">What EIF is not yet</h2>
-          </div>
-          <ul class="limitations__list">
-            <li><strong>Pre-release.</strong> v0.1 is in progress; this repository is being extracted from a private production instance. Expect gaps.</li>
-            <li><strong>Not on PyPI.</strong> There is no <code>pip install</code> from a package index yet.</li>
-            <li data-claim-id="CLM-09"><strong>No quality or rework claim.</strong> No comparative study has been run; this framework makes no claim about task quality, rework rate or defect count.</li>
-            <li><strong>Bounded scale.</strong> Evidence comes from one synthetic vertical slice, a three-fixture benchmark pilot, and adapter-level test suites, not a large or independently-reproduced sample.</li>
-            <li><strong>Optional integrations stay optional.</strong> Graphify and RTK are never required; a non-fresh or degraded provider is reported as such, never marketed as healthy.</li>
-            <li>
-              <strong>Explicit v0.1 non-goals:</strong> hosted SaaS, an
-              autonomous multi-agent runtime, a proprietary cloud memory
-              service, a mandatory code-graph or shell-compression
-              dependency, or any universal token-savings claim.
-            </li>
-          </ul>
         </div>
       </section>
 
       <section class="section final-cta" id="final-cta" aria-labelledby="final-cta-heading">
         <div class="section__inner i18n-block" data-i18n-id="final-cta.body">
           <div class="section__head">
-            <span class="label">12 &middot; Go deeper</span>
+            <span class="label">11 &middot; Go deeper</span>
             <h2 id="final-cta-heading">Architecture, evidence, source</h2>
           </div>
           <nav class="final-cta__links" aria-label="Go deeper">
             <a href="#control-plane">Architecture</a>
             <a href="#evidence">Evidence</a>
-            <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL__</a>
+            <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_EN__</a>
           </nav>
+          <!-- Empty and hidden once EIF_REPOSITORY_URL is set at build time,
+               so the label above never has to carry its own disclaimer in
+               brackets. -->
+          <p class="final-cta__pending">__EIF_REPO_PENDING_EN__</p>
+
+          <div class="final-cta__contact">
+            <h3 id="contact-heading">Questions, critique, or a look at your own repository</h3>
+            <p class="final-cta__contact-lede">
+              This is one engineer's framework, not a company. Both channels
+              below reach me directly, and disagreement is more useful to me
+              right now than agreement.
+            </p>
+            <ul class="final-cta__channels" aria-labelledby="contact-heading">
+              <li>
+                <span class="label label--accent">LinkedIn</span>
+                <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
+                <p>Where the post series on EIF is published, and the fastest way to reach me.</p>
+              </li>
+              <li>
+                <span class="label label--accent">Email</span>
+                <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
+                <p>For anything longer than a comment: questions, critique, adoption on a real repository.</p>
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
     </main>
@@ -1084,14 +1258,22 @@
     </footer>
 
     <div id="i18n-templates" hidden>
+      <template data-i18n-id="hero.legend">
+        <li class="figure-legend__item figure-legend__item--dotted">Метод і попередній досвід спускаються в сесію <em>до того</em>, як вона щось реалізує</li>
+        <li class="figure-legend__item figure-legend__item--bracket">Один пакет, три сесії</li>
+        <li class="figure-legend__item figure-legend__item--mark">Більшість сесії випаровується; перевірене осідає як пам&rsquo;ять проєкту</li>
+        <li class="figure-legend__item figure-legend__item--dashed-accent">Зрідка урок піднімається на рівень фреймворку</li>
+        <li class="figure-legend__item figure-legend__item--dot-warn">Куратор, який стежить за станом цього рівня у власному ритмі</li>
+      </template>
+
       <template data-i18n-id="hero.body">
         <p class="hero__descriptor">
           Керована методологія, завдяки якій інженерний досвід накопичується.
         </p>
         <p class="hero__promise">
           EIF перетворює перевірений інженерний досвід на операційний
-          інтелект, придатний до повторного використання: спільні методи,
-          пам&rsquo;ять проєкту, дисципліну сесій і навички агента, що
+          інтелект, придатний до повторного використання: спільна операційна
+          основа, пам&rsquo;ять проєкту, дисципліна сесій і навички агента, що
           переживають кожну окрему сесію.
         </p>
         <nav class="hero__ctas" aria-label="Основна навігація">
@@ -1134,12 +1316,21 @@
           роботи, шаблонів і навичок агента.
         </p>
         <div class="methodology__definition" data-claim-id="CLM-15">
+          <div class="methodology__lead">
           <p class="methodology__statement">
             <strong>Engineering Intelligence</strong> - це версійований досвід
             і методи, що керують його застосуванням. Він змінює підготовку,
             виконання та перевірку наступного завдання, а не лише місце
             зберігання знань.
           </p>
+          <p class="methodology__boundary" data-claim-id="CLM-15">
+            <strong>Що тут означає &ldquo;навчання&rdquo;:</strong> інженерна
+            система виносить перевірений досвід у переглянуті й версійовані
+            артефакти, які може знайти наступна сесія. EIF не тренує ваги
+            моделі, не донавчає LLM і не дозволяє агенту переписувати власні
+            правила безпеки.
+          </p>
+          </div>
           <dl class="methodology__parts">
             <div>
               <dt class="label label--accent">Методологія</dt>
@@ -1155,13 +1346,6 @@
             </div>
           </dl>
         </div>
-        <p class="methodology__boundary" data-claim-id="CLM-15">
-          <strong>Що тут означає &ldquo;навчання&rdquo;:</strong> інженерна
-          система виносить перевірений досвід у переглянуті й версійовані
-          артефакти, які може знайти наступна сесія. EIF не тренує ваги
-          моделі, не донавчає LLM і не дозволяє агенту переписувати власні
-          правила безпеки.
-        </p>
       </template>
 
       <template data-i18n-id="layers.body">
@@ -1175,8 +1359,8 @@
           Knowledge Delta керує переходом знання між ними.
         </p>
         <div class="layers__stack" data-claim-id="CLM-13">
-          <article class="layers__tier layers__tier--one">
-            <div class="layers__tier-id">
+          <article class="layers__layer layers__layer--one">
+            <div class="layers__layer-id">
               <span class="label label--accent">Р1</span>
               <span class="layers__scope">Спільний</span>
             </div>
@@ -1186,8 +1370,8 @@
             </div>
             <p class="layers__examples">Як працювати</p>
           </article>
-          <article class="layers__tier layers__tier--two">
-            <div class="layers__tier-id">
+          <article class="layers__layer layers__layer--two">
+            <div class="layers__layer-id">
               <span class="label label--accent">Р2</span>
               <span class="layers__scope">Стійкий</span>
             </div>
@@ -1197,8 +1381,8 @@
             </div>
             <p class="layers__examples">Що знає ця система</p>
           </article>
-          <article class="layers__tier layers__tier--three">
-            <div class="layers__tier-id">
+          <article class="layers__layer layers__layer--three">
+            <div class="layers__layer-id">
               <span class="label label--accent">Р3</span>
               <span class="layers__scope">Тимчасовий</span>
             </div>
@@ -1210,18 +1394,18 @@
           </article>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
-          <p><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> метод, обмеження, попередній досвід і повторно використовувані навички агента.</p>
-          <p><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання через Knowledge Delta та явне рішення про підвищення рівня.</p>
+          <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> уся операційна основа - онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички агента - разом із попереднім досвідом самого проєкту, знайденим до початку реалізації.</p>
+          <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання - через Knowledge Delta та явне рішення підняти його на рівень вище. Більшість такого знання лишається там, де його здобули: урок виходить за межі свого проєкту, тільки якщо він застосовний і поза ним, і це радше виняток, ніж завершальний крок кожної сесії.</p>
         </div>
 
         <figure class="ledger" data-claim-id="CLM-15">
           <figcaption class="ledger__caption">
             <span class="label label--accent">Простежено: дві сесії одного пакета</span>
-            <h3>Досвід надходить до реалізації, а не після неї</h3>
+            <h3>Досвід приходить до реалізації, а не описується після неї</h3>
             <p>
-              Простежте один пакет через дві сесії: що кожна сесія отримує ще
-              до старту, що переживає її закриття і що переходить далі, коли
-              починається наступна.
+              Один пакет, дві сесії, три питання: що кожна сесія отримує ще
+              до того, як напише перший рядок, що лишається після її закриття
+              і що друга сесія знаходить уже готовим.
             </p>
           </figcaption>
 
@@ -1241,37 +1425,40 @@
             <text class="ledger__lane-label" x="4" y="244">ПАКЕТ</text>
             <text class="ledger__lane-label" x="4" y="340">Р3 СЕСІЯ</text>
 
-            <line class="ledger__gate" x1="256" y1="40" x2="256" y2="392" />
-            <line class="ledger__gate" x1="492" y1="40" x2="492" y2="392" />
-            <line class="ledger__gate" x1="836" y1="40" x2="836" y2="392" />
+            <line class="ledger__gate ledger__gate--retrieval" x1="256" y1="40" x2="256" y2="392" />
+            <line class="ledger__gate ledger__gate--closeout" x1="492" y1="40" x2="492" y2="392" />
+            <line class="ledger__gate ledger__gate--promotion" x1="836" y1="40" x2="836" y2="392" />
             <text class="ledger__gate-label" x="256" y="28">ПОШУК ДОСВІДУ</text>
             <text class="ledger__gate-label" x="492" y="28">ЗАКРИТТЯ + РЕТРО</text>
             <text class="ledger__gate-label" x="836" y="28">РІШЕННЯ ПРО РІВЕНЬ</text>
 
             <path class="ledger__flow ledger__flow--retrieval" fill="none"
-              d="M 160 64 C 214 76 244 220 254 352" />
+              d="M 160 64 C 214 80 246 210 256 352" />
             <path class="ledger__flow ledger__flow--retrieval" fill="none"
-              d="M 172 160 C 220 172 246 258 255 352" />
+              d="M 172 160 C 222 176 250 250 256 352" />
+
+            <path class="ledger__flow ledger__flow--retrieval" fill="none"
+              d="M 700 160 C 712 220 660 300 616 352" />
 
             <path class="ledger__flow ledger__flow--packet" fill="none"
-              d="M 180 256 C 210 258 236 304 254 352" />
+              d="M 180 256 C 212 260 240 300 256 352" />
 
-            <path class="ledger__flow ledger__flow--work" fill="none"
+            <path class="ledger__flow ledger__flow--work ledger__flow--work-1" fill="none"
               d="M 256 352 L 492 352" />
-            <path class="ledger__flow ledger__flow--work" fill="none"
+            <path class="ledger__flow ledger__flow--work ledger__flow--work-2" fill="none"
               d="M 616 352 L 730 352" />
 
             <path class="ledger__flow ledger__flow--dropped" fill="none"
-              d="M 470 352 C 492 360 508 376 524 392" />
+              d="M 492 352 C 506 366 516 380 524 392" />
 
             <path class="ledger__flow" fill="none"
-              d="M 494 352 C 516 300 522 208 548 160 L 836 160" />
+              d="M 492 352 C 516 300 522 208 548 160 L 836 160" />
 
             <path class="ledger__flow ledger__flow--packet" fill="none"
-              d="M 496 352 C 520 318 536 262 566 256 L 582 256 C 602 256 608 306 614 352" />
+              d="M 492 352 C 512 324 522 256 540 256 L 568 256 C 586 256 596 324 616 352" />
 
             <path class="ledger__flow" fill="none"
-              d="M 732 352 C 754 300 760 206 786 160" />
+              d="M 730 352 C 754 300 760 206 786 160 L 836 160" />
 
             <path class="ledger__flow ledger__flow--candidate" fill="none"
               d="M 836 160 C 872 150 880 84 906 64 L 936 64" />
@@ -1286,13 +1473,15 @@
             <text class="ledger__node-label" x="610" y="376">сесія 2</text>
 
             <text class="ledger__fate ledger__fate--dropped" x="536" y="396">сирі міркування, відкинуто</text>
-            <text class="ledger__fate ledger__fate--muted" x="574" y="240" text-anchor="middle">факти й рішення переходять далі</text>
-            <text class="ledger__fate ledger__fate--muted" x="660" y="148" text-anchor="middle">перевірене знання</text>
+            <text class="ledger__fate ledger__fate--muted" x="620" y="200" text-anchor="middle">факти й рішення</text>
+            <text class="ledger__fate ledger__fate--muted" x="620" y="214" text-anchor="middle">переходять далі</text>
+            <text class="ledger__fate ledger__fate--muted" x="620" y="138" text-anchor="middle">перевірене знання</text>
             <text class="ledger__fate" x="936" y="48" text-anchor="end">придатне іншим проєктам</text>
             <text class="ledger__fate ledger__fate--muted" x="128" y="300">пошук</text>
 
             <circle class="ledger__dot ledger__dot--retrieval" cx="0" cy="0" r="5" />
             <circle class="ledger__dot ledger__dot--retrieval-b" cx="0" cy="0" r="5" />
+            <circle class="ledger__dot ledger__dot--retrieval-c" cx="0" cy="0" r="5" />
             <circle class="ledger__dot ledger__dot--dropped" cx="0" cy="0" r="6" />
             <circle class="ledger__dot ledger__dot--local" cx="0" cy="0" r="6" />
             <circle class="ledger__dot ledger__dot--packet" cx="0" cy="0" r="6" />
@@ -1301,7 +1490,7 @@
 
           <ol class="ledger__fates ledger__fates--four">
             <li class="ledger__outcome ledger__outcome--retrieval">
-              <span class="label">До роботи</span>
+              <span class="label">До реалізації</span>
               <p>
                 <strong>Пошук, а не пам&rsquo;ять.</strong> Сесія починається з
                 пошуку в стійкому знанні: попередні уроки, відхилені підходи,
@@ -1312,7 +1501,7 @@
             <li class="ledger__outcome ledger__outcome--packet">
               <span class="label">Між сесіями</span>
               <p>
-                <strong>Пам&rsquo;ять пакета.</strong> Робота на кілька сесій
+                <strong>Пам&rsquo;ять пакета.</strong> Задача на кілька сесій
                 отримує пакет: статут, факти, рішення й дорожню карту, записані
                 до початку реалізації. Саме це переходить через розрив, тож
                 сесія 2 не переглядає те, що вирішила сесія 1.
@@ -1338,6 +1527,98 @@
             </li>
           </ol>
         </figure>
+
+        <figure class="scale" data-claim-id="CLM-13">
+          <figcaption class="scale__caption">
+            <span class="label label--accent">Один фреймворк, багато проєктів</span>
+            <h3>Фреймворк спільний. Пам&rsquo;ять у кожного проєкту своя.</h3>
+            <p>
+              Проєкти обертаються навколо одного рівня фреймворку. Задача,
+              завелика для однієї сесії, стає пакетом сесій усередині свого
+              проєкту. Вниз, ще до першого рядка реалізації, спускається не
+              лише метод: онтологія й модель повноважень, правила та
+              обмеження, сценарії роботи, шаблони й навички агента, а разом із
+              ними - попередній досвід самого проєкту. Назад піднімається
+              тільки те, що пакет перевірив і що узагальнюється поза його
+              межами, і доходить до іншого проєкту лише там, де воно доречне.
+            </p>
+            <ul class="figure-legend">
+              <li class="figure-legend__item figure-legend__item--dot">
+                <strong>EIF, рівень фреймворку.</strong> Спільна операційна основа, яку сесія отримує до реалізації, а не описує після неї.
+              </li>
+              <li class="figure-legend__item figure-legend__item--dot-muted">
+                <strong>Від P1 до P4, репозиторії проєктів.</strong> У P1 відкрито пакет із трьох сесій, зі своїми правилами відкриття й закриття.
+              </li>
+              <li class="figure-legend__item figure-legend__item--bracket">
+                <strong>Пакет об&rsquo;єднує свої сесії.</strong> Вони йдуть по черзі, і пакет закривається раніше, ніж щось із набутого пропонують нагору.
+              </li>
+              <li class="figure-legend__item figure-legend__item--dashed-accent">
+                <strong>Пунктир означає умовність.</strong> Урок виходить за межі проєкту лише за явним рішенням і потрапляє до іншого лише там, де він доречний.
+              </li>
+              <li class="figure-legend__item figure-legend__item--dot-warn">
+                <strong>Куратор.</strong> Постійно стежить за станом самого фреймворку, у власному ритмі, поза будь-яким окремим підвищенням рівня.
+              </li>
+            </ul>
+          </figcaption>
+
+          <svg class="scale__map" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
+            <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+
+            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+            <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+            <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+
+            <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
+            <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
+            <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+
+            <text class="scale__note" x="274" y="334" text-anchor="end">метод і досвід</text>
+            <text class="scale__note scale__note--up" x="346" y="334">перевірений урок</text>
+            <text class="scale__note scale__note--relay" x="374" y="170" text-anchor="middle">якщо доречно</text>
+
+            <circle class="scale__core" cx="310" cy="266" r="42" />
+            <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+
+            <g class="scale__project scale__project--active">
+              <circle cx="310" cy="442" r="17" />
+              <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+            </g>
+            <g class="scale__project">
+              <circle cx="158" cy="178" r="15" />
+              <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
+            </g>
+            <g class="scale__project scale__project--receiving">
+              <circle cx="462" cy="178" r="15" />
+              <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
+            </g>
+            <g class="scale__project">
+              <circle cx="310" cy="90" r="15" />
+              <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
+            </g>
+
+            <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
+            <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+
+            <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+            <text class="scale__section-label" x="196" y="482">ПАКЕТ</text>
+            <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+            <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
+            <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
+            <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
+            <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
+            <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
+            <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
+            <text class="scale__section-label" x="196" y="546">СЕСІЇ</text>
+
+            <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
+            <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+
+            <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
+            <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
+            <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+          </svg>
+        </figure>
       </template>
 
       <template data-i18n-id="control-plane.body">
@@ -1360,10 +1641,11 @@
           <g class="control-plane__node" transform="translate(860,90)"><circle r="8" /><text y="-24">Докази</text></g>
           <g class="control-plane__node" transform="translate(1020,170)"><circle r="8" /><text y="34">Knowledge Delta</text></g>
           <g class="control-plane__node control-plane__node--terminal" transform="translate(1180,130)"><circle r="9" /><text y="-26">Стійке</text></g>
+          <circle class="control-plane__pulse" cx="0" cy="0" r="7" />
         </svg>
         <ol class="control-plane__list">
           <li><span class="label label--accent">01 &middot; Намір користувача</span><p>У циклі з&rsquo;являється завдання або питання.</p></li>
-          <li><span class="label label--accent">02 &middot; Здобуття досвіду</span><p>Раніше перевірене знання підвантажується в контекст ще до початку роботи.</p></li>
+          <li><span class="label label--accent">02 &middot; Здобуття досвіду</span><p>Раніше перевірене знання підвантажується в контекст ще до початку реалізації.</p></li>
           <li><span class="label label--accent">03 &middot; Повноваження й межі</span><p>Що має відбутися, що відбувається насправді і що можна цитувати - три різні питання.</p></li>
           <li><span class="label label--accent">04 &middot; Структурна навігація</span><p>Необов&rsquo;язковий граф коду допомагає швидше знаходити потрібне. Це доказ для навігації, не джерело повноважень.</p></li>
           <li><span class="label label--accent">05 &middot; Контрольоване виконання</span><p>Робота триває в межах чітко визначеного обсягу, бюджетів і умов зупинки.</p></li>
@@ -1445,12 +1727,15 @@
           <div class="loop__sticky">
             <svg class="loop__diagram" aria-hidden="true" data-label="Навігація фазами обмеженого циклу доказів" viewBox="0 0 300 300" preserveAspectRatio="xMidYMid meet">
               <circle class="loop__ring" cx="150" cy="150" r="110" fill="none" />
-              <g class="loop__node" data-phase="orient" data-label="Показати фазу Контекст" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Контекст</text></g>
-              <g class="loop__node" data-phase="define" data-label="Показати фазу Визначення" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Визначення</text></g>
-              <g class="loop__node" data-phase="act" data-label="Показати фазу Дія" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Дія</text></g>
-              <g class="loop__node" data-phase="observe" data-label="Показати фазу Спостереження" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Спостереження</text></g>
-              <g class="loop__node" data-phase="study" data-label="Показати фазу Аналіз" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="30">Аналіз</text></g>
-              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Уточнення" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="10" /><text y="-18">Уточнення</text></g>
+              <line class="loop__exit" x1="95" y1="55" x2="80" y2="29" />
+              <circle class="loop__exit-stop" cx="77" cy="23" r="4" fill="none" />
+              <circle class="loop__pulse" cx="0" cy="0" r="5" />
+              <g class="loop__node" data-phase="orient" data-label="Показати фазу Контекст" transform="translate(150,40)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="7" /><text y="-15">Контекст</text></g>
+              <g class="loop__node" data-phase="define" data-label="Показати фазу Визначення" transform="translate(245,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="7" /><text y="-15">Визначення</text></g>
+              <g class="loop__node" data-phase="act" data-label="Показати фазу Дія" transform="translate(245,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="7" /><text y="24">Дія</text></g>
+              <g class="loop__node" data-phase="observe" data-label="Показати фазу Спостереження" transform="translate(150,260)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="7" /><text y="24">Спостереження</text></g>
+              <g class="loop__node" data-phase="study" data-label="Показати фазу Аналіз" transform="translate(55,205)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="7" /><text y="24">Аналіз</text></g>
+              <g class="loop__node" data-phase="adapt" data-label="Показати фазу Уточнення" transform="translate(55,95)"><circle class="loop__node-hit" r="26" fill="transparent" /><circle r="7" /><text y="-15">Уточнення</text></g>
             </svg>
           </div>
           <ol class="loop__phases">
@@ -1463,8 +1748,12 @@
           </ol>
         </div>
         <div class="loop__control">
-          <div>
-            <h3 class="label">Передумови</h3>
+          <div class="loop__control-group">
+            <h3 class="loop__control-title">Передумови</h3>
+            <p class="loop__control-note">
+              Їх оголошують до першої ітерації. Без них агент не ітерує, а
+              просто повторює спроби.
+            </p>
             <dl class="loop__precondition-list">
               <div><dt>Мета</dt><dd>Один спостережуваний результат.</dd></div>
               <div><dt>Доказ успіху</dt><dd>Що саме підтверджує результат на практиці.</dd></div>
@@ -1474,8 +1763,12 @@
               <div><dt>Умови зупинки</dt><dd>Безпека, неоднозначність, бюджет або межі, які визначає лише власник.</dd></div>
             </dl>
           </div>
-          <div>
-            <h3 class="label">Виходи</h3>
+          <div class="loop__control-group">
+            <h3 class="loop__control-title">Виходи</h3>
+            <p class="loop__control-note">
+              Три способи завершити, і четвертого немає. Кожен називає доказ
+              або межу, через які цикл спинився.
+            </p>
             <dl class="loop__exits">
               <div class="loop__exits-row loop__exits-row--pass"><dt>Пройдено</dt><dd>Тільки коли доказ успіху справді існує.</dd></div>
               <div class="loop__exits-row loop__exits-row--blocked"><dt>Заблоковано</dt><dd>Настала умова зупинки, оцінювач недоступний і немає гідної заміни, вичерпано бюджет ітерацій, або та сама сигнатура збою повторилася б утретє без змін.</dd></div>
@@ -1511,6 +1804,61 @@
           <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні проєкту; загальний урок доходить до рівня фреймворку тільки за явним рішенням.</p></li>
           <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
         </ol>
+
+        <div class="knowledge-base" data-claim-id="CLM-01">
+          <div class="knowledge-base__lead">
+          <span class="label label--accent">Де саме живе це знання</span>
+          <h3>Пов&rsquo;язана та проіндексована вікі-структура, а не тека з нотатками</h3>
+          <p>
+            Кожен артефакт - це звичайний файл зі структурованим заголовком:
+            тип, межі застосування, стан у життєвому циклі, рівень
+            упевненості, джерело та перелік посилань на сусідні артефакти.
+            Саме ці посилання роблять базу графом, а не купою файлів: рішення
+            вказує на інцидент, що його спричинив, а урок - на правило, яким
+            він став.
+          </p>
+          </div>
+
+          <svg class="kb-map" aria-hidden="true" viewBox="0 0 420 300" preserveAspectRatio="xMidYMid meet">
+            <line class="kb-map__lane" x1="20" y1="272" x2="400" y2="272" />
+
+            <path class="kb-map__link" fill="none" d="M 70 190 L 120 90" />
+            <path class="kb-map__link" fill="none" d="M 70 190 L 215 150" />
+            <path class="kb-map__link" fill="none" d="M 120 90 L 215 150" />
+            <path class="kb-map__link" fill="none" d="M 215 150 L 320 80" />
+            <path class="kb-map__link" fill="none" d="M 320 80 L 370 190" />
+            <path class="kb-map__link" fill="none" d="M 215 150 L 370 190" />
+            <path class="kb-map__link kb-map__link--dead" fill="none" d="M 215 150 L 272 232" />
+
+            <path class="kb-map__query" fill="none" d="M 26 266 C 56 260 50 226 70 190" />
+
+            <circle class="kb-map__node kb-map__node--s1" cx="70" cy="190" r="8" />
+            <circle class="kb-map__node kb-map__node--s2" cx="120" cy="90" r="8" />
+            <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" cx="215" cy="150" r="10" />
+            <circle class="kb-map__node kb-map__node--s4" cx="320" cy="80" r="8" />
+            <circle class="kb-map__node kb-map__node--s5" cx="370" cy="190" r="8" />
+            <circle class="kb-map__node kb-map__node--excluded" cx="272" cy="232" r="8" />
+
+            <circle class="kb-map__flag" cx="272" cy="232" r="15" fill="none" />
+            <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
+
+            <text class="kb-map__note" x="20" y="292">індекс</text>
+            <text class="kb-map__note kb-map__note--excluded" x="294" y="237">замінено</text>
+          </svg>
+
+          <ul class="figure-legend">
+            <li class="figure-legend__item figure-legend__item--dot">Кожне коло - один артефакт, кожна лінія між двома з них - посилання, оголошене в заголовку самого файлу.</li>
+            <li class="figure-legend__item figure-legend__item--dotted">Пошук заходить із боку індексу (лінія внизу) і йде саме цими зв&rsquo;язками, а не перечитує всі файли.</li>
+            <li class="figure-legend__item figure-legend__item--dot-excluded">Пунктирний вузол - відхилений або замінений: прочитати його можна, у видачу за замовчуванням він не потрапляє, а позначає його куратор.</li>
+          </ul>
+          <ul class="knowledge-base__facts">
+            <li><strong>Проіндексована.</strong> Індекс будується по всіх артефактах під заданим коренем знань, а пошук іде по ньому без мережі: за ключовими словами й підрядками, без сервісу векторних представлень і без того, щоб бодай щось залишало машину.</li>
+            <li><strong>Зі станом у життєвому циклі.</strong> Кожен вузол має стан. Відхилені та замінені артефакти лишаються читабельними, але за замовчуванням не потрапляють у видачу пошуку, щоб закрите питання не відкривалося саме собою.</li>
+            <li><strong>Чесна щодо прогалин.</strong> Файл, який не вдалося прочитати, невідповідність схемі та відсутність результату - це три різні відповіді, а не одна. Порожню видачу тут ніколи не видають за чисту.</li>
+            <li><strong>Доглянута.</strong> Куратор знань читає ту саму базу й зводить в один перелік те, що в ній зіпсувалося: застарілі артефакти, сироти, розірвані посилання, знахідки, які закрили, а вони повернулися. Для кожного пункту є відповідальний, а сам куратор нічого не зливає в основну гілку.</li>
+          </ul>
+        </div>
+
         <div class="learning__distinction" data-claim-id="CLM-15">
           <div>
             <span class="label">Досвід</span>
@@ -1535,7 +1883,7 @@
       <template data-i18n-id="integrations.body">
         <div class="section__head">
           <span class="label">08 &middot; Необов&rsquo;язкові спроможності</span>
-          <h2 id="integrations-heading">Три прискорювачі. Для кожного є резервний шлях.</h2>
+          <h2 id="integrations-heading">Три інструменти, які допомагають. Жоден із них не є методом.</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
           Graphify, RTK і Context7 додають по одній обмеженій спроможності.
@@ -1545,9 +1893,10 @@
           не встановлює сам.
         </p>
         <div class="token-economics" data-claim-id="CLM-06">
+          <div class="token-economics__body">
           <span class="label label--accent">Чого це коштує</span>
           <p>
-            Керованість не безкоштовна в токенах. Пошук досвіду до роботи,
+            Керованість не безкоштовна в токенах. Пошук досвіду до реалізації,
             артефакти пакета, Knowledge Delta й повноцінне закриття сесії
             з&rsquo;їдають контекст, який некерований агент витратив би на саме
             завдання. Задум у тому, що керованість це окупає: менше впевнено
@@ -1555,10 +1904,13 @@
             підходу, який уже записано як відхилений.
           </p>
           <p>
-            Що <strong>виміряно</strong>: стиснення. RTK фільтрує вивід команд
-            до того, як він дійде до моделі, а його адаптер фіксує скорочення
-            для кожного маршруту, причому сирі чи невдалі маршрути рахуються
-            як нуль, а не оцінюються приблизно.
+            Що <strong>виміряно</strong>: стиснення. RTK - Rust Token Killer -
+            фільтрує вивід команд до того, як він дійде до моделі, а його
+            адаптер фіксує скорочення для кожного маршруту, причому сирі чи
+            невдалі маршрути рахуються як нуль, а не оцінюються приблизно.
+            EIF ще й генерує придатний до перегляду контракт перехоплення
+            викликів, який спрямовує команди через RTK, але сам його ніколи не
+            встановлює: це робить власник, інакше нічого не відбувається.
           </p>
           <p>
             Що <strong>не виміряно</strong>: підсумковий баланс. Тут немає
@@ -1567,6 +1919,53 @@
             називає ціну, називає те, що рахують, і лишає решту відкритою,
             доки не буде доказів.
           </p>
+          </div>
+
+          <figure class="cap-flow">
+            <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
+              <text class="cap-flow__label" x="4" y="50">Graphify</text>
+              <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
+              <circle class="cap-flow__waypoint" cx="170" cy="46" r="4" />
+              <circle class="cap-flow__waypoint" cx="230" cy="46" r="4" />
+              <circle class="cap-flow__waypoint" cx="290" cy="46" r="4" />
+              <line class="cap-flow__core" x1="92" y1="74" x2="392" y2="74" />
+
+              <text class="cap-flow__label" x="4" y="130">RTK</text>
+              <line class="cap-flow__route" x1="92" y1="126" x2="392" y2="126" />
+              <line class="cap-flow__gate" x1="234" y1="106" x2="234" y2="140" />
+              <text class="cap-flow__note" x="234" y="98" text-anchor="middle">відкинуто тут</text>
+              <circle class="cap-flow__tick" cx="120" cy="126" r="3" />
+              <circle class="cap-flow__tick" cx="146" cy="126" r="3" />
+              <circle class="cap-flow__tick" cx="172" cy="126" r="3" />
+              <circle class="cap-flow__tick" cx="198" cy="126" r="3" />
+              <circle class="cap-flow__tick cap-flow__tick--kept" cx="286" cy="126" r="3" />
+              <circle class="cap-flow__tick cap-flow__tick--kept" cx="330" cy="126" r="3" />
+              <line class="cap-flow__core" x1="92" y1="154" x2="392" y2="154" />
+
+              <text class="cap-flow__label" x="4" y="210">Context7</text>
+              <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
+              <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
+              <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
+              <text class="cap-flow__note" x="300" y="178" text-anchor="middle">залишає машину</text>
+              <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
+
+              <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
+
+              <circle class="cap-flow__pulse cap-flow__pulse--g" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--g-core" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--r-stop" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--r" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--r-core" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--c" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
+            </svg>
+
+            <ul class="figure-legend">
+              <li class="figure-legend__item">Суцільний маршрут - робота, коли інструмент доступний. Graphify іде вже побудованою структурою, RTK фільтрує вивід команд, Context7 відповідає з актуальної документації бібліотек.</li>
+              <li class="figure-legend__item figure-legend__item--dashed">Пунктир під кожним - це базовий шлях, який працює без інструмента: пошук у вихідних файлах, нефільтрований вивід, локальна документація. Доходять обидва.</li>
+              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі: те, що RTK відкидає ще до того, як воно почне коштувати контекст, і точку, де запит Context7 залишає машину. З трьох це робить лише він.</li>
+            </ul>
+          </figure>
         </div>
         <figure class="capability-map">
           <figcaption>
@@ -1672,7 +2071,7 @@
               <span>Здобуття досвіду ще до початку реалізації</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Офлайн-пошук за ключовими словами, чутливий до життєвого циклу знання й схеми, показує релевантні перевірені факти (зокрема українською), за замовчуванням приховує відхилене чи замінене та окремо розрізняє стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code>.</p>
+              <p>Пошук без мережі за ключовими словами, чутливий до життєвого циклу знання й до схеми, показує доречні перевірені факти (зокрема українською), за замовчуванням приховує відхилене чи замінене та окремо розрізняє стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code>.</p>
               <p><strong>Обмеження:</strong> це офлайн-оцінка за ключовими словами й підрядками, не семантичний пошук; перевірено на невеликих тестових індексах.</p>
             </div>
           </li>
@@ -1720,11 +2119,14 @@
         <div class="evidence__proof">
           <h3 class="label">Задокументовані обмежені докази</h3>
           <ul>
-              <li data-claim-id="CLM-08">
-              Перший обмежений пілот A/B із реальним агентом (одна модель, три тестові приклади, шість спроб) завершився стовідсотковим успіхом в обох режимах. Режими C/D уже мають виконувані контракти цілісності, але ще не мають результату з реальним агентом. Це не статистично потужне порівняння ефективності (див. <a href="#limitations">обмеження</a>).
+            <li data-claim-id="CLM-08">
+              Перший обмежений пілот A/B із реальним агентом (одна модель, три тестові приклади, шість спроб) завершився стовідсотковим успіхом в обох режимах. Режими C/D уже мають виконувані контракти цілісності, але ще не мають результату з реальним агентом. Це не статистично потужне порівняння ефективності: одна модель, три тестові приклади з десяти, одна спроба на кожну комірку.
             </li>
             <li data-claim-id="CLM-10">
               Хронометраж на рівні окремих команд існує для конкретних механічних операцій у бенчмарках фреймворку. Про час людини на створення чи перевірку коду заяв не робимо.
+            </li>
+            <li data-claim-id="CLM-09">
+              Порівняльного дослідження не проводили, тож фреймворк не стверджує нічого про якість завдань, частку переробок чи кількість дефектів. Для такого вимірювання поки немає ні базової лінії, ні контрольної групи, ні визначеної методики, і доки їх немає, ця мовчанка навмисна.
             </li>
           </ul>
         </div>
@@ -1745,46 +2147,52 @@
         <p>
           Ця команда створює окремий екземпляр проєкту, готовий до запуску.
           В еталонному проході вбудований приклад додає і знаходить реальне
-          знання, вносить одну зміну на його основі, перевіряє її справжнім
-          тестом, який спочатку падає, а після зміни проходить, і закриває
-          сесію українською через мову, задану в конфігурації.
+          знання, вносить одну зміну на його основі й перевіряє її справжнім
+          тестом, який до зміни падає, а після неї проходить. Далі він
+          закриває сесію тією мовою, яку оголошує конфігурація екземпляра.
+          У тому проході оголошено українську, бо закриття англійською нічого
+          не довело б про мовний рівень: суть саме в тому, що мова - це
+          налаштування, а не зашите за замовчуванням значення.
         </p>
-        <p class="label">
-          Пакета на PyPI ще немає. Про те, скільки часу це займає в людини,
-          заяв не робимо.
+        <p class="quickstart__caveat">
+          <strong>З індексу пакетів поки не встановлюється.</strong>
+          Зробити <code>pip install</code> з PyPI ще не можна: точка входу -
+          це репозиторій і команда вище. Про те, скільки часу це займає в
+          людини, заяв не робимо.
         </p>
-      </template>
-
-      <template data-i18n-id="limitations.body">
-        <div class="section__head">
-          <span class="label">11 &middot; Обмеження</span>
-          <h2 id="limitations-heading">Чого тут ще немає</h2>
-        </div>
-        <ul class="limitations__list">
-          <li><strong>Попередня версія.</strong> v0.1 ще в розробці: репозиторій відокремлюють від приватного робочого екземпляра. Можливі прогалини.</li>
-          <li><strong>Ще не на PyPI.</strong> Встановити через <code>pip install</code> з індексу пакетів поки не можна.</li>
-          <li data-claim-id="CLM-09"><strong>Без заяв про якість чи переробку.</strong> Порівняльного дослідження не проводили; фреймворк не стверджує нічого про якість завдань, частку переробок чи кількість дефектів.</li>
-          <li><strong>Обмежений масштаб.</strong> Докази спираються на один синтетичний вертикальний зріз, пілот на трьох тестових прикладах і тестові набори на рівні адаптерів - це не велика й не незалежно відтворена вибірка.</li>
-          <li><strong>Необов&rsquo;язкові інтеграції такими й лишаються.</strong> Graphify і RTK ніколи не є обов&rsquo;язковими; несвіжий чи деградований інструмент так і позначають, а не видають за справний.</li>
-          <li>
-            <strong>Явні не-цілі v0.1:</strong> розміщений SaaS,
-            автономне мультиагентне середовище виконання, власна хмарна служба пам&rsquo;яті,
-            обов&rsquo;язкова залежність від графа коду чи стиснення виводу,
-            або будь-яка загальна заява про економію токенів.
-          </li>
-        </ul>
       </template>
 
       <template data-i18n-id="final-cta.body">
         <div class="section__head">
-          <span class="label">12 &middot; Заглибитися</span>
+          <span class="label">11 &middot; Заглибитися</span>
           <h2 id="final-cta-heading">Архітектура, докази, джерело</h2>
         </div>
         <nav class="final-cta__links" aria-label="Заглибитися">
           <a href="#control-plane">Архітектура</a>
           <a href="#evidence">Докази</a>
-          <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL__</a>
+          <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_UK__</a>
         </nav>
+        <p class="final-cta__pending">__EIF_REPO_PENDING_UK__</p>
+
+        <div class="final-cta__contact">
+          <h3 id="contact-heading">Питання, критика або погляд на ваш власний репозиторій</h3>
+          <p class="final-cta__contact-lede">
+            Це фреймворк одного інженера, а не компанії. Обидва канали нижче
+            ведуть просто до мене, і незгода зараз корисніша за згоду.
+          </p>
+          <ul class="final-cta__channels" aria-labelledby="contact-heading">
+            <li>
+              <span class="label label--accent">LinkedIn</span>
+              <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
+              <p>Там виходить серія дописів про EIF, і це найшвидший спосіб мене знайти.</p>
+            </li>
+            <li>
+              <span class="label label--accent">Пошта</span>
+              <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
+              <p>Для всього, що довше за коментар: питання, критика, впровадження на реальному репозиторії.</p>
+            </li>
+          </ul>
+        </div>
       </template>
 
       <template data-i18n-id="footer.body">

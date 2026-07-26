@@ -87,13 +87,25 @@ function eifMetadataPlugin(getUrls) {
     transformIndexHtml(html) {
       const { siteUrl, repositoryUrl } = getUrls();
       const repoHref = repositoryUrl || '#evidence';
-      const repoLabel = repositoryUrl
-        ? 'Public repository'
-        : 'Public repository (link added at publication)';
 
+      // The label is the same promise in both states, in the reader's own
+      // language. It used to carry "(link added at publication)" inside the
+      // link text, which put a parenthetical disclaimer in the middle of a
+      // call to action and left the Ukrainian page with an English one. The
+      // caveat now lives in its own line, which the production build empties
+      // and CSS then hides.
       let out = html
         .replaceAll('__EIF_REPO_CTA_HREF__', repoHref)
-        .replaceAll('__EIF_REPO_CTA_LABEL__', repoLabel);
+        .replaceAll('__EIF_REPO_CTA_LABEL_EN__', 'Public repository')
+        .replaceAll('__EIF_REPO_CTA_LABEL_UK__', 'Публічний репозиторій')
+        .replaceAll(
+          '__EIF_REPO_PENDING_EN__',
+          repositoryUrl ? '' : 'The repository link is added at publication.',
+        )
+        .replaceAll(
+          '__EIF_REPO_PENDING_UK__',
+          repositoryUrl ? '' : 'Посилання на репозиторій додаємо під час публікації.',
+        );
 
       const tags = [];
       if (siteUrl) {

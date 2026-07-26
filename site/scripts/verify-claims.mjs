@@ -30,9 +30,14 @@ const SCANNED_EXTENSIONS = new Set(['.html', '.js', '.mjs', '.css', '.json']);
 const MANIFEST_RELATIVE_PATH = path.join('src', 'content', 'claims.json');
 
 const POSIX_USER_ROOT = '/' + 'Users/';
+// A drive letter is one character and nothing alphanumeric precedes it.
+// Without that lookbehind the POSIX-separator variant reads the "s" in
+// "https://" as a drive and reports every absolute URL on the page as a
+// leaked machine path - which is exactly what it did to the first outbound
+// link the site ever carried.
 const PRIVATE_PATH_PATTERNS = [
-  /[A-Za-z]:\\[^\s"'<>]+/, // Windows absolute path shape.
-  /[A-Za-z]:\/[^\s"'<>]+/, // Windows drive path written with POSIX separators.
+  /(?<![A-Za-z0-9])[A-Za-z]:\\[^\s"'<>]+/, // Windows absolute path shape.
+  /(?<![A-Za-z0-9])[A-Za-z]:\/[^\s"'<>]+/, // Windows drive path written with POSIX separators.
   /\\\\[^\\\s"'<>]+\\[^\s"'<>]+/, // UNC share path.
   new RegExp(`${POSIX_USER_ROOT}[^\\s"'<>]+`),
   /\/home\/[^\s"'<>]+/,

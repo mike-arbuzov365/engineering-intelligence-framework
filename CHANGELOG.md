@@ -15,7 +15,94 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
-Nothing since the v0.1.0 preparation entry below.
+### Changed
+
+- The site's standalone Limitations section is gone, and its two load-bearing
+  statements moved to where the claims they qualify are actually made: the
+  no-quality/no-rework claim now sits in the bounded-proof list beside the
+  pilot it qualifies, and the no-package-index caveat sits in the quickstart
+  beside the command it applies to. A limits section read as a disclaimer
+  page; a limit next to its claim reads as part of the claim.
+- The site ends in a way a reader can act on. The repository call to action
+  carries the same label in both states and in the reader's own language,
+  with the pre-publication caveat on its own line instead of in brackets
+  inside the link text, and the page closes with two contact channels rather
+  than three on-page anchors.
+- The evidence loop's figure and its contract block were drawn as if they
+  came from a different site: labels at roughly 19 rendered pixels where
+  every other figure annotates itself between 10 and 13, and a
+  Preconditions/Exits table whose two headings were the quietest elements in
+  their own columns while six decorative accent-green terms were the
+  loudest. Both are now in the page's own weights, the accent appears only
+  where PASS/BLOCKED/DEFERRED actually mean something, and the figure gained
+  an amber exit mark so a ring finally says the loop is bounded.
+- Fixed the traced-packet figure's session handoff: the packet-memory dot ran
+  past its own destination onto session 2's work segment and stopped dead on
+  the exact point the promotion dot started from, so one dot appeared to
+  freeze, vanish and reappear in place. The bridge between the two sessions
+  is also symmetric now instead of leaning left.
+- The four outcome columns under that figure no longer tint their own rules,
+  which had made "At closeout" look promoted above its three neighbours for
+  a reason nothing on the page stated. Each column carries the marker of the
+  thing it describes instead, in the page's existing legend vocabulary.
+- Fixed the hero key: `sections.css` loads after `hero.css`, so the shared
+  legend component's own padding and max-width were winning - the rule sat
+  1px above the first line of the key and ran 48px wider than the figure it
+  captions.
+- The two knowledge directions under the layers now read as a matched pair.
+  The up direction says what happens to the knowledge that is not promoted,
+  and no longer loses a paragraph's worth of height to a stretched grid row.
+- Ukrainian copy: the knowledge base is described by what its links do rather
+  than by naming the front-matter field in English, and the quickstart says
+  why the reference run closes in Ukrainian - the language is configuration,
+  not a hardcoded default.
+- The site's own privacy scanner read the "s" in `https://` as a Windows
+  drive letter, so the first outbound link the site ever carried was
+  reported as a leaked machine path.
+- Site terminology finished the layer rename: the last `tier` class names
+  in the site's markup, styles and tests are now `layer`, so nothing in the
+  repository calls the context model a tier. "Tier" survives only where it
+  genuinely means a ranking - the authority model and adapter capability
+  levels - which is why the two were kept verbally distinct in the first
+  place.
+- Site figures rebuilt to carry the model rather than decorate it: the hero
+  mark now runs retrieval down, one packet of three sessions across, and a
+  rare promotion up, with the curator on its own period; the traced-packet
+  figure gains a second retrieval into session 2, gate pulses and work
+  drawn as it happens; the multi-project figure is paired with its
+  explanation, animates four beats in causal order, and appears in both
+  languages. Both language templates carry every figure now.
+- Site copy: what flows down the layers is named as the whole operating
+  layer rather than "method"; the traced-figure caption reworked in both
+  languages; "before implementation" used consistently in place of "before
+  the work".
+
+- One legend component now serves every figure, with markers optically
+  centred on their first line and drawn at the weight they have in the
+  figure they explain, so a key never outweighs its drawing. Em and en
+  dashes removed from the site and the repository.
+- Figures carry labels on their own lines, not only a legend beside them.
+- Fixed a label that rendered with a stroke as well as a fill, which read as
+  an out-of-focus caption rather than a de-emphasised one.
+- Site figures now explain themselves. Each carries a short legend in the
+  reader's language whose markers match the drawing, so the figures read as
+  diagrams rather than decoration; the SVGs stay text-free and single-copy.
+  Ukrainian copy reworked where it said "робота" for a scoped task and
+  "метод" for the whole framework layer, and the optional capabilities are
+  no longer called accelerators.
+
+### Added
+
+- Site now describes the knowledge base itself - front matter and
+  `related:` links as the graph, a generated index searched offline, the
+  status lifecycle that keeps rejected and superseded artifacts out of
+  retrieval, three distinct failure outcomes, and the curator as its
+  maintenance pass - with a figure of one query walking that graph.
+- The control-plane sequence and the token-cost statement gained figures in
+  the same visual language: one pass from intent to durable knowledge with
+  each station lighting as it arrives, and command output filtered before
+  it reaches the model with the unfiltered core path drawn underneath. No
+  quantity is shown for the second, because none may be claimed.
 
 ## [0.1.0] - unreleased
 

@@ -19,6 +19,52 @@ test.describe('loop', () => {
     await expect(exits.nth(2)).toContainText('Deferred');
   });
 
+  test('the contract block leads with headings that outrank the terms below them', async ({
+    page,
+  }) => {
+    await page.goto('/#loop');
+    const titles = page.locator('.loop__control-title');
+    await expect(titles).toHaveCount(2);
+    await expect(titles.nth(0)).toHaveText('Preconditions');
+    await expect(titles.nth(1)).toHaveText('Exits');
+    await expect(page.locator('.loop__control-note')).toHaveCount(2);
+
+    // Both headings used to be .label - the same uppercase mono as the terms
+    // under them, only muted while the terms were accent green - so each
+    // column was led by its quietest element.
+    const sizes = await page.evaluate(() => {
+      const px = (selector) =>
+        parseFloat(getComputedStyle(document.querySelector(selector)).fontSize);
+      return {
+        title: px('.loop__control-title'),
+        term: px('.loop__precondition-list dt'),
+      };
+    });
+    expect(sizes.title).toBeGreaterThan(sizes.term);
+  });
+
+  test('the loop figure annotates itself at the same rendered size as the traced map', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const rendered = await page.evaluate(() => {
+      const scaledPx = (svgSelector, textSelector) => {
+        const svg = document.querySelector(svgSelector);
+        const fontSize = parseFloat(
+          getComputedStyle(document.querySelector(textSelector)).fontSize,
+        );
+        return (fontSize * svg.getBoundingClientRect().width) / svg.viewBox.baseVal.width;
+      };
+      return {
+        loop: scaledPx('.loop__diagram', '.loop__node text'),
+        ledger: scaledPx('.ledger__map', '.ledger__lane-label'),
+      };
+    });
+    // 18px inside a 300-unit box drawn at 320px put this figure's labels at
+    // ~19 CSS px while every other figure annotated itself between 10 and 13.
+    expect(Math.abs(rendered.loop - rendered.ledger)).toBeLessThan(2.5);
+  });
+
   test('scrolling the phase list updates the sticky diagram active node', async ({ page }) => {
     await page.goto('/');
     await page.locator('.loop__phase[data-phase="adapt"]').scrollIntoViewIfNeeded();

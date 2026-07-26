@@ -15,10 +15,31 @@ test.describe('optional capabilities', () => {
     // The install boundary is the load-bearing claim for this row: EIF ships
     // guidance and a template, it does not configure the MCP server.
     await expect(rows.nth(2)).toContainText('EIF does not install it');
-    await expect(page.locator('#integrations .capability-map li')).toHaveCount(3);
-    await expect(page.locator('#integrations .capability-map')).toContainText(
-      'Core path remains available',
+    // The bridge table was a third restatement of the flow figure and these
+    // rows; it is gone, and the core path is named in the figure's legend.
+    await expect(page.locator('#integrations .capability-map')).toHaveCount(0);
+    await expect(page.locator('#integrations .cap-flow .figure-legend')).toContainText(
+      'core path',
     );
+  });
+
+  test('the cost statement names the price without claiming the balance', async ({ page }) => {
+    await page.goto('/#integrations');
+    const cost = page.locator('.token-economics__body');
+    await expect(cost).toContainText('not free in tokens');
+    await expect(cost).toContainText('leaves the balance open');
+    // Two labelled paragraphs of measured/not-measured accounting were the
+    // bulk of this screen's overload. Their content survives as one clause.
+    await expect(cost.locator('p')).toHaveCount(2);
+  });
+
+  test('the network boundary is stated the same way in both languages', async ({ page }) => {
+    await page.goto('/#integrations');
+    await expect(page.locator('#integrations')).toContainText('goes to the network');
+    await expect(page.locator('#integrations')).not.toContainText('leaves the machine');
+    await page.locator('#lang-toggle').click();
+    await expect(page.locator('#integrations')).toContainText('іде в мережу');
+    await expect(page.locator('#integrations')).not.toContainText('залишає машину');
   });
 
   test('detail reveals on focus via CSS, before any click/JS toggle', async ({ page }) => {

@@ -15,8 +15,40 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+### Added
+
+- [`scripts/eif_release.py`](scripts/eif_release.py): builds the sdist and
+  wheel, validates both the way a package index will (`twine check --strict`,
+  installed into a throwaway environment rather than required on the host),
+  installs the built wheel into a clean virtualenv and runs `eifctl version`
+  from it. It prints the publish commands and stops. Publication takes owner
+  credentials and stays an owner decision, which is the same boundary
+  everything else here observes: EIF generates what a person then chooses to
+  run. Passes end to end on `0.1.0.dev0`.
+
 ### Changed
 
+- The site says how to install rather than that you cannot. `pip install .`
+  followed by `eifctl init` is the quickstart command now, which is the path
+  the installed-wheel suite has been exercising all along, and the caveat is
+  narrowed to the one thing that is actually missing: publication to an index.
+- The optional-capabilities section was carrying the same three facts three
+  times over: a flow figure with its legend, a bridge table, and three
+  expandable rows with the real detail. The bridge table is gone, and the
+  two-paragraph measured/not-measured accounting beside it is now one clause
+  in the cost statement, which is where the honesty was load-bearing and the
+  accounting was not.
+- "Leaves the machine" is now "goes to the network" in both languages. The
+  Ukrainian rendering of it was not idiomatic, and the phrase had spread to
+  four places.
+- The closing screen was three underlined links, a floating status line, a
+  100px hole and a contact block bolted underneath, all at different measures.
+  It is one grid now: two matched columns of destinations, each row saying
+  what it is, where it goes and one line of why you would. The footer no
+  longer announces "local build, not yet deployed", which was a note to the
+  person building the site rather than to the person reading it.
+- The two knowledge directions under the layers are written as plain
+  sentences in both languages instead of clauses hung off dashes.
 - The site's standalone Limitations section is gone, and its two load-bearing
   statements moved to where the claims they qualify are actually made: the
   no-quality/no-rework claim now sits in the bounded-proof list beside the

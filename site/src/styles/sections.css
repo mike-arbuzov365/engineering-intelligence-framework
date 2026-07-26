@@ -427,9 +427,11 @@
 }
 
 /* Cost statement beside the optional capabilities. Amber rather than the
-   accent: this is a caveat, not a feature. Paired with the one measured
-   thing it can honestly show, so the column beside it is not dead space. */
-/* Figure on the left here, on the right for the two figures above it: the
+   accent: this is a caveat, not a feature. Two paragraphs, not five - the
+   measured/not-measured accounting that used to sit here restated what the
+   RTK row already carries, and turned this screen into an essay with a
+   figure attached.
+   Figure on the left here, on the right for the two figures above it: the
    page alternates sides so a reader's eye is not walking down one rail. DOM
    order still puts the prose first, for reading order and no-CSS. */
 .token-economics {

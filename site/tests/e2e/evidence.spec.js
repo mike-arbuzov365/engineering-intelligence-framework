@@ -24,7 +24,7 @@ test.describe('engineering-intelligence methodology', () => {
     await page.goto('/#layers');
     const up = page.locator('.layers__flow--up');
     await expect(page.locator('.layers__flow--down')).toBeVisible();
-    await expect(up).toContainText('Most of it stays where it was found');
+    await expect(up).toContainText('Promotion is the exception');
 
     // Each flow is a two-row grid stretched to the taller column's height,
     // and auto rows stretch by default: the shorter half used to push its
@@ -138,12 +138,15 @@ test.describe('quickstart', () => {
     page,
   }) => {
     await page.goto('/#quickstart');
-    await expect(page.locator('.quickstart__command')).toContainText('eif_init.py');
+    const command = page.locator('.quickstart__command');
+    await expect(command).toContainText('pip install .');
+    await expect(command).toContainText('eifctl init');
     const section = page.locator('#quickstart');
-    await expect(section).not.toContainText('pip install eifctl');
-    // The standalone limitations section is gone; the two guardrails it
-    // carried had to land somewhere real, not just disappear with it.
-    await expect(section).toContainText('Not installable from a package index yet');
+    // `pip install` is real here, from a clone; what is not real yet is a
+    // package index, and the caveat says exactly that and no more.
+    await expect(section).not.toContainText('pip install engineering-intelligence-framework');
+    await expect(section).toContainText('Installable, not yet published');
+    await expect(section).toContainText('eif_release.py');
     await expect(section).toContainText('No claim is made about how long any of this takes a human');
     // The reference run's locale is stated as a configuration outcome, not
     // as an unexplained "closes in Ukrainian".
@@ -176,44 +179,60 @@ test.describe('final CTA', () => {
     // The label is the promise; the pre-publication caveat is its own line,
     // not a parenthetical inside the call to action.
     await expect(repoLink).toHaveText('Public repository');
+    // The caveat sits in the repository row, not inside the link label, and
+    // the build empties it once a real URL exists.
     await expect(page.locator('.final-cta__pending')).toContainText(
       'added at publication',
     );
   });
 
-  test('architecture and evidence links point on-page', async ({ page }) => {
+  test('the closing screen is two matched groups of destinations, not a strip of links', async ({
+    page,
+  }) => {
     await page.goto('/');
-    const links = page.locator('.final-cta__links a');
-    await expect(links.nth(0)).toHaveAttribute('href', '#control-plane');
-    await expect(links.nth(1)).toHaveAttribute('href', '#evidence');
-  });
+    await expect(page.locator('.final-cta__group')).toHaveCount(2);
+    await expect(page.locator('.final-cta__group-title').nth(0)).toHaveText('Read on');
+    await expect(page.locator('.final-cta__group-title').nth(1)).toHaveText('Reach me');
 
-  test('both contact channels are real, reachable links', async ({ page }) => {
-    await page.goto('/');
-    const channels = page.locator('.final-cta__channels li');
-    await expect(channels).toHaveCount(2);
-    await expect(page.locator('.final-cta__channels a').nth(0)).toHaveAttribute(
+    const readOn = page.locator('.final-cta__group').nth(0).locator('a');
+    await expect(readOn.nth(0)).toHaveAttribute('href', '#control-plane');
+    await expect(readOn.nth(1)).toHaveAttribute('href', '#evidence');
+
+    const reachMe = page.locator('.final-cta__group').nth(1).locator('a');
+    await expect(reachMe).toHaveCount(2);
+    await expect(reachMe.nth(0)).toHaveAttribute(
       'href',
       'https://www.linkedin.com/in/preosvan/',
     );
-    await expect(page.locator('.final-cta__channels a').nth(1)).toHaveAttribute(
-      'href',
-      'mailto:mike.arbuzov365@gmail.com',
-    );
+    await expect(reachMe.nth(1)).toHaveAttribute('href', 'mailto:mike.arbuzov365@gmail.com');
+
+    // Every row explains where it goes; a bare link list is what this
+    // replaced.
+    const rows = page.locator('.final-cta__rows > li');
+    await expect(rows).toHaveCount(5);
   });
 
-  test('the repository CTA and the contact block translate with the page', async ({ page }) => {
+  test('the whole closing screen translates, including the repository label', async ({ page }) => {
     await page.goto('/');
     await page.locator('#lang-toggle').click();
     await expect(page.locator('.final-cta__repo')).toHaveText('Публічний репозиторій');
-    await expect(page.locator('.final-cta__channels a').nth(0)).toHaveAttribute(
+    await expect(page.locator('.final-cta__group-title').nth(1)).toHaveText('Зв’язатися');
+    const reachMe = page.locator('.final-cta__group').nth(1).locator('a');
+    await expect(reachMe.nth(0)).toHaveAttribute(
       'href',
       'https://www.linkedin.com/in/preosvan/',
     );
-    await expect(page.locator('.final-cta__channels a').nth(1)).toHaveAttribute(
-      'href',
-      'mailto:mike.arbuzov365@gmail.com',
-    );
+    await expect(reachMe.nth(1)).toHaveAttribute('href', 'mailto:mike.arbuzov365@gmail.com');
+  });
+
+  test('the footer states the licence and nothing about the build machine', async ({ page }) => {
+    await page.goto('/');
+    const footer = page.locator('footer');
+    await expect(footer).toContainText('Apache-2.0');
+    await expect(footer).not.toContainText('not yet deployed');
+    await page.locator('#lang-toggle').click();
+    await expect(footer).toContainText('Apache-2.0');
+    await expect(footer).not.toContainText('не розгорнута');
   });
 });
 

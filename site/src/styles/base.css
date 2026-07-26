@@ -160,3 +160,13 @@ footer .section__inner {
   max-width: var(--eif-content-max);
   margin: 0 auto;
 }
+
+/* Name at one end, licence at the other. It used to also announce "local
+   build, not yet deployed", which is a note to the person building the site,
+   not to the person reading it. */
+footer p {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--eif-space-1) var(--eif-space-3);
+}

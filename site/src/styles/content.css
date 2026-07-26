@@ -46,80 +46,47 @@
   color: var(--eif-fg);
 }
 
-.final-cta__links {
-  display: flex;
-  gap: var(--eif-space-4);
-  flex-wrap: wrap;
-  margin-top: var(--eif-space-3);
-}
-
-.final-cta__links a {
-  font-family: var(--eif-font-mono);
-  font-size: var(--eif-size-lede);
-  text-decoration: none;
-  color: var(--eif-fg);
-  border-bottom: 1px solid var(--eif-rule);
-  padding-bottom: 0.25rem;
-}
-
-.final-cta__links a:hover,
-.final-cta__links a:focus-visible {
-  color: var(--eif-accent);
-  border-color: var(--eif-accent);
-}
-
-/* Substituted to an empty string by the eif-metadata plugin as soon as a
-   repository URL exists, so the published build has no stray blank line
-   where a pre-publication caveat used to be. */
-.final-cta__pending {
-  margin-top: var(--eif-space-2);
-  font-family: var(--eif-font-mono);
-  font-size: var(--eif-size-label);
-  color: var(--eif-fg-muted);
-}
-
-.final-cta__pending:empty {
-  display: none;
-}
-
-/* Contact. Two channels, each one a row that says what it is, where it goes
-   and what it is for - the same three-part shape the evidence rows use, so
-   the page ends in its own idiom rather than a social-icon strip. */
-.final-cta__contact {
-  margin-top: var(--eif-space-6);
-  padding-top: var(--eif-space-4);
-  border-top: 1px solid var(--eif-rule);
-}
-
-.final-cta__contact h3 {
-  font-size: clamp(1.25rem, 2vw, 1.6rem);
-  max-width: var(--eif-measure);
-}
-
-.final-cta__contact-lede {
-  margin-top: var(--eif-space-1);
-  max-width: var(--eif-measure);
-  color: var(--eif-fg-muted);
-}
-
-.final-cta__channels {
-  list-style: none;
-  margin: var(--eif-space-4) 0 0;
-  padding: 0;
+/* The closing screen. It used to be three underlined links, a floating
+   status line, a 100px hole and then a contact block bolted underneath, all
+   at different measures. One grid now, two matched columns, and every
+   destination written in the row shape the rest of the page already uses:
+   what it is, where it goes, and one line of why you would. */
+.final-cta__grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--eif-space-4);
+  gap: var(--eif-space-5);
+  align-items: start;
+  margin-top: var(--eif-space-5);
   max-width: var(--eif-content-max);
 }
 
-.final-cta__channels li {
-  padding-top: var(--eif-space-2);
+.final-cta__group-title {
+  font-size: 1.2rem;
+  color: var(--eif-fg);
+}
+
+.final-cta__rows {
+  list-style: none;
+  margin: var(--eif-space-3) 0 0;
+  padding: 0;
+}
+
+.final-cta__rows > li {
+  padding: var(--eif-space-2) 0;
   border-top: 1px solid var(--eif-rule);
 }
 
-.final-cta__channels a {
+.final-cta__rows > li:last-child {
+  border-bottom: 1px solid var(--eif-rule);
+}
+
+.final-cta__rows .label {
+  display: block;
+}
+
+.final-cta__rows a {
   display: inline-block;
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   font-family: var(--eif-font-mono);
   font-size: 1.05rem;
   color: var(--eif-fg);
@@ -131,20 +98,33 @@
     border-color var(--eif-duration-fast) var(--eif-ease);
 }
 
-.final-cta__channels a:hover,
-.final-cta__channels a:focus-visible {
+.final-cta__rows a:hover,
+.final-cta__rows a:focus-visible {
   color: var(--eif-accent);
   border-color: var(--eif-accent);
 }
 
-.final-cta__channels p {
+.final-cta__rows p {
   margin-top: var(--eif-space-1);
   color: var(--eif-fg-muted);
 }
 
+/* Amber, like every other "declared but not yet true" state on this page.
+   The eif-metadata plugin substitutes it to an empty string as soon as a
+   repository URL exists, and :empty removes the row it would leave behind. */
+.final-cta__pending {
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  color: var(--eif-warn);
+}
+
+.final-cta__pending:empty {
+  display: none;
+}
+
 @media (max-width: 720px) {
-  .final-cta__channels {
+  .final-cta__grid {
     grid-template-columns: 1fr;
-    gap: var(--eif-space-3);
+    gap: var(--eif-space-4);
   }
 }

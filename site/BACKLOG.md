@@ -500,10 +500,45 @@ Also found on the way: the site's own privacy scanner read the `s` in
 `https://` as a Windows drive letter, so the first outbound link the site
 ever carried was reported as a leaked machine path.
 
+## SB-020 - Second pass on the same five screens
+
+**Status:** done (2026-07-26)
+**Raised:** 2026-07-26, owner review of the SB-019 result
+
+- **"Flows up" was still written as clauses on dashes.** Rewritten as plain
+  sentences in both languages: what goes up, that it needs its own decision,
+  that it usually stays put, and that promotion is the exception. Same
+  treatment applied to "Flows down" so the pair matches.
+- **Optional capabilities was overloaded, and it was overloaded by
+  repetition.** Three surfaces carried the same three facts: a flow figure
+  with a three-item legend, a bridge table, and three expandable rows with
+  the actual boundaries and health evidence. The bridge table is gone. The
+  two labelled paragraphs of measured/not-measured accounting are gone too;
+  what they protected (no claim that the net balance is positive) survives as
+  one clause, and what they restated (RTK measures compression) was already
+  in the RTK row.
+- **"Залишає машину" is not Ukrainian anyone writes.** Both languages now say
+  the query goes to the network, in all four places the old phrasing had
+  reached.
+- **`pip install` was a caveat, not a capability.** It is a capability: the
+  quickstart command is `pip install .` then `eifctl init`, which is what the
+  installed-wheel suite already exercised, and `scripts/eif_release.py` now
+  builds, index-validates and clean-installs the artifacts. Only the upload
+  is left, and that needs credentials nobody automates.
+- **The closing screen looked unfinished, because it was.** Three underlined
+  links, a status line floating under them, a 100px hole, then a contact
+  block bolted on at a different measure. Rebuilt as one grid: "Read on" and
+  "Reach me", five rows, each with a label, a destination and one line of
+  purpose. The repository's pre-publication status now sits inside the
+  repository row, in the amber this page already uses for declared-but-not-
+  yet-true. Footer reduced to name and licence.
+
 ---
 
 ## Closed
 
+- **SB-020** second review pass: capabilities de-duplicated, `pip install`
+  made real, closing screen rebuilt as one grid.
 - **SB-019** ten review findings fixed; limitations folded into the claims
   they qualify, and the page now ends with a way to reach its author.
 - **SB-017** hero figure and key composed as one object; legend markers

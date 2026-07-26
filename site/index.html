@@ -304,8 +304,8 @@
             </article>
           </div>
           <div class="layers__flows" aria-label="Knowledge flow between layers" data-claim-id="CLM-13">
-            <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> the whole operating layer - ontology, authority, rules, playbooks, templates and skills - together with the project's own prior experience, retrieved before implementation starts.</p>
-            <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Flows up:</strong> only validated learning, through Knowledge Delta and an explicit promotion decision. Most of it stays where it was found: a lesson leaves its own project only if it holds beyond it, and it is the rare case, not the closing step of every session.</p>
+            <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Flows down:</strong> the whole operating layer together with the project's own prior experience. Ontology, the authority model, rules, playbooks, templates and skills all reach the session before implementation starts.</p>
+            <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Flows up:</strong> only validated knowledge, and only by a separate decision recorded in Knowledge Delta. It usually stays on the layer where it was found. Promotion is the exception, not the required closing step of every session.</p>
           </div>
 
           <figure class="ledger" data-claim-id="CLM-15">
@@ -933,25 +933,14 @@
               Governance is not free in tokens. Retrieval before work, packet
               artifacts, a Knowledge Delta and a real closeout all consume
               context that an ungoverned agent would spend on the task
-              itself. The intent is that controllability repays it: fewer
-              wrong paths taken confidently, fewer rediscoveries, fewer
-              retries of an approach already recorded as rejected.
+              itself.
             </p>
             <p>
-              What is <strong>measured</strong>: compression. RTK - Rust
-              Token Killer - filters command output before it reaches the
-              model, and its adapter records a reduction per route, with raw
-              or failed routes counted as zero rather than estimated. EIF
-              also generates a reviewable pre-tool-call contract that routes
-              commands through it, but never installs that hook itself: the
-              owner does, or nothing happens.
-            </p>
-            <p>
-              What is <strong>not measured</strong>: the net. No study here
+              What it buys is meant to cost less than that: fewer wrong paths
+              taken confidently, fewer rediscoveries, fewer retries of an
+              approach already recorded as rejected. Meant to. No study here
               compares governed against ungoverned work end to end, so this
-              site does not claim the balance comes out positive. It states
-              the cost, states what is counted, and leaves the rest open
-              until there is evidence for it.
+              page states the cost and leaves the balance open.
             </p>
             </div>
 
@@ -986,7 +975,7 @@
                 <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
                 <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
                 <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
-                <text class="cap-flow__note" x="300" y="178" text-anchor="middle">leaves the machine</text>
+                <text class="cap-flow__note" x="300" y="178" text-anchor="middle">goes to the network</text>
                 <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
 
                 <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
@@ -1003,39 +992,10 @@
               <ul class="figure-legend">
                 <li class="figure-legend__item">The solid route is the work with the tool available. Graphify follows structure it already mapped; RTK filters command output; Context7 answers from current library docs.</li>
                 <li class="figure-legend__item figure-legend__item--dashed">The dashed route below each one is the named core path that runs without it: source search, raw shell output, local documentation. Both arrive.</li>
-                <li class="figure-legend__item figure-legend__item--dotted-warn">Amber marks the two boundaries: what RTK drops before it ever costs context, and the point where a Context7 query leaves the machine. It is the only one of the three that does.</li>
+                <li class="figure-legend__item figure-legend__item--dotted-warn">Amber marks the two boundaries: what RTK drops before it ever costs context, and the point where a Context7 query goes to the network. It is the only one of the three that leaves this computer at all.</li>
               </ul>
             </figure>
           </div>
-          <figure class="capability-map">
-            <figcaption>
-              <span class="label label--accent">Optional capability bridges</span>
-              <span>Core path remains available underneath every bridge</span>
-            </figcaption>
-            <ol>
-              <li>
-                <span class="capability-map__index">01</span>
-                <div><strong>Understand the codebase</strong><small>paths, communities, impact hints</small></div>
-                <span class="capability-map__bridge" aria-hidden="true"></span>
-                <b>Graphify</b>
-                <em>fallback: source search</em>
-              </li>
-              <li>
-                <span class="capability-map__index">02</span>
-                <div><strong>Reduce tool noise</strong><small>compressed output, tracked reduction</small></div>
-                <span class="capability-map__bridge" aria-hidden="true"></span>
-                <b>RTK</b>
-                <em>fallback: raw shell</em>
-              </li>
-              <li>
-                <span class="capability-map__index">03</span>
-                <div><strong>Consult current vendor docs</strong><small>version-aware library and API sources</small></div>
-                <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
-                <b>Context7</b>
-                <em>fallback: local docs</em>
-              </li>
-            </ol>
-          </figure>
 
           <ul class="integrations__list">
             <li class="reveal">
@@ -1066,7 +1026,7 @@
                 <span>Current library/API documentation instead of stale training data</span>
               </button>
               <div class="reveal__detail">
-                <p><strong>Data boundary:</strong> external-api; the query text leaves the machine to reach a hosted documentation service. Source code is not sent by the framework.</p>
+                <p><strong>Data boundary:</strong> external-api; the query text goes to the network to reach a hosted documentation service. Source code is not sent by the framework.</p>
                 <p><strong>Degraded mode without it:</strong> the agent relies on local docs or training-data recall, which may describe a different version than the one installed. An unavailable provider is reported, never silently replaced by recall.</p>
                 <p><strong>EIF does not install it.</strong> An MCP server is configured at the user level, outside the project instance, and this framework never mutates user-level configuration. It ships generated routing guidance and a reviewable per-adapter template whose provider command stays owner-supplied.</p>
                 <p><strong>Health:</strong> the declaration, routing guidance and template shape are tested; live provider behavior is not. EIF generates configuration for the agent to load and does not itself speak MCP, so reachability is reported by the agent and marked unverified rather than claimed.</p>
@@ -1190,23 +1150,29 @@
             vertical slice, not a stable release or a representative
             sample of real engineering tasks.
           </p>
-          <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale en</code></pre>
+          <pre class="quickstart__command"><code>pip install .
+eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en</code></pre>
           <p>
-            That command initializes a separate, runnable project instance.
-            In the reference walkthrough, the bundled demo seeds and retrieves
-            real knowledge, makes one retrieval-informed change, and verifies
-            it with a real test that fails before the change and passes after
-            it. It then closes the session in whichever language the instance
-            config declares. That run declares Ukrainian, because a closeout
-            rendered in English would have proved nothing about the locale
-            layer: the point is that the language is configuration, not a
-            hardcoded default.
+            The first line installs the <code>eifctl</code> command from the
+            clone. The second initializes a separate, runnable project
+            instance. In the reference walkthrough, the bundled demo seeds and
+            retrieves real knowledge, makes one retrieval-informed change, and
+            verifies it with a real test that fails before the change and
+            passes after it. It then closes the session in whichever language
+            the instance config declares. That run declares Ukrainian, because
+            a closeout rendered in English would have proved nothing about the
+            locale layer: the point is that the language is configuration, not
+            a hardcoded default.
           </p>
           <p class="quickstart__caveat">
-            <strong>Not installable from a package index yet.</strong>
-            There is no <code>pip install</code> from PyPI; the entry point is
-            the repository and the command above. No claim is made about how
-            long any of this takes a human.
+            <strong>Installable, not yet published.</strong>
+            <code>pip install .</code> builds and installs the real wheel, and
+            <code>scripts/eif_release.py</code> builds the wheel and sdist,
+            validates them against what a package index requires, and proves
+            the built wheel runs in a clean environment. The upload itself
+            takes an owner's credentials, so it is the one step nothing here
+            does on its own. No claim is made about how long any of this takes
+            a human.
           </p>
         </div>
       </section>
@@ -1215,37 +1181,58 @@
         <div class="section__inner i18n-block" data-i18n-id="final-cta.body">
           <div class="section__head">
             <span class="label">11 &middot; Go deeper</span>
-            <h2 id="final-cta-heading">Architecture, evidence, source</h2>
+            <h2 id="final-cta-heading">Where to read on, and how to reach me</h2>
           </div>
-          <nav class="final-cta__links" aria-label="Go deeper">
-            <a href="#control-plane">Architecture</a>
-            <a href="#evidence">Evidence</a>
-            <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_EN__</a>
-          </nav>
-          <!-- Empty and hidden once EIF_REPOSITORY_URL is set at build time,
-               so the label above never has to carry its own disclaimer in
-               brackets. -->
-          <p class="final-cta__pending">__EIF_REPO_PENDING_EN__</p>
+          <p class="section__lede">
+            This is one engineer's framework, not a company. Right now
+            disagreement is worth more to me than agreement, so the second
+            column is not decoration.
+          </p>
 
-          <div class="final-cta__contact">
-            <h3 id="contact-heading">Questions, critique, or a look at your own repository</h3>
-            <p class="final-cta__contact-lede">
-              This is one engineer's framework, not a company. Both channels
-              below reach me directly, and disagreement is more useful to me
-              right now than agreement.
-            </p>
-            <ul class="final-cta__channels" aria-labelledby="contact-heading">
-              <li>
-                <span class="label label--accent">LinkedIn</span>
-                <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
-                <p>Where the post series on EIF is published, and the fastest way to reach me.</p>
-              </li>
-              <li>
-                <span class="label label--accent">Email</span>
-                <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
-                <p>For anything longer than a comment: questions, critique, adoption on a real repository.</p>
-              </li>
-            </ul>
+          <!-- One closing block, two matched columns of destination rows,
+               each row the same three parts the rest of the page uses: what
+               it is, where it goes, and one line of why you would. -->
+          <div class="final-cta__grid">
+            <nav class="final-cta__group" aria-labelledby="read-on-heading">
+              <h3 class="final-cta__group-title" id="read-on-heading">Read on</h3>
+              <ul class="final-cta__rows">
+                <li>
+                  <span class="label">On this page</span>
+                  <a href="#control-plane">Architecture</a>
+                  <p>One governed loop, from intent to durable knowledge.</p>
+                </li>
+                <li>
+                  <span class="label">On this page</span>
+                  <a href="#evidence">Evidence</a>
+                  <p>Seven tasks, each with its own boundary and its own limit.</p>
+                </li>
+                <li>
+                  <span class="label">Source</span>
+                  <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_EN__</a>
+                  <p>Ontology, schemas, the <code>eifctl</code> package and the reproduced slice.</p>
+                  <!-- Substituted to an empty string once EIF_REPOSITORY_URL
+                       is set at build time, and hidden by :empty, so the link
+                       label never has to carry its own disclaimer. -->
+                  <p class="final-cta__pending">__EIF_REPO_PENDING_EN__</p>
+                </li>
+              </ul>
+            </nav>
+
+            <nav class="final-cta__group" aria-labelledby="reach-me-heading">
+              <h3 class="final-cta__group-title" id="reach-me-heading">Reach me</h3>
+              <ul class="final-cta__rows">
+                <li>
+                  <span class="label label--accent">LinkedIn</span>
+                  <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
+                  <p>Where the post series on EIF is published, and the fastest way to reach me.</p>
+                </li>
+                <li>
+                  <span class="label label--accent">Email</span>
+                  <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
+                  <p>For anything longer than a comment: questions, critique, adoption on a real repository.</p>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </section>
@@ -1253,7 +1240,7 @@
 
     <footer>
       <div class="section__inner i18n-block" data-i18n-id="footer.body">
-        <p>Apache-2.0 licensed. Local build, not yet deployed.</p>
+        <p><span>Engineering Intelligence Framework</span><span>Apache-2.0 licensed</span></p>
       </div>
     </footer>
 
@@ -1394,8 +1381,8 @@
           </article>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
-          <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> уся операційна основа - онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички агента - разом із попереднім досвідом самого проєкту, знайденим до початку реалізації.</p>
-          <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання - через Knowledge Delta та явне рішення підняти його на рівень вище. Більшість такого знання лишається там, де його здобули: урок виходить за межі свого проєкту, тільки якщо він застосовний і поза ним, і це радше виняток, ніж завершальний крок кожної сесії.</p>
+          <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> уся операційна основа разом із попереднім досвідом самого проєкту. Онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички агента доходять до сесії ще до початку реалізації.</p>
+          <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання, і тільки за окремим рішенням, записаним у Knowledge Delta. Зазвичай воно залишається на тому рівні, де виникло. Перенесення відбувається як виняток, а не як обов&rsquo;язкове завершення кожної сесії.</p>
         </div>
 
         <figure class="ledger" data-claim-id="CLM-15">
@@ -1852,7 +1839,7 @@
             <li class="figure-legend__item figure-legend__item--dot-excluded">Пунктирний вузол - відхилений або замінений: прочитати його можна, у видачу за замовчуванням він не потрапляє, а позначає його куратор.</li>
           </ul>
           <ul class="knowledge-base__facts">
-            <li><strong>Проіндексована.</strong> Індекс будується по всіх артефактах під заданим коренем знань, а пошук іде по ньому без мережі: за ключовими словами й підрядками, без сервісу векторних представлень і без того, щоб бодай щось залишало машину.</li>
+            <li><strong>Проіндексована.</strong> Індекс будується по всіх артефактах під заданим коренем знань, а пошук іде по ньому без мережі: за ключовими словами й підрядками, без сервісу векторних представлень, і жоден запит не йде в мережу.</li>
             <li><strong>Зі станом у життєвому циклі.</strong> Кожен вузол має стан. Відхилені та замінені артефакти лишаються читабельними, але за замовчуванням не потрапляють у видачу пошуку, щоб закрите питання не відкривалося саме собою.</li>
             <li><strong>Чесна щодо прогалин.</strong> Файл, який не вдалося прочитати, невідповідність схемі та відсутність результату - це три різні відповіді, а не одна. Порожню видачу тут ніколи не видають за чисту.</li>
             <li><strong>Доглянута.</strong> Куратор знань читає ту саму базу й зводить в один перелік те, що в ній зіпсувалося: застарілі артефакти, сироти, розірвані посилання, знахідки, які закрили, а вони повернулися. Для кожного пункту є відповідальний, а сам куратор нічого не зливає в основну гілку.</li>
@@ -1899,25 +1886,14 @@
             Керованість не безкоштовна в токенах. Пошук досвіду до реалізації,
             артефакти пакета, Knowledge Delta й повноцінне закриття сесії
             з&rsquo;їдають контекст, який некерований агент витратив би на саме
-            завдання. Задум у тому, що керованість це окупає: менше впевнено
+            завдання.
+          </p>
+          <p>
+            Задум у тому, щоб віддача була більшою за цю ціну: менше впевнено
             обраних хибних шляхів, менше повторних відкриттів, менше спроб
-            підходу, який уже записано як відхилений.
-          </p>
-          <p>
-            Що <strong>виміряно</strong>: стиснення. RTK - Rust Token Killer -
-            фільтрує вивід команд до того, як він дійде до моделі, а його
-            адаптер фіксує скорочення для кожного маршруту, причому сирі чи
-            невдалі маршрути рахуються як нуль, а не оцінюються приблизно.
-            EIF ще й генерує придатний до перегляду контракт перехоплення
-            викликів, який спрямовує команди через RTK, але сам його ніколи не
-            встановлює: це робить власник, інакше нічого не відбувається.
-          </p>
-          <p>
-            Що <strong>не виміряно</strong>: підсумковий баланс. Тут немає
-            дослідження, яке порівняло б керовану й некеровану роботу від
-            початку до кінця, тож сайт не стверджує, що баланс додатний. Він
-            називає ціну, називає те, що рахують, і лишає решту відкритою,
-            доки не буде доказів.
+            підходу, який уже записано як відхилений. Саме задум. Дослідження,
+            яке порівняло б керовану й некеровану роботу від початку до кінця,
+            тут немає, тож сторінка називає ціну й лишає баланс відкритим.
           </p>
           </div>
 
@@ -1946,7 +1922,7 @@
               <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
               <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
               <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
-              <text class="cap-flow__note" x="300" y="178" text-anchor="middle">залишає машину</text>
+              <text class="cap-flow__note" x="300" y="178" text-anchor="middle">іде в мережу</text>
               <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
 
               <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
@@ -1963,39 +1939,10 @@
             <ul class="figure-legend">
               <li class="figure-legend__item">Суцільний маршрут - робота, коли інструмент доступний. Graphify іде вже побудованою структурою, RTK фільтрує вивід команд, Context7 відповідає з актуальної документації бібліотек.</li>
               <li class="figure-legend__item figure-legend__item--dashed">Пунктир під кожним - це базовий шлях, який працює без інструмента: пошук у вихідних файлах, нефільтрований вивід, локальна документація. Доходять обидва.</li>
-              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі: те, що RTK відкидає ще до того, як воно почне коштувати контекст, і точку, де запит Context7 залишає машину. З трьох це робить лише він.</li>
+              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі: те, що RTK відкидає ще до того, як воно почне коштувати контекст, і точку, де запит Context7 іде в мережу. З трьох лише він взагалі виходить за межі цього комп&rsquo;ютера.</li>
             </ul>
           </figure>
         </div>
-        <figure class="capability-map">
-          <figcaption>
-            <span class="label label--accent">Мости необов&rsquo;язкових спроможностей</span>
-            <span>Під кожним мостом лишається базовий шлях</span>
-          </figcaption>
-          <ol>
-            <li>
-              <span class="capability-map__index">01</span>
-              <div><strong>Зрозуміти кодову базу</strong><small>зв&rsquo;язки, групи компонентів, підказки щодо впливу</small></div>
-              <span class="capability-map__bridge" aria-hidden="true"></span>
-              <b>Graphify</b>
-              <em>резерв: пошук у вихідних файлах</em>
-            </li>
-            <li>
-              <span class="capability-map__index">02</span>
-              <div><strong>Зменшити шум інструментів</strong><small>стиснений вивід і облік скорочення</small></div>
-              <span class="capability-map__bridge" aria-hidden="true"></span>
-              <b>RTK</b>
-              <em>резерв: нефільтрований командний рядок</em>
-            </li>
-            <li>
-              <span class="capability-map__index">03</span>
-              <div><strong>Звіритися з актуальною документацією постачальника</strong><small>джерела для відповідної версії бібліотеки чи API</small></div>
-              <span class="capability-map__bridge capability-map__bridge--declared" aria-hidden="true"></span>
-              <b>Context7</b>
-              <em>резерв: локальна документація</em>
-            </li>
-          </ol>
-        </figure>
         <ul class="integrations__list">
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
@@ -2003,7 +1950,7 @@
               <span>Навігація графом коду, аналіз впливу змін</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-05">
-              <p><strong>Межа даних:</strong> лише локально для структурного видобутку на основі AST; <code>external-api</code> - тільки якщо явно ввімкнено семантичне маркування.</p>
+              <p><strong>Межа даних:</strong> лише локально для структурного видобутку на основі AST; <code>external-api</code> тільки якщо явно ввімкнено семантичне маркування.</p>
               <p><strong>Без неї:</strong> агент повертається до пошуку в джерелах і ручного перегляду - підказок за графом і впливом немає.</p>
               <p><strong>Справність:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, явним ідентифікатором репозиторію та перевіреною областю аналізу. Лише стан <code>fresh</code> означає справність; зміни коду, семантичної області чи історії вимагають відповідного оновлення, а пошкоджений або свідомо вимкнений артефакт лишається недоступним. Перевірено на одній локальній версії й невеликому синтетичному прикладі - це не порівняльний результат навігації.</p>
             </div>
@@ -2025,7 +1972,7 @@
               <span>Актуальна документація бібліотек і API замість застарілих даних навчання</span>
             </button>
             <div class="reveal__detail">
-              <p><strong>Межа даних:</strong> <code>external-api</code> - текст запиту залишає машину й іде до зовнішньої служби документації. Сам код фреймворк не надсилає.</p>
+              <p><strong>Межа даних:</strong> <code>external-api</code>: текст запиту йде в мережу до зовнішньої служби документації. Сам код фреймворк не надсилає.</p>
               <p><strong>Без неї:</strong> агент покладається на локальну документацію або власні знання з навчання, які можуть описувати іншу версію, ніж встановлена. Недоступність провайдера повідомляють явно, а не підміняють тихо знаннями з навчання.</p>
               <p><strong>Фреймворк не встановлює його.</strong> MCP-сервер налаштовують на рівні користувача, поза інстансом проєкту, а фреймворк ніколи не змінює конфігурацію рівня користувача. Він дає згенеровані правила застосування й придатний до перегляду шаблон для кожного адаптера, де команду провайдера вписує власник.</p>
               <p><strong>Справність:</strong> декларацію, правила застосування й форму шаблона перевірено тестами; реальну поведінку провайдера - ні. EIF готує конфігурацію, яку завантажує агент, і сам не спілкується по MCP, тому доступність повідомляє агент, а не фреймворк.</p>
@@ -2143,60 +2090,83 @@
           зріз - це не стабільний реліз і не репрезентативна вибірка
           реальних інженерних завдань.
         </p>
-        <pre class="quickstart__command"><code>python scripts/eif_init.py --framework-root . --instance-path &lt;path&gt; --project-name &lt;name&gt; --locale uk</code></pre>
+        <pre class="quickstart__command"><code>pip install .
+eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk</code></pre>
         <p>
-          Ця команда створює окремий екземпляр проєкту, готовий до запуску.
-          В еталонному проході вбудований приклад додає і знаходить реальне
-          знання, вносить одну зміну на його основі й перевіряє її справжнім
-          тестом, який до зміни падає, а після неї проходить. Далі він
-          закриває сесію тією мовою, яку оголошує конфігурація екземпляра.
+          Перший рядок встановлює команду <code>eifctl</code> із клонованого
+          репозиторію. Другий створює окремий екземпляр проєкту, готовий до
+          запуску. В еталонному проході вбудований приклад додає і знаходить
+          реальне знання, вносить одну зміну на його основі й перевіряє її
+          справжнім тестом, який до зміни падає, а після неї проходить. Далі
+          він закриває сесію тією мовою, яку оголошує конфігурація екземпляра.
           У тому проході оголошено українську, бо закриття англійською нічого
-          не довело б про мовний рівень: суть саме в тому, що мова - це
+          не довело б про мовний рівень: суть саме в тому, що мова це
           налаштування, а не зашите за замовчуванням значення.
         </p>
         <p class="quickstart__caveat">
-          <strong>З індексу пакетів поки не встановлюється.</strong>
-          Зробити <code>pip install</code> з PyPI ще не можна: точка входу -
-          це репозиторій і команда вище. Про те, скільки часу це займає в
-          людини, заяв не робимо.
+          <strong>Встановлюється, але ще не опублікований.</strong>
+          <code>pip install .</code> збирає й встановлює справжній wheel, а
+          <code>scripts/eif_release.py</code> збирає wheel і sdist, перевіряє
+          їх за вимогами індексу пакетів і доводить, що зібраний wheel працює
+          в чистому середовищі. Саме вивантаження потребує облікових даних
+          власника, тож це єдиний крок, який тут нічого не робить самостійно.
+          Про те, скільки часу це займає в людини, заяв не робимо.
         </p>
       </template>
 
       <template data-i18n-id="final-cta.body">
         <div class="section__head">
           <span class="label">11 &middot; Заглибитися</span>
-          <h2 id="final-cta-heading">Архітектура, докази, джерело</h2>
+          <h2 id="final-cta-heading">Що читати далі й як зі мною зв&rsquo;язатися</h2>
         </div>
-        <nav class="final-cta__links" aria-label="Заглибитися">
-          <a href="#control-plane">Архітектура</a>
-          <a href="#evidence">Докази</a>
-          <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_UK__</a>
-        </nav>
-        <p class="final-cta__pending">__EIF_REPO_PENDING_UK__</p>
+        <p class="section__lede">
+          Це фреймворк одного інженера, а не компанії. Зараз незгода варта для
+          мене більше, ніж згода, тож друга колонка тут не для декору.
+        </p>
 
-        <div class="final-cta__contact">
-          <h3 id="contact-heading">Питання, критика або погляд на ваш власний репозиторій</h3>
-          <p class="final-cta__contact-lede">
-            Це фреймворк одного інженера, а не компанії. Обидва канали нижче
-            ведуть просто до мене, і незгода зараз корисніша за згоду.
-          </p>
-          <ul class="final-cta__channels" aria-labelledby="contact-heading">
-            <li>
-              <span class="label label--accent">LinkedIn</span>
-              <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
-              <p>Там виходить серія дописів про EIF, і це найшвидший спосіб мене знайти.</p>
-            </li>
-            <li>
-              <span class="label label--accent">Пошта</span>
-              <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
-              <p>Для всього, що довше за коментар: питання, критика, впровадження на реальному репозиторії.</p>
-            </li>
-          </ul>
+        <div class="final-cta__grid">
+          <nav class="final-cta__group" aria-labelledby="read-on-heading">
+            <h3 class="final-cta__group-title" id="read-on-heading">Читати далі</h3>
+            <ul class="final-cta__rows">
+              <li>
+                <span class="label">На цій сторінці</span>
+                <a href="#control-plane">Архітектура</a>
+                <p>Один керований цикл від наміру до стійкого знання.</p>
+              </li>
+              <li>
+                <span class="label">На цій сторінці</span>
+                <a href="#evidence">Докази</a>
+                <p>Сім завдань, у кожного власна межа й власне обмеження.</p>
+              </li>
+              <li>
+                <span class="label">Джерело</span>
+                <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_UK__</a>
+                <p>Онтологія, схеми, пакет <code>eifctl</code> і відтворений вертикальний зріз.</p>
+                <p class="final-cta__pending">__EIF_REPO_PENDING_UK__</p>
+              </li>
+            </ul>
+          </nav>
+
+          <nav class="final-cta__group" aria-labelledby="reach-me-heading">
+            <h3 class="final-cta__group-title" id="reach-me-heading">Зв&rsquo;язатися</h3>
+            <ul class="final-cta__rows">
+              <li>
+                <span class="label label--accent">LinkedIn</span>
+                <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
+                <p>Там виходить серія дописів про EIF, і це найшвидший спосіб мене знайти.</p>
+              </li>
+              <li>
+                <span class="label label--accent">Пошта</span>
+                <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
+                <p>Для всього, що довше за коментар: питання, критика, впровадження на реальному репозиторії.</p>
+              </li>
+            </ul>
+          </nav>
         </div>
       </template>
 
       <template data-i18n-id="footer.body">
-        <p>Ліцензія Apache-2.0. Локальна збірка, ще не розгорнута.</p>
+        <p><span>Engineering Intelligence Framework</span><span>Ліцензія Apache-2.0</span></p>
       </template>
     </div>
 

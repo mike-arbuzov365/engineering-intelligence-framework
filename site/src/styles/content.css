@@ -31,21 +31,6 @@
   max-width: var(--eif-content-max);
 }
 
-/* The one caveat the quickstart has to carry. It used to be a .label, so a
-   two-sentence disclaimer rendered as uppercase mono - technically a caption,
-   practically unreadable. */
-.quickstart__caveat {
-  margin-top: var(--eif-space-3);
-  padding-top: var(--eif-space-2);
-  border-top: 1px solid var(--eif-rule);
-  max-width: var(--eif-measure);
-  color: var(--eif-fg-muted);
-}
-
-.quickstart__caveat strong {
-  color: var(--eif-fg);
-}
-
 /* The closing screen. It used to be three underlined links, a floating
    status line, a 100px hole and then a contact block bolted underneath, all
    at different measures. One grid now, two matched columns, and every
@@ -84,15 +69,18 @@
   display: block;
 }
 
+/* inline-flex, not inline-block: the 44px coarse-pointer target (D-07) is
+   kept, but the label sits in the middle of it instead of at the top, which
+   is what left a visible hole between each destination and the line
+   explaining it. */
 .final-cta__rows a {
-  display: inline-block;
-  margin-top: 0.35rem;
+  display: inline-flex;
+  align-items: center;
   font-family: var(--eif-font-mono);
   font-size: 1.05rem;
   color: var(--eif-fg);
   text-decoration: none;
   border-bottom: 1px solid var(--eif-rule);
-  padding-bottom: 0.15rem;
   overflow-wrap: anywhere;
   transition: color var(--eif-duration-fast) var(--eif-ease),
     border-color var(--eif-duration-fast) var(--eif-ease);
@@ -105,8 +93,12 @@
 }
 
 .final-cta__rows p {
-  margin-top: var(--eif-space-1);
+  margin: 0.35rem 0 0;
   color: var(--eif-fg-muted);
+}
+
+.final-cta__rows .final-cta__pending {
+  margin-top: var(--eif-space-1);
 }
 
 /* Amber, like every other "declared but not yet true" state on this page.

@@ -917,122 +917,150 @@
         <div class="section__inner i18n-block" data-i18n-id="integrations.body" data-i18n-reinit="reveal">
           <div class="section__head">
             <span class="label">08 &middot; Optional capabilities</span>
-            <h2 id="integrations-heading">Three tools that help. None of them is the method.</h2>
+            <h2 id="integrations-heading">Three tools help. None of them is required.</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-12">
-            Graphify, RTK and Context7 each add one bounded capability.
-            None is the methodology itself: when one is unavailable, EIF
-            keeps a named core path through source search, raw shell output
-            or local documentation. None of the three is installed by the
-            framework.
+            Graphify, RTK and Context7 each add one narrow capability. None is
+            the methodology itself: when a tool is absent, EIF takes a named
+            core path and reports the tool as unavailable instead of quietly
+            substituting a guess. The framework installs none of the three.
           </p>
-          <div class="token-economics" data-claim-id="CLM-06">
-            <div class="token-economics__body">
-            <span class="label label--accent">What this costs</span>
-            <p>
-              Governance is not free in tokens. Retrieval before work, packet
-              artifacts, a Knowledge Delta and a real closeout all consume
-              context that an ungoverned agent would spend on the task
-              itself.
-            </p>
-            <p>
-              What it buys is meant to cost less than that: fewer wrong paths
-              taken confidently, fewer rediscoveries, fewer retries of an
-              approach already recorded as rejected. Meant to. No study here
-              compares governed against ungoverned work end to end, so this
-              page states the cost and leaves the balance open.
-            </p>
-            </div>
 
-            <!-- All three capabilities in one shape: a solid route with the
-                 tool, a dashed core path without it, both arriving at the
-                 same place. The tool names are proper nouns and read the
-                 same in both languages, so the SVG needs no translation.
-                 Deliberately shows no quantity anywhere: CLM-06 permits
-                 saying compression is measured, not how much. -->
-            <figure class="cap-flow">
-              <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
-                <text class="cap-flow__label" x="4" y="50">Graphify</text>
-                <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
-                <circle class="cap-flow__waypoint" cx="170" cy="46" r="4" />
-                <circle class="cap-flow__waypoint" cx="230" cy="46" r="4" />
-                <circle class="cap-flow__waypoint" cx="290" cy="46" r="4" />
-                <line class="cap-flow__core" x1="92" y1="74" x2="392" y2="74" />
+          <!-- All three capabilities in one shape: a solid route with the
+               tool, a dashed core path without it, both arriving at the
+               same place. The tool names are proper nouns and read the
+               same in both languages, so the SVG needs no translation.
+               Deliberately shows no quantity anywhere: CLM-06 permits
+               saying compression is measured, not how much.
 
-                <text class="cap-flow__label" x="4" y="130">RTK</text>
-                <line class="cap-flow__route" x1="92" y1="126" x2="392" y2="126" />
-                <line class="cap-flow__gate" x1="234" y1="106" x2="234" y2="140" />
-                <text class="cap-flow__note" x="234" y="98" text-anchor="middle">dropped here</text>
-                <circle class="cap-flow__tick" cx="120" cy="126" r="3" />
-                <circle class="cap-flow__tick" cx="146" cy="126" r="3" />
-                <circle class="cap-flow__tick" cx="172" cy="126" r="3" />
-                <circle class="cap-flow__tick" cx="198" cy="126" r="3" />
-                <circle class="cap-flow__tick cap-flow__tick--kept" cx="286" cy="126" r="3" />
-                <circle class="cap-flow__tick cap-flow__tick--kept" cx="330" cy="126" r="3" />
-                <line class="cap-flow__core" x1="92" y1="154" x2="392" y2="154" />
+               Full width now, and no longer sharing a grid with the cost
+               note. Sharing one put a drawing and a caveat behind the same
+               amber rule, which made the rule mean nothing, and squeezed
+               the figure into 24rem while its legend ran as three
+               paragraphs of small type underneath. -->
+          <figure class="cap-flow">
+            <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
+              <text class="cap-flow__label" x="4" y="50">Graphify</text>
+              <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
+              <circle class="cap-flow__waypoint" cx="170" cy="46" r="4" />
+              <circle class="cap-flow__waypoint" cx="230" cy="46" r="4" />
+              <circle class="cap-flow__waypoint" cx="290" cy="46" r="4" />
+              <line class="cap-flow__core" x1="92" y1="74" x2="392" y2="74" />
 
-                <text class="cap-flow__label" x="4" y="210">Context7</text>
-                <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
-                <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
-                <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
-                <text class="cap-flow__note" x="300" y="178" text-anchor="middle">goes to the network</text>
-                <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
+              <text class="cap-flow__label" x="4" y="130">RTK</text>
+              <line class="cap-flow__route" x1="92" y1="126" x2="392" y2="126" />
+              <line class="cap-flow__gate" x1="234" y1="106" x2="234" y2="140" />
+              <text class="cap-flow__note" x="234" y="98" text-anchor="middle">dropped here</text>
+              <circle class="cap-flow__tick" cx="120" cy="126" r="3" />
+              <circle class="cap-flow__tick" cx="146" cy="126" r="3" />
+              <circle class="cap-flow__tick" cx="172" cy="126" r="3" />
+              <circle class="cap-flow__tick" cx="198" cy="126" r="3" />
+              <circle class="cap-flow__tick cap-flow__tick--kept" cx="286" cy="126" r="3" />
+              <circle class="cap-flow__tick cap-flow__tick--kept" cx="330" cy="126" r="3" />
+              <line class="cap-flow__core" x1="92" y1="154" x2="392" y2="154" />
 
-                <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
+              <text class="cap-flow__label" x="4" y="210">Context7</text>
+              <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
+              <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
+              <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
+              <text class="cap-flow__note" x="300" y="178" text-anchor="middle">goes to the network</text>
+              <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
 
-                <circle class="cap-flow__pulse cap-flow__pulse--g" cx="0" cy="0" r="5" />
-                <circle class="cap-flow__pulse cap-flow__pulse--g-core" cx="0" cy="0" r="5" />
-                <circle class="cap-flow__pulse cap-flow__pulse--r-stop" cx="0" cy="0" r="5" />
-                <circle class="cap-flow__pulse cap-flow__pulse--r" cx="0" cy="0" r="5" />
-                <circle class="cap-flow__pulse cap-flow__pulse--r-core" cx="0" cy="0" r="5" />
-                <circle class="cap-flow__pulse cap-flow__pulse--c" cx="0" cy="0" r="5" />
-                <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
-              </svg>
+              <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
 
-              <ul class="figure-legend">
-                <li class="figure-legend__item">The solid route is the work with the tool available. Graphify follows structure it already mapped; RTK filters command output; Context7 answers from current library docs.</li>
-                <li class="figure-legend__item figure-legend__item--dashed">The dashed route below each one is the named core path that runs without it: source search, raw shell output, local documentation. Both arrive.</li>
-                <li class="figure-legend__item figure-legend__item--dotted-warn">Amber marks the two boundaries: what RTK drops before it ever costs context, and the point where a Context7 query goes to the network. It is the only one of the three that leaves this computer at all.</li>
-              </ul>
-            </figure>
-          </div>
+              <circle class="cap-flow__pulse cap-flow__pulse--g" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--g-core" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--r-stop" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--r" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--r-core" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--c" cx="0" cy="0" r="5" />
+              <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
+            </svg>
 
+            <!-- Four keys, one line each, across two columns. It used to be
+                 three paragraphs that re-listed the fallbacks named in the
+                 lede and the boundaries named in the rows below, which is
+                 the same fact said three times on one screen. The context
+                 box on the right had no key at all. -->
+            <ul class="figure-legend cap-flow__legend">
+              <li class="figure-legend__item">Solid: the route with the tool available.</li>
+              <li class="figure-legend__item figure-legend__item--dashed">Dashed: the core path that runs without it. Both arrive.</li>
+              <li class="figure-legend__item figure-legend__item--dotted-warn">Amber: the two boundaries. RTK drops output before it costs context; only Context7 leaves this computer.</li>
+              <li class="figure-legend__item figure-legend__item--box">The box on the right is the context the agent has to spend.</li>
+            </ul>
+          </figure>
+
+          <!-- Each row now answers the boundary question in its collapsed
+               state, because that is the question people actually arrive
+               with. Local or network is a tag, not a paragraph three
+               sentences into a disclosure nobody opened. -->
           <ul class="integrations__list">
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
-                <span class="label label--accent">Graphify</span>
-                <span>Structural code-graph navigation, impact analysis</span>
+                <span class="cap-row__head">
+                  <span class="label label--accent">Graphify</span>
+                  <span class="cap-tag">Local</span>
+                </span>
+                <span>Code-graph navigation and impact analysis</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-05">
-                <p><strong>Data boundary:</strong> local-only for AST-based extraction; external-api only if semantic labeling is explicitly enabled.</p>
-                <p><strong>Degraded mode without it:</strong> the agent falls back to source search and manual browsing; no graph-level path or impact hints.</p>
-                <p><strong>Health:</strong> D-08 metadata binds the graph digest to its source commit, Graphify version, explicit repository identity and reviewed scope. Only <code>fresh</code> reports healthy; code, semantic or history changes request the matching update, while invalid or intentionally suppressed artifacts remain unavailable. Bounded to one local version and a small synthetic fixture, not a comparative navigation outcome.</p>
+                <p><strong>Boundary:</strong> local for AST-based extraction. It reaches an external API only if semantic labeling is turned on deliberately.</p>
+                <p><strong>Without it:</strong> the agent falls back to source search and manual browsing, with no graph-level path or impact hints.</p>
+                <p><strong>Verified:</strong> D-08 metadata binds the graph digest to its source commit, the Graphify version, an explicit repository identity and the reviewed scope. Only <code>fresh</code> reports healthy; a code, semantic or history change asks for the matching update, and an invalid or deliberately suppressed artifact stays unavailable. Bounded to one local version and one small synthetic fixture, not a navigation outcome.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
-                <span class="label label--accent">RTK</span>
+                <span class="cap-row__head">
+                  <span class="label label--accent">RTK</span>
+                  <span class="cap-tag">Local</span>
+                </span>
                 <span>Rust Token Killer: shell-output compression with tracked reduction</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-06">
-                <p><strong>Data boundary:</strong> local-only.</p>
-                <p><strong>Degraded mode without it:</strong> shell commands run unfiltered and no reduction is recorded.</p>
-                <p><strong>Health:</strong> RTK 0.43.0 passes all 24 checks on the tested Windows host through native <code>rtk rg</code>. Any failed required canary still reports <code>degraded</code>; a raw or failed proxy route records zero savings, never a positive reduction number. This is not a cross-platform or efficiency claim.</p>
+                <p><strong>Boundary:</strong> local, with nothing sent anywhere.</p>
+                <p><strong>Without it:</strong> shell commands run unfiltered and no reduction is recorded.</p>
+                <p><strong>Verified:</strong> RTK 0.43.0 passes all 24 checks on the tested Windows host through the native <code>rtk rg</code> route. A failed required canary still reports <code>degraded</code>, and a raw or failed proxy route records zero savings rather than a positive number. Not a cross-platform or efficiency claim.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
-                <span class="label label--accent">Context7</span>
-                <span>Current library/API documentation instead of stale training data</span>
+                <span class="cap-row__head">
+                  <span class="label label--accent">Context7</span>
+                  <span class="cap-tag cap-tag--network">Network</span>
+                </span>
+                <span>Current library documentation instead of stale recall</span>
               </button>
               <div class="reveal__detail">
-                <p><strong>Data boundary:</strong> external-api; the query text goes to the network to reach a hosted documentation service. Source code is not sent by the framework.</p>
-                <p><strong>Degraded mode without it:</strong> the agent relies on local docs or training-data recall, which may describe a different version than the one installed. An unavailable provider is reported, never silently replaced by recall.</p>
-                <p><strong>EIF does not install it.</strong> An MCP server is configured at the user level, outside the project instance, and this framework never mutates user-level configuration. It ships generated routing guidance and a reviewable per-adapter template whose provider command stays owner-supplied.</p>
-                <p><strong>Health:</strong> the declaration, routing guidance and template shape are tested; live provider behavior is not. EIF generates configuration for the agent to load and does not itself speak MCP, so reachability is reported by the agent and marked unverified rather than claimed.</p>
+                <p><strong>Boundary:</strong> the query text goes to the network to reach a hosted documentation service. The framework sends no source code.</p>
+                <p><strong>Without it:</strong> the agent relies on local docs or training-data recall, which may describe a different version than the one installed. An unavailable provider is reported, never silently replaced by recall.</p>
+                <p><strong>EIF does not install it.</strong> An MCP server is configured at the user level, outside the project instance, and the framework never changes user-level configuration. It ships generated routing guidance and a reviewable per-adapter template whose provider command stays owner-supplied.</p>
+                <p><strong>Verified:</strong> the declaration, the routing guidance and the template shape are covered by tests; live provider behavior is not. EIF generates configuration for the agent to load and does not speak MCP itself, so reachability is reported by the agent and stays marked unverified.</p>
               </div>
             </li>
           </ul>
+
+          <!-- The amber rule means caveat everywhere else on this page, so
+               it now brackets only the caveat. -->
+          <aside class="token-economics" data-claim-id="CLM-06">
+            <div class="token-economics__body">
+              <span class="label label--accent">What this costs</span>
+              <p>
+                Governance is not free in tokens. Retrieval before the work,
+                packet artifacts, a Knowledge Delta and a real closeout all
+                consume context an ungoverned agent would have spent on the
+                task itself.
+              </p>
+              <p>
+                What it buys is meant to cost less than that: fewer wrong
+                paths taken confidently, fewer rediscoveries, fewer retries
+                of an approach already recorded as rejected. Meant to.
+                Nothing here compares governed and ungoverned work end to
+                end, so this page states the cost and leaves the balance
+                open.
+              </p>
+            </div>
+          </aside>
         </div>
       </section>
 
@@ -1142,13 +1170,12 @@
         <div class="section__inner i18n-block" data-i18n-id="quickstart.body">
           <div class="section__head">
             <span class="label">10 &middot; Quickstart</span>
-            <h2 id="quickstart-heading">A synthetic walkthrough, not a release</h2>
+            <h2 id="quickstart-heading">From a clone to a closed-out change</h2>
           </div>
           <p class="section__lede">
-            Cloning the repository gets you the ontology, schemas, governance
-            docs, the <code>eifctl</code> source package, and one reproduced
-            vertical slice, not a stable release or a representative
-            sample of real engineering tasks.
+            Cloning the repository gets you the ontology, the schemas, the
+            governance docs, the <code>eifctl</code> package and one
+            reproducible vertical slice.
           </p>
           <pre class="quickstart__command"><code>pip install .
 eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en</code></pre>
@@ -1164,52 +1191,50 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
             locale layer: the point is that the language is configuration, not
             a hardcoded default.
           </p>
-          <p class="quickstart__caveat">
-            <strong>Installable, not yet published.</strong>
-            <code>pip install .</code> builds and installs the real wheel, and
-            <code>scripts/eif_release.py</code> builds the wheel and sdist,
-            validates them against what a package index requires, and proves
-            the built wheel runs in a clean environment. The upload itself
-            takes an owner's credentials, so it is the one step nothing here
-            does on its own. No claim is made about how long any of this takes
-            a human.
-          </p>
         </div>
       </section>
 
       <section class="section final-cta" id="final-cta" aria-labelledby="final-cta-heading">
         <div class="section__inner i18n-block" data-i18n-id="final-cta.body">
           <div class="section__head">
-            <span class="label">11 &middot; Go deeper</span>
-            <h2 id="final-cta-heading">Where to read on, and how to reach me</h2>
+            <span class="label">11 &middot; Next</span>
+            <h2 id="final-cta-heading">Where to go from here</h2>
           </div>
+          <!-- What this used to say, and why it no longer does: "right now
+               disagreement is worth more to me than agreement, so the second
+               column is not decoration" performed an attitude instead of
+               saying anything. Plain statement, no contrast to argue with,
+               no instruction to the reader. -->
           <p class="section__lede">
-            This is one engineer's framework, not a company. Right now
-            disagreement is worth more to me than agreement, so the second
-            column is not decoration.
+            EIF is one engineer's framework, developed in the open. Below is
+            the rest of what is written down, and two ways to reach me.
+            Questions, critique and accounts of running it on a real
+            repository are all useful.
           </p>
 
           <!-- One closing block, two matched columns of destination rows,
                each row the same three parts the rest of the page uses: what
-               it is, where it goes, and one line of why you would. -->
+               it is, where it goes, and one line of why you would. The
+               left-hand labels carry the page's own section numbers rather
+               than saying "on this page" twice in a column. -->
           <div class="final-cta__grid">
             <nav class="final-cta__group" aria-labelledby="read-on-heading">
               <h3 class="final-cta__group-title" id="read-on-heading">Read on</h3>
               <ul class="final-cta__rows">
                 <li>
-                  <span class="label">On this page</span>
+                  <span class="label">Section 04</span>
                   <a href="#control-plane">Architecture</a>
                   <p>One governed loop, from intent to durable knowledge.</p>
                 </li>
                 <li>
-                  <span class="label">On this page</span>
+                  <span class="label">Section 09</span>
                   <a href="#evidence">Evidence</a>
                   <p>Seven tasks, each with its own boundary and its own limit.</p>
                 </li>
                 <li>
                   <span class="label">Source</span>
                   <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_EN__</a>
-                  <p>Ontology, schemas, the <code>eifctl</code> package and the reproduced slice.</p>
+                  <p>Ontology, schemas, the <code>eifctl</code> package and the reproducible slice.</p>
                   <!-- Substituted to an empty string once EIF_REPOSITORY_URL
                        is set at build time, and hidden by :empty, so the link
                        label never has to carry its own disclaimer. -->
@@ -1224,7 +1249,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
                 <li>
                   <span class="label label--accent">LinkedIn</span>
                   <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
-                  <p>Where the post series on EIF is published, and the fastest way to reach me.</p>
+                  <p>Where the EIF posts appear, and the quickest way to reach me.</p>
                 </li>
                 <li>
                   <span class="label label--accent">Email</span>
@@ -1870,32 +1895,14 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
       <template data-i18n-id="integrations.body">
         <div class="section__head">
           <span class="label">08 &middot; Необов&rsquo;язкові спроможності</span>
-          <h2 id="integrations-heading">Три інструменти, які допомагають. Жоден із них не є методом.</h2>
+          <h2 id="integrations-heading">Три інструменти допомагають. Жоден не є обов&rsquo;язковим.</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
-          Graphify, RTK і Context7 додають по одній обмеженій спроможності.
-          Жодна не є самою методологією: якщо інструмент недоступний, EIF має
-          визначений базовий шлях через пошук у вихідних файлах, нефільтрований
-          вивід команд або локальну документацію. Жодного з трьох фреймворк
-          не встановлює сам.
+          Graphify, RTK і Context7 додають по одній вузькій можливості. Жоден
+          із них не є самою методологією: якщо інструмента немає, EIF іде
+          визначеним базовим шляхом і прямо повідомляє про недоступність, а не
+          підміняє її здогадом. Жодного з трьох фреймворк не встановлює.
         </p>
-        <div class="token-economics" data-claim-id="CLM-06">
-          <div class="token-economics__body">
-          <span class="label label--accent">Чого це коштує</span>
-          <p>
-            Керованість не безкоштовна в токенах. Пошук досвіду до реалізації,
-            артефакти пакета, Knowledge Delta й повноцінне закриття сесії
-            з&rsquo;їдають контекст, який некерований агент витратив би на саме
-            завдання.
-          </p>
-          <p>
-            Задум у тому, щоб віддача була більшою за цю ціну: менше впевнено
-            обраних хибних шляхів, менше повторних відкриттів, менше спроб
-            підходу, який уже записано як відхилений. Саме задум. Дослідження,
-            яке порівняло б керовану й некеровану роботу від початку до кінця,
-            тут немає, тож сторінка називає ціну й лишає баланс відкритим.
-          </p>
-          </div>
 
           <figure class="cap-flow">
             <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
@@ -1936,49 +1943,78 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
               <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
             </svg>
 
-            <ul class="figure-legend">
-              <li class="figure-legend__item">Суцільний маршрут - робота, коли інструмент доступний. Graphify іде вже побудованою структурою, RTK фільтрує вивід команд, Context7 відповідає з актуальної документації бібліотек.</li>
-              <li class="figure-legend__item figure-legend__item--dashed">Пунктир під кожним - це базовий шлях, який працює без інструмента: пошук у вихідних файлах, нефільтрований вивід, локальна документація. Доходять обидва.</li>
-              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі: те, що RTK відкидає ще до того, як воно почне коштувати контекст, і точку, де запит Context7 іде в мережу. З трьох лише він взагалі виходить за межі цього комп&rsquo;ютера.</li>
+            <ul class="figure-legend cap-flow__legend">
+              <li class="figure-legend__item">Суцільна лінія: маршрут, коли інструмент доступний.</li>
+              <li class="figure-legend__item figure-legend__item--dashed">Пунктир: базовий шлях, який працює без нього. Доходять обидва.</li>
+              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі. RTK відкидає вивід, поки той ще нічого не коштує; із трьох лише Context7 виходить за межі цього комп&rsquo;ютера.</li>
+              <li class="figure-legend__item figure-legend__item--box">Прямокутник праворуч показує контекст, який агент має витратити.</li>
             </ul>
           </figure>
-        </div>
-        <ul class="integrations__list">
-          <li class="reveal">
-            <button class="reveal__trigger" aria-expanded="true" disabled>
-              <span class="label label--accent">Graphify</span>
-              <span>Навігація графом коду, аналіз впливу змін</span>
-            </button>
-            <div class="reveal__detail" data-claim-id="CLM-05">
-              <p><strong>Межа даних:</strong> лише локально для структурного видобутку на основі AST; <code>external-api</code> тільки якщо явно ввімкнено семантичне маркування.</p>
-              <p><strong>Без неї:</strong> агент повертається до пошуку в джерелах і ручного перегляду - підказок за графом і впливом немає.</p>
-              <p><strong>Справність:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, явним ідентифікатором репозиторію та перевіреною областю аналізу. Лише стан <code>fresh</code> означає справність; зміни коду, семантичної області чи історії вимагають відповідного оновлення, а пошкоджений або свідомо вимкнений артефакт лишається недоступним. Перевірено на одній локальній версії й невеликому синтетичному прикладі - це не порівняльний результат навігації.</p>
+
+          <ul class="integrations__list">
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="cap-row__head">
+                  <span class="label label--accent">Graphify</span>
+                  <span class="cap-tag">Локально</span>
+                </span>
+                <span>Навігація графом коду й аналіз впливу змін</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-05">
+                <p><strong>Межа даних:</strong> локально для структурного видобутку на основі AST. До зовнішнього API він звертається лише тоді, коли семантичне маркування ввімкнули свідомо.</p>
+                <p><strong>Без нього:</strong> агент повертається до пошуку у вихідних файлах і ручного перегляду, без підказок за графом і без оцінки впливу.</p>
+                <p><strong>Перевірено:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, явним ідентифікатором репозиторію та переглянутою областю аналізу. Справним вважається лише стан <code>fresh</code>; зміна коду, семантики чи історії вимагає відповідного оновлення, а пошкоджений або свідомо вимкнений артефакт лишається недоступним. Межі перевірки: одна локальна версія й один невеликий синтетичний приклад, а не результат навігації.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="cap-row__head">
+                  <span class="label label--accent">RTK</span>
+                  <span class="cap-tag">Локально</span>
+                </span>
+                <span>Rust Token Killer: стиснення виводу командного рядка з відстеженням скорочення</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-06">
+                <p><strong>Межа даних:</strong> локально, нічого нікуди не надсилається.</p>
+                <p><strong>Без нього:</strong> команди виконуються без фільтрації, а скорочення не фіксується.</p>
+                <p><strong>Перевірено:</strong> RTK 0.43.0 проходить усі 24 перевірки на тестованому хості Windows через власний маршрут <code>rtk rg</code>. Невдала обов&rsquo;язкова перевірка й далі означає стан <code>degraded</code>, а нефільтрований або невдалий маршрут через проксі фіксується як нульова економія, а не як позитивне число. Це не заява ні про всі платформи, ні про ефективність.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="cap-row__head">
+                  <span class="label label--accent">Context7</span>
+                  <span class="cap-tag cap-tag--network">Мережа</span>
+                </span>
+                <span>Актуальна документація бібліотек замість застарілих знань із навчання</span>
+              </button>
+              <div class="reveal__detail">
+                <p><strong>Межа даних:</strong> текст запиту йде в мережу до зовнішньої служби документації. Вихідний код фреймворк не надсилає.</p>
+                <p><strong>Без нього:</strong> агент покладається на локальну документацію або на власні знання з навчання, які можуть описувати іншу версію, ніж встановлена. Про недоступність провайдера повідомляють прямо, а не підміняють її тихо цими знаннями.</p>
+                <p><strong>Фреймворк його не встановлює.</strong> MCP-сервер налаштовують на рівні користувача, поза екземпляром проєкту, а фреймворк ніколи не змінює конфігурацію цього рівня. Він дає згенеровані правила застосування й шаблон для кожного адаптера, який можна переглянути перед використанням; команду провайдера вписує власник.</p>
+                <p><strong>Перевірено:</strong> декларацію, правила застосування й форму шаблона покрито тестами, а реальної поведінки провайдера тести не покривають. EIF готує конфігурацію, яку завантажує агент, і сам по MCP не спілкується, тож доступність повідомляє агент, і вона лишається непідтвердженою.</p>
+              </div>
+            </li>
+          </ul>
+
+          <aside class="token-economics" data-claim-id="CLM-06">
+            <div class="token-economics__body">
+              <span class="label label--accent">Чого це коштує</span>
+              <p>
+                Керованість коштує токенів. Пошук досвіду перед реалізацією,
+                артефакти пакета, Knowledge Delta й повноцінне закриття сесії
+                витрачають контекст, який некерований агент віддав би самому
+                завданню.
+              </p>
+              <p>
+                Задум у тому, щоб віддача перевищила цю ціну: менше впевнено
+                обраних хибних шляхів, менше повторних відкриттів, менше спроб
+                підходу, який уже записано як відхилений. Саме задум.
+                Порівняння керованої й некерованої роботи від початку до кінця
+                тут немає, тож сторінка називає ціну й лишає баланс відкритим.
+              </p>
             </div>
-          </li>
-          <li class="reveal">
-            <button class="reveal__trigger" aria-expanded="true" disabled>
-              <span class="label label--accent">RTK</span>
-              <span>Rust Token Killer: стиснення виводу командного рядка з відстежуваним скороченням</span>
-            </button>
-            <div class="reveal__detail" data-claim-id="CLM-06">
-              <p><strong>Межа даних:</strong> лише локально.</p>
-              <p><strong>Без неї:</strong> команди виконуються без фільтрації, скорочення не фіксується.</p>
-              <p><strong>Справність:</strong> RTK 0.43.0 проходить усі 24 перевірки на випробуваному Windows-середовищі через вбудований маршрут <code>rtk rg</code>. Невдала обов&rsquo;язкова перевірка й надалі означає стан <code>degraded</code>; нефільтрований або невдалий маршрут через <code>rtk proxy</code> фіксується як нульова економія. Це не заява про всі платформи чи ефективність.</p>
-            </div>
-          </li>
-          <li class="reveal">
-            <button class="reveal__trigger" aria-expanded="true" disabled>
-              <span class="label label--accent">Context7</span>
-              <span>Актуальна документація бібліотек і API замість застарілих даних навчання</span>
-            </button>
-            <div class="reveal__detail">
-              <p><strong>Межа даних:</strong> <code>external-api</code>: текст запиту йде в мережу до зовнішньої служби документації. Сам код фреймворк не надсилає.</p>
-              <p><strong>Без неї:</strong> агент покладається на локальну документацію або власні знання з навчання, які можуть описувати іншу версію, ніж встановлена. Недоступність провайдера повідомляють явно, а не підміняють тихо знаннями з навчання.</p>
-              <p><strong>Фреймворк не встановлює його.</strong> MCP-сервер налаштовують на рівні користувача, поза інстансом проєкту, а фреймворк ніколи не змінює конфігурацію рівня користувача. Він дає згенеровані правила застосування й придатний до перегляду шаблон для кожного адаптера, де команду провайдера вписує власник.</p>
-              <p><strong>Справність:</strong> декларацію, правила застосування й форму шаблона перевірено тестами; реальну поведінку провайдера - ні. EIF готує конфігурацію, яку завантажує агент, і сам не спілкується по MCP, тому доступність повідомляє агент, а не фреймворк.</p>
-            </div>
-          </li>
-        </ul>
+          </aside>
       </template>
 
       <template data-i18n-id="evidence.body">
@@ -2082,13 +2118,11 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
       <template data-i18n-id="quickstart.body">
         <div class="section__head">
           <span class="label">10 &middot; Швидкий старт</span>
-          <h2 id="quickstart-heading">Синтетичний прохід, а не реліз</h2>
+          <h2 id="quickstart-heading">Від клону до закритої зміни</h2>
         </div>
         <p class="section__lede">
           Клонування репозиторію дає онтологію, схеми, документи керування,
-          вихідний пакет <code>eifctl</code> і один відтворений вертикальний
-          зріз - це не стабільний реліз і не репрезентативна вибірка
-          реальних інженерних завдань.
+          пакет <code>eifctl</code> і один відтворюваний вертикальний зріз.
         </p>
         <pre class="quickstart__command"><code>pip install .
 eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk</code></pre>
@@ -2103,25 +2137,18 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk
           не довело б про мовний рівень: суть саме в тому, що мова це
           налаштування, а не зашите за замовчуванням значення.
         </p>
-        <p class="quickstart__caveat">
-          <strong>Встановлюється, але ще не опублікований.</strong>
-          <code>pip install .</code> збирає й встановлює справжній wheel, а
-          <code>scripts/eif_release.py</code> збирає wheel і sdist, перевіряє
-          їх за вимогами індексу пакетів і доводить, що зібраний wheel працює
-          в чистому середовищі. Саме вивантаження потребує облікових даних
-          власника, тож це єдиний крок, який тут нічого не робить самостійно.
-          Про те, скільки часу це займає в людини, заяв не робимо.
-        </p>
       </template>
 
       <template data-i18n-id="final-cta.body">
         <div class="section__head">
-          <span class="label">11 &middot; Заглибитися</span>
-          <h2 id="final-cta-heading">Що читати далі й як зі мною зв&rsquo;язатися</h2>
+          <span class="label">11 &middot; Далі</span>
+          <h2 id="final-cta-heading">Куди рухатися далі</h2>
         </div>
         <p class="section__lede">
-          Це фреймворк одного інженера, а не компанії. Зараз незгода варта для
-          мене більше, ніж згода, тож друга колонка тут не для декору.
+          EIF це фреймворк одного інженера, який розвивається відкрито. Нижче
+          зібрано решту написаного і два способи зі мною зв&rsquo;язатися.
+          Запитання, критика й досвід застосування на реальному репозиторії
+          однаково корисні.
         </p>
 
         <div class="final-cta__grid">
@@ -2129,19 +2156,19 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk
             <h3 class="final-cta__group-title" id="read-on-heading">Читати далі</h3>
             <ul class="final-cta__rows">
               <li>
-                <span class="label">На цій сторінці</span>
+                <span class="label">Розділ 04</span>
                 <a href="#control-plane">Архітектура</a>
                 <p>Один керований цикл від наміру до стійкого знання.</p>
               </li>
               <li>
-                <span class="label">На цій сторінці</span>
+                <span class="label">Розділ 09</span>
                 <a href="#evidence">Докази</a>
                 <p>Сім завдань, у кожного власна межа й власне обмеження.</p>
               </li>
               <li>
                 <span class="label">Джерело</span>
                 <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_UK__</a>
-                <p>Онтологія, схеми, пакет <code>eifctl</code> і відтворений вертикальний зріз.</p>
+                <p>Онтологія, схеми, пакет <code>eifctl</code> і відтворюваний вертикальний зріз.</p>
                 <p class="final-cta__pending">__EIF_REPO_PENDING_UK__</p>
               </li>
             </ul>
@@ -2153,7 +2180,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk
               <li>
                 <span class="label label--accent">LinkedIn</span>
                 <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
-                <p>Там виходить серія дописів про EIF, і це найшвидший спосіб мене знайти.</p>
+                <p>Там виходять дописи про EIF, і це найшвидший спосіб мене знайти.</p>
               </li>
               <li>
                 <span class="label label--accent">Пошта</span>

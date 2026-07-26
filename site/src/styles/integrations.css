@@ -5,7 +5,39 @@
    the boundaries and the health evidence. */
 .integrations__list {
   list-style: none;
-  margin: var(--eif-space-4) 0 0;
+  margin: var(--eif-space-5) 0 0;
   padding: 0;
   max-width: var(--eif-content-max);
+}
+
+/* Name on the left, boundary on the right, so the tags stack into one
+   scannable column down the three rows. This is the fact a reader wants
+   first from an optional integration: does it leave my machine. It used to
+   be the opening clause of a paragraph inside a collapsed disclosure, which
+   meant that in the default state this screen answered nothing. */
+.cap-row__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--eif-space-2);
+  width: 100%;
+}
+
+.cap-tag {
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--eif-fg-muted);
+  border: 1px solid var(--eif-rule);
+  border-radius: 2px;
+  padding: 0.05rem 0.45rem;
+}
+
+/* Amber is this page's one word for "leaves the boundary", used on the
+   Context7 lane in the figure directly above. */
+.cap-tag--network {
+  color: var(--eif-warn);
+  border-color: var(--eif-warn);
 }

@@ -3,6 +3,7 @@
    a successfully loaded main module adds .js, collapses details and lets
    main.js maintain aria-expanded on tap/click. */
 .reveal {
+  position: relative;
   border-top: 1px solid var(--eif-rule);
   padding: var(--eif-space-2) 0;
 }
@@ -13,18 +14,54 @@
 
 .reveal__trigger {
   all: unset;
+  /* `all: unset` also unsets the reset's border-box, so `width: 100%` plus
+     the caret's right padding measured wider than the row and pushed the
+     whole document into horizontal overflow at every width below 1024px. */
+  box-sizing: border-box;
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   width: 100%;
   min-height: 44px;
   cursor: pointer;
-  padding: var(--eif-space-1) 0;
+  padding: var(--eif-space-1) 1.75rem var(--eif-space-1) 0;
   color: var(--eif-fg);
 }
 
 .reveal__trigger span:last-child {
   color: var(--eif-fg-muted);
+}
+
+/* A row that opens has to look like a row that opens. Without this the
+   collapsed default is a title and a subtitle with nothing to say it goes
+   anywhere, which is what made these lists read as unfinished. Drawn only
+   under .js, because the no-JS path is already expanded and a caret there
+   would point at a control that does not exist. Decorative: the button and
+   its aria-expanded state carry the meaning for assistive tech. */
+.js .reveal__trigger::after {
+  content: "";
+  position: absolute;
+  right: 0.35rem;
+  top: calc(50% - 0.35rem);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1.5px solid var(--eif-fg-muted);
+  border-bottom: 1.5px solid var(--eif-fg-muted);
+  transform: rotate(45deg);
+  transform-origin: center;
+  opacity: 0.6;
+  transition: transform var(--eif-duration-fast) var(--eif-ease),
+    opacity var(--eif-duration-fast) linear,
+    border-color var(--eif-duration-fast) linear;
+}
+
+.js .reveal__trigger:hover::after,
+.js .reveal__trigger:focus::after,
+.js .reveal.is-open .reveal__trigger::after {
+  opacity: 1;
+  border-color: var(--eif-accent);
+  transform: rotate(225deg) translate(-0.15rem, -0.15rem);
 }
 
 .reveal__detail {
@@ -62,7 +99,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .js .reveal__detail {
+  .js .reveal__detail,
+  .js .reveal__trigger::after {
     transition: none;
   }
 }

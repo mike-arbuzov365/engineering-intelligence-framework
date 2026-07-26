@@ -28,6 +28,37 @@ of the entry rather than a footnote.
 
 ### Changed
 
+- The site's release-status notes moved off the site, into
+  [`docs/product/pre-release.md`](docs/product/pre-release.md). The
+  quickstart used to spend a heading, a lede clause and a closing paragraph
+  arguing about whether this is a release. The command it prints is
+  `pip install .`, which works from a clone, and the page never printed the
+  package-index form that would fail for a reader, so those notes were not
+  protecting anyone. An end-to-end test asserts both facts: the failing
+  install form never appears, and the removed notes stay removed.
+- The optional-capabilities section now answers the boundary question in its
+  default state. Whether an integration leaves the machine was the opening
+  clause of a paragraph inside a collapsed disclosure; it is a `Local` or
+  `Network` tag on each row, amber for the one that goes to the network,
+  matching that tool's lane in the figure directly above. The figure moved
+  out of a 24rem column into full width, its legend went from three
+  paragraphs to four one-line keys, and the amber rule that had been
+  bracketing a drawing and a caveat together now brackets only the caveat.
+- The Ukrainian on that section was translated rather than written, in a way
+  a reader would notice: a heading calqued word for word, "по одній
+  обмеженій спроможності", "Керованість не безкоштовна в токенах", and a
+  feminine "Без неї" standing in for three masculine tool names. Rewritten
+  against the English line by line.
+- Disclosure rows on the capabilities list and the evidence ledger show a
+  caret, so a row that opens looks like one. Drawn only when the enhancement
+  is active, since the no-JS path is already expanded.
+- The closing screen says what is below it instead of performing an
+  attitude about it. "Right now disagreement is worth more to me than
+  agreement, so the second column is not decoration" was telling a reader
+  how to feel about a contact column. On-page destinations carry the page's
+  own section numbers rather than repeating "on this page" down a column,
+  and each destination now sits next to its purpose line instead of 44px
+  above it.
 - The site says how to install rather than that you cannot. `pip install .`
   followed by `eifctl init` is the quickstart command now, which is the path
   the installed-wheel suite has been exercising all along, and the caveat is

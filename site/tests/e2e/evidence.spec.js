@@ -134,20 +134,20 @@ test.describe('evidence', () => {
 });
 
 test.describe('quickstart', () => {
-  test('shows the real init command, the package-index caveat and no human-duration promise', async ({
-    page,
-  }) => {
+  test('shows the real init command and no command the reader cannot run yet', async ({ page }) => {
     await page.goto('/#quickstart');
     const command = page.locator('.quickstart__command');
     await expect(command).toContainText('pip install .');
     await expect(command).toContainText('eifctl init');
     const section = page.locator('#quickstart');
-    // `pip install` is real here, from a clone; what is not real yet is a
-    // package index, and the caveat says exactly that and no more.
+    // The screen carries a command that works from a clone. It must never
+    // print the package-index form, which is the one thing here that would
+    // fail for a reader; that guarantee is what lets the screen drop the
+    // release-status notes it used to carry. Those now live in
+    // docs/product/pre-release.md, off the page.
     await expect(section).not.toContainText('pip install engineering-intelligence-framework');
-    await expect(section).toContainText('Installable, not yet published');
-    await expect(section).toContainText('eif_release.py');
-    await expect(section).toContainText('No claim is made about how long any of this takes a human');
+    await expect(section).not.toContainText('not yet published');
+    await expect(section).not.toContainText('eif_release.py');
     // The reference run's locale is stated as a configuration outcome, not
     // as an unexplained "closes in Ukrainian".
     await expect(section).toContainText('whichever language the instance');
@@ -210,6 +210,21 @@ test.describe('final CTA', () => {
     // replaced.
     const rows = page.locator('.final-cta__rows > li');
     await expect(rows).toHaveCount(5);
+  });
+
+  test('the closing lede states what this is without performing an attitude', async ({ page }) => {
+    await page.goto('/');
+    const lede = page.locator('#final-cta .section__lede');
+    await expect(lede).toContainText('developed in the open');
+    // The old lede set disagreement against agreement to tell the reader how
+    // to feel about the contact column. It says what is below it now.
+    await expect(lede).not.toContainText('disagreement');
+    await expect(lede).not.toContainText('decoration');
+    // On-page destinations are labelled with the page's own section numbers,
+    // instead of the same words twice down one column.
+    const readOnLabels = page.locator('.final-cta__group').nth(0).locator('.label');
+    await expect(readOnLabels.nth(0)).toHaveText('Section 04');
+    await expect(readOnLabels.nth(1)).toHaveText('Section 09');
   });
 
   test('the whole closing screen translates, including the repository label', async ({ page }) => {

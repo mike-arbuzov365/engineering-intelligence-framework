@@ -23,6 +23,38 @@ test.describe('optional capabilities', () => {
     );
   });
 
+  test('each row answers the boundary question while still collapsed', async ({ page }) => {
+    await page.goto('/#integrations');
+    const tags = page.locator('#integrations .cap-tag');
+    await expect(tags).toHaveCount(3);
+    await expect(tags.nth(0)).toHaveText('Local');
+    await expect(tags.nth(1)).toHaveText('Local');
+    await expect(tags.nth(2)).toHaveText('Network');
+    // Only the Context7 row leaves the machine, and only it carries the
+    // amber modifier the figure above uses for the same boundary.
+    await expect(page.locator('#integrations .cap-tag--network')).toHaveCount(1);
+    await expect(page.locator('#integrations .reveal').nth(2).locator('.cap-tag--network')).toHaveCount(
+      1,
+    );
+  });
+
+  test('boundary tags translate with the rest of the section', async ({ page }) => {
+    await page.goto('/#integrations');
+    await page.locator('#lang-toggle').click();
+    const tags = page.locator('#integrations .cap-tag');
+    await expect(tags.nth(0)).toHaveText('Локально');
+    await expect(tags.nth(2)).toHaveText('Мережа');
+  });
+
+  test('the figure legend is four one-line keys, not a second body of text', async ({ page }) => {
+    await page.goto('/#integrations');
+    const keys = page.locator('#integrations .cap-flow .figure-legend__item');
+    await expect(keys).toHaveCount(4);
+    // The context box on the right went unexplained for as long as the legend
+    // had only three keys.
+    await expect(keys.nth(3)).toContainText('context');
+  });
+
   test('the cost statement names the price without claiming the balance', async ({ page }) => {
     await page.goto('/#integrations');
     const cost = page.locator('.token-economics__body');

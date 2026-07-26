@@ -535,8 +535,59 @@ ever carried was reported as a leaked machine path.
 
 ---
 
+## SB-021 - Release pass on capabilities, quickstart and the closing screen
+
+**Status:** done (2026-07-27)
+**Raised:** 2026-07-27, owner review ahead of the release
+
+- **Optional capabilities looked bad and read worse in Ukrainian.** The
+  figure sat in a 24rem column beside the cost note, behind a shared amber
+  rule, so a drawing and a caveat were bracketed as if they were the same
+  kind of thing. Rebuilt as four blocks in reading order: claim, figure,
+  the three tools, then the price. The figure is full width, its legend is
+  four one-line keys in two columns instead of three paragraphs, and the
+  context box on the right finally has a key at all. The amber rule now
+  brackets only the caveat, which is what it means everywhere else.
+- **The screen answered nothing in its default state.** Three collapsed
+  rows carried a name and a subtitle; the boundary, which is the fact
+  people actually arrive with, was the opening clause of a paragraph inside
+  a disclosure nobody had opened. Each row now shows `Local` or `Network`
+  as a tag, and the Context7 tag is amber, matching its lane in the figure
+  directly above.
+- **Rows did not look like rows that open.** A caret, drawn only under
+  `.js` because the no-JS path is already expanded, on both this list and
+  the evidence ledger that shares the component.
+- **The Ukrainian was translated, not written.** "Три інструменти, які
+  допомагають. Жоден із них не є методом", "по одній обмеженій
+  спроможності", "Керованість не безкоштовна в токенах", and "Без неї" for
+  three masculine tool names. Rewritten against the English line by line,
+  as Ukrainian someone would write.
+- **The quickstart was a disclaimer with a command in it.** Heading,
+  lede and a closing caveat all argued about release status. The commands
+  work from a clone and the page never printed the package-index form, so
+  the status notes were not protecting the reader from anything. They moved
+  to [`docs/product/pre-release.md`](../docs/product/pre-release.md), and an
+  end-to-end test now asserts they are gone and that the failing install
+  form never appears.
+- **The closing screen performed an attitude.** "Right now disagreement is
+  worth more to me than agreement, so the second column is not decoration"
+  told the reader how to feel about a contact form. Replaced with what is
+  below it. Written against GOV.UK content guidance: plain words, no
+  "please", front-loaded and self-explanatory link text. On-page rows now
+  carry the page's own section numbers rather than saying "on this page"
+  twice down one column, and each destination sits next to its purpose line
+  instead of 44px above it.
+- **Found on the way:** `all: unset` on the disclosure trigger also unsets
+  the reset's `border-box`, so the caret's right padding measured wider
+  than the row and put the whole document into horizontal overflow at every
+  width below 1024px.
+
+---
+
 ## Closed
 
+- **SB-021** release pass: capabilities rebuilt around the boundary
+  question, quickstart stripped of release notes, closing screen rewritten.
 - **SB-020** second review pass: capabilities de-duplicated, `pip install`
   made real, closing screen rebuilt as one grid.
 - **SB-019** ten review findings fixed; limitations folded into the claims

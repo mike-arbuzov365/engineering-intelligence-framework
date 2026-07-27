@@ -106,13 +106,17 @@ if (deployStatus === 'deployable' && !indexHtml.includes('git clone https://')) 
   failures.push('production quickstart must carry an https clone URL');
 }
 
+// The repository URL is a project constant now, not a per-deployment input,
+// so every mode carries a real one. Only the reserved test profile differs,
+// and it is asserted exactly below.
+if (deployStatus !== 'no-deploy-test-profile') {
+  assertHttps('repository CTA', repositoryHref);
+}
+
 if (deployStatus === 'no-deploy') {
   if (canonical || ogUrl) failures.push('preview bundle must not publish canonical/og:url metadata');
   if (ogImage !== '/social-card.png' || twitterImage !== '/social-card.png') {
     failures.push('preview social image metadata must remain root-relative');
-  }
-  if (repositoryHref !== '#evidence') {
-    failures.push('preview repository CTA must use the on-page evidence fallback');
   }
 } else if (deployStatus === 'no-deploy-test-profile') {
   const expectedSite = 'https://eif-site.invalid/';

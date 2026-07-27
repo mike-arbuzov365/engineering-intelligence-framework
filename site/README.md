@@ -86,18 +86,25 @@ rendered page copy.
 
 ## Metadata / URLs
 
-`EIF_SITE_URL` and `EIF_REPOSITORY_URL` are the only two owner-supplied
-production inputs this site needs, and they live in the committed
-`.env.production`, which Vite loads for `build:production` only. Both are
-public by definition - they are emitted into the shipped HTML - so the file
-is committed and a production build is reproducible from a clean checkout
-instead of from one machine's shell. Moving the site to another host is a
-one-line change to `EIF_SITE_URL`.
+`EIF_SITE_URL` is the one owner-supplied production input, and it lives in
+the committed `.env.production`, which Vite loads for `build:production`
+only. It is public by definition - it is emitted into the shipped HTML as
+the canonical URL, the sitemap and the absolute social-card URLs - so the
+file is committed and a production build is reproducible from a clean
+checkout instead of from one machine's shell. Moving the site to another
+host is a one-line change to it. Preview and dev builds never require it:
+canonical, sitemap and `og:url` are simply not emitted, and `robots.txt`
+degrades to `Disallow: /`.
 
-Preview and dev builds never require either value: the final-CTA repository
-link, the quickstart's `git clone` line and the canonical/sitemap/robots
-output all degrade to an on-page, angle-bracket or `Disallow: /` default
-when unset (see the `eif-metadata` Vite plugin in `vite.config.js`).
+The repository URL is *not* an input. It is a constant of the project, so
+it lives in `vite.config.js` and resolves in every mode including dev, which
+is what makes the closing screen's Source row and the quickstart's
+`git clone` line real links in a local read. `EIF_REPOSITORY_URL` overrides
+it for one build and is validated the same way, so a mistyped override fails
+the build rather than shipping as the first command a reader pastes. It used
+to be production-gated, which was right while publication was undecided and
+wrong the moment the repository went public: every non-production build
+pointed the one outbound CTA at an on-page anchor.
 
 Production inputs must be credential-free HTTPS URLs with no query or
 fragment. `EIF_SITE_URL` may include a deployment sub-path; Vite's base,
@@ -112,6 +119,25 @@ Run `build:production` and then `verify:bundle` before deployment.
 `verify:bundle` fails on any `__EIF_*__` marker that survived into
 `dist/index.html`, so an unsubstituted clone URL cannot ship as a first
 command a reader would paste.
+
+## Deployment
+
+`.github/workflows/pages.yml` publishes this directory to GitHub Pages on
+any change under `site/`, and on manual dispatch. It runs
+`verify:claims:strict`, `verify:metadata`, `build:production` and
+`verify:bundle`, in that order, and nothing else - no Playwright, no
+Lighthouse, no axe. Those three verifiers are pure Node scripts with no
+browser, and they are what stops an unknown claim ID, forbidden wording, a
+leaked private path, a third-party runtime request or a surviving build
+marker from reaching a public page. The full gate stays local and unhosted:
+`npm run gate:site`. See D-15 in `core/policies/decisions.md` for why a
+push-triggered deploy is a boundary rather than a contradiction of D-14.
+
+`generate:social-assets` also emits `.github/social-preview.png` at
+1280x640, from the same brand source as the site's own card, for the
+repository's Social preview setting. It is written outside `public/` because
+the site never serves it and copying it into every `dist/` would be dead
+weight.
 
 ## Structure
 

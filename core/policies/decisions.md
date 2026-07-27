@@ -232,6 +232,29 @@ required jobs failed in ~2s with `runner_id: 0` (no runner allocated) -
 capacity evidence, not a product failure, and the immediate trigger for
 this consolidation.
 
+### D-15: Publication is allowed to run on push; validation still is not
+**Status: provisional, in effect 2026-07-27.** D-14 states that push to
+`main` triggers no workflow at all. `.github/workflows/pages.yml` does, so
+the boundary is recorded here rather than left as a contradiction a reader
+would find on their own. D-14's subject is routine *validation* topology:
+which tests run where, how many hosted jobs a change allocates, and which
+contexts are required to merge. Publishing an already-merged tree to GitHub
+Pages is a different act, and the Pages workflow runs no test at all: no
+Playwright, no Lighthouse, no axe, no Python suite. It installs from the
+committed lockfile, runs the three fail-closed verifiers
+(`verify:claims:strict`, `verify:metadata`, `verify:bundle`), builds, and
+deploys. Those three are pure Node scripts with no browser, and they are
+what stops an unknown claim ID, forbidden wording, a leaked private path, a
+third-party runtime request or an unsubstituted `__EIF_*__` build marker
+from reaching a public page; serving a bundle that fails them would make
+having them pointless. The full site gate stays local and unhosted, exactly
+as D-14 and `site/README.md` describe. Triggered only by a change under
+`site/`, so a documentation commit does not redeploy an identical bundle.
+Provisional rather than ratified: it is in effect because the site needs to
+be served, not because it went through an owner ratification step. Enabling
+Pages itself (Settings -> Pages -> Source: GitHub Actions) is an owner
+action that nothing in this repository performs.
+
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08

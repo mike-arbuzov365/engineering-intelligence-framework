@@ -1,0 +1,121 @@
+name: pages
+
+# Publishes site/ to GitHub Pages.
+#
+# Relationship to D-14 (core/policies/decisions.md), which ratified "push to
+# main triggers no workflow at all": that decision is about routine
+# *validation* topology, and this workflow runs no tests. It builds an
+# already-validated tree and serves it. The narrow amendment is recorded as
+# D-15 rather than left as an undocumented contradiction, and the boundary
+# D-15 draws is the one enforced below: no Playwright, no Lighthouse, no
+# Python suite, nothing that duplicates what the PR job or the local site
+# gate already covered.
+#
+# What it does run is the three fail-closed verifiers, because they are pure
+# Node scripts with no browser and they are the guarantees the site's whole
+# claim discipline rests on: an unknown claim ID, forbidden wording, a leaked
+# private path, a third-party runtime request, a missing metadata marker or
+# an unsubstituted __EIF_*__ build marker all stop the deploy. Publishing a
+# page that fails those would defeat the point of having them.
+#
+# The full gate (two browser engines, axe, Lighthouse, byte budgets) stays
+# local and unhosted, per site/README.md: `npm --prefix site run gate:site`.
+#
+# One manual prerequisite, once: repository Settings -> Pages -> Source must
+# be set to "GitHub Actions". Nothing here can set it, and until it is set
+# the deploy step fails with a "Pages site not found" style error rather than
+# silently doing nothing.
+
+on:
+  push:
+    branches: [main]
+    # Only when something that can change the published page changes. A
+    # documentation-only commit does not redeploy an identical bundle.
+    paths:
+      - "site/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never two deploys at once, and never cancel one midway: a half-finished
+# Pages deploy is a broken public page, unlike a cancelled test run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    name: Build site and deploy to Pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Install from the committed lockfile
+        run: npm ci
+        working-directory: site
+
+      # Before the build, because a claim violation is a content problem and
+      # should be reported as one rather than as a failed deploy.
+      - name: Verify claims, wording, private paths and runtime requests
+        run: npm run verify:claims:strict
+        working-directory: site
+
+      - name: Verify metadata markers and social assets
+        run: npm run verify:metadata
+        working-directory: site
+
+      # EIF_SITE_URL comes from site/.env.production, committed, because it is
+      # public by definition: it is emitted into the page as the canonical URL,
+      # the sitemap and the absolute social-card URLs. This step fails closed
+      # if it is missing or is not a credential-free https URL.
+      - name: Build for production
+        run: npm run build:production
+        working-directory: site
+
+      # Asserts the emitted bundle against its own declared deploy status:
+      # deployable, canonical == og:url, absolute social images under the
+      # canonical origin, an https repository CTA, and no surviving
+      # __EIF_*__ marker. Also writes dist/manifest.json with a per-file
+      # SHA-256 and one bundle digest, so what was served is identifiable
+      # after the fact.
+      - name: Verify the built bundle
+        run: npm run verify:bundle
+        working-directory: site
+
+      - name: Record the bundle digest in the job summary
+        shell: bash
+        run: |
+          {
+            echo "### Deployed bundle"
+            echo
+            echo "- digest: \`$(node -p "require('./dist/manifest.json').bundleDigest")\`"
+            echo "- deploy status: \`$(node -p "require('./dist/manifest.json').deployStatus")\`"
+            echo "- files: $(node -p "require('./dist/manifest.json').files.length")"
+          } >> "$GITHUB_STEP_SUMMARY"
+        working-directory: site
+
+      # manifest.json is build evidence for this job, not something the public
+      # page needs to serve.
+      - name: Drop the build manifest from the published artifact
+        run: rm -f dist/manifest.json
+        working-directory: site
+
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/dist
+
+      - id: deploy
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0

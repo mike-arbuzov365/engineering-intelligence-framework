@@ -754,8 +754,53 @@ Two things this round found that were not on the list:
 
 ---
 
+## SB-026 - Five more from the same read, and the site goes live
+
+**Status:** done (2026-07-27)
+**Raised:** 2026-07-27, owner review
+
+- **The quickstart never said English is the default.** The demo declares
+  Ukrainian on purpose, and a reader could easily take that for the default.
+  Verified by running `eifctl init` with no `--locale` at all: it writes
+  `locale: en` and reports in English. Now stated where the flag is
+  explained, in bold, because it is the sentence that stops the
+  misunderstanding.
+- **The argument note was one sentence holding three arguments.** The owner
+  could not parse it either, which is the whole verdict. It is a definition
+  list now, one row per argument on the same two-track grid the loop's
+  contract block uses, so a reader can find the one they are stuck on
+  instead of re-reading a sentence to extract it. `--instance-path` also
+  says that `.` works, which is true and was the missing practical detail.
+- **The Source link went nowhere.** `EIF_REPOSITORY_URL` was
+  production-gated, so dev and preview resolved the closing screen's one
+  outbound destination to `#evidence` and printed "the repository link is
+  added at publication" underneath it. Correct while publication was an
+  undecided owner call; a dead link and a false caption the moment the
+  repository is public. The URL is a project constant now, resolved in every
+  mode, and the pending line is deleted rather than left permanently empty:
+  it captioned a state that no longer exists.
+- **The repository had no social preview.** Every link to it rendered as
+  GitHub's generic auto-card. `generate:social-assets` emits a 1280x640
+  card from the same brand source as the site's own, written to `.github/`
+  rather than `public/` because the site never serves it. Found one defect
+  while drawing it: a 3px accent rule in a centred flex column shrinks to
+  nothing without `flex: none`, so the rule was silently absent from the
+  first render.
+- **The site is deployed.** `.github/workflows/pages.yml`, on any change
+  under `site/`. It runs the three fail-closed verifiers and nothing else;
+  the browser gate stays local, because duplicating it in CI would cost
+  minutes to re-prove what a local run already proved. It contradicts D-14's
+  "push to main triggers no workflow", so the boundary is recorded as D-15
+  rather than left for a reader to find: D-14 governs validation topology,
+  and this job runs no test.
+
+---
+
 ## Closed
 
+- **SB-026** default locale stated, argument note rebuilt as a list, the
+  Source link made live in every mode, a GitHub social card, and the Pages
+  deploy.
 - **SB-025** loop focus artifact, four Ukrainian tooltips, per-platform
   quickstart with a copy tooltip, muted outcome paragraph; plus a sub-path
   social-image bug and a build-marker check found on the way.

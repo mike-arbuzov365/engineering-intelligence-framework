@@ -1,10 +1,20 @@
 ---
-type: reference
-status: active
+type: rule
+status: validated
 scope: framework
+evidence: OBSERVED
+source: code
 created: 2026-07-27
 review_after: 2026-10-27
 ---
+
+<!-- Frontmatter corrected 2026-07-27: this carried `type: reference` and
+`status: active`, neither of which exists in the ontology. It is
+prescriptive - what a post may and may not say - so `rule`, not a
+descriptive type. OBSERVED/code because its forbidden-wording list is not an
+aspiration: it mirrors the list `site/scripts/verify-claims.mjs` actually
+enforces on every site build. -->
+
 
 # Publishing rules
 

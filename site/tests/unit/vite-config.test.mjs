@@ -1,7 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { normalizePublicUrl, resolveProductionUrls } from '../../vite.config.js';
+import {
+  normalizePublicUrl,
+  resolveProductionUrls,
+  resolveRepositoryUrl,
+} from '../../vite.config.js';
 
 test('production URL normalization preserves a deploy sub-path', () => {
   const result = resolveProductionUrls('production', {
@@ -40,4 +44,35 @@ test('reserved .invalid URLs are accepted only by the test-production profile', 
   const result = resolveProductionUrls('test-production', {});
   assert.equal(result.siteUrl, 'https://eif-site.invalid/');
   assert.equal(result.repositoryUrl, 'https://github.invalid/eif-website-test-profile');
+});
+
+test('the repository URL resolves in every mode, not only production', () => {
+  // It was production-only, which left dev and preview builds pointing the
+  // closing screen's Source row at an on-page anchor.
+  for (const mode of ['development', 'preview', 'production']) {
+    assert.equal(
+      resolveRepositoryUrl(mode, {}),
+      'https://github.com/mike-arbuzov365/engineering-intelligence-framework',
+    );
+  }
+
+  // The reserved test profile keeps its own value rather than inheriting the
+  // real one, or build:test-production would stop being a canary.
+  assert.equal(
+    resolveRepositoryUrl('test-production', {}),
+    'https://github.invalid/eif-website-test-profile',
+  );
+});
+
+test('an overridden repository URL is validated like any other public URL', () => {
+  assert.equal(
+    resolveRepositoryUrl('preview', { EIF_REPOSITORY_URL: 'https://code.invalid-host.test/org/eif' }),
+    'https://code.invalid-host.test/org/eif',
+  );
+
+  // A mistyped override must fail the build rather than ship as the first
+  // command a reader pastes into a shell.
+  for (const value of ['http://code.invalid-host.test/org/eif', 'not-a-url', 'https://user:secret@code.invalid-host.test/eif']) {
+    assert.throws(() => resolveRepositoryUrl('preview', { EIF_REPOSITORY_URL: value }), /eif-site/);
+  }
 });

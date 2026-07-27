@@ -2,10 +2,12 @@ name: ci
 
 # Routine PR validation only - see docs/architecture/HOW-EIF-WORKS.md#ci-and-quality-gates
 # and core/policies/decisions.md D-14. Exactly one hosted job runs per PR.
-# Push to main triggers no workflow: a merged PR was already fully
-# validated by this job, so re-running on push would only duplicate cost,
-# not add confidence (this supersedes D-13's push-side evidence-reuse
-# mechanism, which is no longer needed once push runs nothing). The
+# Push to main triggers no *validation* workflow: a merged PR was already
+# fully validated by this job, so re-running on push would only duplicate
+# cost, not add confidence (this supersedes D-13's push-side evidence-reuse
+# mechanism, which is no longer needed once push runs nothing). The one
+# push-triggered workflow is pages.yml, which publishes an already-merged
+# site/ and runs no test - see D-15 for that boundary. The
 # cross-platform package-build/license-check matrices and the full
 # scripts/tests/run_all.py suite inventory moved to the manual
 # .github/workflows/release-check.yml gate - see scripts/tests/smoke.py

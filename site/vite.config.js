@@ -10,6 +10,18 @@ const TEST_PROFILE_DEFAULTS = {
   EIF_REPOSITORY_URL: 'https://github.invalid/eif-website-test-profile',
 };
 
+// The repository URL is a public, permanent fact about this project, not a
+// per-deployment input, so it has a committed default and resolves in every
+// mode. It used to be production-only, which was right while publication was
+// an undecided owner call: dev and preview pointed the closing screen's
+// Source row at an on-page anchor and printed "the repository link is added
+// at publication". Once the repository is public that link is simply broken
+// in every mode but one, and that line is false. EIF_SITE_URL keeps its
+// production gate, because canonical, sitemap and robots output must not
+// leak out of a production build.
+const DEFAULT_REPOSITORY_URL =
+  'https://github.com/mike-arbuzov365/engineering-intelligence-framework';
+
 export function normalizePublicUrl(name, value, mode, { directory = false } = {}) {
   let parsed;
   try {
@@ -33,34 +45,41 @@ export function normalizePublicUrl(name, value, mode, { directory = false } = {}
   return parsed.toString();
 }
 
+function checkPublicUrl(name, value, mode, { directory = false, isTestProduction = false } = {}) {
+  if (!value) {
+    throw new Error(`[eif-site] ${name} is required for a ${mode} build and was not set.`);
+  }
+  const isReservedInvalid = RESERVED_INVALID_RE.test(value);
+  if (isReservedInvalid && !isTestProduction) {
+    throw new Error(`[eif-site] ${name}="${value}" uses the reserved .invalid test domain outside build:test-production.`);
+  }
+  if (!isReservedInvalid && PLACEHOLDER_RE.test(value)) {
+    throw new Error(`[eif-site] ${name}="${value}" looks like a placeholder value; refusing a ${mode} build.`);
+  }
+  return normalizePublicUrl(name, value, mode, { directory });
+}
+
+// Resolved in every mode, including dev. An override still has to be a
+// credential-free https URL, so a mistyped one fails the build rather than
+// shipping as the reader's first command.
+export function resolveRepositoryUrl(mode, env) {
+  const isTestProduction = mode === 'test-production';
+  const value =
+    env.EIF_REPOSITORY_URL ||
+    (isTestProduction ? TEST_PROFILE_DEFAULTS.EIF_REPOSITORY_URL : DEFAULT_REPOSITORY_URL);
+  return checkPublicUrl('EIF_REPOSITORY_URL', value, mode, { isTestProduction });
+}
+
 export function resolveProductionUrls(mode, env) {
   const isTestProduction = mode === 'test-production';
-  const defaults = isTestProduction ? TEST_PROFILE_DEFAULTS : {};
+  const siteUrl = checkPublicUrl(
+    'EIF_SITE_URL',
+    env.EIF_SITE_URL || (isTestProduction ? TEST_PROFILE_DEFAULTS.EIF_SITE_URL : ''),
+    mode,
+    { directory: true, isTestProduction },
+  );
 
-  let siteUrl = env.EIF_SITE_URL || defaults.EIF_SITE_URL || '';
-  let repositoryUrl = env.EIF_REPOSITORY_URL || defaults.EIF_REPOSITORY_URL || '';
-
-  for (const [name, value, directory] of [
-    ['EIF_SITE_URL', siteUrl, true],
-    ['EIF_REPOSITORY_URL', repositoryUrl, false],
-  ]) {
-    if (!value) {
-      throw new Error(`[eif-site] ${name} is required for a ${mode} build and was not set.`);
-    }
-    const isReservedInvalid = RESERVED_INVALID_RE.test(value);
-    if (isReservedInvalid && !isTestProduction) {
-      throw new Error(`[eif-site] ${name}="${value}" uses the reserved .invalid test domain outside build:test-production.`);
-    }
-    if (!isReservedInvalid && PLACEHOLDER_RE.test(value)) {
-      throw new Error(`[eif-site] ${name}="${value}" looks like a placeholder value; refusing a ${mode} build.`);
-    }
-
-    const normalized = normalizePublicUrl(name, value, mode, { directory });
-    if (name === 'EIF_SITE_URL') siteUrl = normalized;
-    if (name === 'EIF_REPOSITORY_URL') repositoryUrl = normalized;
-  }
-
-  return { siteUrl, repositoryUrl };
+  return { siteUrl, repositoryUrl: resolveRepositoryUrl(mode, env) };
 }
 
 function eifDeployStatusPlugin(getDeployStatus) {
@@ -86,32 +105,18 @@ function eifMetadataPlugin(getUrls) {
     name: 'eif-metadata',
     transformIndexHtml(html) {
       const { siteUrl, repositoryUrl } = getUrls();
-      const repoHref = repositoryUrl || '#evidence';
 
-      // The label is the same promise in both states, in the reader's own
-      // language. It used to carry "(link added at publication)" inside the
-      // link text, which put a parenthetical disclaimer in the middle of a
-      // call to action and left the Ukrainian page with an English one. The
-      // caveat now lives in its own line, which the production build empties
-      // and CSS then hides.
+      // The label is the same promise in both languages, and there is no
+      // second state to caption any more: the repository URL resolves in
+      // every mode, so the closing screen's Source row and the quickstart's
+      // `git clone` line are the real ones whether this is dev, preview or
+      // production. The "link added at publication" line that used to sit
+      // under the CTA described a decision that has since been made.
       let out = html
-        .replaceAll('__EIF_REPO_CTA_HREF__', repoHref)
-        // The quickstart's first line is `git clone <this>`. Until the owner
-        // supplies a repository URL there is no honest value for it, so it
-        // falls back to the same angle-bracket convention the rest of that
-        // block already uses for <name> and <path> rather than shipping a
-        // guessed host a reader would paste and fail on.
-        .replaceAll('__EIF_REPO_CLONE_URL__', repositoryUrl || '&lt;repository-url&gt;')
+        .replaceAll('__EIF_REPO_CTA_HREF__', repositoryUrl)
+        .replaceAll('__EIF_REPO_CLONE_URL__', repositoryUrl)
         .replaceAll('__EIF_REPO_CTA_LABEL_EN__', 'Public repository')
-        .replaceAll('__EIF_REPO_CTA_LABEL_UK__', 'Публічний репозиторій')
-        .replaceAll(
-          '__EIF_REPO_PENDING_EN__',
-          repositoryUrl ? '' : 'The repository link is added at publication.',
-        )
-        .replaceAll(
-          '__EIF_REPO_PENDING_UK__',
-          repositoryUrl ? '' : 'Посилання на репозиторій додаємо під час публікації.',
-        );
+        .replaceAll('__EIF_REPO_CTA_LABEL_UK__', 'Публічний репозиторій');
 
       const tags = [];
       if (siteUrl) {
@@ -161,7 +166,10 @@ export default defineConfig(({ mode }) => {
   const isTestProduction = mode === 'test-production';
 
   let siteUrl = '';
-  let repositoryUrl = '';
+  // Resolved for every mode, dev included, so the closing screen's Source row
+  // and the quickstart's clone line point at the real repository whatever
+  // this build is for.
+  let repositoryUrl = resolveRepositoryUrl(mode, env);
   // 'no-deploy' is the fail-safe default: only a real `production` build with
   // validated URLs flips this to 'deployable'. See D-09 in
   // 03-DECISIONS-001-ratified-implementation-defaults.md (private planning repo).

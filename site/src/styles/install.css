@@ -111,6 +111,54 @@
   display: none;
 }
 
+/* One argument per row, term and definition on one axis, so a reader can
+   find the one they are stuck on instead of parsing a sentence that holds
+   all three at once. Same two-track grid the loop's contract block uses. */
+.install__args {
+  margin: var(--eif-space-3) 0 0;
+  max-width: var(--eif-content-max);
+}
+
+.install__args > div {
+  padding: var(--eif-space-2) 0;
+  border-top: 1px solid var(--eif-rule);
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  column-gap: var(--eif-space-2);
+  row-gap: 0.3rem;
+  align-items: baseline;
+}
+
+.install__args > div:last-child {
+  border-bottom: 1px solid var(--eif-rule);
+}
+
+.install__args dt code {
+  color: var(--eif-fg);
+  font-size: 0.875rem;
+}
+
+.install__args dd {
+  margin: 0;
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
+}
+
+.install__args dd strong {
+  color: var(--eif-fg);
+  font-weight: 600;
+}
+
+.install__args dd code {
+  color: var(--eif-fg);
+}
+
+@media (max-width: 560px) {
+  .install__args > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .install__shell-note {
   margin-top: var(--eif-space-1);
   max-width: var(--eif-measure);

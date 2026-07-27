@@ -37,8 +37,6 @@ const REQUIRED_HTML_MARKERS = [
   '__EIF_REPO_CLONE_URL__',
   '__EIF_REPO_CTA_LABEL_EN__',
   '__EIF_REPO_CTA_LABEL_UK__',
-  '__EIF_REPO_PENDING_EN__',
-  '__EIF_REPO_PENDING_UK__',
 ];
 
 for (const marker of REQUIRED_HTML_MARKERS) {

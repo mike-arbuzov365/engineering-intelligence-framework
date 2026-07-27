@@ -1,10 +1,21 @@
 ---
-type: reference
-status: active
+type: fact
+status: validated
 scope: framework
+evidence: OBSERVED
+source: code
 created: 2026-07-27
 review_after: 2026-08-27
 ---
+
+<!-- Frontmatter corrected 2026-07-27: this carried `type: reference` and
+`status: active`, neither of which exists in the ontology, so CI's own
+frontmatter validation failed on it and on linkedin-series.md from the day
+both were added. It states what is true of this repository right now (the
+version in pyproject.toml, that no artifact is on a package index, what the
+release script does and where it stops), which is empirical, so `fact` with
+an OBSERVED label read from the code itself. -->
+
 
 # Pre-release status
 
@@ -111,19 +122,23 @@ Ordered, with the manual steps marked. Nothing here runs itself.
 3. `python scripts/eif_release.py` clean, including the clean-environment
    install.
 4. **Manual, owner credentials:** upload the artifacts.
-5. **Manual:** make the repository public. `EIF_SITE_URL` and
-   `EIF_REPOSITORY_URL` are already set in
-   [`site/.env.production`](../../site/.env.production), so
-   `npm --prefix site run build:production` emits the real clone command,
-   the canonical URL and the closing screen's Source row, and empties the
-   "repository link is added at publication" line. Until the repository is
-   public those links resolve to a 404 for everyone but the owner, which is
-   why this step comes before the next one and not after it.
-6. **Manual:** serve `site/dist/` and check the built page against a real
-   URL, not localhost. `npm --prefix site run verify:bundle` must pass on
-   that exact `dist/` first; it fails on any unsubstituted `__EIF_*__`
-   marker, so a broken first command cannot reach a reader.
-7. Update the **Live site** line in the root [`README.md`](../../README.md)
-   to the URL that now serves.
+5. **Done 2026-07-27:** the repository is public, and
+   [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
+   publishes `site/` to GitHub Pages on any change under `site/`. The
+   deploy runs `verify:claims:strict`, `verify:metadata` and
+   `verify:bundle` before it serves anything, so a claim violation or an
+   unsubstituted `__EIF_*__` marker stops it. `EIF_SITE_URL` lives in
+   [`site/.env.production`](../../site/.env.production); the repository URL
+   is a constant in `site/vite.config.js` and resolves in every mode.
+6. **Manual, once:** repository Settings -> Pages -> Source set to "GitHub
+   Actions". Nothing in this repository can set it, and until it is set the
+   deploy job fails at its last step rather than silently doing nothing.
+7. **Manual, once:** upload
+   [`.github/social-preview.png`](../../.github/social-preview.png) at
+   Settings -> General -> Social preview. It is generated from the same
+   brand source as the site's own card by
+   `npm --prefix site run generate:social-assets`, at the 1280x640 GitHub
+   asks for. Without it, every link to this repository renders as GitHub's
+   generic auto-card.
 8. Re-read this file. Any line that stopped being true is a line to change,
    not a line to leave.

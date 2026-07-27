@@ -17,12 +17,13 @@ static, no backend and no third-party runtime request - readable locally
 with `npm ci && npm run build:preview && npm run preview` from that
 directory.
 
-<!-- The one place the public URL goes. site/.env.production already carries
-     the same value as EIF_SITE_URL and the two must not drift. Publication
-     itself is an owner-gated step; see docs/product/pre-release.md. -->
-**Live site:** not published yet. The production build is configured for
-`https://mike-arbuzov365.github.io/engineering-intelligence-framework/`, and
-this line becomes that link on the day the page serves.
+<!-- The one place the public URL goes. site/.env.production carries the same
+     value as EIF_SITE_URL and the two must not drift. -->
+**Live site:** <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>,
+published by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on
+any change under `site/`. The deploy runs the same fail-closed verifiers the
+local gate does, so a claim violation or an unsubstituted build marker stops
+it rather than reaching the page.
 
 ## The problem
 

@@ -1357,13 +1357,31 @@ pip install .</code></pre>
                   </svg>
                 </button>
               </div>
-              <p class="install__note">
-                <code>&lt;path&gt;</code> is the repository you want governed,
-                and it does not have to be this one. <code>&lt;name&gt;</code>
-                is what the instance calls itself. <code>--locale</code> sets
-                the language the instance reports in; <code>uk</code> is the
-                other locale that ships.
-              </p>
+              <!-- A list, not a paragraph. Three arguments explained in one
+                   run-on sentence made the reader hold all three in their
+                   head to parse any one of them. -->
+              <dl class="install__args">
+                <div>
+                  <dt><code>--project-name</code></dt>
+                  <dd>What the instance calls itself. Any short name.</dd>
+                </div>
+                <div>
+                  <dt><code>--instance-path</code></dt>
+                  <dd>
+                    The repository you want EIF to govern. Usually your own
+                    project rather than this one, and <code>.</code> works if
+                    you are already standing in it.
+                  </dd>
+                </div>
+                <div>
+                  <dt><code>--locale</code></dt>
+                  <dd>
+                    Optional. The language the instance reports in.
+                    <strong>English if you leave it out</strong>, and
+                    <code>uk</code> is the only other language that ships.
+                  </dd>
+                </div>
+              </dl>
             </li>
           </ol>
 
@@ -1442,12 +1460,8 @@ pip install .</code></pre>
                 </li>
                 <li>
                   <span class="label">Source</span>
-                  <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_EN__</a>
+                  <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__" rel="noopener noreferrer" target="_blank">__EIF_REPO_CTA_LABEL_EN__</a>
                   <p>Ontology, schemas, the <code>eifctl</code> package and the reproducible slice.</p>
-                  <!-- Substituted to an empty string once EIF_REPOSITORY_URL
-                       is set at build time, and hidden by :empty, so the link
-                       label never has to carry its own disclaimer. -->
-                  <p class="final-cta__pending">__EIF_REPO_PENDING_EN__</p>
                 </li>
               </ul>
             </nav>
@@ -2549,13 +2563,28 @@ pip install .</code></pre>
                 </svg>
               </button>
             </div>
-            <p class="install__note">
-              <code>&lt;path&gt;</code> це той репозиторій, яким ви хочете
-              керувати, і це не обовʼязково цей самий.
-              <code>&lt;name&gt;</code> це назва самого екземпляра.
-              <code>--locale</code> задає мову, якою екземпляр звітує;
-              <code>en</code> це друга мова, яка йде в комплекті.
-            </p>
+            <dl class="install__args">
+              <div>
+                <dt><code>--project-name</code></dt>
+                <dd>Як називатиметься екземпляр. Будь-яка коротка назва.</dd>
+              </div>
+              <div>
+                <dt><code>--instance-path</code></dt>
+                <dd>
+                  Репозиторій, яким має керувати EIF. Зазвичай це ваш власний
+                  проєкт, а не цей, і можна поставити <code>.</code>, якщо ви
+                  вже в його каталозі.
+                </dd>
+              </div>
+              <div>
+                <dt><code>--locale</code></dt>
+                <dd>
+                  Необовʼязковий. Мова, якою екземпляр звітує.
+                  <strong>Якщо не вказати, буде англійська</strong>, а
+                  <code>uk</code> це єдина інша мова, яка йде в комплекті.
+                </dd>
+              </div>
+            </dl>
           </li>
         </ol>
 
@@ -2617,9 +2646,8 @@ pip install .</code></pre>
               </li>
               <li>
                 <span class="label">Джерело</span>
-                <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__">__EIF_REPO_CTA_LABEL_UK__</a>
+                <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__" rel="noopener noreferrer" target="_blank">__EIF_REPO_CTA_LABEL_UK__</a>
                 <p>Онтологія, схеми, пакет <code>eifctl</code> і відтворюваний вертикальний зріз.</p>
-                <p class="final-cta__pending">__EIF_REPO_PENDING_UK__</p>
               </li>
             </ul>
           </nav>

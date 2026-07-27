@@ -400,8 +400,18 @@ exactly one hosted job per PR (D-14, 2026-07-19): the critical-path
 scanning, frontmatter/config/lock schema validation, link checking, a
 YAML/JSON-Schema self-consistency check, and Knowledge Delta completeness
 (fetched from the live PR body, not the frozen trigger payload). Push to
-`main` triggers no workflow at all - a merged PR was already fully
-validated by this job. The full runtime test suite
+`main` triggers no *validation* workflow at all - a merged PR was already
+fully validated by this job. The one push-triggered workflow is
+[`.github/workflows/pages.yml`](../../.github/workflows/pages.yml), which
+publishes an already-merged `site/` to GitHub Pages and runs no test: it
+installs from the committed lockfile, runs the three fail-closed verifiers
+(claims/wording/private-path/runtime-request, metadata markers, and the
+built-bundle contract), builds and deploys. The site's full gate - two
+browser engines, axe, Lighthouse and byte budgets - stays local and
+unhosted. See D-15 in
+[`core/policies/decisions.md`](../../core/policies/decisions.md) for why
+that is a boundary rather than a contradiction of D-14. The full runtime
+test suite
 (`scripts/tests/run_all.py`, 28 suites) and the cross-platform package-
 build/license-check matrices run on a manual release gate
 ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml),
@@ -834,7 +844,12 @@ formally ratified (the file is explicit about which is which).
 
 ### Launch
 - [ ] `v0.1.0` tag exists.
-- [ ] Website is live.
+- [ ] Website is live. The deploy is wired
+      ([`.github/workflows/pages.yml`](../../.github/workflows/pages.yml),
+      D-15) and the production URL is committed, but the page does not
+      serve until repository Settings -> Pages -> Source is set to "GitHub
+      Actions", which is an owner action nothing here performs. Unchecked
+      on purpose until a real URL answers.
 - [ ] Article published.
 - [ ] Launch sequence prepared.
 - [x] Feedback/issue intake ready: `.github/ISSUE_TEMPLATE/` ships a bug

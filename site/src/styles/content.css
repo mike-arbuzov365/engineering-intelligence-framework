@@ -130,23 +130,6 @@
   color: var(--eif-fg-muted);
 }
 
-.final-cta__rows .final-cta__pending {
-  margin-top: var(--eif-space-1);
-}
-
-/* Amber, like every other "declared but not yet true" state on this page.
-   The eif-metadata plugin substitutes it to an empty string as soon as a
-   repository URL exists, and :empty removes the row it would leave behind. */
-.final-cta__pending {
-  font-family: var(--eif-font-mono);
-  font-size: var(--eif-size-label);
-  color: var(--eif-warn);
-}
-
-.final-cta__pending:empty {
-  display: none;
-}
-
 @media (max-width: 720px) {
   .final-cta__grid {
     grid-template-columns: 1fr;

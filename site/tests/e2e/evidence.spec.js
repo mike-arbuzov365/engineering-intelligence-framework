@@ -212,20 +212,20 @@ test.describe('honesty guardrails after the limitations section was removed', ()
 });
 
 test.describe('final CTA', () => {
-  test('repository link falls back to an on-page anchor without a configured URL', async ({
-    page,
-  }) => {
+  test('the repository link is live in every build mode', async ({ page }) => {
     await page.goto('/');
     const repoLink = page.locator('.final-cta__repo');
-    await expect(repoLink).toHaveAttribute('href', '#evidence');
-    // The label is the promise; the pre-publication caveat is its own line,
-    // not a parenthetical inside the call to action.
-    await expect(repoLink).toHaveText('Public repository');
-    // The caveat sits in the repository row, not inside the link label, and
-    // the build empties it once a real URL exists.
-    await expect(page.locator('.final-cta__pending')).toContainText(
-      'added at publication',
+    // It used to resolve to "#evidence" outside a production build, so the
+    // closing screen's one outbound destination was a dead link in dev and
+    // preview. The URL is a project constant now, not a deployment input.
+    await expect(repoLink).toHaveAttribute(
+      'href',
+      'https://github.com/mike-arbuzov365/engineering-intelligence-framework',
     );
+    await expect(repoLink).toHaveText('Public repository');
+    // And the caveat line under it is gone rather than permanently empty:
+    // it captioned a decision that has since been made.
+    await expect(page.locator('.final-cta__pending')).toHaveCount(0);
   });
 
   test('the closing screen is two matched groups of destinations, not a strip of links', async ({

@@ -384,7 +384,13 @@ instance declares its own documentation locale in `.eif/config.yaml`
 operating under that instance write prose (Knowledge Delta notes, session
 context, generated docs) in that locale while keeping framework
 identifiers, schema keys, code, and command examples in English. See
-[`locales/README.md`](../../locales/README.md).
+[`locales/README.md`](../../locales/README.md). Matched English and
+Ukrainian `terminology.yaml` files provide the preferred terms for generated
+project surfaces. The human-readable
+[terminology and translation contract](../reference/terminology.md)
+distinguishes standards-aligned terms from industry usage and EIF-defined
+names such as `Knowledge Delta`, `execution packet`, and `Bounded Evidence
+Loop`.
 
 ## CI and quality gates
 
@@ -420,12 +426,12 @@ build/license-check matrices run on a manual release gate
 does. A controlled merge entrypoint
 ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py)) re-verifies
 checks, Knowledge Delta, and review state before merging, pinned to the
-verified head SHA. What's *not* done: none of this is the only path to
-merge yet - required-status-checks/branch-protection are not configured
-at the repository-settings level, and no agent-hook guard blocks a direct
-`gh pr merge` (none of the four adapters that exist - Claude Code, Cursor,
-Codex, Hermes - ships hook scripts) - see [Limitations](#limitations) and
-the [Public-Ready checklist](#definition-of-public-ready).
+verified head SHA. Repository branch protection independently requires the
+consolidated PR smoke context, an up-to-date branch, linear history, resolved
+conversations, and enforcement for administrators. Force pushes and branch
+deletion are disabled. No agent-hook guard is claimed: none of the four
+adapters ships a merge hook, so the platform rule and the merge entrypoint
+are the two enforced paths described here.
 
 ## Privacy and security
 
@@ -692,8 +698,9 @@ formally ratified (the file is explicit about which is which).
 - [x] A non-English locale works end to end, **partially**: Ukrainian
       status messages, Knowledge Delta, closeout headings, and knowledge
       retrieval are verified (`locales/uk/`,
-      `scripts/tests/test_locale.py`, `test_journey.py`); full
-      agent-response localization and `terminology.yaml` are not covered.
+      `scripts/tests/test_locale.py`, `test_journey.py`). Matched English and
+      Ukrainian `terminology.yaml` files are present and checked. Full
+      agent-response localization remains outside the claim.
 - [x] An **experimental** bootstrap (`eif_init.py`) works without any
       private repository - proven against a temp-directory instance and a
       disposable copy of a private repository (adoption pilot). A real,

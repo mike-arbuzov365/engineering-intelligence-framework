@@ -15,7 +15,14 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
-Nothing yet.
+### Changed
+
+- Added one bilingual terminology contract and matching machine-readable
+  English and Ukrainian terminology packs. The contract distinguishes
+  standards-aligned, industry-established, and EIF-defined terms.
+- Reworked Ukrainian project templates and presentation-site copy for clearer
+  sentences, consistent terminology, and the canonical `Knowledge Delta`,
+  `execution packet`, and `Bounded Evidence Loop` names.
 
 ## [0.1.0] - 2026-07-27
 

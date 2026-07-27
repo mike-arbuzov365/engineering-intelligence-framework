@@ -71,6 +71,7 @@ RESOURCE_TREES = [
     "core/ontology",
     "docs/architecture",
     "docs/product",
+    "docs/reference",
     "docs/research",
     "locales",
     "templates",

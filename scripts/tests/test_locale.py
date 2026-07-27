@@ -9,6 +9,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import yaml
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from eif_locale import load_messages, msg, render_template  # noqa: E402
 
@@ -57,7 +59,7 @@ def main() -> int:
     uk_kd_text, uk_kd_locale = render_template(FRAMEWORK_ROOT, "uk", "knowledge-delta.md")
     results.append(check(
         "render_template locale selection: 'uk' resolves to the uk template, not silently falling back",
-        uk_kd_locale == "uk" and "Дельта знань" in uk_kd_text,
+        uk_kd_locale == "uk" and uk_kd_text.startswith("## Knowledge Delta"),
     ))
 
     fallback_kd_text, fallback_kd_locale = render_template(FRAMEWORK_ROOT, "xx-nonexistent", "knowledge-delta.md")
@@ -65,6 +67,34 @@ def main() -> int:
     results.append(check(
         "render_template fallback: unknown locale directory falls back to en template",
         fallback_kd_locale == "en" and fallback_kd_text == en_kd_text,
+    ))
+
+    en_terms = yaml.safe_load(
+        (FRAMEWORK_ROOT / "locales" / "en" / "terminology.yaml").read_text(encoding="utf-8")
+    )
+    uk_terms = yaml.safe_load(
+        (FRAMEWORK_ROOT / "locales" / "uk" / "terminology.yaml").read_text(encoding="utf-8")
+    )
+    results.append(check(
+        "terminology packs use the same canonical term keys",
+        set(en_terms["terms"]) == set(uk_terms["terms"]),
+    ))
+    results.append(check(
+        "named EIF artifacts stay canonical in Ukrainian",
+        uk_terms["terms"]["knowledge_delta"]["preferred"] == "Knowledge Delta"
+        and uk_terms["terms"]["execution_packet"]["preferred"] == "execution packet",
+    ))
+
+    uk_pack_text = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in sorted((FRAMEWORK_ROOT / "locales" / "uk").rglob("*"))
+        if path.is_file() and path.name != "terminology.yaml"
+    )
+    results.append(check(
+        "Ukrainian locale pack avoids deprecated calques and em dashes",
+        "Дельта знань" not in uk_pack_text
+        and "Промоут" not in uk_pack_text
+        and "—" not in uk_pack_text,
     ))
 
     passed = sum(results)

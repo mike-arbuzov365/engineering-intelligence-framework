@@ -25,13 +25,16 @@ of the entry rather than a footnote.
   credentials and stays an owner decision, which is the same boundary
   everything else here observes: EIF generates what a person then chooses to
   run. Passes end to end on `0.1.0.dev0`.
-- [`docs/product/linkedin-series.md`](docs/product/linkedin-series.md): a
-  ten-post bilingual series, planned as one arc, with the audience, the
-  claim boundaries, the voice rules and both language versions of every
-  post. It sits beside the claims register deliberately. A post is a public
-  claim, so it is held to the same forbidden-wording list the site build
-  enforces, and the file says which sentences the series is never allowed
-  to write regardless of how well they would perform.
+- [`docs/product/linkedin-series.md`](docs/product/linkedin-series.md): the
+  rules everything published about EIF is written under. Audience, claim
+  boundaries, voice rules, commenting rules, and the sentences the series
+  may never write regardless of how well they would perform. It sits beside
+  the claims register deliberately: a post is a public claim, so it is held
+  to the same forbidden-wording list the site build enforces. The drafts it
+  governs are private, and the file says why. The short version is that
+  comment history holds named third parties' arguments, and putting those in
+  a public repository without their knowledge is a privacy problem rather
+  than a matter of taste.
 
 ### Added
 

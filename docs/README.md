@@ -17,10 +17,12 @@
   with its evidence and its bound;
   [`pre-release.md`](product/pre-release.md) - where the release actually
   stands, what no claim is made about, and the release-day checklist;
-  [`linkedin-series.md`](product/linkedin-series.md) - the bilingual post
-  series and the voice and claim rules it is written under. The website
-  carries the claims; this directory carries the accounting behind them,
-  and anything published elsewhere is held to the same register.
+  [`linkedin-series.md`](product/linkedin-series.md) - the rules everything
+  published about EIF is written under: audience, claim boundaries, voice,
+  and the sentences the series may never write. The drafts themselves are
+  private, and that file says why. The website carries the claims; this
+  directory carries the accounting behind them, and anything published
+  anywhere is held to the same register.
 - `reference/` - [`config.md`](reference/config.md) - `.eif/config.yaml` and
   `.eif/framework.lock.yaml` field-by-field summary, pointing to the
   authoritative JSON Schemas rather than duplicating them.

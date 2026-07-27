@@ -92,14 +92,15 @@ test.describe('optional capabilities', () => {
     await expect(page.locator('#integrations')).not.toContainText('залишає машину');
   });
 
-  test('detail reveals on focus via CSS, before any click/JS toggle', async ({ page }) => {
+  test('keyboard focus previews the control, while activation opens its detail', async ({ page }) => {
     await page.goto('/#integrations');
     const trigger = page.locator('#integrations .reveal__trigger').nth(0);
     const detail = page.locator('#integrations .reveal').nth(0).locator('.reveal__detail');
     await expect(detail).toHaveCSS('max-height', '0px');
     await trigger.focus();
-    // Web-first assertion (auto-retrying) instead of a one-shot before/after
-    // read, which raced the style recalculation on the mobile-390 project.
+    await expect(detail).toHaveCSS('max-height', '0px');
+    await trigger.press('Enter');
+    await expect(trigger).toHaveAttribute('aria-expanded', 'true');
     await expect(detail).not.toHaveCSS('max-height', '0px');
   });
 
@@ -130,6 +131,9 @@ test.describe('optional capabilities', () => {
     // Clicking the open row again closes it rather than leaving it stuck.
     await rows.nth(3).click();
     await expect(page.locator('#evidence .reveal.is-open')).toHaveCount(0);
+    await expect(
+      page.locator('#evidence .reveal').nth(3).locator('.reveal__detail'),
+    ).toHaveCSS('max-height', '0px');
 
     // The two lists on the page do not close each other.
     await rows.nth(2).click();

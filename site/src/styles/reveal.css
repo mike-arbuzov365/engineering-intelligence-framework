@@ -57,7 +57,11 @@
 }
 
 .js .reveal__trigger:hover::after,
-.js .reveal__trigger:focus::after,
+.js .reveal__trigger:focus-visible::after {
+  opacity: 1;
+  border-color: var(--eif-accent);
+}
+
 .js .reveal.is-open .reveal__trigger::after {
   opacity: 1;
   border-color: var(--eif-accent);
@@ -88,10 +92,6 @@
   color: var(--eif-fg);
 }
 
-.js .reveal__trigger:hover + .reveal__detail,
-.js .reveal__trigger:focus + .reveal__detail,
-.js .reveal__detail:hover,
-.js .reveal__detail:focus-within,
 .js .reveal.is-open .reveal__detail {
   max-height: 30rem;
   opacity: 1;

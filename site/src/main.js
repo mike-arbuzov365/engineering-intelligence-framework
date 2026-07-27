@@ -128,11 +128,12 @@ function initLoopScene() {
   };
 }
 
-// --- Reveal rows (integrations, evidence/tasks): CSS already reveals on
-// hover/focus with no JS at all. This adds a persistent open/close toggle
-// for touch, where ":hover" does not apply, and keeps aria-expanded correct
-// for assistive tech. Safe to call again after a language swap - listeners
-// attach to whatever `.reveal__trigger` elements exist at call time.
+// --- Reveal rows (integrations, evidence/tasks): the no-JS HTML is expanded,
+// while the enhanced path uses one explicit open/close state for mouse,
+// keyboard and touch. Hover/focus only emphasize the caret, so the visible
+// detail can never disagree with aria-expanded after a second activation.
+// Safe to call again after a language swap - listeners attach to whatever
+// `.reveal__trigger` elements exist at call time.
 //
 // One row open at a time within a list. Independent toggles left eight
 // paragraphs of detail stacked open in section 09 and the screen stopped

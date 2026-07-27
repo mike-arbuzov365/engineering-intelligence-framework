@@ -15,13 +15,16 @@
   font-size: var(--eif-size-label);
   letter-spacing: 0.04em;
   color: var(--eif-fg-muted);
-  background: color-mix(in srgb, var(--eif-bg-raised) 92%, transparent);
-  border: 1px solid var(--eif-rule);
+  background: color-mix(in srgb, var(--eif-accent) 6%, var(--eif-bg-raised));
+  border: 1px solid var(--eif-accent);
   border-radius: 14px;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
   backdrop-filter: blur(12px);
-  transition: border-color var(--eif-duration-fast) var(--eif-ease);
+  transition: color var(--eif-duration-fast) var(--eif-ease),
+    border-color var(--eif-duration-fast) var(--eif-ease),
+    background-color var(--eif-duration-fast) var(--eif-ease),
+    box-shadow var(--eif-duration-fast) var(--eif-ease);
 }
 
 .lang-toggle::before {
@@ -33,8 +36,11 @@
   left: 3px;
   width: calc(50% - 3px);
   border-radius: 10px;
-  background: var(--eif-accent);
-  transition: transform var(--eif-duration-fast) var(--eif-ease);
+  background: color-mix(in srgb, var(--eif-accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--eif-accent) 38%, transparent);
+  transition: transform var(--eif-duration-fast) var(--eif-ease),
+    background-color var(--eif-duration-fast) var(--eif-ease),
+    border-color var(--eif-duration-fast) var(--eif-ease);
 }
 
 .lang-toggle.is-uk::before {
@@ -43,8 +49,16 @@
 
 .lang-toggle:hover,
 .lang-toggle:focus-visible {
-  color: var(--eif-fg);
+  color: var(--eif-charcoal-950);
+  background: var(--eif-accent);
   border-color: var(--eif-accent);
+  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--eif-accent) 55%, transparent);
+}
+
+.lang-toggle:hover::before,
+.lang-toggle:focus-visible::before {
+  background: color-mix(in srgb, var(--eif-charcoal-950) 14%, transparent);
+  border-color: color-mix(in srgb, var(--eif-charcoal-950) 30%, transparent);
 }
 
 .lang-toggle span {
@@ -56,10 +70,24 @@
 }
 
 .lang-toggle:not(.is-uk) span:first-child {
-  color: var(--eif-charcoal-950);
+  color: var(--eif-accent);
+  font-weight: 700;
 }
 
 .lang-toggle.is-uk .lang-toggle__alt {
+  color: var(--eif-accent);
+  font-weight: 700;
+}
+
+.lang-toggle:hover span,
+.lang-toggle:focus-visible span {
+  color: color-mix(in srgb, var(--eif-charcoal-950) 65%, var(--eif-accent));
+}
+
+.lang-toggle:hover:not(.is-uk) span:first-child,
+.lang-toggle:focus-visible:not(.is-uk) span:first-child,
+.lang-toggle:hover.is-uk .lang-toggle__alt,
+.lang-toggle:focus-visible.is-uk .lang-toggle__alt {
   color: var(--eif-charcoal-950);
 }
 

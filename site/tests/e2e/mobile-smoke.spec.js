@@ -15,17 +15,35 @@ test('mobile poster, navigation and touch targets fit at 390x844', async ({ page
     expect(box.height, `${selector} is shorter than 44px`).toBeGreaterThanOrEqual(44);
     expect(box.width, `${selector} is narrower than 44px`).toBeGreaterThanOrEqual(44);
   }
+
+  const repoAlignment = await page.locator('.hero__ctas-repo').evaluate((repo) => {
+    const repoRect = repo.getBoundingClientRect();
+    const labelRect = repo.querySelector('.hero__ctas-label').getBoundingClientRect();
+    const arrow = getComputedStyle(repo, '::after');
+    return {
+      labelCenter: labelRect.left + labelRect.width / 2,
+      controlCenter: repoRect.left + repoRect.width / 2,
+      arrowBorder: arrow.borderTopWidth,
+    };
+  });
+  expect(repoAlignment.labelCenter).toBeLessThan(repoAlignment.controlCenter);
+  expect(repoAlignment.arrowBorder).not.toBe('0px');
 });
 
-test('mobile touch switches language and opens a disclosure', async ({ page }) => {
+test('mobile touch switches language and toggles a disclosure both ways', async ({ page }) => {
   await page.goto('/');
   await page.locator('#lang-toggle').tap();
   await expect(page.locator('html')).toHaveAttribute('lang', 'uk');
   await expect(page.locator('.skip-link')).toHaveText('Перейти до вмісту');
 
   const trigger = page.locator('#integrations .reveal__trigger').first();
+  const detail = page.locator('#integrations .reveal__detail').first();
   await trigger.tap();
   await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await expect(detail).not.toHaveCSS('max-height', '0px');
+  await trigger.tap();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(detail).toHaveCSS('max-height', '0px');
 });
 
 test('mobile touch activates a loop phase', async ({ page }) => {

@@ -237,11 +237,6 @@
     padding: 0.7em 0.95em;
   }
 
-  /* The repository pill has no caret to push away from, so it centres its
-     own contents instead of splitting them to the edges. */
-  .hero__ctas .hero__ctas-repo {
-    justify-content: center;
-  }
 }
 
 .hero__ctas a {
@@ -288,34 +283,57 @@
   transform: rotate(45deg) translate(15%, -15%);
 }
 
-/* The one filled control on the page. Everything else - every integration
-   row, every disclosure, the closing screen - is outlined or plain text, so
-   a single solid accent pill is unambiguous at this size. It carries the
-   mark instead of the caret the three anchors carry: one says "further down
-   this page", the other says "off this page, to GitHub". */
+/* The repository action stays in the same restrained outlined family as the
+   three in-page destinations. Equal icon-sized columns keep the desktop
+   label centred between the GitHub mark and the same directional cue the
+   other three controls carry. */
 .hero__ctas .hero__ctas-repo {
-  background: var(--eif-accent);
+  display: grid;
+  grid-template-columns: 1.15em auto 1.15em;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--eif-accent) 8%, transparent);
   border-color: var(--eif-accent);
-  color: var(--eif-charcoal-950);
+  color: var(--eif-accent);
   font-weight: 700;
 }
 
 .hero__ctas .hero__ctas-repo::after {
-  content: none;
+  content: "";
+  justify-self: end;
+  width: 0.4em;
+  height: 0.4em;
+  border-right: 1.5px solid currentColor;
+  border-top: 1.5px solid currentColor;
+  transform: rotate(45deg);
 }
 
 .hero__ctas .hero__ctas-repo:hover,
 .hero__ctas .hero__ctas-repo:focus-visible {
   color: var(--eif-charcoal-950);
-  background: color-mix(in srgb, var(--eif-accent) 86%, #ffffff);
-  border-color: color-mix(in srgb, var(--eif-accent) 86%, #ffffff);
-  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--eif-accent) 70%, transparent);
+  background: var(--eif-accent);
+  border-color: var(--eif-accent);
+  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--eif-accent) 55%, transparent);
   transform: translateY(-1px);
 }
 
 .hero__ctas-mark {
-  flex: none;
   width: 1.15em;
   height: 1.15em;
   fill: currentColor;
+}
+
+@media (max-width: 720px) {
+  /* Full-width mobile controls follow one reading line: identity/action on
+     the left, direction on the right. Centring the GitHub pair on its own
+     made the fourth row look unrelated to the three rows above it. */
+  .hero__ctas .hero__ctas-repo {
+    grid-template-columns: 1.15em 1fr 0.4em;
+    justify-content: stretch;
+  }
+
+  .hero__ctas-repo .hero__ctas-label {
+    justify-self: start;
+    text-align: left;
+  }
 }

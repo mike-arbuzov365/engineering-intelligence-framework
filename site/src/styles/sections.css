@@ -413,7 +413,7 @@
 }
 
 /* A step down from the 13px the project nodes carry, matching the step
-   down in radius. At the shared size S1 filled its circle edge to edge. */
+   down in radius. At the shared size s1 filled its circle edge to edge. */
 .scale__session .scale__node-label {
   font-size: 11px;
 }

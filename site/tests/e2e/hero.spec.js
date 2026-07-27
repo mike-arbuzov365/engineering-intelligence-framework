@@ -15,7 +15,7 @@ test.describe('hero', () => {
     await expect(page.locator('.hero__actions')).toHaveCount(0);
   });
 
-  test('the repository control is the only filled one on the page', async ({ page }) => {
+  test('repository and language controls use a restrained outlined accent', async ({ page }) => {
     await page.goto('/');
     const repo = page.locator('.hero__ctas-repo');
     // The fourth pill used to be a fourth scroll anchor, so the hero's
@@ -27,13 +27,11 @@ test.describe('hero', () => {
     await expect(repo).toHaveAttribute('target', '_blank');
     await expect(repo).toHaveAttribute('rel', /noopener/);
     // At pill size the word alone was not saying "GitHub"; the mark rides
-    // with it, in place of the caret the three anchors carry.
+    // with it, balanced by the directional cue in an equal-width column.
     await expect(repo.locator('.hero__ctas-mark')).toHaveCount(1);
+    await expect(repo.locator('.hero__ctas-label')).toHaveCount(1);
 
-    const filled = await page.evaluate(() => {
-      const accent = getComputedStyle(document.documentElement)
-        .getPropertyValue('--eif-accent')
-        .trim();
+    const base = await page.evaluate(() => {
       const toRgb = (value) => {
         const probe = document.createElement('span');
         probe.style.color = value;
@@ -42,16 +40,46 @@ test.describe('hero', () => {
         probe.remove();
         return resolved;
       };
-      const target = toRgb(accent);
-      return [...document.querySelectorAll('a, button')]
-        // The skip link is filled too, and should be: it is an accessibility
-        // affordance that only exists while focused, not a control competing
-        // for attention on the page.
-        .filter((el) => !el.classList.contains('skip-link'))
-        .filter((el) => getComputedStyle(el).backgroundColor === target)
-        .map((el) => el.className);
+      const accent = toRgb(
+        getComputedStyle(document.documentElement).getPropertyValue('--eif-accent').trim(),
+      );
+      const repo = document.querySelector('.hero__ctas-repo');
+      const language = document.querySelector('.lang-toggle');
+      const labelRect = repo.querySelector('.hero__ctas-label').getBoundingClientRect();
+      const repoRect = repo.getBoundingClientRect();
+      return {
+        accent,
+        repo: {
+          background: getComputedStyle(repo).backgroundColor,
+          border: getComputedStyle(repo).borderTopColor,
+          color: getComputedStyle(repo).color,
+          labelOffset: Math.abs(
+            labelRect.left + labelRect.width / 2 - (repoRect.left + repoRect.width / 2),
+          ),
+        },
+        language: {
+          background: getComputedStyle(language).backgroundColor,
+          border: getComputedStyle(language).borderTopColor,
+        },
+      };
     });
-    expect(filled).toEqual(['hero__ctas-repo']);
+    expect(base.repo.background).not.toBe(base.accent);
+    expect(base.repo.border).toBe(base.accent);
+    expect(base.repo.color).toBe(base.accent);
+    expect(base.repo.labelOffset).toBeLessThanOrEqual(1);
+    expect(base.language.background).not.toBe(base.accent);
+    expect(base.language.border).toBe(base.accent);
+
+    await repo.hover();
+    await expect
+      .poll(() => repo.evaluate((el) => getComputedStyle(el).backgroundColor))
+      .toBe(base.accent);
+
+    const language = page.locator('.lang-toggle');
+    await language.hover();
+    await expect
+      .poll(() => language.evaluate((el) => getComputedStyle(el).backgroundColor))
+      .toBe(base.accent);
   });
 
   test('no horizontal overflow at the configured viewport', async ({ page }) => {
@@ -180,7 +208,18 @@ test.describe('hero', () => {
     const labels = await page
       .locator('.hero .scale__session text')
       .evaluateAll((els) => els.map((el) => el.textContent));
-    expect(labels).toEqual(['S1', 'S2', 'S3']);
+    expect(labels).toEqual(['s1', 's2', 's3']);
+
+    const labelCenterOffsets = await page
+      .locator('.hero .scale__session')
+      .evaluateAll((sessions) =>
+        sessions.map((session) => {
+          const circleRect = session.querySelector('circle').getBoundingClientRect();
+          const labelRect = session.querySelector('text').getBoundingClientRect();
+          return labelRect.top + labelRect.height / 2 - (circleRect.top + circleRect.height / 2);
+        }),
+      );
+    expect(labelCenterOffsets.every((offset) => Math.abs(offset) <= 0.5)).toBe(true);
 
     const radii = await page.evaluate(() => ({
       session: Number(

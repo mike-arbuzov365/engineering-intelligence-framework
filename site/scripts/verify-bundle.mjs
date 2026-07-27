@@ -96,6 +96,16 @@ if (deployStatus === 'unknown') {
   failures.push('could not read eif:deploy-status from dist/index.html');
 }
 
+// No build-time marker may survive into a shipped page in any mode. The
+// clone URL is the one a reader would actually paste into a shell, so an
+// unsubstituted marker there is a broken first command, not a cosmetic slip.
+for (const marker of indexHtml.match(/__EIF_[A-Z_]+__/g) ?? []) {
+  failures.push(`unsubstituted build marker left in dist/index.html: ${marker}`);
+}
+if (deployStatus === 'deployable' && !indexHtml.includes('git clone https://')) {
+  failures.push('production quickstart must carry an https clone URL');
+}
+
 if (deployStatus === 'no-deploy') {
   if (canonical || ogUrl) failures.push('preview bundle must not publish canonical/og:url metadata');
   if (ogImage !== '/social-card.png' || twitterImage !== '/social-card.png') {

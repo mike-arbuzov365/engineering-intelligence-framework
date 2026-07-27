@@ -1231,7 +1231,7 @@
       </section>
 
       <section class="section quickstart" id="quickstart" aria-labelledby="quickstart-heading">
-        <div class="section__inner i18n-block" data-i18n-id="quickstart.body">
+        <div class="section__inner i18n-block" data-i18n-id="quickstart.body" data-i18n-reinit="install">
           <div class="section__head">
             <span class="label">10 &middot; Quickstart</span>
             <h2 id="quickstart-heading">From a clone to a closed-out change</h2>
@@ -1241,35 +1241,134 @@
             governance docs, the <code>eifctl</code> package and one
             reproducible vertical slice.
           </p>
-          <!-- The button is inside the block and static in the markup, so a
-               no-JS reader still sees the commands and main.js only has to
-               wire the click. Labels are attributes rather than text nodes
-               because the button's own content is an icon, and both labels
-               have to exist at once for the copied state to swap without a
-               second DOM lookup. -->
-          <div class="code-block">
-            <pre class="quickstart__command"><code>pip install .
-eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en</code></pre>
-            <button
-              class="code-block__copy"
-              type="button"
-              data-copy-label="Copy"
-              data-copied-label="Copied"
-              aria-label="Copy"
-            >
-              <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
-                <rect x="7" y="7" width="9" height="10" rx="1.5" />
-                <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
-              </svg>
-              <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M4.5 10.5 8 14l7.5-8" />
-              </svg>
-            </button>
-          </div>
-          <p>
-            The first line installs the <code>eifctl</code> command from the
-            clone. The second initializes a separate, runnable project
-            instance. In the reference walkthrough, the bundled demo seeds and
+
+          <!-- Two steps, because they answer two different questions and
+               only the first one differs per platform. Every panel ships in
+               the static markup and stays visible without JavaScript, so a
+               reader with no script gets three labelled blocks rather than
+               one tab strip that cannot switch. The copy buttons are static
+               for the same reason main.js only has to wire the click; their
+               labels are attributes rather than text nodes because the
+               button's own content is an icon, and both labels have to exist
+               at once for the copied state to swap without a second DOM
+               lookup. -->
+          <ol class="install">
+            <li class="install__step">
+              <span class="label label--accent">01 &middot; Install</span>
+              <h3 class="install__title">Put <code>eifctl</code> on your PATH, from a clone</h3>
+              <p class="install__note">
+                You need Python 3.11 or newer and Git. Every line below is
+                typed into a terminal, from whichever directory you keep
+                projects in. Pick the one that matches your shell.
+              </p>
+
+              <div class="install__tablist" role="tablist" aria-label="Platform">
+                <button class="install__tab is-active" type="button" role="tab" id="install-tab-unix" aria-controls="install-panel-unix" aria-selected="true">macOS &middot; Linux &middot; WSL</button>
+                <button class="install__tab" type="button" role="tab" id="install-tab-pwsh" aria-controls="install-panel-pwsh" aria-selected="false" tabindex="-1">Windows PowerShell</button>
+                <button class="install__tab" type="button" role="tab" id="install-tab-cmd" aria-controls="install-panel-cmd" aria-selected="false" tabindex="-1">Windows CMD</button>
+              </div>
+
+              <div class="install__panel is-active" id="install-panel-unix" role="tabpanel" aria-labelledby="install-tab-unix">
+                <h4 class="install__panel-title">macOS, Linux, WSL</h4>
+                <div class="code-block">
+                  <pre class="quickstart__command"><code>git clone __EIF_REPO_CLONE_URL__
+cd engineering-intelligence-framework
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install .</code></pre>
+                  <button class="code-block__copy" type="button" data-copy-label="Copy" data-copied-label="Copied" data-tip="Copy" aria-label="Copy">
+                    <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                      <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                      <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                    </svg>
+                    <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="M4.5 10.5 8 14l7.5-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="install__panel" id="install-panel-pwsh" role="tabpanel" aria-labelledby="install-tab-pwsh">
+                <h4 class="install__panel-title">Windows PowerShell</h4>
+                <div class="code-block">
+                  <pre class="quickstart__command"><code>git clone __EIF_REPO_CLONE_URL__
+cd engineering-intelligence-framework
+python -m venv .venv; .\.venv\Scripts\Activate.ps1
+pip install .</code></pre>
+                  <button class="code-block__copy" type="button" data-copy-label="Copy" data-copied-label="Copied" data-tip="Copy" aria-label="Copy">
+                    <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                      <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                      <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                    </svg>
+                    <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="M4.5 10.5 8 14l7.5-8" />
+                    </svg>
+                  </button>
+                </div>
+                <p class="install__shell-note">
+                  The separator is <code>;</code> and not <code>&amp;&amp;</code>:
+                  Windows PowerShell 5.1 parses <code>&amp;&amp;</code> as an error.
+                </p>
+              </div>
+
+              <div class="install__panel" id="install-panel-cmd" role="tabpanel" aria-labelledby="install-tab-cmd">
+                <h4 class="install__panel-title">Windows CMD</h4>
+                <div class="code-block">
+                  <pre class="quickstart__command"><code>git clone __EIF_REPO_CLONE_URL__
+cd engineering-intelligence-framework
+python -m venv .venv &amp;&amp; .venv\Scripts\activate.bat
+pip install .</code></pre>
+                  <button class="code-block__copy" type="button" data-copy-label="Copy" data-copied-label="Copied" data-tip="Copy" aria-label="Copy">
+                    <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                      <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                      <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                    </svg>
+                    <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                      <path d="M4.5 10.5 8 14l7.5-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <p class="install__note">
+                <code>.venv</code> is a throwaway Python environment that
+                belongs to the clone, so nothing here touches the Python you
+                already use. And the lone <code>.</code> on the last line is
+                not a typo: it names the directory you just cloned into,
+                which is where <code>pip</code> reads the package from.
+              </p>
+            </li>
+
+            <li class="install__step">
+              <span class="label label--accent">02 &middot; Initialize</span>
+              <h3 class="install__title">Turn a repository into a project instance</h3>
+              <p class="install__note">
+                One line, the same on every platform, with the environment
+                from step 01 still active.
+              </p>
+              <div class="code-block">
+                <pre class="quickstart__command install__init-command"><code>eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en</code></pre>
+                <button class="code-block__copy" type="button" data-copy-label="Copy" data-copied-label="Copied" data-tip="Copy" aria-label="Copy">
+                  <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                    <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                    <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                  </svg>
+                  <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M4.5 10.5 8 14l7.5-8" />
+                  </svg>
+                </button>
+              </div>
+              <p class="install__note">
+                <code>&lt;path&gt;</code> is the repository you want governed,
+                and it does not have to be this one. <code>&lt;name&gt;</code>
+                is what the instance calls itself. <code>--locale</code> sets
+                the language the instance reports in; <code>uk</code> is the
+                other locale that ships.
+              </p>
+            </li>
+          </ol>
+
+          <p class="quickstart__outcome">
+            In the reference walkthrough, the bundled demo seeds and
             retrieves real knowledge, makes one retrieval-informed change, and
             verifies it with a real test that fails before the change and
             passes after it. It then closes the session in whichever language
@@ -1449,7 +1548,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
           <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
 
-          <g data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж набуте пропонують нагору.">
+          <g data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж здобутий у ньому урок пропонують нагору.">
             <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
             <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
           </g>
@@ -1470,15 +1569,15 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
             <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
             <line class="svg-hit" x1="382" y1="492" x2="382" y2="516" />
           </g>
-          <g data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене.">
+          <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
             <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
             <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="14" />
           </g>
-          <g data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене.">
+          <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
             <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
             <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="14" />
           </g>
-          <g data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене.">
+          <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
             <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
             <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="14" />
           </g>
@@ -1487,7 +1586,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           <!-- The curator's tip is on its ring, not on the dot that travels
                it: a 4px mark moving on a 27s cycle is not something anyone
                should have to chase to read a label. -->
-          <g data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і сам нічого не зливає.">
+          <g data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і ніколи не підвищує сам.">
             <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
             <circle class="svg-hit" cx="310" cy="266" r="62" />
           </g>
@@ -1841,7 +1940,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
             <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
             <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
 
-            <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="Куратор у власному повільнішому ритмі. Він ранжує те, що зіпсувалося в базі, і призначає відповідального, але сам нічого не зливає." />
+            <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="Куратор у власному повільнішому ритмі. Він ранжує те, що зіпсувалося в базі, і призначає відповідального, але ніколи не підвищує сам." />
           </svg>
         </figure>
       </template>
@@ -2344,29 +2443,124 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           Клонування репозиторію дає онтологію, схеми, документи керування,
           пакет <code>eifctl</code> і один відтворюваний вертикальний зріз.
         </p>
-        <div class="code-block">
-          <pre class="quickstart__command"><code>pip install .
-eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk</code></pre>
-          <button
-            class="code-block__copy"
-            type="button"
-            data-copy-label="Копіювати"
-            data-copied-label="Скопійовано"
-            aria-label="Копіювати"
-          >
-            <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
-              <rect x="7" y="7" width="9" height="10" rx="1.5" />
-              <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
-            </svg>
-            <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
-              <path d="M4.5 10.5 8 14l7.5-8" />
-            </svg>
-          </button>
-        </div>
-        <p>
-          Перший рядок встановлює команду <code>eifctl</code> із клонованого
-          репозиторію. Другий створює окремий екземпляр проєкту, готовий до
-          запуску. В еталонному проході вбудований приклад додає і знаходить
+
+        <ol class="install">
+          <li class="install__step">
+            <span class="label label--accent">01 &middot; Встановлення</span>
+            <h3 class="install__title">Додати <code>eifctl</code> у PATH із клону</h3>
+            <p class="install__note">
+              Потрібні Python 3.11 або новіший і Git. Кожен рядок нижче
+              вводять у термінал, із того каталогу, де ви тримаєте проєкти.
+              Візьміть той варіант, що відповідає вашій оболонці.
+            </p>
+
+            <div class="install__tablist" role="tablist" aria-label="Платформа">
+              <button class="install__tab is-active" type="button" role="tab" id="install-tab-unix" aria-controls="install-panel-unix" aria-selected="true">macOS &middot; Linux &middot; WSL</button>
+              <button class="install__tab" type="button" role="tab" id="install-tab-pwsh" aria-controls="install-panel-pwsh" aria-selected="false" tabindex="-1">Windows PowerShell</button>
+              <button class="install__tab" type="button" role="tab" id="install-tab-cmd" aria-controls="install-panel-cmd" aria-selected="false" tabindex="-1">Windows CMD</button>
+            </div>
+
+            <div class="install__panel is-active" id="install-panel-unix" role="tabpanel" aria-labelledby="install-tab-unix">
+              <h4 class="install__panel-title">macOS, Linux, WSL</h4>
+              <div class="code-block">
+                <pre class="quickstart__command"><code>git clone __EIF_REPO_CLONE_URL__
+cd engineering-intelligence-framework
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install .</code></pre>
+                <button class="code-block__copy" type="button" data-copy-label="Копіювати" data-copied-label="Скопійовано" data-tip="Копіювати" aria-label="Копіювати">
+                  <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                    <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                    <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                  </svg>
+                  <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M4.5 10.5 8 14l7.5-8" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="install__panel" id="install-panel-pwsh" role="tabpanel" aria-labelledby="install-tab-pwsh">
+              <h4 class="install__panel-title">Windows PowerShell</h4>
+              <div class="code-block">
+                <pre class="quickstart__command"><code>git clone __EIF_REPO_CLONE_URL__
+cd engineering-intelligence-framework
+python -m venv .venv; .\.venv\Scripts\Activate.ps1
+pip install .</code></pre>
+                <button class="code-block__copy" type="button" data-copy-label="Копіювати" data-copied-label="Скопійовано" data-tip="Копіювати" aria-label="Копіювати">
+                  <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                    <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                    <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                  </svg>
+                  <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M4.5 10.5 8 14l7.5-8" />
+                  </svg>
+                </button>
+              </div>
+              <p class="install__shell-note">
+                Розділювач тут <code>;</code>, а не <code>&amp;&amp;</code>:
+                Windows PowerShell 5.1 читає <code>&amp;&amp;</code> як помилку.
+              </p>
+            </div>
+
+            <div class="install__panel" id="install-panel-cmd" role="tabpanel" aria-labelledby="install-tab-cmd">
+              <h4 class="install__panel-title">Windows CMD</h4>
+              <div class="code-block">
+                <pre class="quickstart__command"><code>git clone __EIF_REPO_CLONE_URL__
+cd engineering-intelligence-framework
+python -m venv .venv &amp;&amp; .venv\Scripts\activate.bat
+pip install .</code></pre>
+                <button class="code-block__copy" type="button" data-copy-label="Копіювати" data-copied-label="Скопійовано" data-tip="Копіювати" aria-label="Копіювати">
+                  <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                    <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                    <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                  </svg>
+                  <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M4.5 10.5 8 14l7.5-8" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <p class="install__note">
+              <code>.venv</code> це одноразове оточення Python, яке належить
+              клону, тож ніщо тут не чіпає той Python, яким ви вже
+              користуєтесь. А самотня <code>.</code> в останньому рядку не
+              помилка: вона означає каталог, у який ви щойно клонували, і
+              саме звідти <code>pip</code> бере пакет.
+            </p>
+          </li>
+
+          <li class="install__step">
+            <span class="label label--accent">02 &middot; Ініціалізація</span>
+            <h3 class="install__title">Зробити з репозиторію екземпляр проєкту</h3>
+            <p class="install__note">
+              Один рядок, однаковий на всіх платформах, поки оточення з
+              кроку 01 лишається активним.
+            </p>
+            <div class="code-block">
+              <pre class="quickstart__command install__init-command"><code>eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk</code></pre>
+              <button class="code-block__copy" type="button" data-copy-label="Копіювати" data-copied-label="Скопійовано" data-tip="Копіювати" aria-label="Копіювати">
+                <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                  <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                  <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+                </svg>
+                <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M4.5 10.5 8 14l7.5-8" />
+                </svg>
+              </button>
+            </div>
+            <p class="install__note">
+              <code>&lt;path&gt;</code> це той репозиторій, яким ви хочете
+              керувати, і це не обовʼязково цей самий.
+              <code>&lt;name&gt;</code> це назва самого екземпляра.
+              <code>--locale</code> задає мову, якою екземпляр звітує;
+              <code>en</code> це друга мова, яка йде в комплекті.
+            </p>
+          </li>
+        </ol>
+
+        <p class="quickstart__outcome">
+          В еталонному проході вбудований приклад додає і знаходить
           реальне знання, вносить одну зміну на його основі й перевіряє її
           справжнім тестом, який до зміни падає, а після неї проходить. Далі
           він закриває сесію тією мовою, яку оголошує конфігурація екземпляра.

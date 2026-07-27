@@ -161,9 +161,8 @@ test.describe('evidence', () => {
 test.describe('quickstart', () => {
   test('shows the real init command and no command the reader cannot run yet', async ({ page }) => {
     await page.goto('/#quickstart');
-    const command = page.locator('.quickstart__command');
-    await expect(command).toContainText('pip install .');
-    await expect(command).toContainText('eifctl init');
+    await expect(page.locator('#install-panel-unix')).toContainText('pip install .');
+    await expect(page.locator('.install__init-command')).toContainText('eifctl init');
     const section = page.locator('#quickstart');
     // The screen carries a command that works from a clone. It must never
     // print the package-index form, which is the one thing here that would
@@ -176,6 +175,21 @@ test.describe('quickstart', () => {
     // The reference run's locale is stated as a configuration outcome, not
     // as an unexplained "closes in Ukrainian".
     await expect(section).toContainText('whichever language the instance');
+  });
+
+  test('answers the three questions a first-time reader actually has', async ({ page }) => {
+    await page.goto('/#quickstart');
+    const section = page.locator('#quickstart');
+    // Where does this go, what do I need first.
+    await expect(section).toContainText('Python 3.11 or newer');
+    await expect(section).toContainText('typed into a terminal');
+    // What is that lone dot. It read as a typo to the first owner review.
+    await expect(section).toContainText('is not a typo');
+    // And the closing paragraph carries the weight of supporting prose, not
+    // of a second lede - it is the only unclassed <p> the section used to
+    // have, and it rendered at full foreground because of it.
+    const outcome = section.locator('.quickstart__outcome');
+    await expect(outcome).toHaveCSS('color', 'rgb(168, 159, 140)');
   });
 });
 

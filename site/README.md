@@ -19,6 +19,15 @@ claim it limits is made: each evidence row carries its own `Limitation:`
 line, the bounded-proof list carries the no-quality/no-rework claim, and the
 quickstart carries the no-package-index and no-human-duration caveats.
 
+The quickstart is two numbered steps, and only the first differs per
+platform: macOS/Linux/WSL, Windows PowerShell and Windows CMD each get their
+own command block behind a tab strip. All three panels ship in the static
+markup and stay open without JavaScript, each under its own heading, so the
+no-script path is the complete one rather than a strip that cannot switch.
+Every command there is run before it is published - none of them is the
+package-index form, which is the one command on that screen that would fail
+for a reader.
+
 ## Commands
 
 ```
@@ -78,24 +87,39 @@ rendered page copy.
 ## Metadata / URLs
 
 `EIF_SITE_URL` and `EIF_REPOSITORY_URL` are the only two owner-supplied
-production inputs this site needs. Preview and dev builds never require
-them: the final-CTA repository link and canonical/sitemap/robots output all
-degrade to an on-page or `Disallow: /` default when unset (see the
-`eif-metadata` Vite plugin in `vite.config.js`).
+production inputs this site needs, and they live in the committed
+`.env.production`, which Vite loads for `build:production` only. Both are
+public by definition - they are emitted into the shipped HTML - so the file
+is committed and a production build is reproducible from a clean checkout
+instead of from one machine's shell. Moving the site to another host is a
+one-line change to `EIF_SITE_URL`.
+
+Preview and dev builds never require either value: the final-CTA repository
+link, the quickstart's `git clone` line and the canonical/sitemap/robots
+output all degrade to an on-page, angle-bracket or `Disallow: /` default
+when unset (see the `eif-metadata` Vite plugin in `vite.config.js`).
 
 Production inputs must be credential-free HTTPS URLs with no query or
 fragment. `EIF_SITE_URL` may include a deployment sub-path; Vite's base,
 canonical URL, sitemap, robots and absolute Open Graph/Twitter image URLs
-are derived from the same normalized value. Run `build:production` and then
-`verify:bundle` before deployment.
+are derived from the same normalized value. Because Vite rebases
+root-relative asset paths against that base before the metadata plugin
+runs, the social-image substitution matches on filename rather than on the
+source string - a literal match silently did nothing on a sub-path host and
+shipped a relative `og:image` no crawler could resolve.
+
+Run `build:production` and then `verify:bundle` before deployment.
+`verify:bundle` fails on any `__EIF_*__` marker that survived into
+`dist/index.html`, so an unsubstituted clone URL cannot ship as a first
+command a reader would paste.
 
 ## Structure
 
 - `index.html` - the whole single-page site (Vite convention: page shell at
   the project root, not under `src/`).
 - `src/styles/` - one file per concern (tokens, base, hero, sections, loop,
-  integrations, content, reveal, motion), imported in cascade order from
-  `src/main.js`.
+  integrations, content, reveal, motion, figure-tip, code-block, install,
+  lang-toggle), imported in cascade order from `src/main.js`.
 - `src/content/claims.json` - the public claim manifest.
 - `public/` - favicon, social-card and apple-touch-icon assets, copied
   verbatim into `dist/` by Vite.

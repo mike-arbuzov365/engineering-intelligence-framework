@@ -34,6 +34,7 @@ const REQUIRED_HTML_MARKERS = [
   'rel="icon"',
   'rel="apple-touch-icon"',
   '__EIF_REPO_CTA_HREF__',
+  '__EIF_REPO_CLONE_URL__',
   '__EIF_REPO_CTA_LABEL_EN__',
   '__EIF_REPO_CTA_LABEL_UK__',
   '__EIF_REPO_PENDING_EN__',

@@ -96,7 +96,14 @@
   stroke: var(--eif-accent);
 }
 
-.js .loop__node:focus-visible {
+/* Suppressed on :focus, not on :focus-visible. A clicked SVG group does not
+   match :focus-visible in Chromium, so the narrower rule never fired for the
+   one case that needed it and the browser painted its own ring around the
+   whole <g> - whose bounding box includes the label sitting 24 units below
+   the dot, which is why it read as a pale rectangle around a node rather
+   than a ring around a control. Keyboard focus still matches
+   :focus-visible, so the indicator below is unaffected. */
+.js .loop__node:focus {
   outline: none;
 }
 

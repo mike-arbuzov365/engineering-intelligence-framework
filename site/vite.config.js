@@ -96,6 +96,12 @@ function eifMetadataPlugin(getUrls) {
       // and CSS then hides.
       let out = html
         .replaceAll('__EIF_REPO_CTA_HREF__', repoHref)
+        // The quickstart's first line is `git clone <this>`. Until the owner
+        // supplies a repository URL there is no honest value for it, so it
+        // falls back to the same angle-bracket convention the rest of that
+        // block already uses for <name> and <path> rather than shipping a
+        // guessed host a reader would paste and fail on.
+        .replaceAll('__EIF_REPO_CLONE_URL__', repositoryUrl || '&lt;repository-url&gt;')
         .replaceAll('__EIF_REPO_CTA_LABEL_EN__', 'Public repository')
         .replaceAll('__EIF_REPO_CTA_LABEL_UK__', 'Публічний репозиторій')
         .replaceAll(
@@ -111,8 +117,13 @@ function eifMetadataPlugin(getUrls) {
       if (siteUrl) {
         const canonical = siteUrl;
         const socialImage = new URL('social-card.png', siteUrl).toString();
-        out = out
-          .replaceAll('content="/social-card.png"', `content="${socialImage}"`);
+        // Matched by filename rather than by the exact source string. Vite
+        // rebases root-relative asset paths against `base` before this hook
+        // runs, so on a deployment sub-path the meta content is already
+        // "/<base>/social-card.png" and a literal "/social-card.png" replace
+        // silently matches nothing - shipping a relative social image that
+        // no crawler can resolve. Only a root-domain site URL ever hid that.
+        out = out.replace(/content="[^"]*\/social-card\.png"/g, `content="${socialImage}"`);
         tags.push({ tag: 'link', injectTo: 'head', attrs: { rel: 'canonical', href: canonical } });
         tags.push({
           tag: 'meta',

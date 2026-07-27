@@ -9,6 +9,7 @@ import './styles/reveal.css';
 import './styles/motion.css';
 import './styles/figure-tip.css';
 import './styles/code-block.css';
+import './styles/install.css';
 import './styles/lang-toggle.css';
 
 // Collapse enhanced disclosures only after the main module and its styles
@@ -198,6 +199,12 @@ function initHeroFigure() {
 // figure.
 let tipCleanup;
 
+// Set by initFigureTips. Lets another component change its own tip text and
+// have an already-open tip redraw, without that component knowing where the
+// tooltip element lives or how it is positioned. A no-op before the tips are
+// bound, and after a language swap it points at the current binding.
+let refreshTip = () => {};
+
 function initFigureTips() {
   tipCleanup?.();
 
@@ -214,14 +221,17 @@ function initFigureTips() {
   }
 
   let visible = false;
+  let activeTarget = null;
 
   function hide() {
     if (!visible) return;
     visible = false;
+    activeTarget = null;
     tip.classList.remove('is-visible');
   }
 
   function show(target) {
+    activeTarget = target;
     tip.textContent = target.dataset.tip;
     tip.classList.add('is-visible');
     visible = true;
@@ -249,8 +259,16 @@ function initFigureTips() {
 
   window.addEventListener('scroll', hide, { passive: true });
 
+  // Only redraws a tip that is already open on that exact element. A copy
+  // button activated from the keyboard must not make a tooltip appear out of
+  // nowhere just because its label changed.
+  refreshTip = (target) => {
+    if (visible && activeTarget === target) show(target);
+  };
+
   tipCleanup = () => {
     hide();
+    refreshTip = () => {};
     window.removeEventListener('scroll', hide);
     handlers.forEach(([target, onEnter]) => {
       target.removeEventListener('pointerenter', onEnter);
@@ -307,19 +325,94 @@ function initCopyButtons() {
       if (!(await writeClipboard(code.innerText.trim()))) return;
       clearTimeout(resetTimer);
       button.classList.add('is-copied');
+      // aria-label and data-tip carry the same label to two audiences, so
+      // they move together. The tooltip is the pointer user's only written
+      // confirmation - the icon swap alone does not name what happened.
       button.setAttribute('aria-label', button.dataset.copiedLabel);
+      button.dataset.tip = button.dataset.copiedLabel;
+      refreshTip(button);
       resetTimer = setTimeout(() => {
         button.classList.remove('is-copied');
         button.setAttribute('aria-label', button.dataset.copyLabel);
+        button.dataset.tip = button.dataset.copyLabel;
+        refreshTip(button);
       }, 2000);
     });
   });
+}
+
+// --- Install tabs: one platform panel at a time on the quickstart screen.
+// Progressive enhancement, and the static HTML is the complete version: all
+// three panels render with their own headings and the tab strip is not drawn
+// at all until .js is on, so a reader without a script gets every command
+// rather than one strip that cannot switch.
+//
+// Full tablist keyboard semantics rather than three buttons: arrows move
+// between tabs, Home/End jump to the ends, and only the selected tab is a tab
+// stop, which is what a screen-reader user is told to expect the moment the
+// markup says role="tablist".
+let installTabsCleanup;
+
+function initInstallTabs() {
+  installTabsCleanup?.();
+
+  const lists = Array.from(document.querySelectorAll('.install__tablist'));
+  if (lists.length === 0) return;
+
+  const handlers = [];
+
+  lists.forEach((list) => {
+    const tabs = Array.from(list.querySelectorAll('.install__tab'));
+    if (tabs.length === 0) return;
+
+    const select = (tab, { focus = false } = {}) => {
+      tabs.forEach((other) => {
+        const isActive = other === tab;
+        other.classList.toggle('is-active', isActive);
+        other.setAttribute('aria-selected', String(isActive));
+        other.tabIndex = isActive ? 0 : -1;
+        const panel = document.getElementById(other.getAttribute('aria-controls'));
+        panel?.classList.toggle('is-active', isActive);
+      });
+      if (focus) tab.focus();
+    };
+
+    tabs.forEach((tab, index) => {
+      const onClick = () => select(tab);
+      const onKeydown = (event) => {
+        const step =
+          event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+        let next = null;
+        if (step !== 0) next = tabs[(index + step + tabs.length) % tabs.length];
+        else if (event.key === 'Home') next = tabs[0];
+        else if (event.key === 'End') next = tabs[tabs.length - 1];
+        if (!next) return;
+        event.preventDefault();
+        select(next, { focus: true });
+      };
+      tab.addEventListener('click', onClick);
+      tab.addEventListener('keydown', onKeydown);
+      handlers.push([tab, onClick, onKeydown]);
+    });
+
+    // Re-assert the markup's own default through the same path a click takes,
+    // so the roving tabindex is correct before anyone touches it.
+    select(tabs.find((tab) => tab.classList.contains('is-active')) ?? tabs[0]);
+  });
+
+  installTabsCleanup = () => {
+    handlers.forEach(([tab, onClick, onKeydown]) => {
+      tab.removeEventListener('click', onClick);
+      tab.removeEventListener('keydown', onKeydown);
+    });
+  };
 }
 
 const REINIT_HANDLERS = {
   loop: initLoopScene,
   reveal: initRevealRows,
   hero: initHeroFigure,
+  install: initInstallTabs,
 };
 
 // --- Language toggle: English is the static, always-present default (so a
@@ -391,5 +484,6 @@ initLoopScene();
 initRevealRows();
 initLanguageToggle();
 initHeroFigure();
+initInstallTabs();
 initFigureTips();
 initCopyButtons();

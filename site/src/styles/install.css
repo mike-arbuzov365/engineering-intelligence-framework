@@ -1,0 +1,139 @@
+/* Two numbered steps, the first of which carries a platform tab strip.
+   Everything here is written so the no-JS path is the complete one: all
+   three panels render, each under its own heading, and the tab strip is not
+   drawn at all. Only .js hides the inactive panels and shows the strip. */
+.install {
+  list-style: none;
+  margin: var(--eif-space-4) 0 0;
+  padding: 0;
+  max-width: var(--eif-content-max);
+}
+
+.install__step {
+  padding-top: var(--eif-space-4);
+  border-top: 1px solid var(--eif-rule);
+}
+
+.install__step + .install__step {
+  margin-top: var(--eif-space-5);
+}
+
+.install__title {
+  margin-top: 0.4rem;
+  font-size: 1.2rem;
+  color: var(--eif-fg);
+}
+
+.install__note {
+  margin-top: var(--eif-space-2);
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
+}
+
+.install__note code,
+.install__shell-note code {
+  color: var(--eif-fg);
+}
+
+/* Drawn only under .js. Without a script these are three buttons that
+   cannot switch anything, and all three panels are visible anyway. */
+.install__tablist {
+  display: none;
+  margin-top: var(--eif-space-3);
+  border-bottom: 1px solid var(--eif-rule);
+  gap: var(--eif-space-3);
+}
+
+.js .install__tablist {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* The selected tab is marked by a 2px accent rule sitting on the same line
+   as the strip's own 1px rule, which is the page's existing way of saying
+   "this one" - the same device .final-cta__note uses. Not a filled pill:
+   this page has exactly one filled control, the language toggle, and a
+   second one would stop reading as special. */
+.install__tab {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 0 var(--eif-space-1);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  font-family: var(--eif-font-mono);
+  font-size: var(--eif-size-label);
+  letter-spacing: 0.04em;
+  color: var(--eif-fg-muted);
+  cursor: pointer;
+  transition: color var(--eif-duration-fast) var(--eif-ease),
+    border-color var(--eif-duration-fast) var(--eif-ease);
+}
+
+.install__tab:hover {
+  color: var(--eif-fg);
+}
+
+.install__tab:focus-visible {
+  outline: 2px solid var(--eif-accent);
+  outline-offset: 3px;
+}
+
+.install__tab.is-active {
+  color: var(--eif-fg);
+  border-bottom-color: var(--eif-accent);
+}
+
+/* The panel heading is what tells a no-JS reader which block is which. With
+   a script the tab above it says the same thing, and role="tabpanel" plus
+   aria-labelledby carries it for assistive tech, so the visible duplicate
+   goes away rather than repeating the tab one line below itself. */
+.install__panel {
+  margin-top: var(--eif-space-2);
+}
+
+.install__panel-title {
+  margin-top: var(--eif-space-3);
+  font-size: var(--eif-size-label);
+  font-family: var(--eif-font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--eif-fg-muted);
+}
+
+.js .install__panel-title {
+  display: none;
+}
+
+.js .install__panel:not(.is-active) {
+  display: none;
+}
+
+.install__shell-note {
+  margin-top: var(--eif-space-1);
+  max-width: var(--eif-measure);
+  font-size: var(--eif-size-label);
+  color: var(--eif-fg-muted);
+}
+
+/* The paragraph that closes the section. It used to be the only unclassed
+   direct child <p> of a .section__inner on the page, which meant it
+   inherited the body foreground and read at the weight of a lede while
+   every comparable supporting paragraph on every other screen is muted. */
+.quickstart__outcome {
+  margin-top: var(--eif-space-5);
+  max-width: var(--eif-measure);
+  color: var(--eif-fg-muted);
+}
+
+@media (max-width: 560px) {
+  .install__tablist {
+    gap: var(--eif-space-2);
+  }
+
+  .install__tab {
+    font-size: 0.75rem;
+  }
+}

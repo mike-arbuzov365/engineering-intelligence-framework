@@ -661,8 +661,106 @@ ever carried was reported as a leaked machine path.
 
 ---
 
+## SB-024 - Hoverable lines on the hero mark, and a copy button
+
+**Status:** done (2026-07-27)
+**Raised:** 2026-07-27, owner review
+
+Recorded after the fact: this round shipped as commit `8d50b25` without a
+backlog entry, which is the one thing this file exists to prevent.
+
+- **The hero mark's thin lines were unhittable.** A 1px dashed stroke is not
+  a pointer target. Every line carrying a tip got an invisible twin at 18
+  units of the viewBox laid over it, with the tip on the group holding both,
+  so the wide twin and the drawn shape answer the same. `pointer-events:
+  stroke` rather than `all`, or the twin's empty fill area would swallow
+  hovers meant for whatever sits inside a large circle.
+- **The command block had no way to copy it.** A copy button now sits in the
+  corner of the block, always visible rather than revealed on hover - the
+  common pattern hides the one affordance the block has from anyone who does
+  not think to hover. The confirmation is the button itself changing, not a
+  toast covering the thing that was just copied, and it confirms nothing
+  unless the write actually succeeded: `navigator.clipboard` rejects on an
+  insecure origin and under permission policy, and the selection fallback
+  still works there.
+
+---
+
+## SB-025 - Five defects from an owner read of the quickstart
+
+**Status:** done (2026-07-27)
+**Raised:** 2026-07-27, owner review
+
+- **A clicked loop node kept a focus artifact.** `:focus-visible` was
+  already suppressing the outline, and it never fired for the case that
+  needed it: Chromium does not match `:focus-visible` on an SVG group
+  clicked with a mouse, only on one reached by keyboard. So the browser drew
+  its own ring around the group's bounding box, which includes the label 24
+  units below the dot - a pale rectangle around a node rather than a ring
+  around a control. Suppressed on `:focus`; the keyboard indicator is
+  untouched and was verified separately, `Tab` onto a node still matches
+  `:focus-visible`.
+- **A Ukrainian tooltip read as an unadapted translation.** "Її міркування
+  тимчасові, переживає її лише перевірене" is the English word order with
+  Ukrainian words in it, and a bare nominalized adjective doing the work of
+  a subject. The same defect class appeared three more times in the same two
+  figures: "ніж набуте пропонують нагору", and a curator that "нічого не
+  зливає" twice, where "зливає" reads as leaking rather than merging. All
+  four rewritten, and the session line now matches the phrasing the layers
+  figure already used for the same idea.
+- **The quickstart answered none of the questions it was actually being
+  asked.** Two bare lines and a full stop: where do I paste this, is that
+  trailing dot a typo, and what do I do on macOS or Linux or anything that
+  is not the machine this was written on. It is two numbered steps now,
+  because only the first differs per platform, with a command block each for
+  macOS/Linux/WSL, Windows PowerShell and Windows CMD behind a tab strip. It
+  names the prerequisites, explains the dot, and states the one shell
+  difference a reader would otherwise hit as an error - PowerShell 5.1
+  parses `&&` as a parser error, which is exactly the trap the reference
+  implementations of this pattern call out too.
+  Every command was run before it was published: clean 3.11 virtual
+  environment, `pip install .` from the clone, `eifctl init` into a fresh
+  directory, which initialized an instance and reported in its declared
+  locale. All three panels ship in the static markup and stay open without
+  JavaScript, each under its own heading, so the no-script path is the
+  complete one rather than a strip that cannot switch.
+- **The copy button had no hover label.** An icon-only control that says
+  nothing until it is pressed. It reuses the figure-tip machinery already on
+  the page rather than growing a second tooltip system, which also gets it
+  the viewport clamping, the `hover: none` suppression and the language
+  rebinding for free. The tooltip is also where the confirmation lands now:
+  the icon swap alone does not name what happened, and a pointer user had no
+  written confirmation at all.
+- **The paragraph after the commands never got muted.** It was the only
+  unclassed direct `<p>` child of a `.section__inner` on the whole page, so
+  it inherited the body foreground and read at lede weight while every
+  comparable supporting paragraph on every other screen is
+  `--eif-fg-muted`. It also opened by explaining two commands that the two
+  numbered steps now explain in place, so that half is gone rather than
+  restated.
+
+Two things this round found that were not on the list:
+
+- **The social-image URL was relative on any host with a deployment
+  sub-path.** Setting a real project-page `EIF_SITE_URL` for the first time
+  made `verify:bundle` fail immediately: Vite rebases root-relative asset
+  paths against `base` before the metadata plugin runs, so the plugin's
+  literal `/social-card.png` match found nothing. Matched on filename now.
+  Only a root-domain site URL ever hid this.
+- **`verify:bundle` did not check for surviving build markers.** It does
+  now, in every mode. The clone URL is the first command a reader pastes, so
+  an unsubstituted `__EIF_*__` there is a broken first impression rather
+  than a cosmetic slip.
+
+---
+
 ## Closed
 
+- **SB-025** loop focus artifact, four Ukrainian tooltips, per-platform
+  quickstart with a copy tooltip, muted outcome paragraph; plus a sub-path
+  social-image bug and a build-marker check found on the way.
+- **SB-024** hoverable twins on the hero mark's thin lines, and a copy
+  button on the command block that confirms only a real write.
 - **SB-023** hero and layers figures swapped, hero key removed, hover tips
   on every meaningful object in both languages.
 - **SB-022** capabilities recomposed on the knowledge-base grid, ledger

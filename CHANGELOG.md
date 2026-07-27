@@ -26,6 +26,16 @@ of the entry rather than a footnote.
   everything else here observes: EIF generates what a person then chooses to
   run. Passes end to end on `0.1.0.dev0`.
 
+### Added
+
+- [`docs/product/linkedin-series.md`](docs/product/linkedin-series.md): a
+  ten-post bilingual series, planned as one arc, with the audience, the
+  claim boundaries, the voice rules and both language versions of every
+  post. It sits beside the claims register deliberately. A post is a public
+  claim, so it is held to the same forbidden-wording list the site build
+  enforces, and the file says which sentences the series is never allowed
+  to write regardless of how well they would perform.
+
 ### Changed
 
 - The site's release-status notes moved off the site, into

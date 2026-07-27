@@ -33,8 +33,32 @@ of the entry rather than a footnote.
   enforces, and the file says which sentences the series is never allowed
   to write regardless of how well they would perform.
 
+### Added
+
+- Every drawn object on the site that means something names itself on hover,
+  in whichever language the page is showing: what the framework layer holds,
+  why the promotion route is dashed, which segment of the capabilities figure
+  leaves the machine, why a superseded artifact stays readable but out of
+  results. The text lives on the shape inside the i18n block, so each
+  language template carries its own copy. Pointer-only on purpose: every
+  figure already has a written key with the same content, so the shapes stay
+  out of the tab order rather than adding forty stops that tell a
+  screen-reader user nothing new, and the tips are suppressed entirely on
+  touch where they would flash and sit under a finger.
+
 ### Changed
 
+- The two figures at the top of the page swapped places. The hero carried a
+  circuit diagram with a five-line key, which asks to be studied before a
+  reader has any reason to; it is now the orbit mark, symmetrical and
+  unkeyed, because a hero is a poster. The circuit moved to section 03,
+  where its key belongs and where the prose is already about exactly what it
+  draws. Two collisions came with the swap and are fixed: `.hero__figure`
+  now exists in both places, so the pause behaviour is scoped to the hero or
+  scrolling past would freeze the section 03 circuit while it is being read,
+  and the hero figure now sits inside an i18n block, so its
+  IntersectionObserver disconnects its predecessor instead of leaking one
+  per language toggle.
 - The evidence ledger is current again, and one row longer. The install row
   led with "not published to PyPI", which is release status rather than
   evidence; it now leads with the command that works, `pip install .` from a

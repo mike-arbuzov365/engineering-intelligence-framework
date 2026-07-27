@@ -7,6 +7,7 @@ import './styles/integrations.css';
 import './styles/content.css';
 import './styles/reveal.css';
 import './styles/motion.css';
+import './styles/figure-tip.css';
 import './styles/lang-toggle.css';
 
 // Collapse enhanced disclosures only after the main module and its styles
@@ -154,12 +155,22 @@ function initRevealRows() {
 // running, which is the pre-existing behavior, and prefers-reduced-motion
 // still wins over both since the animation is only ever declared inside
 // that query.
+// Safe to call again after a language swap replaces the hero mark's DOM: the
+// previous observer is disconnected first, otherwise every toggle would leave
+// another live observer holding a reference to a detached SVG.
+let heroFigureObserver;
+
 function initHeroFigure() {
+  heroFigureObserver?.disconnect();
+
   const hero = document.querySelector('.hero');
-  const figure = document.querySelector('.hero__figure');
+  // Scoped to the hero. The circuit diagram in section 03 carries the same
+  // class now that the two figures swapped places, and pausing it whenever
+  // the hero is off screen would freeze it exactly when it is being read.
+  const figure = document.querySelector('.hero .hero__figure');
   if (!hero || !figure || typeof IntersectionObserver !== 'function') return;
 
-  const observer = new IntersectionObserver(
+  heroFigureObserver = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         figure.classList.toggle('is-paused', !entry.isIntersecting);
@@ -167,12 +178,90 @@ function initHeroFigure() {
     },
     { threshold: 0 },
   );
-  observer.observe(hero);
+  heroFigureObserver.observe(hero);
+}
+
+// --- Figure tooltips: every drawn object that means something names itself
+// on hover, in whichever language the page is showing.
+//
+// Progressive enhancement, and deliberately pointer-only. The figures stay
+// aria-hidden and out of the tab order: each one already has a written key
+// beside it carrying the same content, so making 40 SVG shapes focusable
+// would add 40 tab stops that tell a screen-reader user nothing new. The
+// tooltip is a shortcut for people who can see the drawing, not the only
+// place the information exists.
+//
+// The text lives in data-tip on the shape, inside the i18n block, so the
+// Ukrainian template carries its own copy and no translation table is needed
+// here. One shared tooltip element, moved and re-filled, rather than one per
+// figure.
+let tipCleanup;
+
+function initFigureTips() {
+  tipCleanup?.();
+
+  const targets = Array.from(document.querySelectorAll('[data-tip]'));
+  if (targets.length === 0) return;
+
+  let tip = document.getElementById('figure-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'figure-tip';
+    tip.className = 'figure-tip';
+    tip.setAttribute('aria-hidden', 'true');
+    document.body.append(tip);
+  }
+
+  let visible = false;
+
+  function hide() {
+    if (!visible) return;
+    visible = false;
+    tip.classList.remove('is-visible');
+  }
+
+  function show(target) {
+    tip.textContent = target.dataset.tip;
+    tip.classList.add('is-visible');
+    visible = true;
+
+    // Measure after the text is in, then clamp to the viewport so a tip on a
+    // shape at the edge of a figure does not hang off the page.
+    const box = target.getBoundingClientRect();
+    const tipBox = tip.getBoundingClientRect();
+    const margin = 8;
+    let left = box.left + box.width / 2 - tipBox.width / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - tipBox.width - margin));
+    let top = box.top - tipBox.height - 10;
+    if (top < margin) top = box.bottom + 10;
+
+    tip.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+  }
+
+  const handlers = [];
+  targets.forEach((target) => {
+    const onEnter = () => show(target);
+    target.addEventListener('pointerenter', onEnter);
+    target.addEventListener('pointerleave', hide);
+    handlers.push([target, onEnter]);
+  });
+
+  window.addEventListener('scroll', hide, { passive: true });
+
+  tipCleanup = () => {
+    hide();
+    window.removeEventListener('scroll', hide);
+    handlers.forEach(([target, onEnter]) => {
+      target.removeEventListener('pointerenter', onEnter);
+      target.removeEventListener('pointerleave', hide);
+    });
+  };
 }
 
 const REINIT_HANDLERS = {
   loop: initLoopScene,
   reveal: initRevealRows,
+  hero: initHeroFigure,
 };
 
 // --- Language toggle: English is the static, always-present default (so a
@@ -206,6 +295,10 @@ function initLanguageToggle() {
       if (block.dataset.i18nReinit) kinds.add(block.dataset.i18nReinit);
     });
     kinds.forEach((kind) => REINIT_HANDLERS[kind]?.());
+    // Unconditional: tooltip text lives inside the swapped markup, so every
+    // figure on the page needs rebinding after a language change, not only
+    // the blocks that declare a reinit handler of their own.
+    initFigureTips();
   }
 
   function setLanguage(next) {
@@ -239,3 +332,4 @@ initLoopScene();
 initRevealRows();
 initLanguageToggle();
 initHeroFigure();
+initFigureTips();

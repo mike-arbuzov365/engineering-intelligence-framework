@@ -1,0 +1,77 @@
+/* One tooltip element for every figure on the page, positioned by main.js.
+   Fixed rather than absolute so a single node can serve figures in different
+   stacking contexts without inheriting any of their transforms.
+
+   pointer-events: none matters more than it looks: these tips are triggered
+   by pointerenter on SVG shapes, and a tip that could take the pointer would
+   immediately fire pointerleave on the shape underneath it and flicker. */
+.figure-tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  max-width: 20rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--eif-rule);
+  border-radius: 3px;
+  background: var(--eif-charcoal-800);
+  color: var(--eif-fg);
+  font-size: var(--eif-size-label);
+  line-height: 1.45;
+  box-shadow: 0 6px 20px rgb(0 0 0 / 45%);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--eif-duration-fast) linear,
+    visibility 0s linear var(--eif-duration-fast);
+}
+
+.figure-tip.is-visible {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* A hoverable object says so before it is hovered, otherwise the tips are a
+   feature nobody discovers. Cursor only: outlining 40 shapes would redraw
+   every figure on the page. */
+[data-tip] {
+  cursor: help;
+}
+
+/* Only the shape under the pointer lifts, so the figure answers rather than
+   lighting up. Transform on an SVG child needs its own box as the origin,
+   otherwise it scales about the whole viewBox and the shape jumps across the
+   drawing. */
+svg [data-tip] {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: opacity var(--eif-duration-fast) var(--eif-ease);
+}
+
+svg [data-tip]:hover {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figure-tip {
+    transition: none;
+  }
+
+  svg [data-tip] {
+    transition: none;
+  }
+}
+
+/* Coarse pointers never fire a hover that lasts, so the tip would flash on
+   tap and stay behind a finger. The written key beside every figure is the
+   real content on those devices. */
+@media (hover: none) {
+  .figure-tip {
+    display: none;
+  }
+
+  [data-tip] {
+    cursor: auto;
+  }
+}

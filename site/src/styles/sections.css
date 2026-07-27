@@ -279,7 +279,11 @@
   color: var(--eif-fg);
 }
 
-.scale__map {
+/* .scale is the container; the drawing inside it is the circuit that used
+   to be the hero mark, and it keeps its own class names. Both selectors are
+   listed so the container works with either figure. */
+.scale__map,
+.scale .hero__figure {
   display: block;
   width: 100%;
   height: auto;
@@ -292,7 +296,8 @@
     gap: var(--eif-space-4);
   }
 
-  .scale__map {
+  .scale__map,
+  .scale .hero__figure {
     max-width: 19rem;
     margin: 0 auto;
   }

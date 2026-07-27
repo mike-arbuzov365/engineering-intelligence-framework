@@ -622,8 +622,49 @@ ever carried was reported as a leaked machine path.
 
 ---
 
+## SB-023 - The two figures swap places, and every figure answers on hover
+
+**Status:** done (2026-07-27)
+**Raised:** 2026-07-27, owner review
+
+- **The wrong drawing was at the top of the page.** The hero carried the
+  circuit diagram: three lanes, a packet bracket, and five lines of key
+  under it. That is a diagram, and a diagram at the top of a page asks to be
+  studied before the reader has any reason to. The orbit map from section 03
+  is a mark: symmetrical, self-contained, one shape. They swapped. The hero
+  has no key now, because a hero is a poster, and the circuit landed in
+  section 03 where its five-line key belongs and where the surrounding prose
+  is already about exactly what it draws.
+- **The hero mark carries text, the circuit does not.** So the hero grew its
+  own i18n block and a Ukrainian twin, and section 03's two templates now
+  hold an identical language-neutral copy. The mark also went from 21rem to
+  26rem: at 21rem its route notes rendered near 10px, under this page's
+  floor for anything meant to be read.
+- **Two class-name collisions came with the swap.** `.hero__figure` is now
+  in both places, so the pause rule and main.js both had to scope to
+  `.hero`, or scrolling past the hero would freeze the section 03 circuit
+  exactly when someone is reading it. And the hero figure now lives inside
+  an i18n block, so the IntersectionObserver had to become re-bindable and
+  disconnect its predecessor rather than leaking one per language toggle.
+- **Every drawn object that means something now names itself on hover**, in
+  whichever language the page is showing. The text lives in `data-tip` on
+  the shape inside the i18n block, so the Ukrainian template carries its own
+  copy and there is no translation table. One shared tooltip node, clamped
+  to the viewport so a tip on a shape at the edge of a figure does not hang
+  off the page.
+- **Pointer-only, deliberately.** Every figure already has a written key
+  carrying the same content, so making forty SVG shapes focusable would add
+  forty tab stops that tell a screen-reader user nothing new. The figures
+  stay `aria-hidden`, the tips are hidden entirely under `hover: none` where
+  they would flash on tap and sit behind a finger, and Lighthouse
+  accessibility stays at 100.
+
+---
+
 ## Closed
 
+- **SB-023** hero and layers figures swapped, hero key removed, hover tips
+  on every meaningful object in both languages.
 - **SB-022** capabilities recomposed on the knowledge-base grid, ledger
   brought current, proof block folded into a Measure row, closing screen
   given its strongest fact.

@@ -97,98 +97,85 @@
           </nav>
         </div>
 
-        <!-- Decorative restatement of the descriptor above, and the whole
-             model in one mark: knowledge descends on the left before any
-             work starts, three sessions of one packet run along the bottom,
-             most of what they produce evaporates, a little settles on the
-             project layer, and rarely one lesson climbs the right arc to the
-             framework layer. aria-hidden because the prose already carries
-             it; without motion it reads as a plain three-layer diagram with
-             a packet under it - nothing has accumulated yet, which is the
-             honest static state.
-             Deliberately unlabelled. It sits outside the i18n block, so any
-             text in it would be stuck in one language, and the section
-             below names the layers properly anyway. A mark, not a diagram. -->
-        <div class="hero__aside">
-        <svg
-          class="hero__figure"
-          aria-hidden="true"
-          viewBox="20 64 340 292"
-          preserveAspectRatio="xMidYMid meet"
-        >
-          <line class="hero__shelf" x1="84" y1="92" x2="330" y2="92" />
-          <line class="hero__shelf" x1="84" y1="202" x2="330" y2="202" />
-          <line class="hero__shelf hero__shelf--session" x1="84" y1="312" x2="330" y2="312" />
+        <!-- The mark is the orbit: one shared framework layer at the centre,
+             projects around it, one packet of three sessions open in P1,
+             method and experience descending before implementation and a
+             validated lesson climbing back, reaching another project only
+             where it applies. Symmetrical and self-contained, which is what
+             a hero mark has to be; the circuit diagram that used to sit here
+             is a diagram, and it now sits in section 03 where a diagram
+             belongs, with the key it needs.
 
-          <!-- Retrieval: method from the framework layer and prior
-               experience from the project layer arrive before the session
-               that uses them. Drawn descending on the left so the figure
-               reads as one circuit: down, across, up. -->
-          <path class="hero__descent" fill="none"
-            d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
-          <path class="hero__descent hero__descent--project" fill="none"
-            d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
+             No key here on purpose. A hero is a poster, and the section
+             below explains the same model in full.
 
-          <!-- Promotion: dashed, because it is conditional and rare. It
-               lands exactly on the end of the framework lane rather than
-               short of it, so the circuit closes instead of leaving a
-               stub. -->
-          <path class="hero__ascent" fill="none"
-            d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
+             It carries text, so unlike the old mark it lives in its own
+             i18n block and has a Ukrainian twin. aria-hidden: decorative,
+             and section 03 carries this content for assistive tech. -->
+        <div class="hero__aside i18n-block" data-i18n-id="hero.figure" data-i18n-reinit="hero">
+        <svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
+          <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
 
-          <!-- One packet, three sessions: an open bracket under the lane
-               rather than a closed box, so it groups the sessions without
-               reading as a second container. -->
-          <g class="hero__packet">
-            <line x1="140" y1="306" x2="140" y2="318" />
-            <line x1="208" y1="306" x2="208" y2="318" />
-            <line x1="276" y1="306" x2="276" y2="318" />
-            <path class="hero__packet-rule" fill="none"
-              d="M 128 332 L 128 342 L 288 342 L 288 332" />
+          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+          <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+          <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+
+          <path class="scale__descend" fill="none" data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation." d="M 300 306 C 282 348 282 392 300 428" />
+          <path class="scale__lift" fill="none" data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes." d="M 320 428 C 338 392 338 348 320 306" />
+          <path class="scale__lift scale__lift--relay" fill="none" data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies." d="M 310 240 C 322 208 400 196 452 190" />
+
+          <text class="scale__note" x="274" y="334" text-anchor="end">method + experience</text>
+          <text class="scale__note scale__note--up" x="346" y="334">validated lesson</text>
+          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle">if it applies</text>
+
+          <circle class="scale__core" cx="310" cy="266" r="42" data-tip="EIF, the framework layer. One shared operating layer: ontology, the authority model, rules, playbooks, templates and skills." />
+          <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+
+          <g class="scale__project scale__project--active"> data-tip="P1, the project with work open in it. A task too large for one session becomes a packet of sessions inside this repository."
+            <circle cx="310" cy="442" r="17" />
+            <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+          </g>
+          <g class="scale__project"> data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer."
+            <circle cx="158" cy="178" r="15" />
+            <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
+          </g>
+          <g class="scale__project scale__project--receiving"> data-tip="P4 receives a lesson from P1. It arrives only where it applies, never automatically."
+            <circle cx="462" cy="178" r="15" />
+            <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
+          </g>
+          <g class="scale__project"> data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer."
+            <circle cx="310" cy="90" r="15" />
+            <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
           </g>
 
-          <g class="hero__lost">
-            <circle cx="112" cy="312" r="3.5" />
-            <circle cx="172" cy="312" r="3.5" />
-            <circle cx="240" cy="312" r="3.5" />
-            <circle cx="304" cy="312" r="3.5" />
-          </g>
+          <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
+          <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
 
-          <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
-          <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
-          <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
+          <path class="scale__packet-rule" fill="none" data-tip="The packet groups its sessions. They run in order, and it closes before anything learned is offered upward." d="M 196 502 L 196 492 L 424 492 L 424 502" />
+          <text class="scale__section-label" x="196" y="482">PACKET</text>
+          <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+          <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
+          <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
+          <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
+          <circle class="scale__session scale__session--1" data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it." cx="238" cy="522" r="6" />
+          <circle class="scale__session scale__session--2" data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it." cx="310" cy="522" r="6" />
+          <circle class="scale__session scale__session--3" data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it." cx="382" cy="522" r="6" />
+          <text class="scale__section-label" x="196" y="546">SESSIONS</text>
 
-          <rect class="hero__settled hero__settled--1" x="133" y="196" width="14" height="6" rx="1" />
-          <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
-          <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
-          <rect class="hero__settled hero__settled--top" x="300" y="86" width="14" height="6" rx="1" />
+          <circle class="scale__curator-ring" cx="310" cy="266" r="62" data-tip="The curator. It watches the framework layer’s own health on its own rhythm, outside any single promotion, and merges nothing itself." fill="none" />
+          <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
 
-          <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
-          <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
-          <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
-
-          <!-- The curator watches the framework layer continuously; it is
-               not part of any single promotion, which is why it moves on its
-               own slower rhythm. -->
-          <circle class="hero__curator" cx="0" cy="0" r="3" />
+          <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
+          <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
+          <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
         </svg>
-
-        <!-- The figure is legible to someone who already knows the model;
-             this names its four moves for everyone else. Its own i18n block
-             so it translates while the SVG, which carries no text at all,
-             stays a single copy. -->
-        <ul class="figure-legend hero__legend i18n-block" data-i18n-id="hero.legend">
-          <li class="figure-legend__item figure-legend__item--dotted">Method and prior experience descend into a session <em>before</em> it implements anything</li>
-          <li class="figure-legend__item figure-legend__item--bracket">One packet, three sessions</li>
-          <li class="figure-legend__item figure-legend__item--mark">Most of a session evaporates; what is validated settles as project memory</li>
-          <li class="figure-legend__item figure-legend__item--dashed-accent">Rarely, a lesson climbs to the framework layer</li>
-          <li class="figure-legend__item figure-legend__item--dot-warn">The curator, watching that layer's health on its own rhythm</li>
-        </ul>
         </div>
       </div>
     </header>
 
     <main id="main">
+
       <section class="section problem" id="problem" aria-labelledby="problem-heading">
         <div class="section__inner i18n-block" data-i18n-id="problem.body">
           <div class="section__head">
@@ -441,100 +428,107 @@
             </ol>
           </figure>
 
-          <!-- SB-003. The SVG is language-neutral on purpose (EIF / P1..P4 /
-               PACKET / SESSIONS read the same in both languages), so the
-               markup is identical in both templates and only the caption and
-               its legend translate. The curator has no label inside the
-               figure for the same reason - the legend names it. -->
+          <!-- The circuit that used to be the hero mark. It belongs here: it
+               draws the three layers as three lanes and shows what moves
+               between them, which is this section's whole subject, and it
+               carries no text at all so both language templates hold an
+               identical copy. The orbit map it swapped with is a poster, and
+               a poster's job is the top of the page. -->
           <figure class="scale" data-claim-id="CLM-13">
             <figcaption class="scale__caption">
               <span class="label label--accent">One framework, many projects</span>
               <h3>The framework is shared. Every project keeps its own memory.</h3>
               <p>
-                Projects orbit one framework layer. A task too large for one
-                session becomes a packet of sessions inside its own project.
-                What descends before the first line of implementation is more
-                than method: ontology and the authority model, rules and
-                constraints, playbooks, templates and skills, and with them
-                the project's own prior experience. What climbs back is only
-                what the packet validated and what generalizes past it - and
-                it reaches another project only where it applies.
+                Read the figure as one circuit, down and across and up. Method
+                and prior experience descend into a session before its first
+                line of implementation: ontology and the authority model,
+                rules and constraints, playbooks, templates and skills, and
+                with them the project's own history. A packet of three
+                sessions runs along the bottom lane. Most of what they produce
+                evaporates with them, a little settles on the project layer,
+                and rarely one validated lesson climbs the right arc to the
+                framework layer, where every other project can retrieve it.
               </p>
               <ul class="figure-legend">
-                <li class="figure-legend__item figure-legend__item--dot">
-                  <strong>EIF, the framework layer.</strong> One shared operating layer, retrieved into a session before implementation, not written up after it.
-                </li>
-                <li class="figure-legend__item figure-legend__item--dot-muted">
-                  <strong>P1 to P4, project repositories.</strong> One packet of three sessions is open in P1, with its own open and close rules.
+                <li class="figure-legend__item figure-legend__item--dotted">
+                  <strong>Method and experience descend first.</strong> Both arrive in the session <em>before</em> it implements anything, retrieved rather than recalled.
                 </li>
                 <li class="figure-legend__item figure-legend__item--bracket">
-                  <strong>The packet groups its sessions.</strong> They run in order, and the packet closes before anything it learned is offered upward.
+                  <strong>One packet, three sessions.</strong> They run in order under the dashed lane, and the packet closes before anything it learned is offered upward.
+                </li>
+                <li class="figure-legend__item figure-legend__item--mark">
+                  <strong>Most of a session evaporates.</strong> What was validated settles on the project layer as durable memory; the rest goes with the session.
                 </li>
                 <li class="figure-legend__item figure-legend__item--dashed-accent">
-                  <strong>Dashed routes are conditional.</strong> A lesson leaves its project only by an explicit decision, and lands in another only where it applies.
+                  <strong>Promotion is the exception.</strong> The climb is dashed because a lesson reaches the framework layer only by an explicit decision.
                 </li>
                 <li class="figure-legend__item figure-legend__item--dot-warn">
-                  <strong>The curator.</strong> It watches the framework's own health continuously, on its own rhythm, outside any single promotion.
+                  <strong>The curator.</strong> It watches the framework layer's own health continuously, on its own rhythm, outside any single promotion.
                 </li>
               </ul>
             </figcaption>
 
-            <svg class="scale__map" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
-              <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+            <svg
+              class="hero__figure"
+              aria-hidden="true"
+              viewBox="20 64 340 292"
+              preserveAspectRatio="xMidYMid meet"
+            >
+              <line class="hero__shelf" x1="84" y1="92" data-tip="The framework layer. Reusable methodology, shared across projects, changed only by an explicit decision." x2="330" y2="92" />
+              <line class="hero__shelf" x1="84" y1="202" data-tip="The project layer. Durable knowledge about this repository: decisions, constraints, facts and risks, each with a status and an evidence label." x2="330" y2="202" />
+              <line class="hero__shelf hero__shelf--session" data-tip="The session lane, drawn dashed because it does not persist. Reasoning, dead ends and command output go with the session that produced them." x1="84" y1="312" x2="330" y2="312" />
 
-              <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
-              <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
-              <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
-              <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+              <!-- Retrieval: method from the framework layer and prior
+                   experience from the project layer arrive before the session
+                   that uses them. Drawn descending on the left so the figure
+                   reads as one circuit: down, across, up. -->
+              <path class="hero__descent" fill="none" data-tip="Method descending from the framework layer, before the session implements anything."
+                d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
+              <path class="hero__descent hero__descent--project" fill="none" data-tip="The project’s own prior experience, retrieved into the session rather than recalled from a chat log."
+                d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
 
-              <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
-              <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
-              <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+              <!-- Promotion: dashed, because it is conditional and rare. It
+                   lands exactly on the end of the framework lane rather than
+                   short of it, so the circuit closes instead of leaving a
+                   stub. -->
+              <path class="hero__ascent" fill="none" data-tip="Promotion, drawn dashed because it is the exception. A lesson reaches the framework layer only by an explicit decision, driven by the retro across many sessions."
+                d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
 
-              <text class="scale__note" x="274" y="334" text-anchor="end">method + experience</text>
-              <text class="scale__note scale__note--up" x="346" y="334">validated lesson</text>
-              <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle">if it applies</text>
-
-              <circle class="scale__core" cx="310" cy="266" r="42" />
-              <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
-
-              <g class="scale__project scale__project--active">
-                <circle cx="310" cy="442" r="17" />
-                <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+              <!-- One packet, three sessions: an open bracket under the lane
+                   rather than a closed box, so it groups the sessions without
+                   reading as a second container. -->
+              <g class="hero__packet"> data-tip="One packet, three sessions. They run in order, and the packet closes before anything it learned is offered upward."
+                <line x1="140" y1="306" x2="140" y2="318" />
+                <line x1="208" y1="306" x2="208" y2="318" />
+                <line x1="276" y1="306" x2="276" y2="318" />
+                <path class="hero__packet-rule" fill="none"
+                  d="M 128 332 L 128 342 L 288 342 L 288 332" />
               </g>
-              <g class="scale__project">
-                <circle cx="158" cy="178" r="15" />
-                <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
-              </g>
-              <g class="scale__project scale__project--receiving">
-                <circle cx="462" cy="178" r="15" />
-                <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
-              </g>
-              <g class="scale__project">
-                <circle cx="310" cy="90" r="15" />
-                <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
+
+              <g class="hero__lost"> data-tip="What evaporates. Most of a session is working context and it is not meant to survive."
+                <circle cx="112" cy="312" r="3.5" />
+                <circle cx="172" cy="312" r="3.5" />
+                <circle cx="240" cy="312" r="3.5" />
+                <circle cx="304" cy="312" r="3.5" />
               </g>
 
-              <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
-              <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+              <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
+              <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
+              <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
 
-              <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
-              <text class="scale__section-label" x="196" y="482">PACKET</text>
-              <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
-              <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
-              <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
-              <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-              <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
-              <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
-              <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
-              <text class="scale__section-label" x="196" y="546">SESSIONS</text>
+              <rect class="hero__settled hero__settled--1" data-tip="What settles as project memory. Validated in the session, kept because it was validated." x="133" y="196" width="14" height="6" rx="1" />
+              <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
+              <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
+              <rect class="hero__settled hero__settled--top" data-tip="A lesson that reached the framework layer. Rare, and every other project can retrieve it from here." x="300" y="86" width="14" height="6" rx="1" />
 
-              <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
-              <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+              <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
+              <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
+              <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
 
-              <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
-              <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
-              <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+              <!-- The curator watches the framework layer continuously; it is
+                   not part of any single promotion, which is why it moves on
+                   its own slower rhythm. -->
+              <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="The curator, on its own slower rhythm. It ranks what has rotted in the base and assigns an owner; it never merges anything." />
             </svg>
           </figure>
         </div>
@@ -862,16 +856,16 @@
               <path class="kb-map__link" fill="none" d="M 215 150 L 320 80" />
               <path class="kb-map__link" fill="none" d="M 320 80 L 370 190" />
               <path class="kb-map__link" fill="none" d="M 215 150 L 370 190" />
-              <path class="kb-map__link kb-map__link--dead" fill="none" d="M 215 150 L 272 232" />
+              <path class="kb-map__link kb-map__link--dead" fill="none" data-tip="The link into an excluded artifact still exists, because the artifact is still readable. Retrieval just does not follow it by default." d="M 215 150 L 272 232" />
 
-              <path class="kb-map__query" fill="none" d="M 26 266 C 56 260 50 226 70 190" />
+              <path class="kb-map__query" fill="none" data-tip="A search entering from the index and walking the links, instead of reading every file. Offline keyword and substring scoring, no embedding service." d="M 26 266 C 56 260 50 226 70 190" />
 
               <circle class="kb-map__node kb-map__node--s1" cx="70" cy="190" r="8" />
               <circle class="kb-map__node kb-map__node--s2" cx="120" cy="90" r="8" />
-              <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" cx="215" cy="150" r="10" />
+              <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" data-tip="One knowledge artifact, linked to several neighbours. A plain file with front matter: type, scope, status, confidence, source and its related links." cx="215" cy="150" r="10" />
               <circle class="kb-map__node kb-map__node--s4" cx="320" cy="80" r="8" />
               <circle class="kb-map__node kb-map__node--s5" cx="370" cy="190" r="8" />
-              <circle class="kb-map__node kb-map__node--excluded" cx="272" cy="232" r="8" />
+              <circle class="kb-map__node kb-map__node--excluded" data-tip="Rejected or superseded. Still readable, kept out of search results by default so a closed question does not quietly reopen, and flagged by the curator." cx="272" cy="232" r="8" />
 
               <circle class="kb-map__flag" cx="272" cy="232" r="15" fill="none" />
               <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
@@ -953,15 +947,15 @@
 
             <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
               <text class="cap-flow__label" x="4" y="50">Graphify</text>
-              <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
+              <line class="cap-flow__route" x1="92" y1="46" data-tip="Graphify available: the agent follows structure it has already mapped." x2="392" y2="46" />
               <circle class="cap-flow__waypoint" cx="170" cy="46" r="4" />
               <circle class="cap-flow__waypoint" cx="230" cy="46" r="4" />
               <circle class="cap-flow__waypoint" cx="290" cy="46" r="4" />
-              <line class="cap-flow__core" x1="92" y1="74" x2="392" y2="74" />
+              <line class="cap-flow__core" x1="92" y1="74" data-tip="Without Graphify: source search and manual browsing. Slower, and it arrives." x2="392" y2="74" />
 
               <text class="cap-flow__label" x="4" y="130">RTK</text>
               <line class="cap-flow__route" x1="92" y1="126" x2="392" y2="126" />
-              <line class="cap-flow__gate" x1="234" y1="106" x2="234" y2="140" />
+              <line class="cap-flow__gate" x1="234" data-tip="Where RTK drops output, before it has cost any context at all." y1="106" x2="234" y2="140" />
               <text class="cap-flow__note" x="234" y="98" text-anchor="middle">dropped here</text>
               <circle class="cap-flow__tick" cx="120" cy="126" r="3" />
               <circle class="cap-flow__tick" cx="146" cy="126" r="3" />
@@ -969,16 +963,16 @@
               <circle class="cap-flow__tick" cx="198" cy="126" r="3" />
               <circle class="cap-flow__tick cap-flow__tick--kept" cx="286" cy="126" r="3" />
               <circle class="cap-flow__tick cap-flow__tick--kept" cx="330" cy="126" r="3" />
-              <line class="cap-flow__core" x1="92" y1="154" x2="392" y2="154" />
+              <line class="cap-flow__core" x1="92" y1="154" data-tip="Without RTK: commands run unfiltered and no reduction is recorded." x2="392" y2="154" />
 
               <text class="cap-flow__label" x="4" y="210">Context7</text>
               <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
-              <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
+              <line class="cap-flow__route cap-flow__route--external" data-tip="The one segment that leaves this computer. A Context7 query goes to a hosted documentation service; the framework sends no source code." x1="300" y1="206" x2="392" y2="206" />
               <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
               <text class="cap-flow__note" x="300" y="178" text-anchor="middle">goes to the network</text>
-              <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
+              <line class="cap-flow__core" x1="92" y1="234" data-tip="Without Context7: local documentation or training-data recall, with the provider reported as unavailable rather than quietly replaced." x2="392" y2="234" />
 
-              <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
+              <rect class="cap-flow__context" data-tip="The agent’s context window. Everything that arrives here has been paid for in tokens." x="400" y="20" width="34" height="228" rx="8" />
 
               <circle class="cap-flow__pulse cap-flow__pulse--g" cx="0" cy="0" r="5" />
               <circle class="cap-flow__pulse cap-flow__pulse--g-core" cx="0" cy="0" r="5" />
@@ -1307,12 +1301,67 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
     </footer>
 
     <div id="i18n-templates" hidden>
-      <template data-i18n-id="hero.legend">
-        <li class="figure-legend__item figure-legend__item--dotted">Метод і попередній досвід спускаються в сесію <em>до того</em>, як вона щось реалізує</li>
-        <li class="figure-legend__item figure-legend__item--bracket">Один пакет, три сесії</li>
-        <li class="figure-legend__item figure-legend__item--mark">Більшість сесії випаровується; перевірене осідає як пам&rsquo;ять проєкту</li>
-        <li class="figure-legend__item figure-legend__item--dashed-accent">Зрідка урок піднімається на рівень фреймворку</li>
-        <li class="figure-legend__item figure-legend__item--dot-warn">Куратор, який стежить за станом цього рівня у власному ритмі</li>
+      <!-- The hero mark carries text, so unlike the circuit it replaced it
+           needs a twin here. Only the three route notes and the two section
+           labels translate; EIF and P1..P4 read the same in both. -->
+      <template data-i18n-id="hero.figure">
+        <svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
+          <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+
+          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+          <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+          <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+
+          <path class="scale__descend" fill="none" data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації." d="M 300 306 C 282 348 282 392 300 428" />
+          <path class="scale__lift" fill="none" data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття." d="M 320 428 C 338 392 338 348 320 306" />
+          <path class="scale__lift scale__lift--relay" fill="none" data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний." d="M 310 240 C 322 208 400 196 452 190" />
+
+          <text class="scale__note" x="274" y="334" text-anchor="end">метод і досвід</text>
+          <text class="scale__note scale__note--up" x="346" y="334">перевірений урок</text>
+          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle">якщо доречно</text>
+
+          <circle class="scale__core" cx="310" cy="266" r="42" data-tip="EIF, рівень фреймворку. Спільна операційна основа: онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички." />
+          <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+
+          <g class="scale__project scale__project--active"> data-tip="P1, проєкт із відкритою роботою. Задача, завелика для однієї сесії, стає пакетом сесій усередині цього репозиторію."
+            <circle cx="310" cy="442" r="17" />
+            <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+          </g>
+          <g class="scale__project"> data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку."
+            <circle cx="158" cy="178" r="15" />
+            <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
+          </g>
+          <g class="scale__project scale__project--receiving"> data-tip="P4 отримує урок від P1. Він доходить лише туди, де він доречний, і ніколи автоматично."
+            <circle cx="462" cy="178" r="15" />
+            <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
+          </g>
+          <g class="scale__project"> data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку."
+            <circle cx="310" cy="90" r="15" />
+            <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
+          </g>
+
+          <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
+          <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+
+          <path class="scale__packet-rule" fill="none" data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж набуте пропонують нагору." d="M 196 502 L 196 492 L 424 492 L 424 502" />
+          <text class="scale__section-label" x="196" y="482">ПАКЕТ</text>
+          <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+          <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
+          <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
+          <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
+          <circle class="scale__session scale__session--1" data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене." cx="238" cy="522" r="6" />
+          <circle class="scale__session scale__session--2" data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене." cx="310" cy="522" r="6" />
+          <circle class="scale__session scale__session--3" data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене." cx="382" cy="522" r="6" />
+          <text class="scale__section-label" x="196" y="546">СЕСІЇ</text>
+
+          <circle class="scale__curator-ring" cx="310" cy="266" r="62" data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і сам нічого не зливає." fill="none" />
+          <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+
+          <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
+          <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
+          <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+        </svg>
       </template>
 
       <template data-i18n-id="hero.body">
@@ -1582,90 +1631,82 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
             <span class="label label--accent">Один фреймворк, багато проєктів</span>
             <h3>Фреймворк спільний. Пам&rsquo;ять у кожного проєкту своя.</h3>
             <p>
-              Проєкти обертаються навколо одного рівня фреймворку. Задача,
-              завелика для однієї сесії, стає пакетом сесій усередині свого
-              проєкту. Вниз, ще до першого рядка реалізації, спускається не
-              лише метод: онтологія й модель повноважень, правила та
+              Читайте малюнок як одне коло: вниз, упоперек і вгору. Метод і
+              попередній досвід спускаються в сесію ще до першого рядка
+              реалізації: онтологія й модель повноважень, правила та
               обмеження, сценарії роботи, шаблони й навички агента, а разом із
-              ними - попередній досвід самого проєкту. Назад піднімається
-              тільки те, що пакет перевірив і що узагальнюється поза його
-              межами, і доходить до іншого проєкту лише там, де воно доречне.
+              ними історія самого проєкту. Нижньою смугою йде пакет із трьох
+              сесій. Більшість того, що вони виробляють, випаровується разом
+              із ними, дещо осідає на рівні проєкту, і зрідка один перевірений
+              урок піднімається правою дугою на рівень фреймворку, звідки його
+              може дістати будь-який інший проєкт.
             </p>
             <ul class="figure-legend">
-              <li class="figure-legend__item figure-legend__item--dot">
-                <strong>EIF, рівень фреймворку.</strong> Спільна операційна основа, яку сесія отримує до реалізації, а не описує після неї.
-              </li>
-              <li class="figure-legend__item figure-legend__item--dot-muted">
-                <strong>Від P1 до P4, репозиторії проєктів.</strong> У P1 відкрито пакет із трьох сесій, зі своїми правилами відкриття й закриття.
+              <li class="figure-legend__item figure-legend__item--dotted">
+                <strong>Спершу спускаються метод і досвід.</strong> Обидва потрапляють у сесію <em>до того</em>, як вона щось реалізує: їх шукають, а не згадують.
               </li>
               <li class="figure-legend__item figure-legend__item--bracket">
-                <strong>Пакет об&rsquo;єднує свої сесії.</strong> Вони йдуть по черзі, і пакет закривається раніше, ніж щось із набутого пропонують нагору.
+                <strong>Один пакет, три сесії.</strong> Вони йдуть по черзі під пунктирною смугою, і пакет закривається раніше, ніж щось із набутого пропонують нагору.
+              </li>
+              <li class="figure-legend__item figure-legend__item--mark">
+                <strong>Більшість сесії випаровується.</strong> Перевірене осідає на рівні проєкту як стійка пам&rsquo;ять, решта зникає разом із сесією.
               </li>
               <li class="figure-legend__item figure-legend__item--dashed-accent">
-                <strong>Пунктир означає умовність.</strong> Урок виходить за межі проєкту лише за явним рішенням і потрапляє до іншого лише там, де він доречний.
+                <strong>Підвищення це виняток.</strong> Підйом намальовано пунктиром, бо урок доходить до рівня фреймворку лише за явним рішенням.
               </li>
               <li class="figure-legend__item figure-legend__item--dot-warn">
-                <strong>Куратор.</strong> Постійно стежить за станом самого фреймворку, у власному ритмі, поза будь-яким окремим підвищенням рівня.
+                <strong>Куратор.</strong> Постійно стежить за станом самого рівня фреймворку, у власному ритмі, поза будь-яким окремим підвищенням.
               </li>
             </ul>
           </figcaption>
 
-          <svg class="scale__map" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
-            <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+          <svg
+            class="hero__figure"
+            aria-hidden="true"
+            viewBox="20 64 340 292"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <line class="hero__shelf" x1="84" y1="92" data-tip="Рівень фреймворку. Методологія багаторазового використання, спільна для проєктів, змінюється лише за явним рішенням." x2="330" y2="92" />
+            <line class="hero__shelf" x1="84" y1="202" data-tip="Рівень проєкту. Стійке знання про цей репозиторій: рішення, обмеження, факти й ризики, у кожного свій статус і позначка доказовості." x2="330" y2="202" />
+            <line class="hero__shelf hero__shelf--session" data-tip="Смуга сесії, намальована пунктиром, бо вона не зберігається. Міркування, глухі кути й вивід команд зникають разом із сесією." x1="84" y1="312" x2="330" y2="312" />
 
-            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
-            <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
-            <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
-            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+            <path class="hero__descent" fill="none" data-tip="Метод спускається з рівня фреймворку ще до того, як сесія щось реалізує."
+              d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
+            <path class="hero__descent hero__descent--project" fill="none" data-tip="Власний попередній досвід проєкту, який підтягують у сесію, а не згадують з історії чату."
+              d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
 
-            <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
-            <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
-            <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+            <path class="hero__ascent" fill="none" data-tip="Підвищення, намальоване пунктиром, бо це виняток. Урок доходить до рівня фреймворку лише за явним рішенням, яке ухвалює ретроспектива по багатьох сесіях."
+              d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
 
-            <text class="scale__note" x="274" y="334" text-anchor="end">метод і досвід</text>
-            <text class="scale__note scale__note--up" x="346" y="334">перевірений урок</text>
-            <text class="scale__note scale__note--relay" x="374" y="170" text-anchor="middle">якщо доречно</text>
-
-            <circle class="scale__core" cx="310" cy="266" r="42" />
-            <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
-
-            <g class="scale__project scale__project--active">
-              <circle cx="310" cy="442" r="17" />
-              <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
-            </g>
-            <g class="scale__project">
-              <circle cx="158" cy="178" r="15" />
-              <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
-            </g>
-            <g class="scale__project scale__project--receiving">
-              <circle cx="462" cy="178" r="15" />
-              <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
-            </g>
-            <g class="scale__project">
-              <circle cx="310" cy="90" r="15" />
-              <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
+            <g class="hero__packet"> data-tip="Один пакет, три сесії. Вони йдуть по черзі, і пакет закривається раніше, ніж щось із набутого пропонують нагору."
+              <line x1="140" y1="306" x2="140" y2="318" />
+              <line x1="208" y1="306" x2="208" y2="318" />
+              <line x1="276" y1="306" x2="276" y2="318" />
+              <path class="hero__packet-rule" fill="none"
+                d="M 128 332 L 128 342 L 288 342 L 288 332" />
             </g>
 
-            <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
-            <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+            <g class="hero__lost"> data-tip="Те, що випаровується. Більша частина сесії це робочий контекст, і він не має зберігатися."
+              <circle cx="112" cy="312" r="3.5" />
+              <circle cx="172" cy="312" r="3.5" />
+              <circle cx="240" cy="312" r="3.5" />
+              <circle cx="304" cy="312" r="3.5" />
+            </g>
 
-            <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
-            <text class="scale__section-label" x="196" y="482">ПАКЕТ</text>
-            <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
-            <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
-            <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
-            <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-            <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
-            <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
-            <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
-            <text class="scale__section-label" x="196" y="546">СЕСІЇ</text>
+            <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
+            <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
+            <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
 
-            <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
-            <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+            <rect class="hero__settled hero__settled--1" data-tip="Те, що осідає як памʼять проєкту. Перевірене в сесії й збережене саме тому, що перевірене." x="133" y="196" width="14" height="6" rx="1" />
+            <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
+            <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
+            <rect class="hero__settled hero__settled--top" data-tip="Урок, який дійшов до рівня фреймворку. Це рідкість, і звідси його може дістати будь-який інший проєкт." x="300" y="86" width="14" height="6" rx="1" />
 
-            <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
-            <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
-            <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+            <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
+            <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
+            <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
+
+            <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="Куратор у власному повільнішому ритмі. Він ранжує те, що зіпсувалося в базі, і призначає відповідального, але сам нічого не зливає." />
           </svg>
         </figure>
       </template>
@@ -1877,16 +1918,16 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
             <path class="kb-map__link" fill="none" d="M 215 150 L 320 80" />
             <path class="kb-map__link" fill="none" d="M 320 80 L 370 190" />
             <path class="kb-map__link" fill="none" d="M 215 150 L 370 190" />
-            <path class="kb-map__link kb-map__link--dead" fill="none" d="M 215 150 L 272 232" />
+            <path class="kb-map__link kb-map__link--dead" fill="none" data-tip="Посилання на виключений артефакт нікуди не зникає, бо сам артефакт лишається читабельним. Просто пошук за замовчуванням ним не йде." d="M 215 150 L 272 232" />
 
-            <path class="kb-map__query" fill="none" d="M 26 266 C 56 260 50 226 70 190" />
+            <path class="kb-map__query" fill="none" data-tip="Пошук заходить із боку індексу й іде звʼязками, а не перечитує всі файли. Офлайн, за ключовими словами й підрядками, без сервісу векторних представлень." d="M 26 266 C 56 260 50 226 70 190" />
 
             <circle class="kb-map__node kb-map__node--s1" cx="70" cy="190" r="8" />
             <circle class="kb-map__node kb-map__node--s2" cx="120" cy="90" r="8" />
-            <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" cx="215" cy="150" r="10" />
+            <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" data-tip="Один артефакт знання, повʼязаний із кількома сусідами. Звичайний файл із заголовком: тип, межі, статус, упевненість, джерело й посилання на сусідів." cx="215" cy="150" r="10" />
             <circle class="kb-map__node kb-map__node--s4" cx="320" cy="80" r="8" />
             <circle class="kb-map__node kb-map__node--s5" cx="370" cy="190" r="8" />
-            <circle class="kb-map__node kb-map__node--excluded" cx="272" cy="232" r="8" />
+            <circle class="kb-map__node kb-map__node--excluded" data-tip="Відхилений або замінений. Читати можна, але за замовчуванням він не потрапляє у видачу, щоб закрите питання не відкрилося саме собою, і його позначає куратор." cx="272" cy="232" r="8" />
 
             <circle class="kb-map__flag" cx="272" cy="232" r="15" fill="none" />
             <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
@@ -1954,15 +1995,15 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
 
             <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
               <text class="cap-flow__label" x="4" y="50">Graphify</text>
-              <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
+              <line class="cap-flow__route" x1="92" y1="46" data-tip="Graphify доступний: агент іде структурою, яку вже побудував." x2="392" y2="46" />
               <circle class="cap-flow__waypoint" cx="170" cy="46" r="4" />
               <circle class="cap-flow__waypoint" cx="230" cy="46" r="4" />
               <circle class="cap-flow__waypoint" cx="290" cy="46" r="4" />
-              <line class="cap-flow__core" x1="92" y1="74" x2="392" y2="74" />
+              <line class="cap-flow__core" x1="92" y1="74" data-tip="Без Graphify: пошук у вихідних файлах і ручний перегляд. Повільніше, але доходить." x2="392" y2="74" />
 
               <text class="cap-flow__label" x="4" y="130">RTK</text>
               <line class="cap-flow__route" x1="92" y1="126" x2="392" y2="126" />
-              <line class="cap-flow__gate" x1="234" y1="106" x2="234" y2="140" />
+              <line class="cap-flow__gate" x1="234" data-tip="Тут RTK відкидає вивід, ще до того, як він почав коштувати контекст." y1="106" x2="234" y2="140" />
               <text class="cap-flow__note" x="234" y="98" text-anchor="middle">відкинуто тут</text>
               <circle class="cap-flow__tick" cx="120" cy="126" r="3" />
               <circle class="cap-flow__tick" cx="146" cy="126" r="3" />
@@ -1970,16 +2011,16 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
               <circle class="cap-flow__tick" cx="198" cy="126" r="3" />
               <circle class="cap-flow__tick cap-flow__tick--kept" cx="286" cy="126" r="3" />
               <circle class="cap-flow__tick cap-flow__tick--kept" cx="330" cy="126" r="3" />
-              <line class="cap-flow__core" x1="92" y1="154" x2="392" y2="154" />
+              <line class="cap-flow__core" x1="92" y1="154" data-tip="Без RTK: команди виконуються без фільтрації, а скорочення не фіксується." x2="392" y2="154" />
 
               <text class="cap-flow__label" x="4" y="210">Context7</text>
               <line class="cap-flow__route" x1="92" y1="206" x2="300" y2="206" />
-              <line class="cap-flow__route cap-flow__route--external" x1="300" y1="206" x2="392" y2="206" />
+              <line class="cap-flow__route cap-flow__route--external" data-tip="Єдиний відрізок, який виходить за межі цього компʼютера. Запит Context7 іде до зовнішньої служби документації, а вихідний код фреймворк не надсилає." x1="300" y1="206" x2="392" y2="206" />
               <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
               <text class="cap-flow__note" x="300" y="178" text-anchor="middle">іде в мережу</text>
-              <line class="cap-flow__core" x1="92" y1="234" x2="392" y2="234" />
+              <line class="cap-flow__core" x1="92" y1="234" data-tip="Без Context7: локальна документація або знання з навчання, і про недоступність провайдера повідомляють прямо, а не підміняють її тихо." x2="392" y2="234" />
 
-              <rect class="cap-flow__context" x="400" y="20" width="34" height="228" rx="8" />
+              <rect class="cap-flow__context" data-tip="Вікно контексту агента. Усе, що сюди потрапляє, вже оплачено токенами." x="400" y="20" width="34" height="228" rx="8" />
 
               <circle class="cap-flow__pulse cap-flow__pulse--g" cx="0" cy="0" r="5" />
               <circle class="cap-flow__pulse cap-flow__pulse--g-core" cx="0" cy="0" r="5" />

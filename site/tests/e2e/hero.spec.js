@@ -46,46 +46,66 @@ test.describe('hero', () => {
     }
   });
 
-  test('the figure key is bound to the figure it explains', async ({ page }) => {
+  test('the hero mark is the orbit, unkeyed, and the circuit moved to section 03', async ({
+    page,
+  }) => {
     await page.goto('/');
-    const geometry = await page.evaluate(() => {
-      const figure = document.querySelector('.hero__figure').getBoundingClientRect();
-      const legend = document.querySelector('.hero__legend');
-      const legendBox = legend.getBoundingClientRect();
-      const firstItem = legend
-        .querySelector('.figure-legend__item')
-        .getBoundingClientRect();
-      return {
-        figureWidth: figure.width,
-        legendWidth: legendBox.width,
-        ruleToFirstLine: firstItem.top - legendBox.top,
-      };
-    });
-    // main.js imports sections.css after hero.css, so at equal specificity
-    // .figure-legend's own `padding: 0` and `max-width` used to win here: the
-    // rule sat 1px above the first line and ran 48px wider than the figure.
-    expect(Math.abs(geometry.legendWidth - geometry.figureWidth)).toBeLessThan(1);
-    expect(geometry.ruleToFirstLine).toBeGreaterThanOrEqual(24);
+    // A hero is a poster. The key that used to sit under it went with the
+    // circuit diagram to section 03, where a diagram and its key belong.
+    await expect(page.locator('.hero__legend')).toHaveCount(0);
+    await expect(page.locator('.hero .hero__aside .figure-legend')).toHaveCount(0);
+    await expect(page.locator('.hero .scale__map')).toHaveCount(1);
+    await expect(page.locator('.hero .scale__core-label')).toHaveText('EIF');
+
+    // The circuit is in the layers figure now, and it kept its five-line key.
+    await expect(page.locator('#layers .scale .hero__shelf')).toHaveCount(3);
+    await expect(page.locator('#layers .scale .figure-legend__item')).toHaveCount(5);
+    await expect(page.locator('.hero .hero__shelf')).toHaveCount(0);
+  });
+
+  test('the hero mark translates its route notes with the page', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('.hero .scale__note').first()).toHaveText('method + experience');
+    await page.locator('#lang-toggle').click();
+    await expect(page.locator('.hero .scale__note').first()).toHaveText('метод і досвід');
+    // Proper nouns stay put in both languages.
+    await expect(page.locator('.hero .scale__core-label')).toHaveText('EIF');
   });
 
   test('hero figure stops animating once the hero is scrolled away', async ({ page }) => {
     await page.goto('/');
-    const mark = page.locator('.hero__settled--1');
-    const playState = () =>
-      mark.evaluate((el) => getComputedStyle(el).animationPlayState);
+    const mark = page.locator('.hero .scale__session--1');
+    const circuit = page.locator('#layers .scale .hero__settled--1');
+    const playState = (locator) =>
+      locator.evaluate((el) => getComputedStyle(el).animationPlayState);
 
-    expect(await playState()).toBe('running');
+    expect(await playState(mark)).toBe('running');
 
     // Far enough that no part of the full-height hero is intersecting.
     await page.evaluate(() => window.scrollTo(0, 4000));
-    await expect(page.locator('.hero__figure')).toHaveClass(/is-paused/);
-    expect(await playState()).toBe('paused');
+    await expect(page.locator('.hero .hero__figure')).toHaveClass(/is-paused/);
+    expect(await playState(mark)).toBe('paused');
+    // The circuit shares the class name but is a different figure in a
+    // different section, and must not be paused by the hero leaving view.
+    expect(await playState(circuit)).toBe('running');
 
     // Resumes rather than restarting, so returning to the top does not
     // replay the accumulation from empty.
     await page.evaluate(() => window.scrollTo(0, 0));
-    await expect(page.locator('.hero__figure')).not.toHaveClass(/is-paused/);
-    expect(await playState()).toBe('running');
+    await expect(page.locator('.hero .hero__figure')).not.toHaveClass(/is-paused/);
+    expect(await playState(mark)).toBe('running');
+  });
+
+  test('the pause observer survives a language swap', async ({ page }) => {
+    await page.goto('/');
+    // The hero mark now lives inside an i18n block, so switching language
+    // replaces the SVG node and leaves the previous observer holding a
+    // detached element.
+    await page.locator('#lang-toggle').click();
+    await page.evaluate(() => window.scrollTo(0, 4000));
+    await expect(page.locator('.hero .hero__figure')).toHaveClass(/is-paused/);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.locator('.hero .hero__figure')).not.toHaveClass(/is-paused/);
   });
 
   test('no third-party network requests on hero load', async ({ page }) => {

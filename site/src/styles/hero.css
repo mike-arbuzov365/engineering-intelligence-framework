@@ -36,47 +36,30 @@
   width: 100%;
 }
 
-/* The figure is shown at every width, not hidden on small screens. On a
-   phone it sits under the CTAs as a short wide band rather than the tall
-   column used beside the wordmark - the same three layers, re-proportioned,
-   so a phone reader gets the idea instead of a blank space.
-   The Ukrainian strings are longer than the English ones, which is why the
-   lane labels are kept to Р1/Р2/Р3 rather than spelled out inside the SVG. */
-/* Figure and key are one object, not two things that happen to be stacked:
-   a single column, one hairline between them, and the pair centred against
-   the wordmark rather than each half floating in its own grid row. */
+/* The mark is shown at every width, not hidden on small screens. The orbit
+   is square-ish and symmetrical, so it takes the same treatment at every
+   size instead of needing a re-proportioned phone variant: one centred
+   column, no key under it.
+
+   The key is gone on purpose. A hero is a poster. Section 03 carries the
+   same model with a five-line key against the circuit diagram that used to
+   sit here, which is where a diagram and its key belong. */
 .hero__aside {
   display: grid;
   justify-items: center;
-  gap: var(--eif-space-3);
   margin-top: var(--eif-space-5);
 }
 
-.hero__figure {
+/* Wider than the 21rem the circuit used. This one is the page's mark rather
+   than a sidebar diagram, and it carries five text labels: at 21rem the
+   route notes rendered near 10px, which is under this page's floor for
+   anything a reader is expected to read. */
+.hero__aside .hero__figure {
   display: block;
   width: 100%;
-  max-width: 21rem;
+  max-width: 26rem;
   height: auto;
   margin: 0;
-}
-
-/* Five short lines naming what the figure does, in the reader's language.
-   Uses the page-wide .figure-legend component; only its placement and the
-   rule tying it to the figure are local.
-
-   Scoped to .hero__aside on purpose. .figure-legend lives in sections.css,
-   which main.js imports after this file, so at equal specificity its own
-   `margin`, `padding: 0` and `max-width: var(--eif-measure)` won every
-   conflict here: the rule ended up sitting 1px above the first line of the
-   key, and the key ran 48px wider than the figure it explains. One extra
-   class settles both - the rule now spans exactly the figure's width, and
-   there is real air under it. */
-.hero__aside .hero__legend {
-  margin: 0;
-  width: 100%;
-  max-width: 21rem;
-  padding-top: var(--eif-space-4);
-  border-top: 1px solid var(--eif-rule);
 }
 
 /* Rows are declared explicitly so the aside can span all three of them:
@@ -86,7 +69,7 @@
 @media (min-width: 1080px) {
   .hero__content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 27rem);
     grid-template-rows: auto auto auto;
     gap: var(--eif-space-2) var(--eif-space-5);
     align-items: center;
@@ -117,8 +100,9 @@
 
 /* Set by main.js once the hero leaves the viewport. Paused rather than
    removed so returning to the top resumes mid-cycle instead of restarting
-   the accumulation from empty. */
-.hero__figure.is-paused * {
+   the accumulation from empty. Scoped to the hero: the circuit in section 03
+   now shares these class names and must keep running when it is on screen. */
+.hero .hero__figure.is-paused * {
   animation-play-state: paused;
 }
 

@@ -734,6 +734,123 @@ person who works in Ukrainian can check it in about two minutes.
 
 ---
 
+## Commenting on other people's posts
+
+The series is one half. The other half is arriving in threads that are
+already happening, which reaches the audience described at the top of this
+file far more directly than a post on a small account does.
+
+Rules, in order of how easy they are to get wrong:
+
+1. **Enter through the strongest objection in the thread, not through the
+   post.** A comment that agrees with the author adds nothing. A comment
+   that answers what three commenters are already arguing about is the one
+   people read.
+2. **Say the one thing nobody in the thread has said.** If it is already
+   there, do not comment.
+3. **Link only when the link is checkable.** If the repository is private
+   or the site is not deployed, do not post. A comment whose whole argument
+   is "here is a thing you can go read" and then cannot be read is worse
+   than silence.
+4. **Concede the author's frame.** Their model is usually not wrong, it is
+   usually incomplete in one specific place. Say which place.
+5. **State the bound in the comment itself.** Same rule as the posts. "It
+   is explicit about what it has not measured" belongs in the comment, not
+   in a follow-up when someone challenges it.
+6. **One comment. No reply-to-own-comment threads, no editing to add a
+   link.**
+
+### Comment 1. On "Steps of AI Adoption"
+
+Target: Boris Cherny's post on the four steps of AI adoption and its
+artifact. Chosen because the thread's dominant objection, from three
+separate commenters, is that verification and trust are the real ceiling,
+which is the argument this framework exists to be part of.
+
+The angle: every guardrail named in that post governs what happens inside a
+session, and none of them outlives the session. That is fine at ten agents
+and expensive at a hundred. Concede the ladder, name the layer it stops
+short of.
+
+**Blocked until a public URL exists.** The repository is private and the
+site is not deployed. Post it after that, and while the thread is still
+moving.
+
+#### EN
+
+The guardrails in the list are all per-session: auto mode, code review,
+worktree isolation, /loop, /batch. That holds to about step 2.
+
+What breaks after it is not verification bandwidth. It is that agent 60 has
+no idea what agents 1 through 59 already decided, tried and rejected, so
+they re-derive the same context in parallel and a few of them confidently
+retake a path that was ruled out that morning. Nothing in a worktree
+outlives the session that made it.
+
+The guardrail that is missing sits outside every agent: durable project
+knowledge with a lifecycle, pulled into a session before implementation
+rather than searched for after it, and a closeout that decides what is
+allowed to persist. Rejected decisions especially, because those have to
+stay rejected without a human re-explaining them each time.
+
+I have been running a methodology built around that since May, and
+published it this week as EIF: [link]. Apache-2.0, and explicit about what
+it has not measured, including any comparison against ungoverned work.
+
+Step 2 to 3 is where it starts paying for itself, which is where you put
+the trust bottleneck too.
+
+#### UA
+
+For reposting into a Ukrainian community, not for the thread itself.
+
+Усі згадані запобіжники діють у межах однієї сесії: автоматичний режим
+дозволів, автоматичне ревʼю коду, ізоляція worktree, /loop, /batch. Цього
+вистачає приблизно до другого кроку.
+
+Далі ламається не пропускна здатність перевірки. Ламається те, що
+шістдесятий агент не має уявлення, що перші пʼятдесят девʼять уже
+вирішили, спробували й відхилили. Вони паралельно доходять до того самого
+контексту, а дехто впевнено повертається на шлях, який відкинули того ж
+ранку. Ніщо у worktree не переживає сесію, яка його створила.
+
+Запобіжник, якого бракує, лежить поза кожним агентом: стійке знання
+проєкту з життєвим циклом, яке підтягують у сесію перед реалізацією, а не
+шукають після неї, і закриття, яке вирішує, чому дозволено лишитися.
+Особливо відхиленим рішенням, бо вони мають лишатися відхиленими без того,
+щоб людина щоразу пояснювала це наново.
+
+Я працюю за методологією, побудованою навколо цього, з травня, а цього
+тижня опублікував її як EIF: [посилання]. Ліцензія Apache-2.0, і там прямо
+сказано, чого не виміряно, зокрема будь-якого порівняння з некерованою
+роботою.
+
+#### Replies to prepare for
+
+Draft direction only. Write the actual reply against what was said, not
+against what was predicted.
+
+- **"This is just RAG for your codebase."** No. Retrieval is one step of
+  six. The part that does the work is the lifecycle: an artifact has a
+  status, and a rejected one stays out of results until somebody decides
+  otherwise. A vector store will happily return the approach you abandoned
+  last week, ranked highly, because it is semantically perfect.
+- **"Sounds like a lot of process for a solo dev."** Agreed, and at one
+  agent it probably is not worth it. Say so. The whole argument is that it
+  starts paying somewhere past step 2.
+- **"Do you have numbers?"** No, and say it in the first sentence. One
+  bounded pilot, one model, three fixtures, one attempt per cell. Not
+  enough for a directional claim, which is why the site does not make one.
+  Offer the register, do not argue.
+- **"How is this different from CLAUDE.md / cursor rules / AGENTS.md?"**
+  Those are instructions to the agent. This is knowledge about the project
+  with a status and a source, plus a rule about what is allowed to become
+  one of those instructions. EIF generates the entrypoint file; it is the
+  output, not the system.
+- **A hostile "another framework" reply.** One line, no defence: fair,
+  there are a lot. It is Apache-2.0 and the claims register lists what is
+  unverified, so it is cheap to check and cheap to dismiss.
+
 ## What to watch, and what to ignore
 
 Ignore: impressions, likes, follower count. They measure how well a post

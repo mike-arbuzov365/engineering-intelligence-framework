@@ -25,9 +25,6 @@ of the entry rather than a footnote.
   credentials and stays an owner decision, which is the same boundary
   everything else here observes: EIF generates what a person then chooses to
   run. Passes end to end on `0.1.0.dev0`.
-
-### Added
-
 - [`docs/product/linkedin-series.md`](docs/product/linkedin-series.md): a
   ten-post bilingual series, planned as one arc, with the audience, the
   claim boundaries, the voice rules and both language versions of every
@@ -38,6 +35,29 @@ of the entry rather than a footnote.
 
 ### Changed
 
+- The evidence ledger is current again, and one row longer. The install row
+  led with "not published to PyPI", which is release status rather than
+  evidence; it now leads with the command that works, `pip install .` from a
+  clone, and keeps only the bounds on the evidence itself. The switching row
+  says adapter scope is frozen at four rather than describing two of them as
+  pending. The "Bounded proof on record" block that trailed the section is
+  folded into an eighth row, `Measure`, so the pilot's two limits sit beside
+  the pilot instead of reading as a disclaimer appended to a page of claims.
+  CLM-08, CLM-09 and CLM-10 all still resolve, which the strict claims gate
+  proves.
+- The capabilities figure is composed like the knowledge-base block in
+  section 07: explanation and legend on one side, drawing capped at 24rem on
+  the other, rows spanning both. Full width had been the wrong correction.
+  The drawing is three thin lanes, so stretching it opened a gap down the
+  middle of each one and stranded the legend underneath, which read fine on
+  a phone and badly on a laptop.
+- The closing screen leads with what the repository is rather than with an
+  adjective about how it is developed: the public extraction of a private
+  framework in daily use on real projects, across different agents and
+  models, where the models change and the governance around them does not.
+  Two notes carry the mechanism behind that, the two layers experience
+  accumulates in and why adapters exist, stated as mechanism rather than as
+  an outcome claim nothing here has measured.
 - The site's release-status notes moved off the site, into
   [`docs/product/pre-release.md`](docs/product/pre-release.md). The
   quickstart used to spend a heading, a lede clause and a closing paragraph

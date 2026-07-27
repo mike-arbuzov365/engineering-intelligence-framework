@@ -921,24 +921,36 @@
           </div>
           <p class="section__lede" data-claim-id="CLM-12">
             Graphify, RTK and Context7 each add one narrow capability. None is
-            the methodology itself: when a tool is absent, EIF takes a named
-            core path and reports the tool as unavailable instead of quietly
-            substituting a guess. The framework installs none of the three.
+            the methodology itself, and the framework installs none of the
+            three.
           </p>
 
-          <!-- All three capabilities in one shape: a solid route with the
-               tool, a dashed core path without it, both arriving at the
-               same place. The tool names are proper nouns and read the
-               same in both languages, so the SVG needs no translation.
-               Deliberately shows no quantity anywhere: CLM-06 permits
-               saying compression is measured, not how much.
+          <!-- Composed the same way as the knowledge-base block in section
+               07: explanation and legend on one side, drawing on the other,
+               and the detail rows spanning both underneath. Full width was
+               worse than it sounds. The drawing is three thin lanes, so at
+               46rem it stretched into a diagram with a lot of nothing in the
+               middle while the legend sat alone under it. At 24rem it reads
+               the way it reads on a phone, which is where it was working.
 
-               Full width now, and no longer sharing a grid with the cost
-               note. Sharing one put a drawing and a caveat behind the same
-               amber rule, which made the rule mean nothing, and squeezed
-               the figure into 24rem while its legend ran as three
-               paragraphs of small type underneath. -->
-          <figure class="cap-flow">
+               All three capabilities in one shape: a solid route with the
+               tool, a dashed core path without it, both arriving at the same
+               place. The tool names are proper nouns and read the same in
+               both languages, so the SVG needs no translation. Deliberately
+               shows no quantity anywhere: CLM-06 permits saying compression
+               is measured, not how much. -->
+          <div class="capabilities">
+            <div class="capabilities__lead">
+              <span class="label label--accent">What happens when one is missing</span>
+              <h3>Every tool has a named path that runs without it</h3>
+              <p>
+                EIF takes the core path and reports the tool as unavailable
+                instead of quietly substituting a guess: source search
+                instead of the graph, unfiltered output instead of
+                compression, local documentation instead of a live lookup.
+              </p>
+            </div>
+
             <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
               <text class="cap-flow__label" x="4" y="50">Graphify</text>
               <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
@@ -977,24 +989,23 @@
               <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
             </svg>
 
-            <!-- Four keys, one line each, across two columns. It used to be
-                 three paragraphs that re-listed the fallbacks named in the
-                 lede and the boundaries named in the rows below, which is
-                 the same fact said three times on one screen. The context
-                 box on the right had no key at all. -->
-            <ul class="figure-legend cap-flow__legend">
+            <!-- Four keys, one line each. It used to be three paragraphs
+                 that re-listed the fallbacks named in the lede and the
+                 boundaries named in the rows below, which is the same fact
+                 said three times on one screen. The context box on the
+                 right had no key at all. -->
+            <ul class="figure-legend">
               <li class="figure-legend__item">Solid: the route with the tool available.</li>
               <li class="figure-legend__item figure-legend__item--dashed">Dashed: the core path that runs without it. Both arrive.</li>
               <li class="figure-legend__item figure-legend__item--dotted-warn">Amber: the two boundaries. RTK drops output before it costs context; only Context7 leaves this computer.</li>
               <li class="figure-legend__item figure-legend__item--box">The box on the right is the context the agent has to spend.</li>
             </ul>
-          </figure>
 
-          <!-- Each row now answers the boundary question in its collapsed
-               state, because that is the question people actually arrive
-               with. Local or network is a tag, not a paragraph three
-               sentences into a disclosure nobody opened. -->
-          <ul class="integrations__list">
+            <!-- Each row answers the boundary question in its collapsed
+                 state, because that is the question people actually arrive
+                 with. Local or network is a tag, not a paragraph three
+                 sentences into a disclosure nobody opened. -->
+            <ul class="integrations__list">
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="cap-row__head">
@@ -1038,7 +1049,8 @@
                 <p><strong>Verified:</strong> the declaration, the routing guidance and the template shape are covered by tests; live provider behavior is not. EIF generates configuration for the agent to load and does not speak MCP itself, so reachability is reported by the agent and stays marked unverified.</p>
               </div>
             </li>
-          </ul>
+            </ul>
+          </div>
 
           <!-- The amber rule means caveat everywhere else on this page, so
                it now brackets only the caveat. -->
@@ -1071,7 +1083,7 @@
             <h2 id="evidence-heading">What has been observed within clear boundaries</h2>
           </div>
           <p class="section__lede">
-            Seven tasks a governed agent actually performs with this
+            Eight tasks a governed agent actually performs with this
             framework, each with its own evidence and boundary, not a
             single blanket capability claim.
           </p>
@@ -1083,8 +1095,8 @@
                 <span>An installable eifctl wheel with seven subcommands</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-02">
-                <p>A real wheel built from <code>pyproject.toml</code>, installed into a clean venv, gives a working <code>eifctl</code> command with seven subcommands and delivers the standalone benchmark C/D contract tool. The package is proven through a full synthetic-task journey.</p>
-                <p><strong>Limitation:</strong> not published to PyPI; the full journey exercises the Claude Code adapter for its own bootstrap step, and the C/D proof is deterministic contract evidence rather than a real-agent result.</p>
+                <p><code>pip install .</code> from a clone builds a real wheel from <code>pyproject.toml</code>. Installed into a clean virtual environment it gives a working <code>eifctl</code> command with seven subcommands, and delivers the standalone benchmark contract tool. That path is exercised end to end by a full synthetic-task journey, not just by an import check.</p>
+                <p><strong>Limitation:</strong> the journey uses the Claude Code adapter for its own bootstrap step, and the C/D proof is deterministic contract evidence rather than a real-agent result.</p>
               </div>
             </li>
             <li class="reveal">
@@ -1134,7 +1146,7 @@
               </button>
               <div class="reveal__detail" data-claim-id="CLM-03">
                 <p>A full directed switching matrix (12 ordered pairs across Claude Code, Cursor, Codex and Hermes) proves exactly one active EIF block, correct destination resolution, and project-content preservation after every switch.</p>
-                <p><strong>Limitation:</strong> only Claude Code and Cursor are required for v0.1; Codex and Hermes are experimental-supported additions.</p>
+                <p><strong>Limitation:</strong> adapter scope is frozen at these four. Claude Code and Cursor are the v0.1 set, Codex and Hermes are experimental-supported, and some properties are proven adapter-generically rather than one pair at a time.</p>
               </div>
             </li>
             <li class="reveal">
@@ -1147,22 +1159,24 @@
                 <p><strong>Limitation:</strong> does not cover an agent's own free-form responses inside a session.</p>
               </div>
             </li>
+            <!-- This used to be a "Bounded proof on record" block of three
+                 paragraphs after the list, which read as a disclaimer
+                 appended to a page of claims. Measuring is one of the things
+                 this framework does, so it is a row like the others, and the
+                 two limits it carries sit inside it rather than trailing the
+                 whole section. -->
+            <li class="reveal">
+              <button class="reveal__trigger" aria-expanded="true" disabled>
+                <span class="label label--accent">Measure</span>
+                <span>One bounded real-agent pilot, and what it does not settle</span>
+              </button>
+              <div class="reveal__detail" data-claim-id="CLM-08">
+                <p>A first bounded real-agent A/B pilot, one model and three fixtures across six attempts in total, completed with every attempt succeeding in both modes. Modes C and D have executable integrity contracts rather than a real-agent performance result.</p>
+                <p data-claim-id="CLM-10">Command-level timing evidence exists for specific mechanical operations, recorded in the framework's benchmark evidence. No claim is made about human authoring or review time.</p>
+                <p data-claim-id="CLM-09"><strong>Limitation:</strong> this is not a statistically powered efficiency comparison, and no comparative study of task quality or rework rate has been run at all. One model, three of ten fixtures, one attempt per cell, no baseline and no control group. Until that changes the silence is deliberate.</p>
+              </div>
+            </li>
           </ul>
-
-          <div class="evidence__proof">
-            <h3 class="label">Bounded proof on record</h3>
-            <ul>
-              <li data-claim-id="CLM-08">
-                A first bounded real-agent A/B pilot (one model, three fixtures, six total attempts) completed with 100% task success in both modes. Modes C/D now have executable integrity contracts, but no real-agent performance result. This is not a statistically powered efficiency comparison: one model, three of ten fixtures, one attempt per cell.
-              </li>
-              <li data-claim-id="CLM-10">
-                Command-level timing evidence exists for specific mechanical operations in the framework's benchmark evidence. No claim is made about human authoring or review time.
-              </li>
-              <li data-claim-id="CLM-09">
-                No comparative study has been run, so this framework makes no claim about task quality, rework rate or defect count. That measurement has no baseline, no control group and no defined methodology yet, and until it does, the silence is deliberate.
-              </li>
-            </ul>
-          </div>
         </div>
       </section>
 
@@ -1203,14 +1217,37 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           <!-- What this used to say, and why it no longer does: "right now
                disagreement is worth more to me than agreement, so the second
                column is not decoration" performed an attitude instead of
-               saying anything. Plain statement, no contrast to argue with,
-               no instruction to the reader. -->
+               saying anything, and "developed in the open" left the reader
+               to guess whether the framework or the engineer was the one
+               being described. This states what this repository is, which is
+               the strongest thing there is to say about it: it is not a
+               proposal, it is the public form of something already in daily
+               use. -->
           <p class="section__lede">
-            EIF is one engineer's framework, developed in the open. Below is
-            the rest of what is written down, and two ways to reach me.
-            Questions, critique and accounts of running it on a real
-            repository are all useful.
+            This is the public extraction of a private framework I use every
+            working day, on my own projects, across different agents and
+            different models. The models change often. The governance around
+            them does not.
           </p>
+
+          <div class="final-cta__note">
+            <p>
+              <strong>Two kinds of experience accumulate at once.</strong>
+              What is specific to one repository stays with that repository.
+              What turns out to hold everywhere is promoted once and is there
+              for every project after it. Neither is a chat log, and neither
+              depends on the agent that produced it still being the agent you
+              use.
+            </p>
+            <p>
+              <strong>It moves at the speed the field moves.</strong> A
+              methodology that needs rewriting every time a model, an agent
+              or a tool changes is already behind. Adapters absorb that
+              churn, the three optional tools are optional precisely so no
+              vendor can break the method, and the core stays where it is
+              while the surface around it keeps changing.
+            </p>
+          </div>
 
           <!-- One closing block, two matched columns of destination rows,
                each row the same three parts the rest of the page uses: what
@@ -1229,7 +1266,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
                 <li>
                   <span class="label">Section 09</span>
                   <a href="#evidence">Evidence</a>
-                  <p>Seven tasks, each with its own boundary and its own limit.</p>
+                  <p>Eight tasks, each with its own boundary and its own limit.</p>
                 </li>
                 <li>
                   <span class="label">Source</span>
@@ -1899,12 +1936,22 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
           Graphify, RTK і Context7 додають по одній вузькій можливості. Жоден
-          із них не є самою методологією: якщо інструмента немає, EIF іде
-          визначеним базовим шляхом і прямо повідомляє про недоступність, а не
-          підміняє її здогадом. Жодного з трьох фреймворк не встановлює.
+          із них не є самою методологією, і жодного з трьох фреймворк не
+          встановлює.
         </p>
 
-          <figure class="cap-flow">
+          <div class="capabilities">
+            <div class="capabilities__lead">
+              <span class="label label--accent">Що відбувається, коли інструмента немає</span>
+              <h3>У кожного інструмента є названий шлях, який працює без нього</h3>
+              <p>
+                EIF іде базовим шляхом і прямо повідомляє, що інструмент
+                недоступний, а не підміняє його здогадом: пошук у вихідних
+                файлах замість графа, нефільтрований вивід замість стиснення,
+                локальна документація замість запиту в мережу.
+              </p>
+            </div>
+
             <svg class="cap-flow__svg" aria-hidden="true" viewBox="0 0 440 252" preserveAspectRatio="xMidYMid meet">
               <text class="cap-flow__label" x="4" y="50">Graphify</text>
               <line class="cap-flow__route" x1="92" y1="46" x2="392" y2="46" />
@@ -1943,15 +1990,14 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
               <circle class="cap-flow__pulse cap-flow__pulse--c-core" cx="0" cy="0" r="5" />
             </svg>
 
-            <ul class="figure-legend cap-flow__legend">
+            <ul class="figure-legend">
               <li class="figure-legend__item">Суцільна лінія: маршрут, коли інструмент доступний.</li>
               <li class="figure-legend__item figure-legend__item--dashed">Пунктир: базовий шлях, який працює без нього. Доходять обидва.</li>
               <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі. RTK відкидає вивід, поки той ще нічого не коштує; із трьох лише Context7 виходить за межі цього комп&rsquo;ютера.</li>
               <li class="figure-legend__item figure-legend__item--box">Прямокутник праворуч показує контекст, який агент має витратити.</li>
             </ul>
-          </figure>
 
-          <ul class="integrations__list">
+            <ul class="integrations__list">
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="cap-row__head">
@@ -1995,7 +2041,8 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
                 <p><strong>Перевірено:</strong> декларацію, правила застосування й форму шаблона покрито тестами, а реальної поведінки провайдера тести не покривають. EIF готує конфігурацію, яку завантажує агент, і сам по MCP не спілкується, тож доступність повідомляє агент, і вона лишається непідтвердженою.</p>
               </div>
             </li>
-          </ul>
+            </ul>
+          </div>
 
           <aside class="token-economics" data-claim-id="CLM-06">
             <div class="token-economics__body">
@@ -2023,8 +2070,8 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           <h2 id="evidence-heading">Що вже перевірено у чітко визначених межах</h2>
         </div>
         <p class="section__lede">
-          Сім завдань, які керований агент справді виконує з цим
-          фреймворком - кожне зі своїм доказом і межею, а не одна загальна
+          Вісім завдань, які керований агент справді виконує з цим
+          фреймворком: кожне зі своїм доказом і межею, а не одна загальна
           заява про можливості.
         </p>
         <ul class="integrations__list evidence__tasks">
@@ -2034,8 +2081,8 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
               <span>Пакет eifctl, придатний до встановлення, із сімома підкомандами</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-02">
-              <p>Справжній wheel, зібраний із <code>pyproject.toml</code> і встановлений у чисте віртуальне середовище, дає робочу команду <code>eifctl</code> (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) - перевірено повним синтетичним завданням від початку до кінця.</p>
-              <p><strong>Обмеження:</strong> пакета ще немає на PyPI; весь прохід спирається на адаптер Claude Code для власного запуску.</p>
+              <p><code>pip install .</code> із клону збирає справжній wheel із <code>pyproject.toml</code>. Встановлений у чисте віртуальне середовище, він дає робочу команду <code>eifctl</code> (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) і окремий інструмент контрактів для бенчмарку. Цей шлях перевірено повним синтетичним завданням від початку до кінця, а не самою лише перевіркою імпорту.</p>
+              <p><strong>Обмеження:</strong> увесь прохід спирається на адаптер Claude Code для власного запуску, а докази для режимів C і D це детерміновані контракти, а не результат із реальним агентом.</p>
             </div>
           </li>
           <li class="reveal">
@@ -2085,7 +2132,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
             </button>
             <div class="reveal__detail" data-claim-id="CLM-03">
               <p>Повна матриця перемикань (12 упорядкованих пар серед Claude Code, Cursor, Codex і Hermes) підтверджує, що після кожного перемикання лишається рівно один активний блок EIF, правильно визначено новий адаптер і збережено вміст проєкту.</p>
-              <p><strong>Обмеження:</strong> для v0.1 обов&rsquo;язкові лише Claude Code і Cursor; Codex і Hermes поки експериментальні.</p>
+              <p><strong>Обмеження:</strong> набір адаптерів заморожено на цих чотирьох. Claude Code і Cursor входять у набір v0.1, Codex і Hermes лишаються експериментальними, а частину властивостей доведено спільно для всіх адаптерів, а не окремо для кожної пари.</p>
             </div>
           </li>
           <li class="reveal">
@@ -2094,25 +2141,22 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
               <span>Українські поверхні проєкту, ще не повна локалізація відповідей</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-07">
-              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською - мову задає конфігурація кожного окремого екземпляра.</p>
+              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською, а мову задає конфігурація кожного окремого екземпляра.</p>
               <p><strong>Обмеження:</strong> це не стосується довільних відповідей самого агента в сесії.</p>
             </div>
           </li>
+          <li class="reveal">
+            <button class="reveal__trigger" aria-expanded="true" disabled>
+              <span class="label label--accent">Вимірювання</span>
+              <span>Один обмежений пілот із реальним агентом, і чого він не вирішує</span>
+            </button>
+            <div class="reveal__detail" data-claim-id="CLM-08">
+              <p>Перший обмежений пілот A/B із реальним агентом, одна модель і три тестові приклади на шість спроб загалом, завершився успіхом у кожній спробі в обох режимах. Режими C і D мають виконувані контракти цілісності, а не результат продуктивності з реальним агентом.</p>
+              <p data-claim-id="CLM-10">Хронометраж на рівні окремих команд існує для конкретних механічних операцій і записаний у бенчмарках фреймворку. Про час людини на створення чи перевірку коду заяв не робимо.</p>
+              <p data-claim-id="CLM-09"><strong>Обмеження:</strong> це не статистично потужне порівняння ефективності, а порівняльного дослідження якості завдань чи частки переробок не проводили взагалі. Одна модель, три тестові приклади з десяти, одна спроба на комірку, без базової лінії й без контрольної групи. Доки це не зміниться, мовчанка навмисна.</p>
+            </div>
+          </li>
         </ul>
-        <div class="evidence__proof">
-          <h3 class="label">Задокументовані обмежені докази</h3>
-          <ul>
-            <li data-claim-id="CLM-08">
-              Перший обмежений пілот A/B із реальним агентом (одна модель, три тестові приклади, шість спроб) завершився стовідсотковим успіхом в обох режимах. Режими C/D уже мають виконувані контракти цілісності, але ще не мають результату з реальним агентом. Це не статистично потужне порівняння ефективності: одна модель, три тестові приклади з десяти, одна спроба на кожну комірку.
-            </li>
-            <li data-claim-id="CLM-10">
-              Хронометраж на рівні окремих команд існує для конкретних механічних операцій у бенчмарках фреймворку. Про час людини на створення чи перевірку коду заяв не робимо.
-            </li>
-            <li data-claim-id="CLM-09">
-              Порівняльного дослідження не проводили, тож фреймворк не стверджує нічого про якість завдань, частку переробок чи кількість дефектів. Для такого вимірювання поки немає ні базової лінії, ні контрольної групи, ні визначеної методики, і доки їх немає, ця мовчанка навмисна.
-            </li>
-          </ul>
-        </div>
       </template>
 
       <template data-i18n-id="quickstart.body">
@@ -2145,11 +2189,30 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk
           <h2 id="final-cta-heading">Куди рухатися далі</h2>
         </div>
         <p class="section__lede">
-          EIF це фреймворк одного інженера, який розвивається відкрито. Нижче
-          зібрано решту написаного і два способи зі мною зв&rsquo;язатися.
-          Запитання, критика й досвід застосування на реальному репозиторії
-          однаково корисні.
+          Це публічна версія приватного фреймворку, за яким я працюю щодня,
+          на власних проєктах, із різними агентами та різними моделями.
+          Моделі змінюються часто. Керованість навколо них лишається та сама.
         </p>
+
+        <div class="final-cta__note">
+          <p>
+            <strong>Досвід накопичується одразу двома шарами.</strong> Те, що
+            стосується лише одного репозиторію, лишається при ньому. Те, що
+            підтверджується скрізь, піднімають один раз, і далі воно є в
+            кожному наступному проєкті. Жодне з двох не є історією чату, і
+            жодне не залежить від того, чи користуєтеся ви й досі тим агентом,
+            який це створив.
+          </p>
+          <p>
+            <strong>Швидкість тут задає сама галузь.</strong> Методологія,
+            яку доводиться переписувати щоразу, коли змінюється модель, агент
+            чи інструмент, уже відстала. Цю мінливість беруть на себе
+            адаптери, а три необов&rsquo;язкові інструменти лишаються
+            необов&rsquo;язковими саме для того, щоб жоден постачальник не міг
+            зламати метод. Ядро лишається на місці, поки поверхня навколо
+            нього змінюється далі.
+          </p>
+        </div>
 
         <div class="final-cta__grid">
           <nav class="final-cta__group" aria-labelledby="read-on-heading">
@@ -2163,7 +2226,7 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk
               <li>
                 <span class="label">Розділ 09</span>
                 <a href="#evidence">Докази</a>
-                <p>Сім завдань, у кожного власна межа й власне обмеження.</p>
+                <p>Вісім завдань, у кожного власна межа й власне обмеження.</p>
               </li>
               <li>
                 <span class="label">Джерело</span>

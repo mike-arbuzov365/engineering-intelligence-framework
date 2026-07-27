@@ -31,6 +31,39 @@
   max-width: var(--eif-content-max);
 }
 
+/* Two claims the closing screen has to land before the destinations: that
+   experience accumulates in two places at once, and that the method absorbs
+   churn instead of being rewritten by it. Set as a pair of bordered notes
+   rather than more lede, so the section does not open with four large
+   paragraphs before the first link. */
+.final-cta__note {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--eif-space-4);
+  margin-top: var(--eif-space-4);
+  max-width: var(--eif-content-max);
+}
+
+.final-cta__note p {
+  margin: 0;
+  padding-top: var(--eif-space-2);
+  border-top: 2px solid var(--eif-accent);
+  max-width: none;
+  color: var(--eif-fg-muted);
+}
+
+.final-cta__note strong {
+  display: block;
+  color: var(--eif-fg);
+}
+
+@media (max-width: 720px) {
+  .final-cta__note {
+    grid-template-columns: 1fr;
+    gap: var(--eif-space-3);
+  }
+}
+
 /* The closing screen. It used to be three underlined links, a floating
    status line, a 100px hole and then a contact block bolted underneath, all
    at different measures. One grid now, two matched columns, and every

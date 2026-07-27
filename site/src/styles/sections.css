@@ -468,27 +468,82 @@
   color: var(--eif-fg);
 }
 
-/* Full width, and no longer a 24rem column beside a block of prose. The
-   figure carries three lanes of labelled detail; at 24rem its labels sat
-   at the size of a footnote and its legend became a wall. */
-.cap-flow {
-  margin: var(--eif-space-4) 0 0;
+/* Composed exactly like .knowledge-base in section 07, so the two read as
+   the same kind of object: explanation on one side, drawing on the other,
+   legend under the explanation, and the detail rows spanning both.
+
+   Full width was the wrong correction. The drawing is three thin lanes
+   between x=92 and x=392, so stretching it to 46rem opened a gap in the
+   middle of every lane and left the legend stranded underneath. At 24rem
+   it renders at the proportions it already had on a phone, which is the
+   width it was working at. */
+.capabilities {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 24rem);
+  column-gap: var(--eif-space-5);
+  row-gap: var(--eif-space-3);
+  margin-top: var(--eif-space-5);
+  padding-top: var(--eif-space-3);
+  border-top: 1px solid var(--eif-rule);
   max-width: var(--eif-content-max);
+}
+
+.capabilities__lead {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.capabilities__lead h3 {
+  margin-top: 0.4rem;
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+}
+
+.capabilities__lead p {
+  margin-top: var(--eif-space-1);
+  color: var(--eif-fg-muted);
+}
+
+.capabilities .cap-flow__svg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.capabilities > .figure-legend {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: start;
+  margin-top: 0;
+}
+
+.capabilities > .integrations__list {
+  grid-column: 1 / -1;
+  grid-row: 3;
 }
 
 .cap-flow__svg {
   display: block;
   width: 100%;
-  max-width: 46rem;
   height: auto;
 }
 
-/* Two columns of one-line keys, so the key reads at a glance instead of
-   as a second body of text under the drawing. */
-.cap-flow__legend {
-  max-width: var(--eif-content-max);
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--eif-space-4);
+@media (max-width: 900px) {
+  .capabilities {
+    grid-template-columns: 1fr;
+  }
+
+  .capabilities__lead,
+  .capabilities .cap-flow__svg,
+  .capabilities > .figure-legend,
+  .capabilities > .integrations__list {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .capabilities .cap-flow__svg {
+    max-width: 22rem;
+    margin: 0 auto;
+  }
 }
 
 .cap-flow__label {
@@ -557,11 +612,6 @@
   fill: var(--eif-fg-muted);
 }
 
-@media (max-width: 720px) {
-  .cap-flow__legend {
-    grid-template-columns: 1fr;
-  }
-}
 
 .learning__loops {
   max-width: var(--eif-measure);

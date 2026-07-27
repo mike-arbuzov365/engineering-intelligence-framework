@@ -116,20 +116,45 @@ test.describe('engineering-intelligence methodology', () => {
 });
 
 test.describe('evidence', () => {
-  test('seven task rows are present', async ({ page }) => {
+  test('eight task rows are present', async ({ page }) => {
     await page.goto('/#evidence');
     const rows = page.locator('#evidence .reveal');
-    await expect(rows).toHaveCount(7);
-    for (const label of ['Install', 'Adopt', 'Retrieve', 'Plan', 'Verify', 'Switch', 'Localize']) {
+    await expect(rows).toHaveCount(8);
+    for (const label of [
+      'Install',
+      'Adopt',
+      'Retrieve',
+      'Plan',
+      'Verify',
+      'Switch',
+      'Localize',
+      'Measure',
+    ]) {
       await expect(page.locator('#evidence .reveal', { hasText: label })).toBeVisible();
     }
   });
 
-  test('bounded pilot and timing evidence name their own limits', async ({ page }) => {
+  test('the install row states the command that works, not the index it is not on', async ({
+    page,
+  }) => {
     await page.goto('/#evidence');
-    const proof = page.locator('.evidence__proof');
-    await expect(proof).toContainText('not a statistically powered efficiency comparison');
-    await expect(proof).toContainText('No claim is made about human authoring or review time');
+    const install = page.locator('#evidence .reveal').nth(0);
+    await expect(install).toContainText('pip install .');
+    // Release status is docs/product/pre-release.md's job, not this row's.
+    // What stays here is the bound on the evidence itself.
+    await expect(install).not.toContainText('PyPI');
+    await expect(install).toContainText('Claude Code adapter for its own bootstrap step');
+  });
+
+  test('bounded pilot and timing limits live in the row they qualify', async ({ page }) => {
+    await page.goto('/#evidence');
+    // Was a "Bounded proof on record" block trailing the whole section,
+    // which read as a disclaimer appended to a page of claims.
+    await expect(page.locator('.evidence__proof')).toHaveCount(0);
+    const measure = page.locator('#evidence .reveal').nth(7);
+    await expect(measure).toContainText('not a statistically powered efficiency comparison');
+    await expect(measure).toContainText('No claim is made about human authoring or review time');
+    await expect(measure).toContainText('no baseline and no control group');
   });
 });
 
@@ -157,9 +182,12 @@ test.describe('quickstart', () => {
 test.describe('honesty guardrails after the limitations section was removed', () => {
   test('the no-quality-claim now lives with the evidence it qualifies', async ({ page }) => {
     await page.goto('/#evidence');
-    const proof = page.locator('.evidence__proof');
-    await expect(proof).toContainText('makes no claim about task quality');
-    await expect(proof).toContainText('no baseline, no control group');
+    // It has moved twice, and both moves went the same direction: out of a
+    // standalone limitations section, into a proof block under the ledger,
+    // and now into the Measure row itself, beside the pilot it qualifies.
+    const measure = page.locator('#evidence .reveal').nth(7);
+    await expect(measure).toContainText('no comparative study of task quality');
+    await expect(measure).toContainText('no baseline and no control group');
   });
 
   test('no section, anchor or link to a limitations section survives', async ({ page }) => {
@@ -212,14 +240,24 @@ test.describe('final CTA', () => {
     await expect(rows).toHaveCount(5);
   });
 
-  test('the closing lede states what this is without performing an attitude', async ({ page }) => {
+  test('the closing screen states what this is and what keeps it current', async ({ page }) => {
     await page.goto('/');
     const lede = page.locator('#final-cta .section__lede');
-    await expect(lede).toContainText('developed in the open');
+    // The strongest fact available: this is not a proposal, it is the public
+    // form of something already in daily use.
+    await expect(lede).toContainText('public extraction of a private framework');
+    await expect(lede).toContainText('every working day');
     // The old lede set disagreement against agreement to tell the reader how
-    // to feel about the contact column. It says what is below it now.
+    // to feel about the contact column, and "developed in the open" left it
+    // ambiguous whether the framework or the engineer was being described.
     await expect(lede).not.toContainText('disagreement');
     await expect(lede).not.toContainText('decoration');
+    await expect(lede).not.toContainText('developed in the open');
+
+    const notes = page.locator('#final-cta .final-cta__note p');
+    await expect(notes).toHaveCount(2);
+    await expect(notes.nth(0)).toContainText('stays with that repository');
+    await expect(notes.nth(1)).toContainText('already behind');
     // On-page destinations are labelled with the page's own section numbers,
     // instead of the same words twice down one column.
     const readOnLabels = page.locator('.final-cta__group').nth(0).locator('.label');
@@ -254,17 +292,26 @@ test.describe('final CTA', () => {
 test.describe('evidence no-js', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('all seven task rows and their limitations are readable without a script', async ({
+  test('all eight task rows and their limitations are readable without a script', async ({
     page,
   }) => {
     await page.goto('/#evidence');
     const details = page.locator('#evidence .reveal__detail');
-    await expect(details).toHaveCount(7);
-    for (let index = 0; index < 7; index += 1) {
+    await expect(details).toHaveCount(8);
+    for (let index = 0; index < 8; index += 1) {
       await expect(details.nth(index)).toBeVisible();
     }
     const text = await page.locator('#evidence .evidence__tasks').innerText();
-    for (const word of ['Install', 'Adopt', 'Retrieve', 'Plan', 'Verify', 'Switch', 'Localize']) {
+    for (const word of [
+      'Install',
+      'Adopt',
+      'Retrieve',
+      'Plan',
+      'Verify',
+      'Switch',
+      'Localize',
+      'Measure',
+    ]) {
       expect(text.toLowerCase()).toContain(word.toLowerCase());
     }
     expect(text).toContain('Limitation:');

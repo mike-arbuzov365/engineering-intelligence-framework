@@ -18,9 +18,27 @@ test.describe('optional capabilities', () => {
     // The bridge table was a third restatement of the flow figure and these
     // rows; it is gone, and the core path is named in the figure's legend.
     await expect(page.locator('#integrations .capability-map')).toHaveCount(0);
-    await expect(page.locator('#integrations .cap-flow .figure-legend')).toContainText(
+    await expect(page.locator('#integrations .capabilities > .figure-legend')).toContainText(
       'core path',
     );
+  });
+
+  test('the section is composed like the knowledge-base block, not full width', async ({
+    page,
+  }) => {
+    await page.goto('/#integrations');
+    // Two columns at desktop: explanation and legend on the left, the
+    // drawing on the right. Stretched to full width the three lanes opened a
+    // gap down the middle of the figure and stranded the legend under it.
+    const columns = await page
+      .locator('#integrations .capabilities')
+      .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+    expect(columns).toBe(2);
+    const svgWidth = await page
+      .locator('#integrations .cap-flow__svg')
+      .evaluate((el) => el.getBoundingClientRect().width);
+    // 24rem cap, so the drawing keeps the proportions it has on a phone.
+    expect(svgWidth).toBeLessThanOrEqual(24 * 16 + 1);
   });
 
   test('each row answers the boundary question while still collapsed', async ({ page }) => {
@@ -48,7 +66,7 @@ test.describe('optional capabilities', () => {
 
   test('the figure legend is four one-line keys, not a second body of text', async ({ page }) => {
     await page.goto('/#integrations');
-    const keys = page.locator('#integrations .cap-flow .figure-legend__item');
+    const keys = page.locator('#integrations .capabilities > .figure-legend .figure-legend__item');
     await expect(keys).toHaveCount(4);
     // The context box on the right went unexplained for as long as the legend
     // had only three keys.

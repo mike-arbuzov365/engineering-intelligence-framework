@@ -584,8 +584,49 @@ ever carried was reported as a leaked machine path.
 
 ---
 
+## SB-022 - Release pass, second round
+
+**Status:** done (2026-07-27)
+**Raised:** 2026-07-27, owner review of the SB-021 result
+
+- **Full width was the wrong correction for the capabilities figure.** It
+  read well on a phone and badly on a laptop: the drawing is three thin
+  lanes between x=92 and x=392, so at 46rem it opened a gap down the middle
+  of every lane while the legend sat stranded underneath. Recomposed on the
+  section 07 knowledge-base grid instead: explanation and legend on the
+  left, drawing capped at 24rem on the right, the three rows spanning both.
+  The two screens now read as the same kind of object, and the figure keeps
+  the proportions it already had at phone width.
+- **The evidence ledger was out of date.** The install row still led with
+  "not published to PyPI" as its limitation, which is release status, not
+  evidence, and which the previous pass had already moved off the page
+  everywhere else. It now states the command that works, `pip install .`
+  from a clone, and keeps only the bounds on the evidence itself. The
+  switching row still described Codex and Hermes as pending rather than as
+  a frozen four-adapter scope.
+- **"Bounded proof on record" was a disclaimer block appended to a page of
+  claims.** Gone as a block. Measuring is one of the things this framework
+  does, so it is now an eighth row, `Measure`, with the pilot in it and its
+  two limits inside it rather than trailing the whole section. Nothing was
+  dropped: CLM-08, CLM-09 and CLM-10 all still resolve, and the strict
+  claims gate proves it.
+- **The closing screen said less than it could.** "Developed in the open"
+  left the reader to work out whether the framework or the engineer was
+  being described, and it buried the strongest available fact. The screen
+  now opens with what this repository actually is: the public extraction of
+  a private framework in daily use on real projects, across different
+  agents and models, where the models change and the governance does not.
+  Two notes follow it, on the two layers experience accumulates in and on
+  why adapters exist, stated as mechanism rather than as an outcome claim
+  nothing here has measured.
+
+---
+
 ## Closed
 
+- **SB-022** capabilities recomposed on the knowledge-base grid, ledger
+  brought current, proof block folded into a Measure row, closing screen
+  given its strongest fact.
 - **SB-021** release pass: capabilities rebuilt around the boundary
   question, quickstart stripped of release notes, closing screen rewritten.
 - **SB-020** second review pass: capabilities de-duplicated, `pip install`

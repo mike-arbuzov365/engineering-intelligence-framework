@@ -38,7 +38,7 @@ test.describe('Firefox no-js', () => {
   test('static reading path stays complete', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('#lang-toggle')).toBeHidden();
-    await expect(page.locator('#evidence .reveal__detail')).toHaveCount(7);
+    await expect(page.locator('#evidence .reveal__detail')).toHaveCount(8);
     await expect(page.locator('#evidence .reveal__detail').last()).toBeVisible();
   });
 });

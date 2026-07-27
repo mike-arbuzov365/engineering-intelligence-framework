@@ -61,13 +61,13 @@ test.describe('engineering-intelligence methodology', () => {
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
     await expect(page.locator('#learning')).toContainText('Ретроспектива');
     await expect(page.locator('#layers .ledger__outcome')).toHaveCount(4);
-    await expect(page.locator('#layers .ledger')).toContainText('ЗАКРИТТЯ + РЕТРО');
-    await expect(page.locator('#layers .ledger')).toContainText('Пам’ять пакета');
+    await expect(page.locator('#layers .ledger')).toContainText('ЗАКРИТТЯ І РЕТРО');
+    await expect(page.locator('#layers .ledger')).toContainText('Пакет зберігає контекст');
     await expect(page.locator('#learning')).toContainText('не прихована поведінка моделі');
     await expect(page.locator('#loop')).toContainText('Контекст');
     await expect(page.locator('#loop')).toContainText('Уточнення');
     await expect(page.locator('body')).toContainText(
-      'переживають кожну окрему сесію',
+      'зберігаються між сесіями',
     );
 
     const ukrainianText = await page.locator('main').innerText();

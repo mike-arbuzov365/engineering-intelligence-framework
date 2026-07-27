@@ -1,11 +1,11 @@
-## Сесію завершено: {task_name}
+## Сесію закрито: {task_name}
 <!-- Session Done -->
 
-- Гілка/PR: {branch_or_pr}
-- Verification: {verification_result}
-- Створено артефакти:
+- Гілка або PR: {branch_or_pr}
+- Результат перевірки: {verification_result}
+- Створені артефакти:
   - {artifacts}
-- Промоутовано у спільну базу знань: {promoted}
-- Не зроблено / поза scope: {not_done}
+- Знання, підвищене до рівня фреймворку: {promoted}
+- Не виконано або поза визначеними межами: {not_done}
 - Відкриті питання: {open_questions}
-- Knowledge Delta: додано у PR
+- Knowledge Delta додано до PR.

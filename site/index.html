@@ -6,7 +6,7 @@
     <title>Engineering Intelligence Framework: methodology, memory and governed learning</title>
     <meta
       name="description"
-      content="An operating methodology for AI-agent engineering: reusable experience, three intelligence layers, controlled sessions, evidence and governed learning. Open source, Apache-2.0."
+      content="An operating methodology for software development with AI agents. Reusable experience, controlled sessions, evidence and governed learning. Open source, Apache-2.0."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
@@ -17,7 +17,7 @@
     <meta property="og:title" content="Engineering Intelligence Framework" />
     <meta
       property="og:description"
-      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Open source, Apache-2.0."
+      content="Methodology, reusable engineering experience and governed learning for software development with AI agents. Open source, Apache-2.0."
     />
     <meta property="og:image" content="/social-card.png" />
     <meta property="og:image:width" content="1200" />
@@ -26,7 +26,7 @@
     <meta name="twitter:title" content="Engineering Intelligence Framework" />
     <meta
       name="twitter:description"
-      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Open source, Apache-2.0."
+      content="Methodology, reusable engineering experience and governed learning for software development with AI agents. Open source, Apache-2.0."
     />
     <meta name="twitter:image" content="/social-card.png" />
   </head>
@@ -197,28 +197,27 @@
         <div class="section__inner i18n-block" data-i18n-id="methodology.body">
           <div class="section__head">
             <span class="label">02 &middot; The methodology</span>
-            <h2 id="methodology-heading">Engineering Intelligence is the system around the agent</h2>
+            <h2 id="methodology-heading">Engineering Intelligence makes experience reusable</h2>
           </div>
           <p class="section__lede" data-claim-id="CLM-15">
-            EIF defines a governed learning flow in which a session's
-            validated Knowledge Delta can be classified, linted, retained
-            locally or promoted into reusable artifacts such as rules,
-            playbooks, templates and skills.
+            At closeout, a session records a Knowledge Delta. This EIF artifact
+            captures the change in knowledge. It is checked, kept in the
+            project, or explicitly promoted into a reusable rule, playbook,
+            template, or skill.
           </p>
           <div class="methodology__definition" data-claim-id="CLM-15">
             <div class="methodology__lead">
             <p class="methodology__statement">
-              <strong>Engineering Intelligence</strong> is versioned
-              experience plus the methods that govern its use. It changes how
-              the next task is prepared, executed and verified - not merely
-              where knowledge is stored.
+              <strong>In EIF, Engineering Intelligence</strong> means versioned
+              engineering experience plus the methods that govern its use. It
+              shapes how the next task is prepared, executed, and verified. It
+              is more than a place to store knowledge.
             </p>
             <p class="methodology__boundary" data-claim-id="CLM-15">
-              <strong>What “learning” means here:</strong> the engineering
-              system externalizes validated experience into reviewed,
-              versioned artifacts that the next session can retrieve. EIF does
-              not train model weights, fine-tune an LLM or let an agent rewrite
-              its own safeguards.
+              <strong>“Learning” happens at the system level.</strong>
+              Validated experience becomes a reviewed, versioned artifact that
+              the next session can retrieve. EIF does not train model weights,
+              fine-tune an LLM, or let an agent rewrite its own safeguards.
             </p>
             </div>
             <dl class="methodology__parts">
@@ -1400,13 +1399,12 @@ pip install .</code></pre>
 
       <template data-i18n-id="hero.body">
         <p class="hero__descriptor">
-          Керована методологія, завдяки якій інженерний досвід накопичується.
+          Керована методологія для накопичення інженерного досвіду.
         </p>
         <p class="hero__promise">
-          EIF перетворює перевірений інженерний досвід на операційний
-          інтелект, придатний до повторного використання: спільна операційна
-          основа, пам&rsquo;ять проєкту, дисципліна сесій і навички агента, що
-          переживають кожну окрему сесію.
+          EIF перетворює перевірений досвід на знання, які можна застосувати
+          знову. Методологія, пам&rsquo;ять проєкту, дисципліна сесій і навички
+          агента зберігаються між сесіями.
         </p>
         <nav class="hero__ctas" aria-label="Основна навігація">
           <a href="#methodology">Що таке EIF</a>
@@ -1430,43 +1428,43 @@ pip install .</code></pre>
           <h2 id="problem-heading">Історія чату не замінює інженерну пам&rsquo;ять</h2>
         </div>
         <p class="section__lede">
-          Агенти ШІ для розробки потужні, але в більшості робочих процесів
-          сесію з агентом досі трактують як стійке інженерне знання.
+          Агенти ШІ вже добре працюють із кодом. Але історія окремої сесії не є
+          стійким інженерним знанням.
         </p>
         <ol class="problem__list">
           <li>Попередні рішення живуть лише в межах однієї сесії й губляться, коли контекст стискають або сесія завершується.</li>
           <li>Агент щоразу заново шукає ті самі файли й виводить ті самі висновки.</li>
-          <li>Локальні уроки не спливають перед новим, схожим завданням.</li>
-          <li>Вивід команд заповнює контекстне вікно без фільтрації.</li>
+          <li>Локальні уроки не знаходяться перед новим схожим завданням.</li>
+          <li>Нефільтрований вивід команд заповнює контекстне вікно.</li>
           <li>Архітектурні рішення змішуються з неперевіреними припущеннями.</li>
-          <li>PR після злиття вважають доказом робочої поведінки, навіть коли поведінкових доказів немає.</li>
-          <li>Якість, приватність і ефективність використання токенів підпорядковані різним, часто суперечливим правилам.</li>
+          <li>Злитий PR вважають доказом робочої поведінки, навіть коли тести її не підтверджують.</li>
+          <li>Якість, приватність і використання токенів регулюють різні правила, які часто суперечать одне одному.</li>
         </ol>
       </template>
 
       <template data-i18n-id="methodology.body">
         <div class="section__head">
           <span class="label">02 &middot; Методологія</span>
-          <h2 id="methodology-heading">Інженерний інтелект - це система навколо агента</h2>
+          <h2 id="methodology-heading">Інженерний інтелект робить досвід повторно використовуваним</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-15">
-          EIF задає керований потік навчання: перевірений Knowledge Delta
-          сесії можна класифікувати, перевірити, залишити в проєкті або
-          підвищити до рівня повторно використовуваних правил, сценаріїв
-          роботи, шаблонів і навичок агента.
+          Під час закриття сесія створює Knowledge Delta. Цей артефакт EIF
+          фіксує зміни у знаннях. Його перевіряють, залишають у проєкті або
+          явно підвищують до правила, сценарію роботи, шаблону чи навички
+          агента.
         </p>
         <div class="methodology__definition" data-claim-id="CLM-15">
           <div class="methodology__lead">
           <p class="methodology__statement">
-            <strong>Engineering Intelligence</strong> - це версійований досвід
-            і методи, що керують його застосуванням. Він змінює підготовку,
-            виконання та перевірку наступного завдання, а не лише місце
-            зберігання знань.
+            <strong>У EIF Engineering Intelligence</strong> означає
+            версійований інженерний досвід і методи, які керують його
+            застосуванням. Вони визначають підготовку, виконання й перевірку
+            наступного завдання. Це більше, ніж місце зберігання знань.
           </p>
           <p class="methodology__boundary" data-claim-id="CLM-15">
-            <strong>Що тут означає &ldquo;навчання&rdquo;:</strong> інженерна
-            система виносить перевірений досвід у переглянуті й версійовані
-            артефакти, які може знайти наступна сесія. EIF не тренує ваги
+            <strong>&ldquo;Навчання&rdquo; відбувається на рівні системи.</strong>
+            Перевірений досвід оформлюють як переглянутий і версійований
+            артефакт. Наступна сесія може його знайти. EIF не змінює ваги
             моделі, не донавчає LLM і не дозволяє агенту переписувати власні
             правила безпеки.
           </p>
@@ -1491,12 +1489,12 @@ pip install .</code></pre>
       <template data-i18n-id="layers.body">
         <div class="section__head">
           <span class="label">03 &middot; Рівні інтелекту</span>
-          <h2 id="layers-heading">Три рівні: як працювати, що знає проєкт, що відбувається зараз</h2>
+          <h2 id="layers-heading">Три рівні інженерного інтелекту</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-13">
-          EIF відокремлює повторно використовувану методологію фреймворку,
-          стійке знання проєкту та тимчасовий контекст сесії у три рівні;
-          Knowledge Delta керує переходом знання між ними.
+          EIF розділяє повторно використовувану методологію, стійке знання
+          проєкту й тимчасовий контекст сесії. Knowledge Delta визначає, чи
+          переходить знання на інший рівень.
         </p>
         <div class="layers__stack" data-claim-id="CLM-13">
           <article class="layers__layer layers__layer--one">
@@ -1506,7 +1504,7 @@ pip install .</code></pre>
             </div>
             <div>
               <h3>Рівень фреймворку</h3>
-              <p>Операційна основа роботи агента, спільна для всіх проєктів: онтологія, модель повноважень, глобальні правила, сценарії роботи, шаблони та виконувані навички агента. Це більше, ніж метод.</p>
+              <p>Спільна операційна основа для всіх проєктів. Вона містить онтологію, модель повноважень, глобальні правила, сценарії роботи, шаблони та виконувані навички агента.</p>
             </div>
             <p class="layers__examples">Як працювати</p>
           </article>
@@ -1534,18 +1532,18 @@ pip install .</code></pre>
           </article>
         </div>
         <div class="layers__flows" aria-label="Потік знань між рівнями" data-claim-id="CLM-13">
-          <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Вниз:</strong> уся операційна основа разом із попереднім досвідом самого проєкту. Онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички агента доходять до сесії ще до початку реалізації.</p>
-          <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Вгору:</strong> лише перевірене знання, і тільки за окремим рішенням, записаним у Knowledge Delta. Зазвичай воно залишається на тому рівні, де виникло. Перенесення відбувається як виняток, а не як обов&rsquo;язкове завершення кожної сесії.</p>
+          <p class="layers__flow layers__flow--down"><span aria-hidden="true">&darr;</span><strong>Вниз.</strong> До сесії надходять методологія та попередній досвід проєкту. Це відбувається до початку реалізації.</p>
+          <p class="layers__flow layers__flow--up"><span aria-hidden="true">&uarr;</span><strong>Вгору.</strong> Переходить лише перевірене знання і лише за окремим рішенням у Knowledge Delta. Зазвичай знання залишається на рівні, де виникло.</p>
         </div>
 
         <figure class="ledger" data-claim-id="CLM-15">
           <figcaption class="ledger__caption">
-            <span class="label label--accent">Простежено: дві сесії одного пакета</span>
-            <h3>Досвід приходить до реалізації, а не описується після неї</h3>
+            <span class="label label--accent">Дві сесії одного пакета</span>
+            <h3>Сесія отримує досвід до початку роботи</h3>
             <p>
-              Один пакет, дві сесії, три питання: що кожна сесія отримує ще
-              до того, як напише перший рядок, що лишається після її закриття
-              і що друга сесія знаходить уже готовим.
+              Схема показує шлях одного пакета через дві сесії. Вона пояснює,
+              що сесії отримують до реалізації, що зберігається після закриття
+              і що наступна сесія знаходить готовим.
             </p>
           </figcaption>
 
@@ -1569,7 +1567,7 @@ pip install .</code></pre>
             <line class="ledger__gate ledger__gate--closeout" x1="492" y1="40" x2="492" y2="392" />
             <line class="ledger__gate ledger__gate--promotion" x1="836" y1="40" x2="836" y2="392" />
             <text class="ledger__gate-label" x="256" y="28">ПОШУК ДОСВІДУ</text>
-            <text class="ledger__gate-label" x="492" y="28">ЗАКРИТТЯ + РЕТРО</text>
+            <text class="ledger__gate-label" x="492" y="28">ЗАКРИТТЯ І РЕТРО</text>
             <text class="ledger__gate-label" x="836" y="28">РІШЕННЯ ПРО РІВЕНЬ</text>
 
             <path class="ledger__flow ledger__flow--retrieval" fill="none"
@@ -1612,7 +1610,7 @@ pip install .</code></pre>
             <text class="ledger__node-label" x="250" y="376">сесія 1</text>
             <text class="ledger__node-label" x="610" y="376">сесія 2</text>
 
-            <text class="ledger__fate ledger__fate--dropped" x="536" y="396">сирі міркування, відкинуто</text>
+            <text class="ledger__fate ledger__fate--dropped" x="536" y="396">сирі міркування відкинуто</text>
             <text class="ledger__fate ledger__fate--muted" x="620" y="200" text-anchor="middle">факти й рішення</text>
             <text class="ledger__fate ledger__fate--muted" x="620" y="214" text-anchor="middle">переходять далі</text>
             <text class="ledger__fate ledger__fate--muted" x="620" y="138" text-anchor="middle">перевірене знання</text>
@@ -1632,37 +1630,37 @@ pip install .</code></pre>
             <li class="ledger__outcome ledger__outcome--retrieval">
               <span class="label">До реалізації</span>
               <p>
-                <strong>Пошук, а не пам&rsquo;ять.</strong> Сесія починається з
-                пошуку в стійкому знанні: попередні уроки, відхилені підходи,
-                повторювані збої. Пропустити цей крок, бо завдання «просте», -
-                перший антипатерн, який називає плейбук.
+                <strong>Спочатку пошук.</strong> Сесія шукає в стійкому знанні
+                попередні уроки, відхилені підходи й повторювані збої. Плейбук
+                вважає пропуск цього кроку для «простого» завдання
+                антипатерном.
               </p>
             </li>
             <li class="ledger__outcome ledger__outcome--packet">
               <span class="label">Між сесіями</span>
               <p>
-                <strong>Пам&rsquo;ять пакета.</strong> Задача на кілька сесій
-                отримує пакет: статут, факти, рішення й дорожню карту, записані
-                до початку реалізації. Саме це переходить через розрив, тож
-                сесія 2 не переглядає те, що вирішила сесія 1.
+                <strong>Пакет зберігає контекст.</strong> Якщо робота охоплює
+                кілька сесій, її статут, факти, рішення й дорожню карту
+                фіксують до реалізації. Завдяки цьому сесія 2 не відновлює
+                рішення сесії 1 з нуля.
               </p>
             </li>
             <li class="ledger__outcome ledger__outcome--local">
               <span class="label">На закритті</span>
               <p>
-                <strong>Ретро, потім Knowledge Delta.</strong> Закриття звіряє
-                намір із доказами й називає повторювані моделі збоїв. Сирі
-                міркування свідомо відкидають: пам&rsquo;яттю проєкту стає лише
-                структурований результат із зазначеним джерелом.
+                <strong>Закриття відділяє знання.</strong> Під час ретро намір
+                звіряють із доказами й фіксують повторювані збої. Knowledge
+                Delta зберігає структурований результат із джерелом. Сирі
+                міркування не стають пам&rsquo;яттю проєкту.
               </p>
             </li>
             <li class="ledger__outcome ledger__outcome--promoted">
               <span class="label">Рідко, вгору</span>
               <p>
-                <strong>Підвищення рівня це виняток.</strong> Урок виходить за
-                межі проєкту, лише якщо він застосовний ширше, проходить
-                перевірку джерела й типу і його приймає власник. Більшість
-                перевіреного знання має лишатися локальною.
+                <strong>Підвищення рівня трапляється рідко.</strong> Урок
+                виходить за межі проєкту лише тоді, коли застосовний ширше,
+                його джерело й тип перевірені, а власник його прийняв.
+                Більшість перевіреного знання залишається локальною.
               </p>
             </li>
           </ol>
@@ -1673,32 +1671,28 @@ pip install .</code></pre>
             <span class="label label--accent">Один фреймворк, багато проєктів</span>
             <h3>Фреймворк спільний. Пам&rsquo;ять у кожного проєкту своя.</h3>
             <p>
-              У центрі один спільний робочий рівень, і кожен проєкт на власній
-              орбіті навколо нього. У центрі лежить те, що придатне будь-де:
-              онтологія й модель повноважень, правила та обмеження, сценарії
-              роботи, шаблони й навички агента. Кожен проєкт має власний
-              репозиторій і власну пам&rsquo;ять і бере з центру потрібне ще до
-              того, як почне працювати. Під P1 відкрито пакет із трьох сесій, бо
-              задача завелика для однієї. Метод і власна історія проєкту
-              спускаються в ці сесії ще до першого рядка реалізації, а коли
-              пакет закривається, перевірений урок може піднятися назад у центр
-              і звідти дійти до іншого проєкту лише там, де він доречний.
+              Рівень фреймворку містить спільну методологію. Кожен проєкт має
+              окремий репозиторій і власну пам&rsquo;ять. Перед реалізацією
+              сесії отримують потрібний метод і локальний досвід. Після
+              закриття пакета перевірений урок може піднятися до рівня
+              фреймворку, але лише за явним рішенням. Тоді його можна
+              використати в іншому проєкті, якщо він там доречний.
             </p>
             <ul class="figure-legend">
               <li class="figure-legend__item figure-legend__item--dot">
-                <strong>У центрі рівень фреймворку.</strong> Там лежить усе багаторазове, і кожен проєкт обертається навколо нього з власним репозиторієм, власною пам&rsquo;яттю та власними правилами пакетів.
+                <strong>Рівень фреймворку в центрі.</strong> Тут зберігається все повторно використовуване. Кожен проєкт має власний репозиторій, пам&rsquo;ять і правила пакетів.
               </li>
               <li class="figure-legend__item figure-legend__item--dotted">
-                <strong>Спершу вниз ідуть метод і досвід.</strong> Обидва потрапляють у сесію <em>до того</em>, як вона щось реалізує: їх шукають, а не згадують.
+                <strong>Метод і досвід надходять першими.</strong> Сесія знаходить їх <em>до початку</em> реалізації.
               </li>
               <li class="figure-legend__item figure-legend__item--bracket">
-                <strong>Один пакет, три сесії.</strong> Вони йдуть по черзі під P1, і пакет закривається раніше, ніж здобуте в ньому пропонують нагору.
+                <strong>Пакет об&rsquo;єднує три сесії.</strong> Вони виконуються по черзі під P1. Знання з пакета розглядають для підвищення лише після його закриття.
               </li>
               <li class="figure-legend__item figure-legend__item--dashed-accent">
-                <strong>Підйом назад це виняток.</strong> Урок доходить до центру лише за явним рішенням, а пунктирна гілка несе його до іншого проєкту лише там, де він доречний.
+                <strong>Підвищення рівня потребує рішення.</strong> Урок доходить до рівня фреймворку лише за явним рішенням. До іншого проєкту він переходить, лише якщо доречний.
               </li>
               <li class="figure-legend__item figure-legend__item--dot-warn">
-                <strong>Куратор не спиняється.</strong> Амброва крапка, що обходить центр, це єдиний тут неперервний рух: він стежить за станом самого рівня фреймворку у власному ритмі й нічого не підвищує сам.
+                <strong>Куратор працює окремо.</strong> Амброва крапка показує цикл догляду за фреймворком. Куратор стежить за його станом, але сам нічого не підвищує.
               </li>
             </ul>
           </figcaption>
@@ -1710,7 +1704,7 @@ pip install .</code></pre>
       <template data-i18n-id="control-plane.body">
         <div class="section__head">
           <span class="label">04 &middot; Площина керування</span>
-          <h2 id="control-plane-heading">Один керований цикл: від джерела до стійкого знання</h2>
+          <h2 id="control-plane-heading">Один керований цикл від джерела до стійкого знання</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-01">
           EIF координує інструменти та агентів, не підмінюючи їх, і зводить
@@ -1732,29 +1726,29 @@ pip install .</code></pre>
         <ol class="control-plane__list">
           <li><span class="label label--accent">01 &middot; Намір користувача</span><p>У циклі з&rsquo;являється завдання або питання.</p></li>
           <li><span class="label label--accent">02 &middot; Здобуття досвіду</span><p>Раніше перевірене знання підвантажується в контекст ще до початку реалізації.</p></li>
-          <li><span class="label label--accent">03 &middot; Повноваження й межі</span><p>Що має відбутися, що відбувається насправді і що можна цитувати - три різні питання.</p></li>
-          <li><span class="label label--accent">04 &middot; Структурна навігація</span><p>Необов&rsquo;язковий граф коду допомагає швидше знаходити потрібне. Це доказ для навігації, не джерело повноважень.</p></li>
+          <li><span class="label label--accent">03 &middot; Повноваження й межі</span><p>Очікувану поведінку, фактичну поведінку й авторитетність джерела перевіряють окремо.</p></li>
+          <li><span class="label label--accent">04 &middot; Структурна навігація</span><p>Необов&rsquo;язковий граф коду допомагає швидше знаходити потрібне. Він підтримує навігацію, але не замінює джерело.</p></li>
           <li><span class="label label--accent">05 &middot; Контрольоване виконання</span><p>Робота триває в межах чітко визначеного обсягу, бюджетів і умов зупинки.</p></li>
-          <li><span class="label label--accent">06 &middot; Тести й докази</span><p>Змерджену зміну не вважають доказом робочої поведінки саму собою.</p></li>
+          <li><span class="label label--accent">06 &middot; Тести й докази</span><p>Сам факт злиття зміни не доводить її робочу поведінку.</p></li>
           <li><span class="label label--accent">07 &middot; Knowledge Delta</span><p>Здобуте знання фіксують у тій самій сесії, а не залишають у чаті.</p></li>
           <li><span class="label label--accent">08 &middot; Стійкий інженерний інтелект</span><p>Перевірене знання стає доступним наступному завданню й наступному агенту.</p></li>
         </ol>
         <p class="control-plane__note label" data-claim-id="CLM-12">
-          Файли джерела лишаються головним джерелом повноважень завжди.
-          Необов&rsquo;язковий структурний граф - це доказ для навігації, він не замінює
-          перевірку джерела.
+          Файли репозиторію залишаються авторитетним джерелом.
+          Необов&rsquo;язковий структурний граф допомагає навігації, але не
+          замінює перевірку джерела.
         </p>
       </template>
 
       <template data-i18n-id="session.body">
         <div class="section__head">
           <span class="label">05 &middot; Сесія</span>
-          <h2 id="session-heading">Сесія - одиниця контрольованої роботи й навчання</h2>
+          <h2 id="session-heading">Сесія обмежує роботу й фіксує навчання</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-14">
-          EIF вимагає пошуку релевантного попереднього знання до нетривіальної
-          роботи й визначає підготовку, контрольоване виконання, перевірку
-          та закриття як життєвий цикл сесії.
+          Перед нетривіальною роботою EIF вимагає знайти попередній досвід.
+          Життєвий цикл сесії охоплює підготовку, контрольоване виконання,
+          перевірку й закриття.
         </p>
         <ol class="session__timeline" data-claim-id="CLM-14">
           <li>
@@ -1769,7 +1763,7 @@ pip install .</code></pre>
             <span class="session__number label label--accent">02</span>
             <div>
               <h3>Визначити обсяг і підготуватися</h3>
-              <p>Обрати одну сесію або execution packet. Назвати мету, докази, обмеження, бюджети й умови зупинки.</p>
+              <p>Обрати одну сесію або execution packet для роботи на кілька сесій. Назвати мету, докази, обмеження, бюджети й умови зупинки.</p>
             </div>
             <span class="session__artifact">Обсяг завдання</span>
           </li>
@@ -1777,7 +1771,7 @@ pip install .</code></pre>
             <span class="session__number label label--accent">03</span>
             <div>
               <h3>Виконати й перевірити</h3>
-              <p>Тримати спостереження окремо від припущень, працювати в межах визначеного обсягу та спиратися на оголошені оцінювачі, а не на фразу про завершення.</p>
+              <p>Відокремлювати спостереження від припущень. Працювати в заданих межах і спиратися на визначені оцінювачі, а не на заяву про завершення.</p>
             </div>
             <span class="session__artifact">Р3</span>
           </li>
@@ -1791,10 +1785,10 @@ pip install .</code></pre>
           </li>
         </ol>
         <p class="session__boundary" data-claim-id="CLM-14">
-          Рівень сесії - це контрольна точка, а не пам&rsquo;ять: тут можуть бути
-          стан виконання, позначки доказів, відкриті питання й чернетка
-          Knowledge Delta, але не сирі міркування ШІ. Цей рівень ніколи не
-          підвищують цілком.
+          Рівень сесії є контрольною точкою, а не пам&rsquo;яттю. Тут можуть
+          бути стан виконання, позначки доказів, відкриті питання й чернетка
+          Knowledge Delta. Сирі міркування ШІ не зберігають, а весь рівень
+          ніколи не підвищують.
         </p>
       </template>
 
@@ -1804,10 +1798,11 @@ pip install .</code></pre>
           <h2 id="loop-heading">Обмежені ітерації замість безмежної автономності</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-04">
-          EIF задає контракт обмеженого циклу для ітеративної роботи агента:
-          явні оцінювачі, бюджети, докази й умови зупинки. Це методологічний
-          контракт - сам собою він не доводить менше повторів, вищу якість,
-          нижчу вартість чи надійне автономне завершення.
+          EIF задає Bounded Evidence Loop, або обмежений цикл доказів, для
+          ітеративної роботи агента. Він містить явні оцінювачі, бюджети, докази
+          й умови зупинки. Це методологічний контракт. Сам собою він не доводить
+          меншу кількість повторів, вищу якість, нижчу вартість чи надійне
+          автономне завершення.
         </p>
         <div class="loop__scene">
           <div class="loop__sticky">
@@ -1829,7 +1824,7 @@ pip install .</code></pre>
             <li class="loop__phase" data-phase="define"><span class="label label--accent">02 &middot; Визначення</span><p>Сформулювати найменшу наступну гіпотезу і спостереження, яке її підтвердить або спростує.</p></li>
             <li class="loop__phase" data-phase="act"><span class="label label--accent">03 &middot; Дія</span><p>Внести одну оборотну зміну або провести один діагностичний експеримент.</p></li>
             <li class="loop__phase" data-phase="observe"><span class="label label--accent">04 &middot; Спостереження</span><p>Запустити оголошений оцінювач і зафіксувати його реальний результат.</p></li>
-            <li class="loop__phase" data-phase="study"><span class="label label--accent">05 &middot; Аналіз</span><p>Порівняти очікуване з фактичним. Якщо не вийшло - зафіксувати стислу сигнатуру збою, яку можна порівняти з іншими спробами.</p></li>
+            <li class="loop__phase" data-phase="study"><span class="label label--accent">05 &middot; Аналіз</span><p>Порівняти очікуване з фактичним. Якщо результат не збігається з очікуванням, зафіксувати стислу сигнатуру збою для порівняння з іншими спробами.</p></li>
             <li class="loop__phase" data-phase="adapt"><span class="label label--accent">06 &middot; Уточнення</span><p>Обрати наступний крок, спираючись на спостереження. Дію, що вже не спрацювала, без нових доказів не повторюють.</p></li>
           </ol>
         </div>
@@ -1858,7 +1853,7 @@ pip install .</code></pre>
             <dl class="loop__exits">
               <div class="loop__exits-row loop__exits-row--pass"><dt>Пройдено</dt><dd>Тільки коли доказ успіху справді існує.</dd></div>
               <div class="loop__exits-row loop__exits-row--blocked"><dt>Заблоковано</dt><dd>Настала умова зупинки, оцінювач недоступний і немає гідної заміни, вичерпано бюджет ітерацій, або та сама сигнатура збою повторилася б утретє без змін.</dd></div>
-              <div class="loop__exits-row loop__exits-row--deferred"><dt>Відкладено</dt><dd>Тільки коли решта роботи явно належить власнику або виходить за межі затвердженого обсягу - із названим місцем призначення.</dd></div>
+              <div class="loop__exits-row loop__exits-row--deferred"><dt>Відкладено</dt><dd>Решта роботи належить власнику або виходить за затверджені межі. В обох випадках вказують, куди передано роботу.</dd></div>
             </dl>
           </div>
         </div>
@@ -1870,24 +1865,23 @@ pip install .</code></pre>
           <h2 id="learning-heading">Від досвіду до повторно використовуваних знань і виконуваних навичок агента</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-15">
-          Навчання стає стійким лише тоді, коли перевірений Knowledge Delta
-          сесії класифікують, перевіряють, залишають у проєкті або явно
-          підвищують до рівня версійованого правила, сценарію роботи, шаблону
-          чи навички агента.
+          Knowledge Delta фіксує перевірену зміну в знаннях після сесії. Цей
+          артефакт класифікують, перевіряють і залишають у проєкті. Лише за
+          окремим рішенням він стає версійованим правилом, сценарієм роботи,
+          шаблоном чи навичкою агента.
         </p>
         <p class="learning__loops" data-claim-id="CLM-15">
-          <strong>Два цикли, а не один.</strong> Внутрішній працює всередині
-          сесії й питає, чого навчила саме ця сесія. Зовнішній охоплює багато
-          сесій і питає те, на що жодне окреме закриття відповісти не може: що
-          повторюється? Урок, побачений один раз, це інцидент. Та сама
-          сигнатура збою, побачена знову і знову, це правило, якого бракує.
+          <strong>Два цикли, а не один.</strong> Внутрішній цикл фіксує результат
+          окремої сесії. Зовнішній порівнює багато сесій і шукає повторювані
+          моделі. Одиничний випадок може бути інцидентом. Повторювана сигнатура
+          збою може вказувати на правило, якого бракує.
         </p>
         <ol class="learning__flow" data-claim-id="CLM-15">
           <li><span class="label label--accent">Спостерігати</span><p>Реальна робота дає докази: факт, інцидент, відхилений підхід, ризик або повторюваний метод.</p></li>
           <li><span class="label label--accent">Зафіксувати</span><p>Сесія записує стислий Knowledge Delta разом із тим, що лишилося неперевіреним.</p></li>
-          <li><span class="label label--accent">Ретроспектива</span><p>Зовнішній цикл, на межі пакета або раз на кілька тижнів: спершу вивести активність періоду з репозиторію, потім знайти те, що повторюється. Ретро над однією сесією не знаходить нічого, і це закладено навмисно.</p></li>
-          <li><span class="label label--accent">Класифікувати + перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
-          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні проєкту; загальний урок доходить до рівня фреймворку тільки за явним рішенням.</p></li>
+          <li><span class="label label--accent">Ретроспектива</span><p>На межі пакета або раз на кілька тижнів зовнішній цикл збирає активність із репозиторію та шукає повторення. Одна сесія не дає достатньо даних для такого висновку.</p></li>
+          <li><span class="label label--accent">Класифікувати й перевірити</span><p>Приймання й перевірка знань звіряють тип артефакту, джерело, стан, мову, дублювання й посилання.</p></li>
+          <li><span class="label label--accent">Підвищити рівень</span><p>Проєктне знання лишається на рівні проєкту. Загальний урок доходить до рівня фреймворку лише за явним рішенням.</p></li>
           <li><span class="label label--accent">Знайти знову</span><p>Наступна доречна сесія знаходить артефакт до початку дії й замикає цикл навчання.</p></li>
         </ol>
 
@@ -1896,12 +1890,11 @@ pip install .</code></pre>
           <span class="label label--accent">Де саме живе це знання</span>
           <h3>Пов&rsquo;язана та проіндексована вікі-структура, а не тека з нотатками</h3>
           <p>
-            Кожен артефакт - це звичайний файл зі структурованим заголовком:
-            тип, межі застосування, стан у життєвому циклі, рівень
-            упевненості, джерело та перелік посилань на сусідні артефакти.
-            Саме ці посилання роблять базу графом, а не купою файлів: рішення
-            вказує на інцидент, що його спричинив, а урок - на правило, яким
-            він став.
+            Кожен артефакт є звичайним файлом зі структурованим заголовком.
+            Заголовок містить тип, межі застосування, стан у життєвому циклі,
+            рівень упевненості, джерело та посилання на сусідні артефакти.
+            Ці посилання утворюють граф. Наприклад, рішення вказує на інцидент,
+            що його спричинив, а урок на правило, яким він став.
           </p>
           </div>
 
@@ -1937,15 +1930,15 @@ pip install .</code></pre>
             </svg>
 
           <ul class="figure-legend">
-            <li class="figure-legend__item figure-legend__item--dot">Кожне коло - один артефакт, кожна лінія між двома з них - посилання, оголошене в заголовку самого файлу.</li>
+            <li class="figure-legend__item figure-legend__item--dot">Кожне коло показує один артефакт. Кожна лінія показує посилання із заголовка файла.</li>
             <li class="figure-legend__item figure-legend__item--dotted">Пошук заходить із боку індексу (лінія внизу) і йде саме цими зв&rsquo;язками, а не перечитує всі файли.</li>
-            <li class="figure-legend__item figure-legend__item--dot-excluded">Пунктирний вузол - відхилений або замінений: прочитати його можна, у видачу за замовчуванням він не потрапляє, а позначає його куратор.</li>
+            <li class="figure-legend__item figure-legend__item--dot-excluded">Пунктирний вузол показує відхилений або замінений артефакт. Його можна прочитати, але за замовчуванням він не потрапляє у видачу.</li>
           </ul>
           <ul class="knowledge-base__facts">
             <li><strong>Проіндексована.</strong> Індекс будується по всіх артефактах під заданим коренем знань, а пошук іде по ньому без мережі: за ключовими словами й підрядками, без сервісу векторних представлень, і жоден запит не йде в мережу.</li>
             <li><strong>Зі станом у життєвому циклі.</strong> Кожен вузол має стан. Відхилені та замінені артефакти лишаються читабельними, але за замовчуванням не потрапляють у видачу пошуку, щоб закрите питання не відкривалося саме собою.</li>
-            <li><strong>Чесна щодо прогалин.</strong> Файл, який не вдалося прочитати, невідповідність схемі та відсутність результату - це три різні відповіді, а не одна. Порожню видачу тут ніколи не видають за чисту.</li>
-            <li><strong>Доглянута.</strong> Куратор знань читає ту саму базу й зводить в один перелік те, що в ній зіпсувалося: застарілі артефакти, сироти, розірвані посилання, знахідки, які закрили, а вони повернулися. Для кожного пункту є відповідальний, а сам куратор нічого не зливає в основну гілку.</li>
+            <li><strong>Чесна щодо прогалин.</strong> Не прочитаний файл, невідповідність схемі та відсутність результату дають три різні відповіді. Порожню видачу не подають як чисту.</li>
+            <li><strong>Доглянута.</strong> Куратор знань формує перелік застарілих артефактів, сиріт, розірваних посилань і повторно відкритих знахідок. Для кожного пункту є відповідальний. Сам куратор нічого не зливає в основну гілку.</li>
           </ul>
         </div>
 
@@ -1964,9 +1957,9 @@ pip install .</code></pre>
         <p class="learning__boundary" data-claim-id="CLM-15">
           Це кероване навчання на рівні системи, а не автономна
           самомодифікація. Урок можна відхилити, залишити локальним, визнати
-          простроченим або замінити новішим; локальна навичка агента може
-          спеціалізувати робочий процес, але не послаблювати правила безпеки
-          фреймворку.
+          простроченим або замінити новішим. Локальна навичка агента може
+          спеціалізувати робочий процес, але не може послаблювати правила
+          безпеки фреймворку.
         </p>
       </template>
 
@@ -1976,7 +1969,7 @@ pip install .</code></pre>
           <h2 id="integrations-heading">Три інструменти допомагають. Жоден не є обов&rsquo;язковим.</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-12">
-          Graphify, RTK і Context7 додають по одній вузькій можливості. Жоден
+          Graphify, RTK і Context7 додають по одній вузькій спроможності. Жоден
           із них не є самою методологією, і жодного з трьох фреймворк не
           встановлює.
         </p>
@@ -1986,10 +1979,10 @@ pip install .</code></pre>
               <span class="label label--accent">Що відбувається, коли інструмента немає</span>
               <h3>У кожного інструмента є названий шлях, який працює без нього</h3>
               <p>
-                EIF іде базовим шляхом і прямо повідомляє, що інструмент
-                недоступний, а не підміняє його здогадом: пошук у вихідних
-                файлах замість графа, нефільтрований вивід замість стиснення,
-                локальна документація замість запиту в мережу.
+                Якщо інструмент недоступний, EIF прямо про це повідомляє й
+                переходить на базовий шлях. Це пошук у вихідних файлах замість
+                графа, нефільтрований вивід замість стиснення або локальна
+                документація замість запиту в мережу.
               </p>
             </div>
 
@@ -2032,9 +2025,9 @@ pip install .</code></pre>
             </svg>
 
             <ul class="figure-legend">
-              <li class="figure-legend__item">Суцільна лінія: маршрут, коли інструмент доступний.</li>
-              <li class="figure-legend__item figure-legend__item--dashed">Пунктир: базовий шлях, який працює без нього. Доходять обидва.</li>
-              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі. RTK відкидає вивід, поки той ще нічого не коштує; із трьох лише Context7 виходить за межі цього комп&rsquo;ютера.</li>
+              <li class="figure-legend__item">Суцільна лінія показує маршрут із доступним інструментом.</li>
+              <li class="figure-legend__item figure-legend__item--dashed">Пунктир показує базовий шлях без інструмента. Обидва маршрути доходять до результату.</li>
+              <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі. RTK відкидає вивід до його потрапляння в контекст. Із трьох інструментів лише Context7 виходить за межі цього комп&rsquo;ютера.</li>
               <li class="figure-legend__item figure-legend__item--box">Прямокутник праворуч показує контекст, який агент має витратити.</li>
             </ul>
 
@@ -2050,7 +2043,8 @@ pip install .</code></pre>
               <div class="reveal__detail" data-claim-id="CLM-05">
                 <p><strong>Межа даних:</strong> локально для структурного видобутку на основі AST. До зовнішнього API він звертається лише тоді, коли семантичне маркування ввімкнули свідомо.</p>
                 <p><strong>Без нього:</strong> агент повертається до пошуку у вихідних файлах і ручного перегляду, без підказок за графом і без оцінки впливу.</p>
-                <p><strong>Перевірено:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, явним ідентифікатором репозиторію та переглянутою областю аналізу. Справним вважається лише стан <code>fresh</code>; зміна коду, семантики чи історії вимагає відповідного оновлення, а пошкоджений або свідомо вимкнений артефакт лишається недоступним. Межі перевірки: одна локальна версія й один невеликий синтетичний приклад, а не результат навігації.</p>
+                <p><strong>Перевірено:</strong> метадані D-08 пов&rsquo;язують відбиток графа з комітом вихідних файлів, версією Graphify, ідентифікатором репозиторію та переглянутою областю аналізу. Справним вважається лише стан <code>fresh</code>. Зміна коду, семантики чи історії вимагає оновлення, а пошкоджений або вимкнений артефакт лишається недоступним.</p>
+                <p><strong>Межі:</strong> перевірено одну локальну версію й один невеликий синтетичний приклад. Результат навігації не оцінювали.</p>
               </div>
             </li>
             <li class="reveal">
@@ -2064,7 +2058,8 @@ pip install .</code></pre>
               <div class="reveal__detail" data-claim-id="CLM-06">
                 <p><strong>Межа даних:</strong> локально, нічого нікуди не надсилається.</p>
                 <p><strong>Без нього:</strong> команди виконуються без фільтрації, а скорочення не фіксується.</p>
-                <p><strong>Перевірено:</strong> RTK 0.43.0 проходить усі 24 перевірки на тестованому хості Windows через власний маршрут <code>rtk rg</code>. Невдала обов&rsquo;язкова перевірка й далі означає стан <code>degraded</code>, а нефільтрований або невдалий маршрут через проксі фіксується як нульова економія, а не як позитивне число. Це не заява ні про всі платформи, ні про ефективність.</p>
+                <p><strong>Перевірено:</strong> RTK 0.43.0 проходить усі 24 перевірки на тестованому хості Windows через власний маршрут <code>rtk rg</code>. Невдала обов&rsquo;язкова перевірка дає стан <code>degraded</code>. Нефільтрований або невдалий маршрут через проксі фіксується як нульова економія.</p>
+                <p><strong>Межі:</strong> це не твердження про всі платформи чи загальну ефективність.</p>
               </div>
             </li>
             <li class="reveal">
@@ -2078,8 +2073,8 @@ pip install .</code></pre>
               <div class="reveal__detail">
                 <p><strong>Межа даних:</strong> текст запиту йде в мережу до зовнішньої служби документації. Вихідний код фреймворк не надсилає.</p>
                 <p><strong>Без нього:</strong> агент покладається на локальну документацію або на власні знання з навчання, які можуть описувати іншу версію, ніж встановлена. Про недоступність провайдера повідомляють прямо, а не підміняють її тихо цими знаннями.</p>
-                <p><strong>Фреймворк його не встановлює.</strong> MCP-сервер налаштовують на рівні користувача, поза екземпляром проєкту, а фреймворк ніколи не змінює конфігурацію цього рівня. Він дає згенеровані правила застосування й шаблон для кожного адаптера, який можна переглянути перед використанням; команду провайдера вписує власник.</p>
-                <p><strong>Перевірено:</strong> декларацію, правила застосування й форму шаблона покрито тестами, а реальної поведінки провайдера тести не покривають. EIF готує конфігурацію, яку завантажує агент, і сам по MCP не спілкується, тож доступність повідомляє агент, і вона лишається непідтвердженою.</p>
+                <p><strong>Фреймворк його не встановлює.</strong> MCP-сервер налаштовують на рівні користувача, поза екземпляром проєкту. EIF не змінює цю конфігурацію. Він дає правила застосування й шаблон для кожного адаптера, а команду провайдера вписує власник.</p>
+                <p><strong>Перевірено:</strong> декларацію, правила застосування й форму шаблона покрито тестами. Реальну поведінку провайдера не тестували. EIF готує конфігурацію для агента, але сам не спілкується через MCP.</p>
               </div>
             </li>
             </ul>
@@ -2095,11 +2090,10 @@ pip install .</code></pre>
                 завданню.
               </p>
               <p>
-                Задум у тому, щоб віддача перевищила цю ціну: менше впевнено
-                обраних хибних шляхів, менше повторних відкриттів, менше спроб
-                підходу, який уже записано як відхилений. Саме задум.
-                Порівняння керованої й некерованої роботи від початку до кінця
-                тут немає, тож сторінка називає ціну й лишає баланс відкритим.
+                Очікувана користь полягає в меншій кількості повторних відкриттів
+                і спроб уже відхиленого підходу. Це задум, а не виміряний
+                результат. Порівняння керованої й некерованої роботи від початку
+                до кінця ще немає, тому баланс лишається відкритим.
               </p>
             </div>
           </aside>
@@ -2107,13 +2101,12 @@ pip install .</code></pre>
 
       <template data-i18n-id="evidence.body">
         <div class="section__head">
-          <span class="label">09 &middot; Можливості й докази</span>
-          <h2 id="evidence-heading">Що працює вже сьогодні і на чому тримається кожне твердження</h2>
+          <span class="label">09 &middot; Спроможності й докази</span>
+          <h2 id="evidence-heading">Що вже працює і як це перевірено</h2>
         </div>
         <p class="section__lede">
-          Вісім речей, які фреймворк робить зараз. У кожному рядку: що саме
-          працює, чим це перевірено і які межі має ця перевірка. Межі стоять
-          у самому рядку, а не в застереженні внизу сторінки.
+          Фреймворк уже має вісім робочих спроможностей. Для кожної вказано
+          спосіб перевірки та межі доказу.
         </p>
         <ul class="integrations__list evidence__tasks">
           <li class="reveal">
@@ -2122,8 +2115,8 @@ pip install .</code></pre>
               <span>Пакет eifctl із сімома командами</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-02">
-              <p><code>pip install .</code> із клону збирає справжній wheel із <code>pyproject.toml</code> і дає робочу команду <code>eifctl</code>: <code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code> і <code>version</code>. Вона працює без клону фреймворку поруч, а зібраний пакет проходить повний синтетичний прогін від запуску до закриття сесії, а не саму лише перевірку імпорту, і разом із ним постачається окремий інструмент контрактів для бенчмарку.</p>
-              <p><strong>Межі:</strong> перевірено встановлення з клону в чисте віртуальне середовище, причому початкове налаштування в цьому прогоні йде через адаптер Claude Code. Встановлення за назвою з індексу пакетів це окремий крок, і швидкий старт друкує не його.</p>
+              <p><code>pip install .</code> із клону збирає wheel із <code>pyproject.toml</code> і встановлює <code>eifctl</code> із сімома командами. Пакет працює без сусіднього клону фреймворку. Синтетичний прогін охоплює шлях від запуску до закриття сесії, а не лише імпорт.</p>
+              <p><strong>Межі:</strong> встановлення перевірено з клону в чисте віртуальне середовище. Початкове налаштування в цьому прогоні використовує адаптер Claude Code. Встановлення з індексу пакетів ще не перевірено.</p>
             </div>
           </li>
           <li class="reveal">
@@ -2132,7 +2125,7 @@ pip install .</code></pre>
               <span>Співіснування з репозиторієм, який уже має власні правила</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-11">
-              <p>Перед першим записом іде перевірка репозиторію. Якщо проєкт уже має власні правила, робота спиняється й вимагає явного рішення, а не перебирає керування на себе. У режимі співіснування згенерований блок поступається наявним правилам, а не оголошує себе єдиним джерелом повноважень.</p>
+              <p>Перед першим записом EIF перевіряє репозиторій. Якщо проєкт уже має власні правила, робота зупиняється до явного рішення власника. У режимі співіснування згенерований блок поступається наявним правилам.</p>
               <p><strong>Межі:</strong> наявні правила розпізнаються за обсягом і формою файлів, а не за їхнім змістом. Перевірено на синтетичній фікстурі та повторних прогонах проти одного реального приватного репозиторію.</p>
             </div>
           </li>
@@ -2142,7 +2135,7 @@ pip install .</code></pre>
               <span>Досвід приходить ще до початку реалізації</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Пошук працює без мережі по власному індексу проєкту, з урахуванням схеми кожного артефакта та його стану в життєвому циклі. Відхилене й замінене лишається читабельним, але за замовчуванням не потрапляє у видачу, а <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code> повертаються як три різні відповіді, а не як одна порожня. Українські артефакти індексуються й повертаються нарівні з рештою.</p>
+              <p>Пошук працює без мережі за індексом проєкту й враховує схему та стан кожного артефакту. Відхилені й замінені артефакти лишаються читабельними, але за замовчуванням не потрапляють у видачу. Стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code> повертаються окремо. Українські артефакти індексуються нарівні з англійськими.</p>
               <p><strong>Межі:</strong> це збіг за словами й підрядками, а не пошук за змістом. Жодної зовнішньої служби, і нічого не виходить за межі машини.</p>
             </div>
           </li>
@@ -2152,7 +2145,7 @@ pip install .</code></pre>
               <span>Роботу обмежують ще до того, як вона почалася</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-04">
-              <p>Одиниця роботи відкривається як сесія або пакет виконання: наперед названий спосіб перевірки результату, бюджети на ітерації та віддалені запуски й умова зупинки, яка не залежить від того, чи агент вирішив, що вже досить (докладніше - у <a href="#loop">циклі доказів</a>).</p>
+              <p>Робота відкривається як сесія або execution packet для кількох сесій. Заздалегідь визначають спосіб перевірки, бюджети на ітерації та віддалені запуски, а також умови зупинки. Докладніше це описано в <a href="#loop">циклі доказів</a>.</p>
               <p><strong>Межі:</strong> це контракт, який робочий процес накладає сам на себе. Він задає, чим робота обмежена, а не скільки спроб піде на конкретне завдання.</p>
             </div>
           </li>
@@ -2162,7 +2155,7 @@ pip install .</code></pre>
               <span>Екземпляр перевіряє власну цілісність</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Вбудований засіб перевірки наново обчислює дайджести маніфесту з файлів на диску, звіряє конфігурацію й lock-файл зі схемами й перевіряє, що активний адаптер збігається з конфігурацією, що згенерована точка входу не розійшлася з конфігурацією, яка її створила, і що маркери блоку цілі.</p>
+              <p>Вбудований засіб наново обчислює дайджести маніфесту з файлів на диску й звіряє конфігурацію та lock-файл зі схемами. Він також перевіряє активний адаптер, згенеровану точку входу й цілісність маркерів блоку.</p>
               <p><strong>Межі:</strong> перевіряється саме той пакет EIF, яким ця команда керує. Це не інструмент загальної перевірки цілісності файлів усього репозиторію.</p>
             </div>
           </li>
@@ -2172,8 +2165,8 @@ pip install .</code></pre>
               <span>Чотири адаптери для чотирьох агентів і будь-який перехід між ними</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-03">
-              <p>Claude Code, Cursor, Codex і Hermes. Пройдено всі дванадцять упорядкованих пар: після кожного перемикання лишається рівно один активний блок EIF, точка входу нового адаптера веде до правильного джерела, а вміст самого проєкту лишається таким, як був.</p>
-              <p><strong>Межі:</strong> адаптерів свідомо саме чотири, а ядро фреймворку це звичайний Markdown, на який можна навести будь-якого іншого агента. Різняться вони механікою, а не статусом: у Cursor немає перехоплення викликів, тож його адаптер постачає правила, а контракти Codex і Hermes блокують команду, а не переписують її.</p>
+              <p>Підтримуються Claude Code, Cursor, Codex і Hermes. Пройдено всі дванадцять упорядкованих переходів між ними. Після перемикання лишається один активний блок EIF, а точка входу веде до правильного джерела.</p>
+              <p><strong>Межі:</strong> адаптерів свідомо чотири. Їхня механіка відрізняється. Cursor постачає правила без перехоплення викликів, а контракти Codex і Hermes блокують команду, але не переписують її.</p>
             </div>
           </li>
           <li class="reveal">
@@ -2182,7 +2175,7 @@ pip install .</code></pre>
               <span>Українські поверхні проєкту, які задає конфігурація</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-07">
-              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу подаються тією мовою, яку оголосив екземпляр; українську перевірено нарівні з англійською. Мова тут це налаштування, а не зашитий стандарт.</p>
+              <p>Пошук, Knowledge Delta, закриття сесії та згенерована точка входу використовують мову, яку задає екземпляр. Українську перевірено нарівні з англійською. Мова є налаштуванням, а не зашитим стандартом.</p>
               <p><strong>Межі:</strong> це стосується поверхонь, які формує сам фреймворк. Те, що агент каже у вільній відповіді, це його власна поведінка, а не те, що відтворює EIF.</p>
             </div>
           </li>
@@ -2192,9 +2185,9 @@ pip install .</code></pre>
               <span>Що виміряно, а про що навмисно не йдеться</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-08">
-              <p>Стенд бенчмарку проганяє A/B із реальним агентом і записує результат як контракт, який можна перевірити машинно, а не як гучний заголовок: одна модель, три тестові набори, шість прогонів, і кожен завершився успішно в обох режимах. Режими C і D виконуються як контракти цілісності, тож доводять, що прогін був коректним, а не що він був швидшим.</p>
+              <p>Стенд бенчмарку запускає A/B із реальним агентом і записує результат у машинозчитуваному контракті. Поточний набір охоплює одну модель, три тестові набори й шість прогонів загалом. У кожному режимі успішно завершено три прогони. Режими C і D перевіряють цілісність прогону, а не швидкість.</p>
               <p data-claim-id="CLM-10">Хронометраж окремих механічних команд існує й зберігається разом із доказами бенчмарку. Ніщо тут не міряє, скільки часу людина витрачає на написання чи перевірку коду.</p>
-              <p data-claim-id="CLM-09"><strong>Межі:</strong> ця сторінка ніде не заявляє ні про швидкість, ні про якість роботи, і не заявлятиме, доки не буде дослідження, яке це витримає. Шість прогонів без базової лінії й без контрольної групи таким дослідженням не є.</p>
+              <p data-claim-id="CLM-09"><strong>Межі:</strong> сторінка не заявляє про швидкість чи якість роботи. Шість прогонів без базової лінії та контрольної групи не дають підстав для такого висновку.</p>
             </div>
           </li>
         </ul>
@@ -2263,8 +2256,8 @@ pip install .</code></pre>
                 </button>
               </div>
               <p class="install__shell-note">
-                Розділювач тут <code>;</code>, а не <code>&amp;&amp;</code>:
-                Windows PowerShell 5.1 читає <code>&amp;&amp;</code> як помилку.
+                Тут використано розділювач <code>;</code>. Windows PowerShell
+                5.1 не підтримує <code>&amp;&amp;</code>.
               </p>
             </div>
 
@@ -2288,11 +2281,10 @@ pip install .</code></pre>
             </div>
 
             <p class="install__note">
-              <code>.venv</code> це одноразове оточення Python, яке належить
-              клону, тож ніщо тут не чіпає той Python, яким ви вже
-              користуєтесь. А самотня <code>.</code> в останньому рядку не
-              помилка: вона означає каталог, у який ви щойно клонували, і
-              саме звідти <code>pip</code> бере пакет.
+              <code>.venv</code> є окремим оточенням Python для цього клону.
+              Воно не змінює Python, яким ви вже користуєтесь. Крапка
+              <code>.</code> в останньому рядку означає поточний каталог.
+              Саме звідти <code>pip</code> встановлює пакет.
             </p>
           </li>
 
@@ -2331,9 +2323,9 @@ pip install .</code></pre>
               <div>
                 <dt><code>--locale</code></dt>
                 <dd>
-                  Необовʼязковий. Мова, якою екземпляр звітує.
-                  <strong>Якщо не вказати, буде англійська</strong>, а
-                  <code>uk</code> це єдина інша мова, яка йде в комплекті.
+                  Необовʼязкова мова поверхонь EIF.
+                  <strong>За замовчуванням використовується англійська.</strong>
+                  Українська доступна як <code>uk</code>.
                 </dd>
               </div>
             </dl>
@@ -2341,13 +2333,10 @@ pip install .</code></pre>
         </ol>
 
         <p class="quickstart__outcome">
-          В еталонному проході вбудований приклад додає і знаходить
-          реальне знання, вносить одну зміну на його основі й перевіряє її
-          справжнім тестом, який до зміни падає, а після неї проходить. Далі
-          він закриває сесію тією мовою, яку оголошує конфігурація екземпляра.
-          У тому проході оголошено українську, бо закриття англійською нічого
-          не довело б про мовний рівень: суть саме в тому, що мова це
-          налаштування, а не зашите за замовчуванням значення.
+          В еталонному проході приклад додає й знаходить знання, вносить одну
+          зміну та перевіряє її тестом. До зміни тест падає, після неї проходить.
+          Потім приклад закриває сесію українською, як задано в конфігурації.
+          Це підтверджує, що мова є налаштуванням екземпляра.
         </p>
       </template>
 
@@ -2364,20 +2353,16 @@ pip install .</code></pre>
 
         <div class="final-cta__note">
           <p>
-            <strong>Досвід накопичується одразу двома шарами.</strong> Те, що
-            стосується лише одного репозиторію, лишається при ньому. Те, що
-            підтверджується скрізь, піднімають один раз, і далі воно є в
-            кожному наступному проєкті. Жодне з двох не є історією чату, і
-            жодне не залежить від того, чи користуєтеся ви й досі тим агентом,
-            який це створив.
+            <strong>Досвід накопичується на двох рівнях.</strong> Знання про
+            конкретний репозиторій лишається в ньому. Загальний урок можна
+            підвищити до рівня фреймворку й використати в інших проєктах.
+            Обидва рівні зберігаються як артефакти, а не як історія чату.
           </p>
           <p>
-            <strong>Швидкість тут задає сама галузь.</strong> Методологія,
-            яку доводиться переписувати щоразу, коли змінюється модель, агент
-            чи інструмент, уже відстала. Цю мінливість беруть на себе
-            адаптери, а Graphify, RTK і Context7 лишаються необов&rsquo;язковими
-            саме для того, щоб жоден постачальник не міг зламати метод. Ядро
-            лишається на місці, поки поверхня навколо нього змінюється далі.
+            <strong>Інструменти можуть змінюватися без зміни методології.</strong>
+            Відмінності між агентами беруть на себе адаптери. Graphify, RTK і
+            Context7 лишаються необов&rsquo;язковими. Тому ядро не залежить від
+            одного постачальника.
           </p>
         </div>
 
@@ -2393,7 +2378,7 @@ pip install .</code></pre>
               <li>
                 <span class="label">Розділ 09</span>
                 <a href="#evidence">Докази</a>
-                <p>Вісім можливостей: у кожної своя перевірка й свої межі.</p>
+                <p>Вісім спроможностей. У кожної своя перевірка й свої межі.</p>
               </li>
               <li>
                 <span class="label">GitHub</span>

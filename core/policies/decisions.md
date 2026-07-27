@@ -106,10 +106,12 @@ entry ratifies it explicitly rather than leaving it an assumption.
 first-class supported project locale in v0.1: status messages, Knowledge
 Delta, closeout headings, and knowledge retrieval (`locales/uk/`,
 `scripts/tests/test_locale.py`, `test_journey.py`, `test_cursor_adapter.py`
-scenario 16). **Explicit v0.1 limitation rather than a hidden gap**: full
-agent-response localization and `locales/uk/terminology.yaml` are not
-populated. The release supports the four named project-facing surfaces and
-does not make a broader localization claim.
+scenario 16). Matched English and Ukrainian terminology packs were added on
+2026-07-28 and are governed by
+`docs/reference/terminology.md`. **Explicit v0.1 limitation rather than a
+hidden gap**: full agent-response localization is not provided. The release
+supports the four named project-facing surfaces and does not make a broader
+localization claim.
 
 ### D-10: Graphify/RTK as optional-only v0.1 integrations
 **Status: ratified 2026-07-16 (owner decision).** Graphify and RTK are

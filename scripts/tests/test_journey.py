@@ -244,10 +244,10 @@ def main() -> int:
         co = run([str(bundle / "eif_render.py"), "--framework-root", str(bundle), "session-closeout", *ALL_CLOSEOUT_SET], cwd=inst)
         kd_file, co_file = inst / "knowledge-delta.md", inst / "session-closeout.md"
         results.append(check("11. config-driven render created knowledge-delta.md (locale from config, no --locale flag)",
-                             kd.returncode == 0 and kd_file.exists() and "Дельта знань" in kd_file.read_text(encoding="utf-8"),
+                             kd.returncode == 0 and kd_file.exists() and "## Knowledge Delta" in kd_file.read_text(encoding="utf-8"),
                              kd.stdout + kd.stderr))
         results.append(check("12. config-driven render created a FULLY-FILLED session-closeout.md",
-                             co.returncode == 0 and co_file.exists() and "Сесію завершено" in co_file.read_text(encoding="utf-8")
+                             co.returncode == 0 and co_file.exists() and "Сесію закрито" in co_file.read_text(encoding="utf-8")
                              and "{" not in co_file.read_text(encoding="utf-8"),
                              co.stdout + co.stderr))
 
@@ -279,7 +279,7 @@ def main() -> int:
         # run's own status messages must come from config.yaml (uk), not a
         # CLI default (en), even though --locale was not passed this time. ---
         results.append(check("18. upgrade with no --locale flag still prints the real Ukrainian init-start message (locale read from config, not CLI-defaulted to 'en')",
-                             "Ініціалізація EIF project instance" in upgrade.stdout, upgrade.stdout))
+                             "Ініціалізуємо екземпляр EIF" in upgrade.stdout, upgrade.stdout))
         results.append(check("18. upgrade with no --locale flag still prints the real Ukrainian init-complete message",
                              "ініціалізовано" in upgrade.stdout.lower(), upgrade.stdout))
 

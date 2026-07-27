@@ -1,0 +1,88 @@
+schema_version: 1
+locale: en
+
+terms:
+  ai_system:
+    preferred: "AI system"
+    class: "standards-aligned"
+  ai_agent:
+    preferred: "AI agent"
+    class: "standards-aligned"
+  ai_coding_agent:
+    preferred: "AI coding agent"
+    class: "industry-established"
+  governance:
+    preferred: "governance"
+    class: "standards-aligned"
+  control_plane:
+    preferred: "control plane"
+    class: "industry-established"
+  authority_to_act:
+    preferred: "authority to act"
+    class: "industry-established"
+  source_authority:
+    preferred: "source authority"
+    class: "industry-established"
+  source_of_truth:
+    preferred: "source of truth"
+    class: "industry-established"
+  evidence:
+    preferred: "evidence"
+    class: "standards-aligned"
+  verification:
+    preferred: "verification"
+    class: "standards-aligned"
+  validation:
+    preferred: "validation"
+    class: "standards-aligned"
+  provenance:
+    preferred: "provenance"
+    class: "standards-aligned"
+  ontology:
+    preferred: "ontology"
+    class: "standards-aligned"
+  lifecycle:
+    preferred: "lifecycle"
+    class: "standards-aligned"
+  runtime:
+    preferred: "runtime"
+    class: "industry-established"
+  fallback:
+    preferred: "fallback"
+    class: "industry-established"
+  capability:
+    preferred: "capability"
+    class: "industry-established"
+  knowledge_base:
+    preferred: "knowledge base"
+    class: "industry-established"
+  knowledge_graph:
+    preferred: "knowledge graph"
+    class: "industry-established"
+  session:
+    preferred: "session"
+    class: "eif-defined"
+  closeout:
+    preferred: "session closeout"
+    class: "eif-defined"
+  promotion:
+    preferred: "promotion"
+    class: "eif-defined"
+  retrospective:
+    preferred: "retrospective"
+    class: "industry-established"
+  benchmark:
+    preferred: "benchmark"
+    class: "industry-established"
+  engineering_intelligence:
+    preferred: "Engineering Intelligence"
+    class: "eif-defined"
+  knowledge_delta:
+    preferred: "Knowledge Delta"
+    class: "eif-defined"
+  execution_packet:
+    preferred: "execution packet"
+    class: "eif-defined"
+  bounded_evidence_loop:
+    preferred: "Bounded Evidence Loop"
+    class: "eif-defined"

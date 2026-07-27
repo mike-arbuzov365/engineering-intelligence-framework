@@ -1,0 +1,102 @@
+schema_version: 1
+locale: uk
+
+terms:
+  ai_system:
+    preferred: "система ШІ"
+    class: "standards-aligned"
+  ai_agent:
+    preferred: "агент ШІ"
+    class: "standards-aligned"
+    avoid:
+      - "ШІ-агент"
+      - "AI-агент"
+  ai_coding_agent:
+    preferred: "агент ШІ для розробки"
+    class: "industry-established"
+  governance:
+    preferred: "керування та нагляд"
+    class: "standards-aligned"
+  control_plane:
+    preferred: "площина керування"
+    class: "industry-established"
+  authority_to_act:
+    preferred: "повноваження діяти"
+    class: "industry-established"
+  source_authority:
+    preferred: "авторитетність джерела"
+    class: "industry-established"
+  source_of_truth:
+    preferred: "джерело істини"
+    class: "industry-established"
+  evidence:
+    preferred: "докази"
+    class: "standards-aligned"
+  verification:
+    preferred: "перевірка відповідності"
+    short: "перевірка"
+    class: "standards-aligned"
+  validation:
+    preferred: "підтвердження придатності"
+    technical_operation: "валідація"
+    class: "standards-aligned"
+  provenance:
+    preferred: "походження"
+    class: "standards-aligned"
+  ontology:
+    preferred: "онтологія"
+    class: "standards-aligned"
+  lifecycle:
+    preferred: "життєвий цикл"
+    class: "standards-aligned"
+  runtime:
+    preferred: "середовище виконання"
+    class: "industry-established"
+  fallback:
+    preferred: "базовий шлях"
+    class: "industry-established"
+  capability:
+    preferred: "спроможність"
+    class: "industry-established"
+  knowledge_base:
+    preferred: "база знань"
+    class: "industry-established"
+  knowledge_graph:
+    preferred: "граф знань"
+    class: "industry-established"
+  session:
+    preferred: "сесія"
+    class: "eif-defined"
+  closeout:
+    preferred: "закриття сесії"
+    class: "eif-defined"
+  promotion:
+    preferred: "підвищення рівня"
+    class: "eif-defined"
+    avoid:
+      - "промоція"
+      - "промоутити"
+  retrospective:
+    preferred: "ретроспектива"
+    short: "ретро"
+    class: "industry-established"
+  benchmark:
+    preferred: "бенчмарк"
+    class: "industry-established"
+  engineering_intelligence:
+    preferred: "Engineering Intelligence"
+    explanatory: "інженерний інтелект"
+    class: "eif-defined"
+  knowledge_delta:
+    preferred: "Knowledge Delta"
+    class: "eif-defined"
+    avoid:
+      - "Дельта знань"
+  execution_packet:
+    preferred: "execution packet"
+    explanatory: "пакет роботи на кілька сесій"
+    class: "eif-defined"
+  bounded_evidence_loop:
+    preferred: "Bounded Evidence Loop"
+    explanatory: "обмежений цикл доказів"
+    class: "eif-defined"

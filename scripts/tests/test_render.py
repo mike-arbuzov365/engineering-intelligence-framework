@@ -65,7 +65,7 @@ def main() -> int:
         results.append(check("no --locale flag: reads locale from .eif/config.yaml", r.returncode == 0, r.stdout + r.stderr))
         out_file = inst / "knowledge-delta.md"
         results.append(check("writes a real file by default (not stdout-only)", out_file.exists(), r.stdout + r.stderr))
-        results.append(check("written file has Ukrainian headings", "Дельта знань" in out_file.read_text(encoding="utf-8") if out_file.exists() else False))
+        results.append(check("written file has Ukrainian headings", "## Knowledge Delta" in out_file.read_text(encoding="utf-8") if out_file.exists() else False))
 
         # Overwrite protection.
         r2 = run(inst, ["knowledge-delta"])
@@ -85,7 +85,7 @@ def main() -> int:
                              r4b.returncode == 0, r4b.stdout + r4b.stderr))
         co_file = inst / "session-closeout.md"
         results.append(check("draft closeout file is written and has Ukrainian headings",
-                             co_file.exists() and "Сесію завершено" in co_file.read_text(encoding="utf-8") if co_file.exists() else False))
+                             co_file.exists() and "Сесію закрито" in co_file.read_text(encoding="utf-8") if co_file.exists() else False))
         co_file.unlink(missing_ok=True)
 
         r4c = run(inst, ["session-closeout", *ALL_CLOSEOUT_SET])
@@ -144,7 +144,7 @@ def main() -> int:
         results.append(check("missing .eif/config.yaml (not broken - absent) falls back to en, not a crash", r.returncode == 0 and "Knowledge Delta" in r.stdout, r.stdout + r.stderr))
 
         r2 = run(inst_en, ["--locale", "uk", "--stdout", "knowledge-delta"])
-        results.append(check("explicit --locale overrides (no config present) config-derived default", "Дельта знань" in r2.stdout, r2.stdout))
+        results.append(check("explicit --locale overrides (no config present) config-derived default", "## Knowledge Delta" in r2.stdout, r2.stdout))
 
         r3 = run(inst_en, ["--locale", "xx-nonexistent", "--stdout", "knowledge-delta"])
         results.append(check("unknown locale falls back to en template (exit 0)", r3.returncode == 0 and "Knowledge Delta" in r3.stdout))

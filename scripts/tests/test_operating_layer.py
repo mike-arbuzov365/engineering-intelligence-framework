@@ -122,6 +122,7 @@ def check_bounded_loop_contract() -> list[Result]:
     runtime_docs = (
         "docs/architecture/HOW-EIF-WORKS.md",
         "docs/product/claims-evidence.md",
+        "docs/reference/terminology.md",
         "docs/research/bounded-evidence-loops.md",
     )
     for relative_path in runtime_docs:

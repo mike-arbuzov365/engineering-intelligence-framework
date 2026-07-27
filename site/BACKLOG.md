@@ -793,6 +793,12 @@ Two things this round found that were not on the list:
   "push to main triggers no workflow", so the boundary is recorded as D-15
   rather than left for a reader to find: D-14 governs validation topology,
   and this job runs no test.
+  The first run failed, usefully: `configure-pages` returned "Get Pages site
+  failed ... Not Found" because Pages had never been turned on. The fix was
+  not a click in repository settings but `enablement: true` on that step,
+  which turns Pages on through the API with the `pages: write` permission
+  the job already held. The deploy is now described entirely in a file
+  somebody can diff, rather than half here and half in a settings page.
 
 ---
 

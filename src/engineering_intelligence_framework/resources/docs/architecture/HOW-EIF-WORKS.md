@@ -844,12 +844,11 @@ formally ratified (the file is explicit about which is which).
 
 ### Launch
 - [ ] `v0.1.0` tag exists.
-- [ ] Website is live. The deploy is wired
+- [ ] Website is live. The deploy is wired and self-enabling
       ([`.github/workflows/pages.yml`](../../.github/workflows/pages.yml),
-      D-15) and the production URL is committed, but the page does not
-      serve until repository Settings -> Pages -> Source is set to "GitHub
-      Actions", which is an owner action nothing here performs. Unchecked
-      on purpose until a real URL answers.
+      D-15) and the production URL is committed. Unchecked until a real URL
+      answers with the built page, which is the only evidence that would
+      justify ticking it.
 - [ ] Article published.
 - [ ] Launch sequence prepared.
 - [x] Feedback/issue intake ready: `.github/ISSUE_TEMPLATE/` ships a bug

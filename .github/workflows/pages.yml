@@ -21,10 +21,9 @@ name: pages
 # The full gate (two browser engines, axe, Lighthouse, byte budgets) stays
 # local and unhosted, per site/README.md: `npm --prefix site run gate:site`.
 #
-# One manual prerequisite, once: repository Settings -> Pages -> Source must
-# be set to "GitHub Actions". Nothing here can set it, and until it is set
-# the deploy step fails with a "Pages site not found" style error rather than
-# silently doing nothing.
+# No manual prerequisite: the configure-pages step enables Pages itself on
+# the first run (see its comment below), so the whole deploy is described
+# here rather than half here and half in a settings page nobody can diff.
 
 on:
   push:
@@ -61,7 +60,15 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: site/package-lock.json
+      # enablement: true turns Pages on and sets its build type to "workflow"
+      # through the API, using the pages: write permission this job already
+      # has. Without it the first run failed at this step with "Get Pages site
+      # failed ... Not Found", and the fix would have been a click in
+      # repository settings that nothing in this repository records. A
+      # no-op on every run after the first.
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        with:
+          enablement: true
 
       - name: Install from the committed lockfile
         run: npm ci

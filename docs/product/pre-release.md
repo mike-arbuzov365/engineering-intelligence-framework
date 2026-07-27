@@ -130,9 +130,11 @@ Ordered, with the manual steps marked. Nothing here runs itself.
    unsubstituted `__EIF_*__` marker stops it. `EIF_SITE_URL` lives in
    [`site/.env.production`](../../site/.env.production); the repository URL
    is a constant in `site/vite.config.js` and resolves in every mode.
-6. **Manual, once:** repository Settings -> Pages -> Source set to "GitHub
-   Actions". Nothing in this repository can set it, and until it is set the
-   deploy job fails at its last step rather than silently doing nothing.
+6. **Automatic:** the workflow's `configure-pages` step enables Pages and
+   sets its build type to "workflow" on the first run, using the
+   `pages: write` permission the job already has. The first attempt failed
+   without it, at that exact step, with "Get Pages site failed ... Not
+   Found".
 7. **Manual, once:** upload
    [`.github/social-preview.png`](../../.github/social-preview.png) at
    Settings -> General -> Social preview. It is generated from the same

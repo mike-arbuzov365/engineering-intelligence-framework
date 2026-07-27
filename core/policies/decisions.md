@@ -251,9 +251,11 @@ having them pointless. The full site gate stays local and unhosted, exactly
 as D-14 and `site/README.md` describe. Triggered only by a change under
 `site/`, so a documentation commit does not redeploy an identical bundle.
 Provisional rather than ratified: it is in effect because the site needs to
-be served, not because it went through an owner ratification step. Enabling
-Pages itself (Settings -> Pages -> Source: GitHub Actions) is an owner
-action that nothing in this repository performs.
+be served, not because it went through an owner ratification step. Pages is
+enabled by the workflow's own `configure-pages` step
+(`enablement: true`, using the `pages: write` permission the job already
+holds) rather than by a click in repository settings, so the whole deploy
+is diffable in this repository instead of half-recorded in a settings page.
 
 ## Open (not yet decided)
 

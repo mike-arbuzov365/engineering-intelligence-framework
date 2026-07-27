@@ -21,9 +21,9 @@ name: pages
 # The full gate (two browser engines, axe, Lighthouse, byte budgets) stays
 # local and unhosted, per site/README.md: `npm --prefix site run gate:site`.
 #
-# No manual prerequisite: the configure-pages step enables Pages itself on
-# the first run (see its comment below), so the whole deploy is described
-# here rather than half here and half in a settings page nobody can diff.
+# One owner-credentialed prerequisite, done once on 2026-07-27 and recorded
+# at the configure-pages step below: the Pages site has to exist before this
+# workflow can deploy to it, and the workflow's own token cannot create it.
 
 on:
   push:
@@ -60,15 +60,15 @@ jobs:
           node-version: "22"
           cache: npm
           cache-dependency-path: site/package-lock.json
-      # enablement: true turns Pages on and sets its build type to "workflow"
-      # through the API, using the pages: write permission this job already
-      # has. Without it the first run failed at this step with "Get Pages site
-      # failed ... Not Found", and the fix would have been a click in
-      # repository settings that nothing in this repository records. A
-      # no-op on every run after the first.
+      # No `enablement: true`. It was tried and it cannot work here: the
+      # workflow GITHUB_TOKEN may deploy to a Pages site but may not create
+      # one, so that run failed with "Create Pages site failed: Resource not
+      # accessible by integration" on top of the "Not Found" it was meant to
+      # cure. Creating the site is a one-time owner-credentialed call, done
+      # 2026-07-27 with `gh api --method POST repos/<owner>/<repo>/pages -f
+      # build_type=workflow`, which is recorded here so the next person does
+      # not rediscover it from a failing run.
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-        with:
-          enablement: true
 
       - name: Install from the committed lockfile
         run: npm ci

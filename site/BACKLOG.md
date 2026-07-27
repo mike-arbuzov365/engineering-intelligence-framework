@@ -793,12 +793,16 @@ Two things this round found that were not on the list:
   "push to main triggers no workflow", so the boundary is recorded as D-15
   rather than left for a reader to find: D-14 governs validation topology,
   and this job runs no test.
-  The first run failed, usefully: `configure-pages` returned "Get Pages site
-  failed ... Not Found" because Pages had never been turned on. The fix was
-  not a click in repository settings but `enablement: true` on that step,
-  which turns Pages on through the API with the `pages: write` permission
-  the job already held. The deploy is now described entirely in a file
-  somebody can diff, rather than half here and half in a settings page.
+  Two runs failed before one worked, and both failures were worth having.
+  The first: `configure-pages` returned "Get Pages site failed ... Not
+  Found", because Pages had never been turned on. The obvious fix,
+  `enablement: true`, produced the second: "Create Pages site failed:
+  Resource not accessible by integration". A workflow's `GITHUB_TOKEN` may
+  deploy to a Pages site and may not create one, which is not something the
+  action's own documentation leads with. Creating it is therefore a one-time
+  owner-credentialed call, made and then written into the workflow beside
+  the step that needs it, so the next person reads it there instead of
+  deriving it from a red run.
 
 ---
 

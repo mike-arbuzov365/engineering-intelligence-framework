@@ -2,8 +2,9 @@ name: release-check
 
 # Owner-triggered only, run before a technical preview or release - never
 # automatically. A regular PR triggers exactly one required job (see
-# .github/workflows/ci.yml); push to main triggers nothing. This workflow
-# is the exhaustive/cross-platform layer that moved off the routine PR
+# .github/workflows/ci.yml); push to main triggers no validation workflow
+# (the site-only Pages publication exception is D-15). This workflow is the
+# exhaustive/cross-platform layer that moved off the routine PR
 # path under D-14: the full scripts/tests/run_all.py suite inventory, and
 # the cross-platform package-build/license-check matrices. See
 # docs/architecture/HOW-EIF-WORKS.md#ci-and-quality-gates.

@@ -4,11 +4,11 @@
 
 Please do not open a public GitHub issue for security or privacy concerns.
 
-Until a dedicated security contact/email is set up for this project, report
-privately via a GitHub Security Advisory
-(`Security` tab -> `Report a vulnerability`) on this repository once it is
-public, or contact the maintainer directly through the profile listed on
-this repository.
+Use the repository's
+[private vulnerability reporting form](https://github.com/mike-arbuzov365/engineering-intelligence-framework/security/advisories/new)
+(`Security` -> `Advisories` -> `Report a vulnerability`). Private reporting
+is enabled, so the report and any follow-up remain visible only to the
+reporter and repository maintainers until coordinated disclosure.
 
 Include:
 - A description of the issue and its potential impact.
@@ -77,12 +77,11 @@ end to end.
   closely adapted belongs in a `NOTICE` file once this repository actually
   vendors something (none yet).
 
-## Private vulnerability reporting readiness
+## Private vulnerability reporting
 
-GitHub private vulnerability reporting (Security tab -> "Report a
-vulnerability") requires the repository to be public first. Until then,
-contact the maintainer directly - see the reporting section above. Enabling
-GitHub's private reporting is tracked as a public-readiness item.
+GitHub private vulnerability reporting is enabled for this public
+repository. Do not include vulnerability details in a public issue or
+discussion; use the private form linked above.
 
 ## Automated checks
 
@@ -96,5 +95,7 @@ especially for secret shapes it doesn't yet recognize.
 
 ## Supported versions
 
-Pre-v0.1: no versioned releases yet. Once `v0.1.0` ships, this section will
-list which versions receive security fixes.
+| Version | Supported |
+|---|---|
+| 0.1.x | Yes |
+| < 0.1.0 | No |

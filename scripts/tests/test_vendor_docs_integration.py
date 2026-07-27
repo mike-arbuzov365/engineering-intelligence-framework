@@ -246,6 +246,7 @@ def main() -> int:
 
     passed = sum(1 for r in results if r)
     total = len(results)
+    print(f"EIF-RESULT: passed={passed} total={total}")
     print(f"\nvendor-docs integration: {passed}/{total}")
     return 0 if passed == total else 1
 

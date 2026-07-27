@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use Engineering Intelligence Framework, please cite this release."
+title: "Engineering Intelligence Framework"
+type: software
+version: 0.1.0
+date-released: 2026-07-27
+abstract: >-
+  A quality-first control plane for governed AI-agent software development,
+  with persistent engineering knowledge, explicit source identity,
+  controlled execution workflows, and evidence-aware quality gates.
+authors:
+  - family-names: Arbuzov
+    given-names: Mike
+license: Apache-2.0
+repository-code: "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+url: "https://mike-arbuzov365.github.io/engineering-intelligence-framework/"
+keywords:
+  - AI agents
+  - agentic development
+  - engineering intelligence
+  - governance
+  - knowledge management

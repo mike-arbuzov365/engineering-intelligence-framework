@@ -7,7 +7,7 @@ item), see
 this page summarizes the same sequence for a reader who wants the shape of
 the plan without the full history.
 
-This is a **roadmap, not a commitment with dates**. Pre-v0.1: sequencing
+This is a **roadmap, not a commitment with dates**. During 0.x, sequencing
 can change based on what each step actually finds, the same discipline
 this project applies to every other claim it makes about itself - see
 [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md).
@@ -45,21 +45,25 @@ this project applies to every other claim it makes about itself - see
   forbidden wording, a leaked private path or any third-party runtime
   request. The deploy re-runs those same verifiers, so a claim violation
   cannot reach the page; the browser gate stays local.
+- GitHub release `v0.1.0`, with installable wheel and source distribution
+  artifacts; package-index publication remains a separate decision.
+- Repository community and security intake: Discussions, evidence/bug issue
+  forms, private vulnerability reporting, dependency alerts, secret
+  scanning, and protected `main` with the consolidated PR check required.
 
 ## In progress
 
-- Final local release gate and a refreshed fresh-history candidate after the
-  last documentation changes.
-- Owner review of launch source, repository-history choice, domain/social
-  strategy and the exact candidate digest.
+- Repeated comparative quality-per-token trials across more
+  fixtures/models.
+- Review of whether to rewrite the pre-release Git history: the current tree
+  passes the privacy scan, but D-03 records that an old private pilot
+  repository identifier existed in four files before commit `c64baaa`
+  removed it. Rewriting public history is a separate destructive owner
+  decision, not something a routine release silently performs.
 
 ## Not started
 
-- Real merge-gate/CI enforcement wired into repository settings (required
-  status checks, branch protection), not just present as workflow files
-  re-verified by a wrapper script.
-- Repeated comparative quality-per-token trials across more fixtures/models.
-  Modes C/D remain blocked until a real agent runner consumes Graphify
+- Modes C/D remain blocked until a real agent runner consumes Graphify
   evidence and RTK passes the required behavioral/telemetry contract; fake
   integration results are not accepted.
 - A provider-specific vendor-documentation adapter; its generic declaration
@@ -67,9 +71,8 @@ this project applies to every other claim it makes about itself - see
 - Broader playbook/template/skill porting - deliberately sequenced after
   the items above, and only as much as their own lessons say is actually
   needed.
-- `v0.1.0` tag/release, package-index publication, article/LinkedIn
-  publication and feedback intake. These are separate owner-gated launch
-  packets, not side effects of technical review.
+- Package-index publication and article/LinkedIn publication. These remain
+  separate owner-gated launch steps, not side effects of a GitHub release.
 
 ## Explicit non-goals for v0.1
 

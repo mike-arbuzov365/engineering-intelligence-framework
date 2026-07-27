@@ -217,9 +217,11 @@ def main() -> int:
     # 11. required contexts come from the single policy source (not hardcoded
     #     here) - D-14 consolidated routine PR CI to one hosted job.
     check("11. policy provides exactly one consolidated required context", len(REQUIRED) == 1, str(len(REQUIRED)))
-    # 12. platform enforcement honestly recorded as wrapper-only (branch protection unavailable).
-    check("12. wrapper-only enforcement recorded (branch protection unavailable)",
-          POLICY["platform_enforcement"]["branch_protection_available"] is False)
+    # 12. the public repository records the platform + wrapper enforcement
+    #     mode that is also verified against the live settings before release.
+    check("12. platform + wrapper enforcement recorded",
+          POLICY["platform_enforcement"]["branch_protection_available"] is True
+          and POLICY["platform_enforcement"]["enforcement_mode"] == "platform-plus-wrapper")
 
     # ------------------------------------------- unit: 1.2 no-bypass-flag proof
     # There is no `allow_missing_checks` parameter on evaluate_gate anymore -

@@ -79,7 +79,10 @@ test.describe('hero', () => {
     await language.hover();
     await expect
       .poll(() => language.evaluate((el) => getComputedStyle(el).backgroundColor))
-      .toBe(base.accent);
+      .not.toBe(base.language.background);
+    expect(await language.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(
+      base.accent,
+    );
   });
 
   test('no horizontal overflow at the configured viewport', async ({ page }) => {

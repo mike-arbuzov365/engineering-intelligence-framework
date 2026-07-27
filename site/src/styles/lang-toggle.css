@@ -49,16 +49,16 @@
 
 .lang-toggle:hover,
 .lang-toggle:focus-visible {
-  color: var(--eif-charcoal-950);
-  background: var(--eif-accent);
-  border-color: var(--eif-accent);
-  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--eif-accent) 55%, transparent);
+  color: var(--eif-fg);
+  background: color-mix(in srgb, var(--eif-accent) 10%, var(--eif-bg-raised));
+  border-color: color-mix(in srgb, var(--eif-accent) 72%, var(--eif-rule));
+  box-shadow: 0 8px 24px -14px color-mix(in srgb, var(--eif-accent) 38%, transparent);
 }
 
 .lang-toggle:hover::before,
 .lang-toggle:focus-visible::before {
-  background: color-mix(in srgb, var(--eif-charcoal-950) 14%, transparent);
-  border-color: color-mix(in srgb, var(--eif-charcoal-950) 30%, transparent);
+  background: color-mix(in srgb, var(--eif-accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--eif-accent) 52%, transparent);
 }
 
 .lang-toggle span {
@@ -81,14 +81,14 @@
 
 .lang-toggle:hover span,
 .lang-toggle:focus-visible span {
-  color: color-mix(in srgb, var(--eif-charcoal-950) 65%, var(--eif-accent));
+  color: var(--eif-fg-muted);
 }
 
 .lang-toggle:hover:not(.is-uk) span:first-child,
 .lang-toggle:focus-visible:not(.is-uk) span:first-child,
 .lang-toggle:hover.is-uk .lang-toggle__alt,
 .lang-toggle:focus-visible.is-uk .lang-toggle__alt {
-  color: var(--eif-charcoal-950);
+  color: var(--eif-accent);
 }
 
 @media (max-width: 480px) {

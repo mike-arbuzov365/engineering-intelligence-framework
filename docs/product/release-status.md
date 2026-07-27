@@ -63,10 +63,14 @@ the page does not make: no timing figure appears anywhere on it.
 ## Where the release actually stands
 
 - **Version.** `0.1.0` in [`pyproject.toml`](../../pyproject.toml),
-  released 2026-07-27 and dated in [`CHANGELOG.md`](../../CHANGELOG.md).
-- **Installable from a clone.** `pip install .` builds and installs a real
-  wheel. Verified by the installed-wheel synthetic journey, which runs
-  `eifctl` from a built wheel in a clean virtual environment.
+  released 2026-07-27, tagged `v0.1.0`, and dated in
+  [`CHANGELOG.md`](../../CHANGELOG.md).
+- **Installable from a clone or GitHub release artifact.** `pip install .`
+  builds and installs a real wheel. The
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0)
+  also carries the validated wheel and source distribution. The
+  installed-wheel synthetic journey runs `eifctl` from that build in a
+  clean virtual environment.
 - **Not on a package index.** No artifact has been uploaded to PyPI or any
   other index. `pip install engineering-intelligence-framework` does not
   resolve.
@@ -125,17 +129,10 @@ Ordered, with the manual steps marked. Nothing here runs itself.
    because nothing had shipped between them.
 3. `python scripts/eif_release.py` clean, including the clean-environment
    install.
-4. **Manual, owner credentials, still open:** tag and publish.
-
-   ```
-   git tag -a v0.1.0 -m "v0.1.0"
-   git push origin v0.1.0
-   gh release create v0.1.0 --title "v0.1.0" --notes-from-tag
-   ```
-
-   Nothing in this repository does this. It takes owner credentials, which
-   is the same boundary everything else here observes: EIF generates what a
-   person then chooses to run. Uploading the built artifacts to a package
+4. **Done 2026-07-27, owner credentials:** annotated tag `v0.1.0` pushed and
+   the [GitHub Release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0)
+   published with the wheel and source distribution produced and validated
+   by `scripts/eif_release.py`. Uploading the same artifacts to a package
    index is a separate owner decision and is not part of this release.
 5. **Done 2026-07-27:** the repository is public, and
    [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
@@ -187,10 +184,7 @@ that would otherwise imply them. What changed is that the page stopped
 narrating its own release process to a reader who came to find out what EIF
 is. The release process is this file's job.
 
-**Still open, and both owner decisions:** there is no `v0.1.0` tag and no
-published GitHub Release, and no artifact is on a package index. Until the
-tag exists, the box for it in
-[`HOW-EIF-WORKS.md`](../architecture/HOW-EIF-WORKS.md#definition-of-public-ready)
-stays unchecked and the README status line stays as it is. The repository
-being public and the site being live is a launch; the tag is what makes it
-a version.
+**Still open, as a separate owner decision:** no artifact is on a package
+index, so `pip install engineering-intelligence-framework` does not resolve.
+The GitHub release and source installation are the supported 0.1.0
+distribution paths.

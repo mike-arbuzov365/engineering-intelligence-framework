@@ -5,29 +5,27 @@ This document is the honest, repository-visible statement of how merges to
 
 ## Platform reality (verified, not assumed)
 
-This repository is **private on the free GitHub plan**. GitHub's branch
-protection and rulesets APIs are **not available** on that plan for a private
-repository - both return:
+This repository is public, and `main` is protected at the GitHub repository
+level. The live protection rule:
 
-```
-HTTP 403: Upgrade to GitHub Pro or make this repository public to enable this feature.
-```
+- requires `PR smoke checks (required by policy)` to pass against an
+  up-to-date branch;
+- requires review conversations to be resolved;
+- requires linear history; and
+- prevents force pushes and branch deletion.
 
-So platform-level "required status checks" cannot be configured here. Making
-CI "required by policy" *technically* enforceable therefore has exactly two
-platform routes, **both deferred to the owner and neither done here**:
+The required context is the same value stored in
+[`core/policies/merge-policy.json`](../../core/policies/merge-policy.json),
+not a second independently chosen list. Release readiness checks compare the
+live API response with that file.
 
-1. Upgrade the account to GitHub Pro (enables branch protection / rulesets on
-   a private repo); or
-2. Make the repository public (enables them on the free plan).
+## Enforcement mode: platform plus wrapper
 
-Changing repository **visibility is out of scope** and was not done.
-
-## Enforcement mode: wrapper-only
-
-Until one of the platform routes above is taken, the enforcement is a
-**controlled merge wrapper**, `scripts/eif_merge_pr.py`. It is the supported
-merge path, and it has **no CLI flag that can weaken it** - no
+Platform protection blocks an unchecked update to `main`. The
+**controlled merge wrapper**, `scripts/eif_merge_pr.py`, remains the
+supported maintainer merge path because it evaluates repository-specific
+signals GitHub branch protection does not understand. It has **no CLI flag
+that can weaken it** - no
 `--allow-missing-checks`, no `--skip-knowledge-delta`. What is required is a
 property of `core/policies/merge-policy.json` alone.
 
@@ -87,14 +85,16 @@ policy.
 
 ## What is enforced vs advisory (residual risk, stated plainly)
 
-- **Enforced** for anyone who uses the supported path (agents, and humans who
-  follow it): the full gate above, pinned to the verified head.
-- **Advisory / bypassable**: a human with push access can still run
-  `gh pr merge` directly, or push straight to `main`, bypassing the wrapper.
-  The wrapper cannot prevent that on its own - only branch protection (paid
-  plan) or public visibility + required checks would. This residual bypass is
-  documented here rather than hidden behind a "branch is protected" claim it
-  cannot back up.
+- **Platform-enforced:** the required PR check, up-to-date branch, linear
+  history, conversation resolution, and force-push/deletion prevention.
+- **Wrapper-enforced:** live Knowledge Delta content, duplicate or
+  non-required check failures, complete review-thread pagination, and the
+  second pre-merge evaluation pinned to the verified head.
+- **Process-enforced:** maintainers and agents use the wrapper. GitHub cannot
+  express EIF's Knowledge Delta semantics as a native branch rule, so a
+  maintainer who changes or bypasses repository settings could still evade
+  that additional gate. This single-maintainer 0.x release does not require a
+  second-party approval.
 
 ## Machine-readable test evidence
 
@@ -132,8 +132,6 @@ scenarios drive `eif_merge_pr.main()` end-to-end against a programmable fake
 `gh`, including one positive control proving a genuinely clean run reaches
 `gh pr merge`.
 
-The private planning packet
-`planning/80-execution-packets/PACKET-EIF-REPOSITORY-MERGE-ENFORCEMENT/`
-carries the read-only settings-audit snapshot, the applied-diff record (none:
-branch protection unavailable), the proof-matrix result, and the residual-risk
-statement.
+The release audit verifies the live branch-protection response in addition
+to the local proof matrix; workflow files alone are not treated as evidence
+that GitHub actually enforces them.

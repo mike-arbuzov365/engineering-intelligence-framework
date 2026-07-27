@@ -3,7 +3,7 @@
 <!-- Canonical source document. README, website copy, articles, diagrams,
 FAQ, and launch posts should all derive from this file, not diverge from it. -->
 
-**Status: pre-v0.1, first full draft** (revised across two independent
+**Status: v0.1.0, released 2026-07-27** (revised across two independent
 review passes, both 2026-07-15 - see
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for what
 that review changed). Extracted and genericized from a private production
@@ -583,22 +583,25 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    project-layer repository~~ (done - see [Limitations](#limitations) for what
    the pilot found and what remains a heuristic, not a solved problem).
 3. ~~Repeat the slice against a second adapter (Cursor) to prove the
-   framework/adapter boundary holds~~ (done) -> ~~two further,
-   experimental-supported (not required) adapters, Codex and Hermes,
-   each re-verified against its own primary/installed source rather than
-   documentation, with real installed-CLI runtime proof from an isolated
-   home directory~~ (done) -> ~~a full directed switching matrix across
-   all four adapters (12 ordered pairs)~~ (done) -> **adapter scope is
-   now frozen at these four** - no fifth adapter, no hooks-parity
-   rewrite, no new adapter abstraction. See
+   framework/adapter boundary holds~~ (done) -> ~~two further adapters,
+   Codex and Hermes, each re-verified against its own primary/installed
+   source rather than documentation, with real installed-CLI runtime proof
+   from an isolated home directory~~ (done) -> ~~a full directed switching
+   matrix across all four adapters (12 ordered pairs)~~ (done) ->
+   **adapter scope is now frozen at these four and all four are supported
+   under D-16** - no fifth adapter, no hooks-parity rewrite, no new adapter
+   abstraction. See
    [`docs/product/claims-evidence.md`](../product/claims-evidence.md)
    for exactly what is and is not verified per adapter.
 4. ~~Reproducible dependency/license checking~~ (done - default mode now
    reads a committed SBOM instead of scanning whatever the invoking
    interpreter happens to have installed, confirmed identical on Windows
    and Ubuntu CI - see `scripts/eif_check_licenses.py`).
-5. Real merge-gate/CI enforcement wired up in repository settings, not just
-   present as workflow files (open).
+5. ~~Real merge-gate/CI enforcement wired up in repository settings, not
+   just present as workflow files~~ (done: protected `main`, required
+   consolidated PR context, linear history, conversation resolution, and
+   force-push/deletion prevention; the repository-specific wrapper remains
+   the supported maintainer merge path).
 6. ~~Reproducible quality-per-token benchmark, run against the vertical
    slice~~ (first bounded pilot done - one model, three of ten fixtures,
    one attempt per mode, 2026-07-20, see
@@ -618,10 +621,12 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
    remain post-v0.1 scope.
 8. ~~Add optional RTK and Graphify behavioral adapters with explicit degraded
    modes~~ (done). Vendor-docs remains declaration-only.
-9. Final local release gate + refreshed fresh-history candidate -> owner-gated
-   `v0.1.0`/package publication -> website hosting and community launch. The
-   site itself is built and gated in [`site/`](../../site/README.md); what
-   is left is serving it, which nothing here performs.
+9. ~~Final local release gate -> owner-gated `v0.1.0` GitHub release ->
+   website hosting and community intake~~ (done). Package-index publication,
+   broader benchmarks, and public launch writing remain separate owner
+   decisions. The pre-release-history identifier recorded by D-03 also
+   remains a separate destructive-history decision; the current tree is
+   clean, but no silent force rewrite is part of this release.
 
 ## Definition of Public-Ready
 
@@ -633,11 +638,13 @@ formally ratified (the file is explicit about which is which).
 
 ### Brand
 - [x] Full name **ratified**: "Engineering Intelligence Framework" (D-01).
-- [x] Descriptor adopted, **provisional** (D-02).
+- [x] Descriptor **ratified** (D-02).
 - [x] Repository slug selected: `engineering-intelligence-framework`.
 - [x] Preliminary name-collision search performed (no exact GitHub/PyPI/npm
       match found) - **not** a trademark clearance.
-- [ ] Domain/social strategy documented.
+- [x] Repository description, live-site homepage, discovery topics, and a
+      custom 1280x640 social preview are configured. A custom domain and
+      broader launch channels remain optional follow-up work.
 
 ### Public/private boundary
 - [x] Public core repository created, physically separate from the private
@@ -647,11 +654,15 @@ formally ratified (the file is explicit about which is which).
       repository names, absolute machine paths, and owner identifiers
       spread across 100+ tracked files and dozens of commits in the
       private instance - full remediation not done).
-- [ ] Git history of anything migrated is audited (none migrated yet -
-      this repository started with clean history by design).
-- [ ] No private paths, customer data, internal telemetry, or raw
-      structural-graph artifacts present (spot-checked in ported files so
-      far; not exhaustively verified).
+- [x] No private history was migrated: this repository started with fresh
+      history by design.
+- [x] The release tree contains no private paths, customer data, internal
+      telemetry, or raw structural-graph artifacts according to the
+      fail-closed privacy scan. Historical limitation: D-03 records one
+      retired private pilot-repository identifier in four older commits;
+      commit `c64baaa` removed it from the tree, but old public commits
+      remain reachable until the owner separately authorizes a destructive
+      history rewrite.
 - [x] Synthetic demo replaces private examples: the only content under
       `examples/` is `demo-workspace/`, a synthetic leap-year calculator
       with no real project data.
@@ -737,10 +748,9 @@ formally ratified (the file is explicit about which is which).
       does NOT yet have this: no human has confirmed a real Cursor
       Agent-chat response reflects the generated rule's content - see
       `adapters/cursor/README.md#runtime-validation-status` and
-      `examples/demo-cursor-workspace/MANUAL-RUNTIME-CHECK.md`. D-09
-      ratifies which two adapters (Claude Code, Cursor) are *required* for
-      v0.1 scope; Codex and Hermes are experimental-supported, not required
-      - none of this is a claim that all four are production-ready, or that
+      `examples/demo-cursor-workspace/MANUAL-RUNTIME-CHECK.md`. D-16
+      supersedes D-09's earlier tiering: all four are supported in v0.1.
+      That status does not claim all four are production-ready, or that
       runtime validation is complete for all four.
 - [x] Structural-graph and shell-compression integrations are optional,
       behaviorally checked adapters. Graphify has bounded
@@ -773,16 +783,14 @@ formally ratified (the file is explicit about which is which).
       re-read), paginates review threads, and merges pinned to the verified
       head SHA. Live-used for real merges, not only `--dry-run` (PR #4 and
       this repository's other merged PRs).
-- [ ] Those CI checks and the merge-gate script are not yet the *only*
-      path to merge - nothing at the repository-settings level (required
-      status checks / branch protection) or the agent-hook level (none of
-      the four adapters that exist - Claude Code, Cursor, Codex, Hermes -
-      ships hook scripts, so there is no "deny direct `gh pr merge`" guard)
-      technically prevents bypassing them. Checks are labeled "required by
-      policy," not "blocking," for exactly this reason. This is the same
-      gap the private instance found and fixed in itself (see Limitations)
-      - do not consider this item done until it's closed the same way
-      (repository settings + a hook guard for each adapter).
+- [x] GitHub branch protection requires the consolidated PR context on an
+      up-to-date branch, requires linear history and resolved conversations,
+      and blocks force-push/deletion on `main`. The controlled wrapper remains
+      the supported maintainer path because GitHub cannot express EIF's live
+      Knowledge Delta semantics. No adapter ships a merge hook, and this
+      single-maintainer 0.x release does not require a second-party approval;
+      those are explicit residual process limits, not a claim that the
+      wrapper itself is platform-native.
 - [x] Graph lifecycle is derived from validated artifact metadata, graph
       digest, explicit repository identity, reviewed scope, source commit,
       current commit and Git ancestry, with explicit `fresh`,
@@ -846,9 +854,9 @@ formally ratified (the file is explicit about which is which).
 - [x] Version set to `0.1.0` in [`pyproject.toml`](../../pyproject.toml) and
       dated `2026-07-27` in [`CHANGELOG.md`](../../CHANGELOG.md), with the
       two sections that both described 0.1.0 merged into one.
-- [ ] `v0.1.0` tag pushed and the GitHub Release published. Both take owner
-      credentials, so nothing in this repository does them; the commands are
-      in [`release-status.md`](../product/release-status.md)'s checklist.
+- [x] `v0.1.0` tag pushed and the GitHub Release published with the validated
+      wheel and source distribution. Package-index publication remains a
+      separate owner decision.
 - [x] Website is live at
       <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>,
       deployed by [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
@@ -941,15 +949,15 @@ documentation and identifiers stay English; your project's generated
 documentation follows your configured locale.
 
 **How production-ready is this?**
-Pre-v0.1. The methodology has run daily in a private instance since May
-2026, but this public extraction is new and incomplete - see
+Version 0.1.0 is an early public 0.x release. The methodology has run daily
+in a private instance since May 2026, but the public extraction is new and
+several evidence bounds remain - see
 [Definition of Public-Ready](#definition-of-public-ready) for exactly
 what's missing.
 
 **What coding agents does this support?**
-Four adapters exist and adapter scope is frozen at this set: Claude Code
-and Cursor are the two required v0.1 adapters; Codex and Hermes are
-experimental-supported, not required. All four generate the correct
+Four adapters are supported and adapter scope is frozen at this set: Claude
+Code, Cursor, Codex and Hermes. All four generate the correct
 entrypoint for their agent and have been re-verified against that agent's
 own primary or installed source, not just documentation - see
 [Skills and agent adapters](#skills-and-agent-adapters) and

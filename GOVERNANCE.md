@@ -35,4 +35,7 @@ external contributors to govern.
 
 - Code of conduct violations: see [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 - Security or privacy issues: see [`SECURITY.md`](SECURITY.md).
-- Everything else: open a GitHub issue once the repository is public.
+- Bugs and bounded proposals: open a
+  [GitHub issue](https://github.com/mike-arbuzov365/engineering-intelligence-framework/issues).
+- Methodology questions and early ideas: start a
+  [GitHub discussion](https://github.com/mike-arbuzov365/engineering-intelligence-framework/discussions).

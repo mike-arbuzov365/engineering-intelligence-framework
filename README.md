@@ -6,7 +6,8 @@ EIF gives AI coding agents persistent engineering knowledge, explicit source
 identity, controlled execution workflows, quality gates and token-efficient
 tool integrations.
 
-> **v0.1.0, released 2026-07-27.** Apache-2.0, installable from a clone,
+> **v0.1.0, released 2026-07-27.** Apache-2.0, installable from a clone or
+> the [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0),
 > and the public extraction of a private production instance that has run
 > this methodology daily since May 2026. It is a 0.x release: what is
 > marked experimental in [`CHANGELOG.md`](CHANGELOG.md) may change shape
@@ -27,6 +28,24 @@ any change under `site/`. The deploy re-runs the same fail-closed verifiers
 the local gate does, so an unknown claim ID, forbidden wording, a leaked
 private path, a third-party runtime request or an unsubstituted build marker
 stops it rather than reaching the page.
+
+## Get started
+
+EIF is not published to a package index yet. Install the released source,
+then initialize a project instance:
+
+```bash
+git clone https://github.com/mike-arbuzov365/engineering-intelligence-framework.git
+cd engineering-intelligence-framework
+python -m pip install .
+eifctl init ../my-project --adapter codex
+eifctl doctor --instance-path ../my-project
+```
+
+Use `claude-code`, `cursor`, `codex`, or `hermes` for `--adapter`. The
+dedicated [quickstart](docs/guides/quickstart.md) explains the generated
+files, Windows commands, locale selection, and the first governed knowledge
+retrieval.
 
 ## The problem
 
@@ -92,8 +111,8 @@ User intent
    [Bounded Evidence Loop](playbooks/bounded-evidence-loop.md).
 5. **Quality wins over token savings.** Compression can never weaken
    verification, source hierarchy, or review.
-6. **Tool-agnostic core.** Claude Code, Codex, Cursor, Hermes, and others are
-   adapters, not the center of the system.
+6. **Tool-agnostic core.** Claude Code, Codex, Cursor, and Hermes are the
+   four supported adapters, not the center of the system.
 7. **Optional integrations.** A structural code graph and a shell-output
    compression layer plug in as capabilities, not required dependencies.
 8. **Multilingual project documentation.** Framework documentation is
@@ -123,7 +142,7 @@ that isn't runnable is worse than not having the row. -->
 | Instance self-verification (`eif_verify_runtime.py`) | **Available (experimental)** | [`scripts/eif_verify_runtime.py`](scripts/eif_verify_runtime.py) - bundled "doctor" command: config/lock schema validity, manifest digest self-consistency, per-file bundle hash verification, missing/unexpected-file classification, config/adapter/lock/entrypoint consistency, provenance (dirty/asserted) notes, `CLAUDE.md`/`.gitignore` marker integrity, and drift between `.eif/config.yaml` and the generated entrypoint block or knowledge index (a hand-edited config or index with no regeneration fails with a specific fix instruction, not a silent pass) - all from the instance's own bundle, no framework checkout needed |
 | Instance contract / upgrade / adoption | **Available (experimental)** | [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md) - provenance, upgrade-by-re-init, and safe adoption of an existing repo, hardened against a real external pilot: adoption preflight, `coexist` mode, repository-origin provenance (an existing repo with no `CLAUDE.md` is recorded `adopted`, not `greenfield`), configurable knowledge paths, path-escape validation, finding-specific privacy suppressions, tested with a realistic sanitized fixture (`scripts/tests/test_adoption.py`, 67 checks) |
 | Knowledge index / lifecycle + schema-aware retrieval | **Available (experimental)** | [`scripts/eif_generate_index.py`](scripts/eif_generate_index.py), [`scripts/eif_search_knowledge.py`](scripts/eif_search_knowledge.py) - offline, Unicode-aware keyword search that returns only eligible statuses by default (excludes rejected/superseded), and reports three honest outcomes for anything wrong: unparseable YAML, schema-invalid (parses fine, violates the ontology), or status-ineligible - never conflated with "no results." No embeddings; not tested at scale |
-| Locale layer (Ukrainian project docs + retrieval) | **Available (experimental)**, 4 surfaces | [`locales/`](locales/), [`scripts/eif_locale.py`](scripts/eif_locale.py), [`scripts/eif_render.py`](scripts/eif_render.py) - status messages, Knowledge Delta, closeout headings, and Ukrainian knowledge retrieval, with a real render command and English fallback; not full agent-response localization; D-06/D-07 remain open |
+| Locale layer (Ukrainian project docs + retrieval) | **Available (experimental)**, 4 surfaces | [`locales/`](locales/), [`scripts/eif_locale.py`](scripts/eif_locale.py), [`scripts/eif_render.py`](scripts/eif_render.py) - status messages, Knowledge Delta, closeout headings, and Ukrainian knowledge retrieval, with a real render command and English fallback; not full agent-response localization; D-06/D-07 are ratified with those limits stated explicitly |
 | Playbooks, templates, skills | **Available (v0.1 operating set)** | 13 playbooks, 15 templates, and 9 skills, including planning/execution/review, knowledge operations, the [Bounded Evidence Loop](playbooks/bounded-evidence-loop.md), the outer [retro loop](playbooks/run-retro.md) that finds patterns repeating across many sessions, and the [knowledge curator](playbooks/knowledge-curator.md) that ranks what in the knowledge base needs maintenance; knowledge-health metrics and customer workflows remain out of v0.1 scope |
 | Agent adapters | **4 supported (Claude Code, Cursor, Codex, Hermes) - adapter scope FROZEN at 4, entrypoints generated for all** | [`adapters/claude-code/README.md`](adapters/claude-code/README.md) - `eif_init` generates the correct `CLAUDE.md` entrypoint (the file Claude Code loads, per official docs + CLI `2.1.169`); instruction/skill discovery verified live; hooks not re-verified this round; no hook scripts shipped. [`adapters/cursor/README.md`](adapters/cursor/README.md) - `eif_init` generates `.cursor/rules/eif/governance.mdc` (Cursor's current Rules format, per official docs + installed `3.11.19`); code/test-validated (74 acceptance checks); real Cursor runtime consumption not yet manually confirmed - see that README's "Runtime-validation status". [`adapters/codex/README.md`](adapters/codex/README.md) - dynamic active-entrypoint resolution, re-verified against Codex's own primary Rust source (not documentation) and real installed-CLI runtime proof from an isolated `CODEX_HOME` (123 checks). [`adapters/hermes/README.md`](adapters/hermes/README.md) - dynamic active-source resolution, verified against Hermes's own installed Python source and real installed-CLI runtime proof from an isolated `HERMES_HOME` (77 checks). All 12 directed adapter-switching pairs proven - see [`adapters/switch-matrix.json`](adapters/switch-matrix.json) (81 checks). All four are supported adapters (D-16, which retired the earlier required/experimental split); what differs between them is hook mechanics, stated per adapter above, and none of it is a claim of production readiness. See [`adapters/README.md`](adapters/README.md) |
 | Optional integration contract | **Behavioral adapters built (experimental)** | RTK has version/argv/native-`rg`/diff canaries, a command registry and content-free local telemetry; Graphify has version/query/path/explain canaries plus a D-08 artifact lifecycle bound to source commit, graph digest, explicit repository identity and reviewed scope. Both remain optional and degrade to core-safe fallbacks. Focused evidence is provider/version bounded, not a general performance claim; see [`integrations/README.md`](integrations/README.md). Vendor-docs now declares a named provider (Context7, over MCP) with generated routing guidance and a reviewable per-adapter config template, but EIF does not install it and cannot probe it - see that integration's own README for the stated verification gap. |
@@ -131,10 +150,10 @@ that isn't runnable is worse than not having the row. -->
 | Benchmark | **Bounded A/B pilot published; C/D attempt contracts executable** | The existing real-agent pilot remains 6/6 attempts across three synthetic tasks and modes A/B, n=1 per cell. Modes C/D now require integrity-bound Graphify consumption and, for D, attempt-attributed RTK telemetry. Their deterministic runs are contract tests with token figures suppressed, not new performance evidence; see [`docs/benchmarks/README.md`](docs/benchmarks/README.md). |
 | Public claims evidence ledger | **Available** | [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md) - what's OBSERVED vs. UNVERIFIED vs. NOT TESTED, and the allowed/forbidden wording for each |
 
-**Experimental quickstart.** Cloning this repository gets you the ontology,
-schemas, governance docs, `eifctl` source package, operating layer, and one
-reproduced vertical slice - not a stable release or a representative sample
-of real engineering tasks. Follow
+**Quickstart scope.** Cloning this repository gets you the ontology, schemas,
+governance docs, `eifctl` source package, operating layer, and one reproduced
+vertical slice. Version 0.1.0 is an early 0.x release, not a representative
+sample of real engineering tasks. Follow
 [`examples/demo-workspace/README.md`](examples/demo-workspace/README.md)
 for the exact commands, real captured output, and known limitations. See
 [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) for how
@@ -222,7 +241,9 @@ full agent-response localization and `terminology.yaml`. See
   just document a policy - see [`scripts/`](scripts/) and
   [`.github/workflows/ci.yml`](.github/workflows/ci.yml). This repository
   runs its own privacy scan, frontmatter validation, and link check on
-  every PR - see [`AGENTS.md`](AGENTS.md).
+  every PR, and GitHub branch protection requires that consolidated check
+  before `main` can advance - see [`AGENTS.md`](AGENTS.md) and
+  [`docs/architecture/merge-enforcement.md`](docs/architecture/merge-enforcement.md).
 
 ## Benchmarks
 
@@ -253,8 +274,9 @@ code-graph or shell-compression dependency, universal token-savings claims.
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). This project is not yet accepting
-external contributions while the public/private extraction is in progress -
-the file explains current status.
+external feature pull requests; focused bug reports, evidence reports,
+documentation fixes, and methodology discussions are welcome. The file
+explains the current contribution boundary.
 
 ## Changelog
 

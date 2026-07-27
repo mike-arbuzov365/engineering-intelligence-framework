@@ -33,9 +33,9 @@ write against the schema directly.
 
 ### Adapter compatibility
 
-`adapter.name` accepts one of the four registered adapters - two required
-for v0.1 (`claude-code`, `cursor`), two experimental-supported
-(`codex`, `hermes`). Adapter scope is frozen at these four - see
+`adapter.name` accepts one of the four supported adapters: `claude-code`,
+`cursor`, `codex`, or `hermes`. D-16 retired the earlier two-tier status,
+and adapter scope is frozen at these four - see
 [`adapters/README.md`](../../adapters/README.md) for the full registry,
 [`adapters/parity-matrix.json`](../../adapters/parity-matrix.json) for
 per-adapter capabilities, and

@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """Controlled merge entrypoint - the supported merge path for this repo.
 
-Platform note: GitHub branch protection / rulesets are UNAVAILABLE on this
-repository's plan (private repo, free tier -> the branch-protection and
-rulesets APIs return HTTP 403 "Upgrade to GitHub Pro or make this repository
-public"). This script is therefore the technical enforcement (a "wrapper-only"
-gate), not a substitute for platform enforcement - see
-docs/architecture/merge-enforcement.md and core/policies/merge-policy.json.
-Agents must merge only through this script; direct `gh pr merge` from agent
-shells is denied by the RTK PreToolUse hook. It does NOT stop a human with
-push access from bypassing it - that residual risk is documented, not
-eliminated (only branch protection or public visibility + required checks
-would eliminate it).
+Platform note: this public repository protects `main` with the consolidated
+status context from `core/policies/merge-policy.json`, linear history,
+conversation resolution, and force-push/deletion prevention. This script is
+the second, repository-aware gate: it also evaluates the live Knowledge
+Delta, every review thread, duplicate/non-required failures, and rechecks
+immediately before a SHA-pinned merge. See
+docs/architecture/merge-enforcement.md. Agents must merge only through this
+script; direct `gh pr merge` from agent shells is denied by the RTK
+PreToolUse hook.
 
 The gate is a pure function (`evaluate_gate`, unit-tested in
 scripts/tests/test_merge_gate.py without gh). There is no CLI flag that can

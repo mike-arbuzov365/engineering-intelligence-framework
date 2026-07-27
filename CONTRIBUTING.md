@@ -2,14 +2,15 @@
 
 ## Current status
 
-This repository is being extracted from a private production instance
-(see [`docs/architecture/HOW-EIF-WORKS.md`](docs/architecture/HOW-EIF-WORKS.md)
-for the framework/instance split). Until the
-[Definition of Public-Ready](docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready)
-checklist is complete, this project is **not accepting external pull
-requests**. Issues and discussion are welcome once the repository is public.
+EIF 0.1.x is public and maintained by one owner. Focused bug fixes,
+documentation corrections, reproducible evidence reports, and small
+well-scoped improvements are welcome. For a new capability or a change to
+the methodology, start a
+[discussion](https://github.com/mike-arbuzov365/engineering-intelligence-framework/discussions)
+before writing a large patch; the adapter scope for 0.1.x is frozen at
+Claude Code, Cursor, Codex, and Hermes.
 
-## When contributions open
+## Contribution requirements
 
 - All contributions are licensed under [Apache-2.0](LICENSE) by submission
   (see the license grant in `LICENSE` section 5); no separate CLA is planned
@@ -23,14 +24,30 @@ requests**. Issues and discussion are welcome once the repository is public.
 - PRs must pass the CI checks in
   [`.github/workflows/ci.yml`](.github/workflows/ci.yml) - privacy scan,
   frontmatter/config schema validation, link check, YAML/JSON Schema
-  syntax, Knowledge Delta completeness. These are labeled "required by
-  policy," not "blocking": nothing at the repository-settings level
-  (required status checks / branch protection) currently prevents merging
-  past a failure - see
-  [`docs/architecture/HOW-EIF-WORKS.md#quality`](docs/architecture/HOW-EIF-WORKS.md)
-  for why that distinction matters and what it will take to close it.
+  syntax, Knowledge Delta completeness, and the critical-path smoke suite.
+  GitHub branch protection requires the consolidated
+  `PR smoke checks (required by policy)` context before `main` advances;
+  [`scripts/eif_merge_pr.py`](scripts/eif_merge_pr.py) performs the
+  repository-specific second gate for maintainer merges.
 - Scope discipline: one PR, one logical change. Do not mix refactors with
   new features.
+
+## Local checks
+
+Install the pinned validation dependencies and run the same critical path as
+routine pull requests:
+
+```bash
+python -m pip install -r scripts/requirements.txt
+python scripts/tests/smoke.py
+python scripts/eif_privacy_scan.py --repo .
+python scripts/eif_check_links.py --repo .
+```
+
+Before a release, maintainers also run the exhaustive local inventory and
+the site gate documented in
+[`.github/workflows/release-check.yml`](.github/workflows/release-check.yml)
+and [`site/README.md`](site/README.md).
 
 ## Code of conduct
 

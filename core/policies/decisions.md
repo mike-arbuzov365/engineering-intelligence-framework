@@ -85,10 +85,11 @@ bar).
   normal development (not migrated history - content added directly to
   this repository's own history). The *strategy* (start clean, don't
   migrate) is ratified; it does not by itself guarantee ongoing hygiene,
-  which failed at least once. **This repository's current OSS-facing tree
-  now requires renewed history/metadata sanitation** before any public
-  visibility change - see `PACKET-EIF-PUBLIC-HISTORY-AND-METADATA-SANITATION`
-  (private planning packet) for the full audit this finding triggered.
+  which failed at least once. The current tree passes the fail-closed
+  privacy scan and commit `c64baaa` removed the identifier from all four
+  affected files, but older commits remain reachable in the now-public
+  history. Rewriting that history is a separate destructive owner decision;
+  this release does not silently claim it happened.
 
 ### D-04: License
 **Status: ratified.** Apache-2.0 for v0.1, see [`LICENSE`](../../LICENSE).
@@ -105,27 +106,26 @@ entry ratifies it explicitly rather than leaving it an assumption.
 first-class supported project locale in v0.1: status messages, Knowledge
 Delta, closeout headings, and knowledge retrieval (`locales/uk/`,
 `scripts/tests/test_locale.py`, `test_journey.py`, `test_cursor_adapter.py`
-scenario 16). **Not yet closed, and explicitly flagged as a limitation
-rather than silently left out**: full agent-response localization and
-`locales/uk/terminology.yaml` are not populated - these remain open
-partial-locale-surface gaps to close (or explicitly re-scope out of v0.1)
-before release, tracked in `docs/architecture/HOW-EIF-WORKS.md`'s
-Definition of Public-Ready.
+scenario 16). **Explicit v0.1 limitation rather than a hidden gap**: full
+agent-response localization and `locales/uk/terminology.yaml` are not
+populated. The release supports the four named project-facing surfaces and
+does not make a broader localization claim.
 
 ### D-10: Graphify/RTK as optional-only v0.1 integrations
 **Status: ratified 2026-07-16 (owner decision).** Graphify and RTK are
 official v0.1 integrations, but strictly optional: core EIF, the
-bootstrap (`eif_init.py`), both adapters, `eif_verify_runtime.py` (doctor),
+bootstrap (`eif_init.py`), all four adapters, `eif_verify_runtime.py` (doctor),
 and degraded-mode operation must not depend on either. Verified true today
-- neither adapter's registry entry, transaction layer, or test suite
+- no adapter's registry entry, transaction layer, or test suite
 references Graphify or RTK anywhere.
 
 ### D-11: Website timing
 **Status: ratified 2026-07-16 (owner decision).** Website work follows
 technical-preview readiness and a first honest benchmark result, but
 precedes broad community launch - it is not gated on the full v0.1.0
-release. Not started this round, consistent with this decision (no
-benchmark result exists yet either).
+release. The site was subsequently built and published on 2026-07-27 after
+the first bounded benchmark result and before broader launch work,
+consistent with this sequence.
 
 ### D-12: v0.1 benchmark publication scope
 **Status: ratified 2026-07-16 (owner decision).** Synthetic fixtures only
@@ -140,19 +140,18 @@ governs.
 
 ### D-09: Required v0.1 adapters
 **Status: ratified 2026-07-16 (owner decision). Adapter tiering superseded
-by D-16, 2026-07-27 - all four adapters are supported; the rest of this
-entry stands.** Required tested adapters
-for the current v0.1 scope: **Claude Code** and **Cursor**. Graphify and RTK
-remain optional integrations - neither adapter depends on them. See
+by D-16, 2026-07-27 - all four adapters are supported; only the historical
+rationale and optional-integration boundary below remain current.** At the
+time of this decision, the tested minimum was **Claude Code** and
+**Cursor**. Graphify and RTK remain optional integrations - no adapter
+depends on them. See
 [`adapters/README.md`](../../adapters/README.md#recommended-v01-priority)
 for the underlying evidence (hook-reliability testing done while building
 this repository) that motivated Cursor as the second adapter; that evidence
 is about a different Cursor mechanism (tool-call hooks) than the Rules
 mechanism `adapters/cursor/README.md` documents and `eif_init.py` generates
-for - the two should not be conflated. Codex and Hermes remain deferred, not
-ratified as required. (Moved here from a misplaced position under "Open"
-in the prior revision of this file - its own status text already said
-ratified; only the section placement was wrong.)
+for - the two should not be conflated. D-16, not this historical tiering,
+defines the current adapter status.
 
 ### D-16: All four adapters are supported; the two-tier split is retired
 **Status: ratified 2026-07-27 (owner decision). Supersedes the tiering in

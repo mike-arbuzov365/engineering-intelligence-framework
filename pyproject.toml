@@ -11,6 +11,13 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
 authors = [{ name = "Mike Arbuzov" }]
+keywords = [
+    "ai-agents",
+    "agentic-development",
+    "engineering-intelligence",
+    "governance",
+    "knowledge-management",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -26,8 +33,11 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+Homepage = "https://mike-arbuzov365.github.io/engineering-intelligence-framework/"
+Documentation = "https://mike-arbuzov365.github.io/engineering-intelligence-framework/"
 Repository = "https://github.com/mike-arbuzov365/engineering-intelligence-framework"
+Issues = "https://github.com/mike-arbuzov365/engineering-intelligence-framework/issues"
+Changelog = "https://github.com/mike-arbuzov365/engineering-intelligence-framework/blob/main/CHANGELOG.md"
 
 [project.scripts]
 eifctl = "engineering_intelligence_framework.cli:main"

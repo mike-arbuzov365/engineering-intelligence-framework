@@ -35,9 +35,30 @@ of the entry rather than a footnote.
   comment history holds named third parties' arguments, and putting those in
   a public repository without their knowledge is a privacy problem rather
   than a matter of taste.
-
-### Added
-
+- The site's quickstart carries a command block per platform: macOS/Linux/WSL,
+  Windows PowerShell and Windows CMD, behind a tab strip, split into two
+  numbered steps because only the first one differs per platform. It answers
+  what the screen was actually being asked - where do I paste this, what is
+  that lone `.`, and what happens on my OS - and it states the one shell
+  difference a reader would otherwise hit as an error, that Windows
+  PowerShell 5.1 parses `&&` as a parser error. Every command was run before
+  it was published: a clean 3.11 virtual environment, `pip install .` from
+  the clone, then `eifctl init` into a fresh directory, which initialized an
+  instance and reported in the locale its config declared. All three panels
+  ship in the static markup and stay open without JavaScript, each under its
+  own heading, so the no-script path is the complete one rather than a strip
+  that cannot switch.
+- `site/.env.production`, committed: the two owner-supplied production inputs
+  (`EIF_SITE_URL`, `EIF_REPOSITORY_URL`) in one file rather than in one
+  machine's shell, so a production build is reproducible from a clean
+  checkout and moving hosts is a one-line change. Both values are public by
+  definition - they are emitted into the shipped HTML - so nothing secret is
+  committed. `verify:bundle` now fails on any `__EIF_*__` marker that
+  survived into `dist/index.html`, because the first of those markers a
+  reader meets is the `git clone` line.
+- `scripts/tests/smoke.py` fails when the installable package's bundled
+  copies drift from their sources. The only sync check lived in the manual
+  release gate, so a documentation-only change never reached it - see Fixed.
 - Every drawn object on the site that means something names itself on hover,
   in whichever language the page is showing: what the framework layer holds,
   why the promotion route is dashed, which segment of the capabilities figure
@@ -48,6 +69,16 @@ of the entry rather than a footnote.
   out of the tab order rather than adding forty stops that tell a
   screen-reader user nothing new, and the tips are suppressed entirely on
   touch where they would flash and sit under a finger.
+- Site now describes the knowledge base itself - front matter and
+  `related:` links as the graph, a generated index searched offline, the
+  status lifecycle that keeps rejected and superseded artifacts out of
+  retrieval, three distinct failure outcomes, and the curator as its
+  maintenance pass - with a figure of one query walking that graph.
+- The control-plane sequence and the token-cost statement gained figures in
+  the same visual language: one pass from intent to durable knowledge with
+  each station lighting as it arrives, and command output filtered before
+  it reaches the model with the unfiltered core path drawn underneath. No
+  quantity is shown for the second, because none may be claimed.
 
 ### Changed
 
@@ -211,18 +242,35 @@ of the entry rather than a footnote.
   "метод" for the whole framework layer, and the optional capabilities are
   no longer called accelerators.
 
-### Added
+### Fixed
 
-- Site now describes the knowledge base itself - front matter and
-  `related:` links as the graph, a generated index searched offline, the
-  status lifecycle that keeps rejected and superseded artifacts out of
-  retrieval, three distinct failure outcomes, and the curator as its
-  maintenance pass - with a figure of one query walking that graph.
-- The control-plane sequence and the token-cost statement gained figures in
-  the same visual language: one pass from intent to durable knowledge with
-  each station lighting as it arrives, and command output filtered before
-  it reaches the model with the unfiltered core path drawn underneath. No
-  quantity is shown for the second, because none may be claimed.
+- The installable package was missing two of its own declared resources.
+  `docs/product/linkedin-series.md` and `docs/product/pre-release.md` are
+  inside a tree that `scripts/sync_package_sources.py` bundles into the
+  wheel, and neither had ever been copied - a wheel built before this would
+  have shipped without them. The drift survived because the only sync check
+  lived in the manual release gate, which a documentation-only change never
+  reaches; `scripts/tests/smoke.py` now runs that check in the fast loop,
+  and `AGENTS.md` names the trees that need a re-sync after an edit.
+- The site's social-image URLs were relative on any host with a deployment
+  sub-path. Vite rebases root-relative asset paths against `base` before the
+  metadata plugin runs, so the plugin's literal `/social-card.png` match
+  found nothing and shipped a path no crawler could resolve. Only a
+  root-domain site URL ever hid it. Matched on filename now, and
+  `verify:bundle` caught it the first time a project-page URL was set.
+- A clicked node in the site's evidence-loop diagram left a pale rectangle
+  around itself. Chromium does not match `:focus-visible` on an SVG group
+  clicked with a mouse, so the rule meant to suppress the browser's own ring
+  never fired, and the ring was drawn around the group's bounding box -
+  which includes the label sitting below the dot. Suppressed on `:focus`;
+  the keyboard indicator is unchanged.
+- Four Ukrainian tooltips read as unadapted translation rather than as
+  Ukrainian: a session whose reasoning "переживає її лише перевірене", a
+  packet closing before "набуте пропонують нагору", and a curator that
+  "нічого не зливає" twice, where the English says it merges nothing.
+- `docs/README.md` listed a `concepts/` directory that does not exist and
+  omitted `architecture/instance-contract.md`,
+  `architecture/merge-enforcement.md` and the whole `research/` tree.
 
 ## [0.1.0] - unreleased
 

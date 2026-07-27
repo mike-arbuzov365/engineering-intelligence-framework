@@ -151,6 +151,26 @@ def check_privacy_scan() -> list[Result]:
     )]
 
 
+def check_package_sources_synced() -> list[Result]:
+    """The installable package bundles copies of scripts/ and several docs
+    trees; sync_package_sources.py is what keeps them byte-identical.
+
+    Added after a pre-publication audit found two docs/product/ files that
+    the sync declares as package resources and that had never been copied at
+    all - the wheel would have shipped without them. That drift survived
+    because the only sync check lived in the manual release gate, and a
+    documentation-only change never reaches it. This is a file comparison,
+    not a build, so it belongs in the fast loop a contributor runs before
+    pushing rather than at release time when it is expensive to be wrong.
+    """
+    proc = run([sys.executable, str(FRAMEWORK_ROOT / "scripts" / "sync_package_sources.py"), "--check"])
+    return [check(
+        "package resource copies match their sources",
+        proc.returncode == 0,
+        proc.stdout + proc.stderr,
+    )]
+
+
 def check_demo_smoke(tmp_path: Path) -> list[Result]:
     """One synthetic demo smoke: init a fresh instance and confirm the
     generated entrypoint has exactly one well-formed managed block -
@@ -304,6 +324,7 @@ def main() -> int:
         jobs = [
             lambda: check_schemas_parse(),
             lambda: check_privacy_scan(),
+            lambda: check_package_sources_synced(),
             lambda: check_demo_smoke(tmp_path),
             lambda: check_doctor_catches_corruption(tmp_path),
             *(lambda a=adapter, e=entry_rel: check_adapter(tmp_path, a, e) for adapter, entry_rel in ADAPTERS),

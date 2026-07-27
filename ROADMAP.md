@@ -38,6 +38,11 @@ this project applies to every other claim it makes about itself - see
   iteration/remote budgets, adaptation and closeout states.
 - Public documentation reconciliation across README, architecture,
   integrations, claims and roadmap.
+- A bilingual presentation site, built and gated locally: every material
+  claim on it cites a manifest entry that resolves to this repository's
+  claims ledger, and the build fails on an unknown claim ID, forbidden
+  wording, a leaked private path or any third-party runtime request. Built,
+  not hosted - see below.
 
 ## In progress
 
@@ -60,9 +65,11 @@ this project applies to every other claim it makes about itself - see
 - Broader playbook/template/skill porting - deliberately sequenced after
   the items above, and only as much as their own lessons say is actually
   needed.
-- `v0.1.0` tag/release, package-index publication, website implementation and
-  hosting, article/LinkedIn publication and feedback intake. These are
-  separate owner-gated launch packets, not side effects of technical review.
+- `v0.1.0` tag/release, package-index publication, website hosting,
+  article/LinkedIn publication and feedback intake. These are separate
+  owner-gated launch packets, not side effects of technical review. The site
+  itself is built and its production URLs are configured; what remains is
+  the act of serving it, which nothing in this repository performs.
 
 ## Explicit non-goals for v0.1
 

@@ -12,10 +12,17 @@ tool integrations.
 > [Definition of Public-Ready](docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready)
 > checklist is complete.
 
-A presentation website source lives in [`site/`](site/README.md), buildable
-and previewable locally (`npm ci && npm run build:preview && npm run preview`
-from that directory). It is **not deployed** - domain, hosting and
-publication are owner-gated decisions that have not been made.
+A presentation website is built from [`site/`](site/README.md) - bilingual,
+static, no backend and no third-party runtime request - readable locally
+with `npm ci && npm run build:preview && npm run preview` from that
+directory.
+
+<!-- The one place the public URL goes. site/.env.production already carries
+     the same value as EIF_SITE_URL and the two must not drift. Publication
+     itself is an owner-gated step; see docs/product/pre-release.md. -->
+**Live site:** not published yet. The production build is configured for
+`https://mike-arbuzov365.github.io/engineering-intelligence-framework/`, and
+this line becomes that link on the day the page serves.
 
 ## The problem
 

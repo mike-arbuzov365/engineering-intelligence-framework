@@ -609,7 +609,9 @@ High-level sequence, updated after the 2026-07-18 adapter/license round:
 8. ~~Add optional RTK and Graphify behavioral adapters with explicit degraded
    modes~~ (done). Vendor-docs remains declaration-only.
 9. Final local release gate + refreshed fresh-history candidate -> owner-gated
-   `v0.1.0`/package publication -> website implementation and community launch.
+   `v0.1.0`/package publication -> website hosting and community launch. The
+   site itself is built and gated in [`site/`](../../site/README.md); what
+   is left is serving it, which nothing here performs.
 
 ## Definition of Public-Ready
 

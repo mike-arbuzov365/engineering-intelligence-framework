@@ -1,12 +1,18 @@
 # docs/
 
-- [`architecture/HOW-EIF-WORKS.md`](architecture/HOW-EIF-WORKS.md) - the
-  canonical, single source-of-truth explanation of how EIF works end to
-  end. Everything else (README, website copy, articles, FAQ) is meant to
-  derive from this document, not diverge from it.
-- `concepts/` - focused explanations of individual concepts (not populated
-  yet; content currently lives inside HOW-EIF-WORKS.md until it grows large
-  enough to split).
+- `architecture/` - how the system is put together:
+  [`HOW-EIF-WORKS.md`](architecture/HOW-EIF-WORKS.md) is the canonical,
+  single source-of-truth explanation of how EIF works end to end, and
+  everything else (README, website copy, articles, FAQ) is meant to derive
+  from it rather than diverge from it;
+  [`instance-contract.md`](architecture/instance-contract.md) - what a
+  project instance is, how it is initialized, upgraded and adopted onto an
+  existing repository, and what its self-verification covers;
+  [`merge-enforcement.md`](architecture/merge-enforcement.md) - what the
+  controlled merge entrypoint does and, precisely, what it does not yet
+  enforce at the repository-settings level.
+  Individual concepts do not have their own directory yet; they live inside
+  `HOW-EIF-WORKS.md` until one grows large enough to split out.
 - `guides/` - task-oriented how-tos:
   [`vertical-slice.md`](guides/vertical-slice.md) - the target minimum
   functional workflow and its sequencing; [`quickstart.md`](guides/quickstart.md) -
@@ -26,5 +32,11 @@
 - `reference/` - [`config.md`](reference/config.md) - `.eif/config.yaml` and
   `.eif/framework.lock.yaml` field-by-field summary, pointing to the
   authoritative JSON Schemas rather than duplicating them.
+- `research/` - the primary-source work behind a design decision, kept
+  separate from the design itself so the sources stay auditable:
+  [`bounded-evidence-loops.md`](research/bounded-evidence-loops.md) - what
+  PDSA, double-loop learning, MAPE-K, the NIST AI RMF, ReAct and Reflexion
+  each contribute to EIF's bounded loop, and what that loop is still not
+  evidence of.
 - `benchmarks/` - quality-per-token benchmark methodology and results, see
   [`benchmarks/README.md`](benchmarks/README.md).

@@ -36,6 +36,13 @@ No project-specific code, no private data, no product logic.
   Run `python scripts/eif_validate_frontmatter.py` to check.
 - If you add or change a relative Markdown link, run
   `python scripts/eif_check_links.py` before committing.
+- If you edit anything under `core/schemas/`, `core/ontology/`,
+  `docs/architecture/`, `docs/product/`, `docs/research/`, `locales/`,
+  `templates/`, `playbooks/`, `skills/`, `integrations/` or the bundled
+  `scripts/`, run `python scripts/sync_package_sources.py` and commit the
+  synced copies with the change. The installable package bundles those
+  trees, and a docs-only edit is the easy way to leave the wheel behind -
+  `scripts/tests/smoke.py` now fails when it happens.
 - Do not add empty directory stubs beyond what's needed to explain
   structure - prefer a working, if small, vertical slice over a large
   skeleton of "not built yet" placeholders. See

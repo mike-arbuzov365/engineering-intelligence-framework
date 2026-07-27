@@ -843,7 +843,12 @@ formally ratified (the file is explicit about which is which).
       [`ROADMAP.md`](../../ROADMAP.md) at the repository root.
 
 ### Launch
-- [ ] `v0.1.0` tag exists.
+- [x] Version set to `0.1.0` in [`pyproject.toml`](../../pyproject.toml) and
+      dated `2026-07-27` in [`CHANGELOG.md`](../../CHANGELOG.md), with the
+      two sections that both described 0.1.0 merged into one.
+- [ ] `v0.1.0` tag pushed and the GitHub Release published. Both take owner
+      credentials, so nothing in this repository does them; the commands are
+      in [`release-status.md`](../product/release-status.md)'s checklist.
 - [x] Website is live at
       <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>,
       deployed by [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)

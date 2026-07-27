@@ -71,6 +71,13 @@ const repositoryHref = findTag(
   'a',
   (attrs) => attrs.class?.split(/\s+/).includes('final-cta__repo'),
 )?.href;
+// The hero's primary action points at the same repository. It is the loudest
+// control on the page, so a marker that failed to substitute there is worse
+// than one in the closing screen, not better.
+const heroRepositoryHref = findTag(
+  'a',
+  (attrs) => attrs.class?.split(/\s+/).includes('hero__ctas-repo'),
+)?.href;
 
 function assertHttps(label, value, { allowInvalid = false } = {}) {
   let parsed;
@@ -111,6 +118,15 @@ if (deployStatus === 'deployable' && !indexHtml.includes('git clone https://')) 
 // and it is asserted exactly below.
 if (deployStatus !== 'no-deploy-test-profile') {
   assertHttps('repository CTA', repositoryHref);
+  assertHttps('hero repository CTA', heroRepositoryHref);
+}
+
+// Both links go to the same place in every mode, including the reserved test
+// profile. Two destinations for one repository is a defect either way round.
+if (heroRepositoryHref !== repositoryHref) {
+  failures.push(
+    `hero repository CTA (${heroRepositoryHref ?? '(missing)'}) does not match the closing-screen one (${repositoryHref ?? '(missing)'})`,
+  );
 }
 
 if (deployStatus === 'no-deploy') {

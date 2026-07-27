@@ -1,0 +1,84 @@
+<!-- DEPRECATED, not in use. Kept deliberately, not orphaned.
+
+     This is the circuit that was the hero mark until SB-023 swapped it into
+     section 03, and that section 03 carried until the orbit replaced it
+     there too. It draws the three layers as three lanes and shows what
+     moves between them, which is a true and rather good picture - the
+     reason it is off the page is that section 03 says "one framework, many
+     projects" and the orbit is the drawing of that sentence, while this one
+     is the drawing of a different sentence.
+
+     If a screen ever needs the lane view - the three layers on their own,
+     without the multi-project frame - this is the artwork, and it is
+     complete: shelves, retrieval descents, the dashed promotion arc, the
+     packet bracket, what evaporates, what settles, and the curator on the
+     framework lane.
+
+     Nothing includes this file. It is not expanded by the eif-partials
+     plugin unless an `eif:include` marker names it, and no marker does.
+
+     Its class names are the `hero__*` set, which the orbit does not use, so
+     the styles it needs are still live in src/styles/hero.css and
+     src/styles/motion.css and it would render as-is. The Ukrainian twin is
+     circuit-figure.uk.html beside this file. -->
+<svg
+  class="hero__figure"
+  aria-hidden="true"
+  viewBox="20 64 340 292"
+  preserveAspectRatio="xMidYMid meet"
+>
+  <line class="hero__shelf" x1="84" y1="92" data-tip="The framework layer. Reusable methodology, shared across projects, changed only by an explicit decision." x2="330" y2="92" />
+  <line class="hero__shelf" x1="84" y1="202" data-tip="The project layer. Durable knowledge about this repository: decisions, constraints, facts and risks, each with a status and an evidence label." x2="330" y2="202" />
+  <line class="hero__shelf hero__shelf--session" data-tip="The session lane, drawn dashed because it does not persist. Reasoning, dead ends and command output go with the session that produced them." x1="84" y1="312" x2="330" y2="312" />
+
+  <!-- Retrieval: method from the framework layer and prior experience from
+       the project layer arrive before the session that uses them. Drawn
+       descending on the left so the figure reads as one circuit: down,
+       across, up. -->
+  <path class="hero__descent" fill="none" data-tip="Method descending from the framework layer, before the session implements anything."
+    d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
+  <path class="hero__descent hero__descent--project" fill="none" data-tip="The project’s own prior experience, retrieved into the session rather than recalled from a chat log."
+    d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
+
+  <!-- Promotion: dashed, because it is conditional and rare. It lands
+       exactly on the end of the framework lane rather than short of it, so
+       the circuit closes instead of leaving a stub. -->
+  <path class="hero__ascent" fill="none" data-tip="Promotion, drawn dashed because it is the exception. A lesson reaches the framework layer only by an explicit decision, driven by the retro across many sessions."
+    d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
+
+  <!-- One packet, three sessions: an open bracket under the lane rather
+       than a closed box, so it groups the sessions without reading as a
+       second container. -->
+  <g class="hero__packet"> data-tip="One packet, three sessions. They run in order, and the packet closes before anything it learned is offered upward."
+    <line x1="140" y1="306" x2="140" y2="318" />
+    <line x1="208" y1="306" x2="208" y2="318" />
+    <line x1="276" y1="306" x2="276" y2="318" />
+    <path class="hero__packet-rule" fill="none"
+      d="M 128 332 L 128 342 L 288 342 L 288 332" />
+  </g>
+
+  <g class="hero__lost"> data-tip="What evaporates. Most of a session is working context and it is not meant to survive."
+    <circle cx="112" cy="312" r="3.5" />
+    <circle cx="172" cy="312" r="3.5" />
+    <circle cx="240" cy="312" r="3.5" />
+    <circle cx="304" cy="312" r="3.5" />
+  </g>
+
+  <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
+  <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
+  <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
+
+  <rect class="hero__settled hero__settled--1" data-tip="What settles as project memory. Validated in the session, kept because it was validated." x="133" y="196" width="14" height="6" rx="1" />
+  <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
+  <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
+  <rect class="hero__settled hero__settled--top" data-tip="A lesson that reached the framework layer. Rare, and every other project can retrieve it from here." x="300" y="86" width="14" height="6" rx="1" />
+
+  <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
+  <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
+  <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
+
+  <!-- The curator watches the framework layer continuously; it is not part
+       of any single promotion, which is why it moves on its own slower
+       rhythm. -->
+  <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="The curator, on its own slower rhythm. It ranks what has rotted in the base and assigns an owner; it never merges anything." />
+</svg>

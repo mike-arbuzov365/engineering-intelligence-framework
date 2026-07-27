@@ -17,10 +17,10 @@ release script does and where it stops), which is empirical, so `fact` with
 an OBSERVED label read from the code itself. -->
 
 
-# Pre-release status
+# Release status
 
-Everything the website used to say about its own release status, in one
-place off the page.
+Where v0.1.0 actually stands, and everything the website used to say
+about its own release status, in one place off the page.
 
 The website is a description of the framework, not a status board for it.
 Release notes, install boundaries and "not yet" statements were being
@@ -62,7 +62,8 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.1.0.dev0` in [`pyproject.toml`](../../pyproject.toml).
+- **Version.** `0.1.0` in [`pyproject.toml`](../../pyproject.toml),
+  released 2026-07-27 and dated in [`CHANGELOG.md`](../../CHANGELOG.md).
 - **Installable from a clone.** `pip install .` builds and installs a real
   wheel. Verified by the installed-wheel synthetic journey, which runs
   `eifctl` from a built wheel in a clean virtual environment.
@@ -75,14 +76,14 @@ the page does not make: no timing figure appears anywhere on it.
   run from a throwaway environment rather than required on the host),
   installs the built wheel into a clean virtualenv and runs `eifctl
   version` from it. It then prints the publish commands and stops. Passes
-  end to end on `0.1.0.dev0`.
+  end to end.
 - **The upload is a person's decision.** It takes owner credentials, and
   nothing in this repository performs it. That is the same boundary
   everything else here observes: EIF generates what a person then chooses
   to run.
-- **Adapter scope is frozen** at four adapters, two required for v0.1
-  (Claude Code, Cursor) and two experimental-supported (Codex, Hermes).
-  See [`ROADMAP.md`](../../ROADMAP.md).
+- **Adapter scope is frozen** at four adapters - Claude Code, Cursor, Codex
+  and Hermes - and all four are supported (D-16, 2026-07-27, retiring the
+  two-tier split D-09 recorded). See [`ROADMAP.md`](../../ROADMAP.md).
 
 ## What no claim is made about
 
@@ -116,12 +117,26 @@ Ordered, with the manual steps marked. Nothing here runs itself.
 
 1. `python -m pytest` and the site gate (`npm --prefix site run gate:site`)
    both green on the release commit.
-2. Version set in [`pyproject.toml`](../../pyproject.toml) and the
-   matching entry moved out of `[Unreleased]` in
-   [`CHANGELOG.md`](../../CHANGELOG.md).
+2. **Done 2026-07-27:** version set to `0.1.0` in
+   [`pyproject.toml`](../../pyproject.toml) and dated in
+   [`CHANGELOG.md`](../../CHANGELOG.md). The two sections that both
+   described 0.1.0 - an `[Unreleased]` one holding the last round and a
+   `[0.1.0] - unreleased` one holding the initial extraction - were merged,
+   because nothing had shipped between them.
 3. `python scripts/eif_release.py` clean, including the clean-environment
    install.
-4. **Manual, owner credentials:** upload the artifacts.
+4. **Manual, owner credentials, still open:** tag and publish.
+
+   ```
+   git tag -a v0.1.0 -m "v0.1.0"
+   git push origin v0.1.0
+   gh release create v0.1.0 --title "v0.1.0" --notes-from-tag
+   ```
+
+   Nothing in this repository does this. It takes owner credentials, which
+   is the same boundary everything else here observes: EIF generates what a
+   person then chooses to run. Uploading the built artifacts to a package
+   index is a separate owner decision and is not part of this release.
 5. **Done 2026-07-27:** the repository is public, and
    [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
    publishes `site/` to GitHub Pages on any change under `site/`. The
@@ -142,12 +157,40 @@ Ordered, with the manual steps marked. Nothing here runs itself.
    canonical and `og:image` are absolute under that origin, its `git clone`
    line and closing Source row carry the real repository, no `__EIF_*__`
    marker survives, and the console is clean.
-8. **Manual, once, still open:** upload
-   [`.github/social-preview.png`](../../.github/social-preview.png) at
-   Settings -> General -> Social preview. It is generated from the same
+8. **Done 2026-07-27, owner, once:**
+   [`.github/social-preview.png`](../../.github/social-preview.png) uploaded
+   at Settings -> General -> Social preview. It is generated from the same
    brand source as the site's own card by
    `npm --prefix site run generate:social-assets`, at the 1280x640 GitHub
-   asks for. Without it, every link to this repository renders as GitHub's
-   generic auto-card. There is no API for this one, so it stays a click.
+   asks for. Confirmed against the API rather than against the settings
+   page: `gh repo view --json usesCustomOpenGraphImage,openGraphImageUrl`
+   reports `true` and a `repository-images.githubusercontent.com` URL, so
+   links to this repository render the real card instead of GitHub's
+   generic auto-card. There is no API to *set* it, so it stayed a click.
+   The repository description, homepage URL and topics are set the same
+   way, and the homepage points at the live site.
 9. Re-read this file. Any line that stopped being true is a line to change,
    not a line to leave.
+
+## What the website says about status now, and why
+
+As of 2026-07-27 (SB-027) nothing on the site describes itself as
+unreleased, and no capability row calls its evidence a pilot. The three
+meta descriptions say "Open source, Apache-2.0" where they used to say
+"Pre-release", and section 09 states each capability with the scope of the
+check behind it rather than with a `Limitation:` line under it.
+
+None of that changed a claim. The claims register is untouched, every row
+still carries its `data-claim-id`, and the two things the benchmark does
+not establish - efficiency and task quality - are still stated in the row
+that would otherwise imply them. What changed is that the page stopped
+narrating its own release process to a reader who came to find out what EIF
+is. The release process is this file's job.
+
+**Still open, and both owner decisions:** there is no `v0.1.0` tag and no
+published GitHub Release, and no artifact is on a package index. Until the
+tag exists, the box for it in
+[`HOW-EIF-WORKS.md`](../architecture/HOW-EIF-WORKS.md#definition-of-public-ready)
+stays unchecked and the README status line stays as it is. The repository
+being public and the site being live is a launch; the tag is what makes it
+a version.

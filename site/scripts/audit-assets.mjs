@@ -14,7 +14,20 @@ const siteRoot = path.resolve(__dirname, '..');
 const distDir = path.resolve(siteRoot, process.argv[2] ?? 'dist');
 
 const KIB = 1024;
-const BUDGETS_KIB = { js: 40, css: 50, html: 45, initialPayload: 350 };
+
+// html was 45 and is 50 as of 2026-07-27 (SB-027). The page draws the orbit
+// mark twice on purpose now - as the hero poster and again as section 03's
+// figure, where it is the drawing of that section's own sentence - and the
+// document carries two complete languages, so that is four copies of a
+// 60-shape SVG rather than two. Measured 42.77 KiB before, 46.42 after,
+// against a Lighthouse performance score that stayed at 100.
+//
+// Raised to a number with headroom left in it, not to the number that made
+// the run green: 50 is roughly one more figure, and the next thing that
+// pushes past it should have to argue for itself the same way. The cheap
+// win was taken first - the GitHub mark is one <symbol> referenced four
+// times instead of four copies of a 700-character path, worth 1.07 KiB.
+const BUDGETS_KIB = { js: 40, css: 50, html: 50, initialPayload: 350 };
 
 function gzipKiB(file) {
   return gzipSync(readFileSync(file)).length / KIB;

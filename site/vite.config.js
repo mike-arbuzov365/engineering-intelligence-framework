@@ -1,5 +1,5 @@
 import { defineConfig, loadEnv } from 'vite';
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 const RESERVED_INVALID_RE = /\.invalid(\/|$)/i;
@@ -80,6 +80,88 @@ export function resolveProductionUrls(mode, env) {
   );
 
   return { siteUrl, repositoryUrl: resolveRepositoryUrl(mode, env) };
+}
+
+// Build-time HTML partials. `<!-- eif:include partials/<file>.html -->` in
+// index.html is replaced with that file's contents, resolved under src/.
+//
+// This exists for one reason: the orbit mark is drawn in two places (the
+// hero and section 03) and in two languages, and a 60-shape SVG carrying a
+// tooltip on every shape cannot be maintained as four hand-kept copies. It
+// drifts on the first edit, and each language drifts differently. One file
+// per language, two markers each.
+//
+// Deliberately not `__EIF_*__`: verify-bundle.mjs fails a build on any
+// surviving marker of that shape, and it should keep doing so. An
+// unresolved include here fails the build directly instead, at the point
+// where the path is wrong.
+//
+// Runs in dev too - transformIndexHtml is applied to the served index.html -
+// so what a dev server shows is what a build emits.
+// HTML comments do not nest: the first `-->` closes the outermost `<!--`,
+// and everything after it spills into the document as text. A partial that
+// documents its own marker by quoting it is the obvious way to write that
+// bug, and the only symptom is a parse5 warning in the dev log plus a page
+// that silently loses its <head>. Cheaper to refuse it here, at the file
+// that contains it, than to recognise the symptom later.
+export function assertNoNestedComment(relative, body) {
+  let depth = 0;
+  for (let i = 0; i < body.length - 2; i += 1) {
+    if (body.startsWith('<!--', i)) {
+      if (depth > 0) {
+        const line = body.slice(0, i).split('\n').length;
+        throw new Error(
+          `[eif-site] src/${relative}:${line} opens a comment inside a comment. ` +
+            'HTML comments do not nest - describe the marker instead of quoting it.',
+        );
+      }
+      depth += 1;
+      i += 3;
+    } else if (body.startsWith('-->', i) && depth > 0) {
+      depth -= 1;
+      i += 2;
+    }
+  }
+}
+
+export function expandPartials(html, readPartial) {
+  return html.replace(
+    /^([ \t]*)<!--\s*eif:include\s+([A-Za-z0-9._/-]+)\s*-->[ \t]*$/gm,
+    (_match, indent, relative) => {
+      if (relative.includes('..')) {
+        throw new Error(`[eif-site] eif:include path must stay under src/: "${relative}"`);
+      }
+      const body = readPartial(relative);
+      assertNoNestedComment(relative, body);
+      // Re-indent so the expansion sits where the marker sat. Only the
+      // marker's own indentation is added, and blank lines stay blank.
+      return body
+        .replace(/\n+$/, '')
+        .split('\n')
+        .map((line) => (line.length > 0 ? indent + line : line))
+        .join('\n');
+    },
+  );
+}
+
+function eifPartialsPlugin(srcDir) {
+  return {
+    name: 'eif-partials',
+    enforce: 'pre',
+    transformIndexHtml: {
+      order: 'pre',
+      handler(html) {
+        return expandPartials(html, (relative) => {
+          const file = path.join(srcDir, relative);
+          try {
+            return readFileSync(file, 'utf8');
+          } catch {
+            throw new Error(`[eif-site] eif:include target not found: src/${relative}`);
+          }
+        });
+      },
+    },
+  };
 }
 
 function eifDeployStatusPlugin(getDeployStatus) {
@@ -187,6 +269,9 @@ export default defineConfig(({ mode }) => {
     // root base because it has no owner-supplied public URL.
     base: siteUrl ? new URL(siteUrl).pathname : '/',
     plugins: [
+      // Includes expand first: everything after this point, the metadata
+      // substitution included, sees the assembled page.
+      eifPartialsPlugin(path.resolve(process.cwd(), 'src')),
       eifDeployStatusPlugin(() => deployStatus),
       eifMetadataPlugin(() => ({ siteUrl, repositoryUrl })),
     ],

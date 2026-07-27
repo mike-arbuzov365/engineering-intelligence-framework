@@ -6,7 +6,7 @@
     <title>Engineering Intelligence Framework: methodology, memory and governed learning</title>
     <meta
       name="description"
-      content="An operating methodology for AI-agent engineering: reusable experience, three intelligence layers, controlled sessions, evidence and governed learning. Pre-release."
+      content="An operating methodology for AI-agent engineering: reusable experience, three intelligence layers, controlled sessions, evidence and governed learning. Open source, Apache-2.0."
     />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
@@ -17,7 +17,7 @@
     <meta property="og:title" content="Engineering Intelligence Framework" />
     <meta
       property="og:description"
-      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Pre-release."
+      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Open source, Apache-2.0."
     />
     <meta property="og:image" content="/social-card.png" />
     <meta property="og:image:width" content="1200" />
@@ -26,11 +26,35 @@
     <meta name="twitter:title" content="Engineering Intelligence Framework" />
     <meta
       name="twitter:description"
-      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Pre-release."
+      content="Methodology, reusable engineering experience and governed learning for AI-agent software development. Open source, Apache-2.0."
     />
     <meta name="twitter:image" content="/social-card.png" />
   </head>
   <body>
+    <!-- One definition per mark. GitHub is drawn four times on this page -
+         the hero's primary action and the closing screen's GitHub row, each
+         of them again in the Ukrainian template - and its path is seven
+         hundred characters, with three of those copies too far apart in the
+         file for gzip to see as repeats. A <symbol> costs one.
+
+         The marks appear on exactly the destinations that leave this page,
+         which is the rule the closing screen reads by: a row with a mark
+         goes somewhere else, a row without one moves down this page. -->
+    <svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0">
+      <symbol id="eif-mark-github" viewBox="0 0 16 16">
+        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+      </symbol>
+      <symbol id="eif-mark-linkedin" viewBox="0 0 16 16">
+        <path d="M13.632 13.635h-2.37V9.922c0-.886-.018-2.025-1.234-2.025-1.235 0-1.424.964-1.424 1.96v3.778h-2.37V6H8.51v1.04h.032c.317-.6 1.092-1.233 2.247-1.233 2.4 0 2.845 1.58 2.845 3.637v4.19ZM3.558 4.955a1.376 1.376 0 1 1 0-2.751 1.376 1.376 0 0 1 0 2.751Zm1.188 8.68H2.369V6h2.377v7.635ZM14.816 0H1.18C.528 0 0 .516 0 1.153v13.694C0 15.484.528 16 1.18 16h13.635c.652 0 1.185-.516 1.185-1.153V1.153C16 .516 15.467 0 14.815 0Z" />
+      </symbol>
+      <!-- Drawn, not a brand mark: mail is not a vendor. Stroked, so it
+           carries its own modifier class rather than the filled default. -->
+      <symbol id="eif-mark-mail" viewBox="0 0 16 16">
+        <rect x="1" y="3" width="14" height="10" rx="1.6" />
+        <path d="m1.6 4.4 5.6 4a1.4 1.4 0 0 0 1.6 0l5.6-4" />
+      </symbol>
+    </svg>
+
     <a
       class="skip-link"
       href="#main"
@@ -89,11 +113,37 @@
             memory, session discipline and invokable skills that outlive any
             single session.
           </p>
+          <!-- One row, still four controls, and the fourth one leaves the
+               page. It was a fourth scroll anchor, which meant the hero's
+               loudest row went nowhere at all and the repository - the
+               thing a developer arrives wanting - was one text line on the
+               closing screen with nothing on it to say it led to GitHub.
+
+               Filled rather than outlined, and carrying the mark, which is
+               what makes one word enough. It is the only filled control on
+               the page. Labelled "GitHub" and not "View on GitHub" for a
+               layout reason as well as a reading one: the longer label put
+               the row over its column width between roughly 1080 and
+               1170px and dropped this pill onto a second line, and it also
+               reads the same length in both languages, which the Ukrainian
+               "Дивитись на GitHub" did not.
+
+               A second row of buttons and a strip of facts were tried here
+               and made the screen busier without making it clearer. Three
+               destinations and one action is the whole hero. -->
           <nav class="hero__ctas" aria-label="Primary">
             <a href="#methodology">What EIF is</a>
             <a href="#layers">The three layers</a>
             <a href="#learning">How it learns</a>
-            <a href="#evidence">Current evidence</a>
+            <a
+              class="hero__ctas-repo"
+              href="__EIF_REPO_CTA_HREF__"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              <svg class="hero__ctas-mark" aria-hidden="true"><use href="#eif-mark-github" /></svg>
+              GitHub
+            </a>
           </nav>
         </div>
 
@@ -102,130 +152,18 @@
              method and experience descending before implementation and a
              validated lesson climbing back, reaching another project only
              where it applies. Symmetrical and self-contained, which is what
-             a hero mark has to be; the circuit diagram that used to sit here
-             is a diagram, and it now sits in section 03 where a diagram
-             belongs, with the key it needs.
+             a hero mark has to be.
 
-             No key here on purpose. A hero is a poster, and the section
-             below explains the same model in full.
+             No key here on purpose. A hero is a poster. Section 03 draws
+             the same mark again and explains it in full, which is why the
+             drawing itself is a partial rather than two hand-kept copies -
+             see src/partials/orbit-figure.en.html.
 
-             It carries text, so unlike the old mark it lives in its own
-             i18n block and has a Ukrainian twin. aria-hidden: decorative,
-             and section 03 carries this content for assistive tech. -->
+             It carries text, so it lives in its own i18n block and has a
+             Ukrainian twin. aria-hidden: decorative, and section 03 carries
+             this content in prose for assistive tech. -->
         <div class="hero__aside i18n-block" data-i18n-id="hero.figure" data-i18n-reinit="hero">
-        <svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
-          <g data-tip="Projects orbit one shared framework layer. Each keeps its own repository, its own memory and its own packet rules.">
-            <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
-            <circle class="svg-hit" cx="310" cy="266" r="176" />
-          </g>
-
-          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
-            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
-            <line class="svg-hit" x1="310" y1="266" x2="310" y2="442" />
-          </g>
-          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
-            <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
-            <line class="svg-hit" x1="310" y1="266" x2="158" y2="178" />
-          </g>
-          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
-            <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
-            <line class="svg-hit" x1="310" y1="266" x2="462" y2="178" />
-          </g>
-          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
-            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
-            <line class="svg-hit" x1="310" y1="266" x2="310" y2="90" />
-          </g>
-
-          <g data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation.">
-            <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
-            <path class="svg-hit" d="M 300 306 C 282 348 282 392 300 428" />
-          </g>
-          <g data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes.">
-            <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
-            <path class="svg-hit" d="M 320 428 C 338 392 338 348 320 306" />
-          </g>
-          <g data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies.">
-            <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
-            <path class="svg-hit" d="M 310 240 C 322 208 400 196 452 190" />
-          </g>
-
-          <text class="scale__note" x="274" y="334" text-anchor="end" data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation.">method + experience</text>
-          <text class="scale__note scale__note--up" x="346" y="334" data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes.">validated lesson</text>
-          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle" data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies.">if it applies</text>
-
-          <g data-tip="EIF, the framework layer. One shared operating layer: ontology, the authority model, rules, playbooks, templates and skills.">
-            <circle class="scale__core" cx="310" cy="266" r="42" />
-            <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
-          </g>
-
-          <g class="scale__project scale__project--active" data-tip="P1, the project with work open in it. A task too large for one session becomes a packet of sessions inside this repository.">
-            <circle cx="310" cy="442" r="17" />
-            <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
-          </g>
-          <g class="scale__project" data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer.">
-            <circle cx="158" cy="178" r="15" />
-            <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
-          </g>
-          <g class="scale__project scale__project--receiving" data-tip="P4 receives a lesson from P1. It arrives only where it applies, never automatically.">
-            <circle cx="462" cy="178" r="15" />
-            <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
-          </g>
-          <g class="scale__project" data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer.">
-            <circle cx="310" cy="90" r="15" />
-            <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
-          </g>
-
-          <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
-          <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
-
-          <g data-tip="The packet groups its sessions. They run in order, and it closes before anything learned is offered upward.">
-            <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
-            <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
-          </g>
-          <text class="scale__section-label" x="196" y="482" data-tip="PACKET. One unit of work too large for a single session, with its own open and close rules.">PACKET</text>
-          <g data-tip="The packet’s link to one of its sessions.">
-            <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
-            <line class="svg-hit" x1="310" y1="459" x2="310" y2="492" />
-          </g>
-          <g data-tip="The packet’s link to one of its sessions.">
-            <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
-            <line class="svg-hit" x1="238" y1="492" x2="238" y2="516" />
-          </g>
-          <g data-tip="The packet’s link to one of its sessions.">
-            <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
-            <line class="svg-hit" x1="310" y1="492" x2="310" y2="516" />
-          </g>
-          <g data-tip="The packet’s link to one of its sessions.">
-            <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-            <line class="svg-hit" x1="382" y1="492" x2="382" y2="516" />
-          </g>
-          <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
-            <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
-            <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="14" />
-          </g>
-          <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
-            <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
-            <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="14" />
-          </g>
-          <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
-            <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
-            <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="14" />
-          </g>
-          <text class="scale__section-label" x="196" y="546" data-tip="SESSIONS. The three runs inside this packet, in order.">SESSIONS</text>
-
-          <!-- The curator's tip is on its ring, not on the dot that travels
-               it: a 4px mark moving on a 27s cycle is not something anyone
-               should have to chase to read a label. -->
-          <g data-tip="The curator. It watches the framework layer’s own health on its own rhythm, outside any single promotion, and merges nothing itself.">
-            <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
-            <circle class="svg-hit" cx="310" cy="266" r="62" />
-          </g>
-          <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
-
-          <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
-          <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
-          <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
-        </svg>
+        <!-- eif:include partials/orbit-figure.en.html -->
         </div>
       </div>
     </header>
@@ -484,108 +422,56 @@
             </ol>
           </figure>
 
-          <!-- The circuit that used to be the hero mark. It belongs here: it
-               draws the three layers as three lanes and shows what moves
-               between them, which is this section's whole subject, and it
-               carries no text at all so both language templates hold an
-               identical copy. The orbit map it swapped with is a poster, and
-               a poster's job is the top of the page. -->
+          <!-- Section 03 draws the hero mark a second time, and this is the
+               place it is actually explained: the hero is a poster with no
+               key, this one has the written model above it and a five-line
+               key beside it. Same drawing, expanded from the same partial,
+               so the two can never drift apart.
+
+               The circuit that used to sit here - three layers as three
+               lanes - is kept, unused, at
+               src/partials/deprecated/circuit-figure.en.html. It was a true
+               picture of a different sentence; this section's sentence is
+               "one framework, many projects", and the orbit is the drawing
+               of that one. -->
           <figure class="scale" data-claim-id="CLM-13">
             <figcaption class="scale__caption">
               <span class="label label--accent">One framework, many projects</span>
               <h3>The framework is shared. Every project keeps its own memory.</h3>
               <p>
-                Read the figure as one circuit, down and across and up. Method
-                and prior experience descend into a session before its first
-                line of implementation: ontology and the authority model,
-                rules and constraints, playbooks, templates and skills, and
-                with them the project's own history. A packet of three
-                sessions runs along the bottom lane. Most of what they produce
-                evaporates with them, a little settles on the project layer,
-                and rarely one validated lesson climbs the right arc to the
-                framework layer, where every other project can retrieve it.
+                One shared operating layer at the centre, and every project
+                on its own orbit around it. The centre holds what is reusable
+                everywhere: ontology and the authority model, rules and
+                constraints, playbooks, templates and skills. Each project
+                keeps its own repository and its own memory, and retrieves
+                from the centre before it starts. Under P1 a packet of three
+                sessions is open, because the task was too large for one of
+                them. Method and the project's own history descend into those
+                sessions before their first line of implementation; when the
+                packet closes, a validated lesson can climb back to the
+                centre, and from there reach another project only where it
+                applies.
               </p>
               <ul class="figure-legend">
+                <li class="figure-legend__item figure-legend__item--dot">
+                  <strong>The centre is the framework layer.</strong> Everything reusable lives there, and every project orbits it with its own repository, its own memory and its own packet rules.
+                </li>
                 <li class="figure-legend__item figure-legend__item--dotted">
-                  <strong>Method and experience descend first.</strong> Both arrive in the session <em>before</em> it implements anything, retrieved rather than recalled.
+                  <strong>Method and experience go down first.</strong> Both arrive in the session <em>before</em> it implements anything, retrieved rather than recalled.
                 </li>
                 <li class="figure-legend__item figure-legend__item--bracket">
-                  <strong>One packet, three sessions.</strong> They run in order under the dashed lane, and the packet closes before anything it learned is offered upward.
-                </li>
-                <li class="figure-legend__item figure-legend__item--mark">
-                  <strong>Most of a session evaporates.</strong> What was validated settles on the project layer as durable memory; the rest goes with the session.
+                  <strong>One packet, three sessions.</strong> They run in order under P1, and the packet closes before anything it learned is offered upward.
                 </li>
                 <li class="figure-legend__item figure-legend__item--dashed-accent">
-                  <strong>Promotion is the exception.</strong> The climb is dashed because a lesson reaches the framework layer only by an explicit decision.
+                  <strong>The climb back is the exception.</strong> A lesson reaches the centre only by an explicit decision, and the dashed relay carries it to another project only where it applies.
                 </li>
                 <li class="figure-legend__item figure-legend__item--dot-warn">
-                  <strong>The curator.</strong> It watches the framework layer's own health continuously, on its own rhythm, outside any single promotion.
+                  <strong>The curator never stops.</strong> The amber dot circling the centre is the one continuous motion here: it watches the framework layer's own health on its own rhythm, and merges nothing itself.
                 </li>
               </ul>
             </figcaption>
 
-            <svg
-              class="hero__figure"
-              aria-hidden="true"
-              viewBox="20 64 340 292"
-              preserveAspectRatio="xMidYMid meet"
-            >
-              <line class="hero__shelf" x1="84" y1="92" data-tip="The framework layer. Reusable methodology, shared across projects, changed only by an explicit decision." x2="330" y2="92" />
-              <line class="hero__shelf" x1="84" y1="202" data-tip="The project layer. Durable knowledge about this repository: decisions, constraints, facts and risks, each with a status and an evidence label." x2="330" y2="202" />
-              <line class="hero__shelf hero__shelf--session" data-tip="The session lane, drawn dashed because it does not persist. Reasoning, dead ends and command output go with the session that produced them." x1="84" y1="312" x2="330" y2="312" />
-
-              <!-- Retrieval: method from the framework layer and prior
-                   experience from the project layer arrive before the session
-                   that uses them. Drawn descending on the left so the figure
-                   reads as one circuit: down, across, up. -->
-              <path class="hero__descent" fill="none" data-tip="Method descending from the framework layer, before the session implements anything."
-                d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
-              <path class="hero__descent hero__descent--project" fill="none" data-tip="The project’s own prior experience, retrieved into the session rather than recalled from a chat log."
-                d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
-
-              <!-- Promotion: dashed, because it is conditional and rare. It
-                   lands exactly on the end of the framework lane rather than
-                   short of it, so the circuit closes instead of leaving a
-                   stub. -->
-              <path class="hero__ascent" fill="none" data-tip="Promotion, drawn dashed because it is the exception. A lesson reaches the framework layer only by an explicit decision, driven by the retro across many sessions."
-                d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
-
-              <!-- One packet, three sessions: an open bracket under the lane
-                   rather than a closed box, so it groups the sessions without
-                   reading as a second container. -->
-              <g class="hero__packet"> data-tip="One packet, three sessions. They run in order, and the packet closes before anything it learned is offered upward."
-                <line x1="140" y1="306" x2="140" y2="318" />
-                <line x1="208" y1="306" x2="208" y2="318" />
-                <line x1="276" y1="306" x2="276" y2="318" />
-                <path class="hero__packet-rule" fill="none"
-                  d="M 128 332 L 128 342 L 288 342 L 288 332" />
-              </g>
-
-              <g class="hero__lost"> data-tip="What evaporates. Most of a session is working context and it is not meant to survive."
-                <circle cx="112" cy="312" r="3.5" />
-                <circle cx="172" cy="312" r="3.5" />
-                <circle cx="240" cy="312" r="3.5" />
-                <circle cx="304" cy="312" r="3.5" />
-              </g>
-
-              <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
-              <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
-              <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
-
-              <rect class="hero__settled hero__settled--1" data-tip="What settles as project memory. Validated in the session, kept because it was validated." x="133" y="196" width="14" height="6" rx="1" />
-              <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
-              <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
-              <rect class="hero__settled hero__settled--top" data-tip="A lesson that reached the framework layer. Rare, and every other project can retrieve it from here." x="300" y="86" width="14" height="6" rx="1" />
-
-              <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
-              <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
-              <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
-
-              <!-- The curator watches the framework layer continuously; it is
-                   not part of any single promotion, which is why it moves on
-                   its own slower rhythm. -->
-              <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="The curator, on its own slower rhythm. It ranks what has rotted in the base and assigns an owner; it never merges anything." />
-            </svg>
+            <!-- eif:include partials/orbit-figure.en.html -->
           </figure>
         </div>
       </section>
@@ -904,30 +790,39 @@
                  the node the curator has flagged rather than passing
                  through it. -->
             <svg class="kb-map" aria-hidden="true" viewBox="0 0 420 300" preserveAspectRatio="xMidYMid meet">
-              <line class="kb-map__lane" x1="20" y1="272" x2="400" y2="272" />
+              <line class="kb-map__lane" x1="20" y1="278" x2="172" y2="278" />
 
-              <path class="kb-map__link" fill="none" d="M 70 190 L 120 90" />
-              <path class="kb-map__link" fill="none" d="M 70 190 L 215 150" />
-              <path class="kb-map__link" fill="none" d="M 120 90 L 215 150" />
-              <path class="kb-map__link" fill="none" d="M 215 150 L 320 80" />
-              <path class="kb-map__link" fill="none" d="M 320 80 L 370 190" />
-              <path class="kb-map__link" fill="none" d="M 215 150 L 370 190" />
-              <path class="kb-map__link kb-map__link--dead" fill="none" data-tip="The link into an excluded artifact still exists, because the artifact is still readable. Retrieval just does not follow it by default." d="M 215 150 L 272 232" />
+              <path class="kb-map__link" fill="none" d="M 132 100 L 96 206" />
+              <path class="kb-map__link" fill="none" d="M 132 100 L 218 158" />
+              <path class="kb-map__link" fill="none" d="M 96 206 L 218 158" />
+              <path class="kb-map__link" fill="none" d="M 218 158 L 312 86" />
+              <path class="kb-map__link" fill="none" d="M 312 86 L 356 200" />
+              <path class="kb-map__link" fill="none" d="M 218 158 L 356 200" />
+              <path class="kb-map__link kb-map__link--dead" fill="none" data-tip="The link into an excluded artifact still exists, because the artifact is still readable. Retrieval just does not follow it by default." d="M 218 158 L 252 250" />
 
-              <path class="kb-map__query" fill="none" data-tip="A search entering from the index and walking the links, instead of reading every file. Offline keyword and substring scoring, no embedding service." d="M 26 266 C 56 260 50 226 70 190" />
+              <path class="kb-map__query" fill="none" data-tip="A search entering from the index and walking the links, instead of reading every file. Offline keyword and substring scoring, no embedding service." d="M 26 272 C 50 266 60 240 96 206" />
 
-              <circle class="kb-map__node kb-map__node--s1" cx="70" cy="190" r="8" />
-              <circle class="kb-map__node kb-map__node--s2" cx="120" cy="90" r="8" />
-              <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" data-tip="One knowledge artifact, linked to several neighbours. A plain file with front matter: type, scope, status, confidence, source and its related links." cx="215" cy="150" r="10" />
-              <circle class="kb-map__node kb-map__node--s4" cx="320" cy="80" r="8" />
-              <circle class="kb-map__node kb-map__node--s5" cx="370" cy="190" r="8" />
-              <circle class="kb-map__node kb-map__node--excluded" data-tip="Rejected or superseded. Still readable, kept out of search results by default so a closed question does not quietly reopen, and flagged by the curator." cx="272" cy="232" r="8" />
+              <circle class="kb-map__node kb-map__node--s1" cx="96" cy="206" r="8" />
+              <circle class="kb-map__node kb-map__node--s2" cx="132" cy="100" r="8" />
+              <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" data-tip="One knowledge artifact, linked to several neighbours. A plain file with front matter: type, scope, status, confidence, source and its related links." cx="218" cy="158" r="10" />
+              <circle class="kb-map__node kb-map__node--s4" cx="312" cy="86" r="8" />
+              <circle class="kb-map__node kb-map__node--s5" cx="356" cy="200" r="8" />
+              <circle class="kb-map__node kb-map__node--excluded" data-tip="Rejected or superseded. Still readable, kept out of search results by default so a closed question does not quietly reopen, and flagged by the curator." cx="252" cy="250" r="8" />
 
-              <circle class="kb-map__flag" cx="272" cy="232" r="15" fill="none" />
+              <circle class="kb-map__flag" cx="252" cy="250" r="15" fill="none" />
               <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
 
-              <text class="kb-map__note" x="20" y="292">index</text>
-              <text class="kb-map__note kb-map__note--excluded" x="294" y="237">superseded</text>
+              <text class="kb-map__note" x="20" y="298">index</text>
+              <text class="kb-map__note" x="132" y="82" text-anchor="middle">decision</text>
+              <text class="kb-map__note" x="86" y="230" text-anchor="middle">incident</text>
+              <text class="kb-map__note" x="312" y="68" text-anchor="middle">lesson</text>
+              <!-- Under its node and centred on it, like `incident`. Set to
+                   the right of the node it ran past the view box in
+                   Ukrainian, where the word is `правило` rather than
+                   `rule` - and the label that survives translation is the
+                   one to lay out for. -->
+              <text class="kb-map__note" x="356" y="224" text-anchor="middle">rule</text>
+              <text class="kb-map__note kb-map__note--excluded" x="268" y="258">rejected</text>
             </svg>
 
             <ul class="figure-legend">
@@ -1129,101 +1024,98 @@
       <section class="section evidence" id="evidence" aria-labelledby="evidence-heading">
         <div class="section__inner i18n-block" data-i18n-id="evidence.body" data-i18n-reinit="reveal">
           <div class="section__head">
-            <span class="label">09 &middot; Current tasks and evidence</span>
-            <h2 id="evidence-heading">What has been observed within clear boundaries</h2>
+            <span class="label">09 &middot; Capabilities and evidence</span>
+            <h2 id="evidence-heading">What runs today, and what each claim rests on</h2>
           </div>
           <p class="section__lede">
-            Eight tasks a governed agent actually performs with this
-            framework, each with its own evidence and boundary, not a
-            single blanket capability claim.
+            Eight things this framework does now, each with the check behind
+            it and the scope that check covers. The scope line belongs to the
+            row it qualifies, not to a disclaimer at the foot of the page.
           </p>
 
           <ul class="integrations__list evidence__tasks">
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Install</span>
-                <span>An installable eifctl wheel with seven subcommands</span>
+                <span>An installable eifctl with seven subcommands</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-02">
-                <p><code>pip install .</code> from a clone builds a real wheel from <code>pyproject.toml</code>. Installed into a clean virtual environment it gives a working <code>eifctl</code> command with seven subcommands, and delivers the standalone benchmark contract tool. That path is exercised end to end by a full synthetic-task journey, not just by an import check.</p>
-                <p><strong>Limitation:</strong> the journey uses the Claude Code adapter for its own bootstrap step, and the C/D proof is deterministic contract evidence rather than a real-agent result.</p>
+                <p><code>pip install .</code> from a clone builds a real wheel from <code>pyproject.toml</code> and gives you a working <code>eifctl</code>: <code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code> and <code>version</code>. It runs with no framework checkout beside it, and the installed wheel is exercised by a full synthetic task from bootstrap to closeout - not by an import check - including delivery of the standalone benchmark contract tool.</p>
+                <p><strong>Scope:</strong> proven from a clone into a clean virtual environment, with that walkthrough bootstrapping through the Claude Code adapter. Installing by name from a package index is a separate step, and it is not the command the quickstart prints.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Adopt</span>
-                <span>Coexistence on an already-governed repository</span>
+                <span>Coexistence with a repository that already has rules</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-11">
-                <p>An adoption preflight detects pre-existing project governance before any write and refuses to proceed without an explicit coexistence decision; coexist mode defers to existing rules instead of declaring sole authority.</p>
-                <p><strong>Limitation:</strong> governance detection is a content-length heuristic, not semantic; verified against one synthetic fixture plus repeated runs against one real private pilot target.</p>
+                <p>The adoption preflight reads the repository before it writes anything. If the project is already governed it stops and asks for an explicit decision instead of taking over, and in coexist mode the generated block defers to the rules already there rather than declaring itself the only authority.</p>
+                <p><strong>Scope:</strong> existing governance is recognised by the size and shape of the files, not by reading what they mean. Verified against a synthetic fixture and repeated runs against one real private repository.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Retrieve</span>
-                <span>Experience retrieval before implementation</span>
+                <span>Prior experience arrives before implementation</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-01">
-                <p>Offline, lifecycle-aware, schema-aware keyword retrieval surfaces relevant validated knowledge (including Ukrainian), excludes rejected/superseded results by default, and reports unparseable vs. schema-invalid vs. not-found as three distinct outcomes.</p>
-                <p><strong>Limitation:</strong> offline keyword/substring scoring, not semantic search; tested against small seeded indexes.</p>
+                <p>Search runs offline over the project's own index, aware of each artifact's schema and its place in the lifecycle. Rejected and superseded artifacts stay readable but are kept out of results by default, and unparseable, schema-invalid and not-found come back as three different answers rather than one empty one. Ukrainian artifacts are indexed and returned like any other.</p>
+                <p><strong>Scope:</strong> keyword and substring scoring, not search by meaning. No embedding service, and nothing leaves the machine.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Plan</span>
-                <span>Bounded, evidence-driven execution</span>
+                <span>Work is bounded before it starts</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-04">
-                <p>Work is scoped as a session or execution packet with an explicit evaluator, iteration/remote-run budgets, and a named stop condition (see <a href="#loop">the evidence loop</a>).</p>
-                <p><strong>Limitation:</strong> a methodology contract, not a guarantee of fewer retries or lower cost.</p>
+                <p>A unit of work opens as a session or as an execution packet with the evaluator named up front, budgets for iterations and remote runs, and a stop condition that does not depend on the agent deciding it is finished (see <a href="#loop">the evidence loop</a>).</p>
+                <p><strong>Scope:</strong> a contract the workflow holds itself to. It sets how work is bounded, not how many attempts a given task will take.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Verify</span>
-                <span>A project instance audits its own integrity</span>
+                <span>An instance audits its own integrity</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-01">
-                <p>A bundled verifier checks config/lock schema validity, manifest digests against a fresh recompute, adapter/config consistency, marker integrity, and drift between config and generated entrypoint content.</p>
-                <p><strong>Limitation:</strong> scoped to the bundle's own manifest, not a general-purpose file-integrity tool.</p>
+                <p>The bundled verifier recomputes the manifest digests from the files on disk, validates config and lock against their schemas, and checks that the active adapter matches the configuration, that the generated entrypoint has not drifted from the config that produced it, and that the block markers are intact.</p>
+                <p><strong>Scope:</strong> it verifies the EIF bundle it manages. It is not a general file-integrity tool for the rest of the repository.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Switch</span>
-                <span>Move between any two of four registered adapters</span>
+                <span>Four adapters for four agents, and any move between them</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-03">
-                <p>A full directed switching matrix (12 ordered pairs across Claude Code, Cursor, Codex and Hermes) proves exactly one active EIF block, correct destination resolution, and project-content preservation after every switch.</p>
-                <p><strong>Limitation:</strong> adapter scope is frozen at these four. Claude Code and Cursor are the v0.1 set, Codex and Hermes are experimental-supported, and some properties are proven adapter-generically rather than one pair at a time.</p>
+                <p>Claude Code, Cursor, Codex and Hermes. All twelve ordered pairs are exercised: after every switch there is exactly one active EIF block, the new adapter's entrypoint resolves to the right source, and the project's own content is left as it was.</p>
+                <p><strong>Scope:</strong> adapter coverage is these four, deliberately, and the core is plain Markdown any other agent can be pointed at. What differs between them is mechanics, not status: Cursor has no tool-call hook to enforce through, so its adapter ships rules, and the Codex and Hermes hook contracts block rather than rewrite.</p>
               </div>
             </li>
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Localize</span>
-                <span>Ukrainian project surfaces, not full response localization</span>
+                <span>Ukrainian project surfaces, driven by configuration</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-07">
-                <p>Retrieval, Knowledge Delta rendering, session-closeout rendering and generated entrypoint content have been verified in Ukrainian, config-driven per project instance.</p>
-                <p><strong>Limitation:</strong> does not cover an agent's own free-form responses inside a session.</p>
+                <p>Retrieval, Knowledge Delta rendering, session closeout and the generated entrypoint content all render in the language the instance declares, verified in Ukrainian as well as English. The language is configuration, not a hardcoded default.</p>
+                <p><strong>Scope:</strong> the surfaces the framework itself renders. What an agent says in free-form conversation is the agent's own behavior, not something EIF produces.</p>
               </div>
             </li>
-            <!-- This used to be a "Bounded proof on record" block of three
-                 paragraphs after the list, which read as a disclaimer
-                 appended to a page of claims. Measuring is one of the things
-                 this framework does, so it is a row like the others, and the
-                 two limits it carries sit inside it rather than trailing the
-                 whole section. -->
+            <!-- Measuring is one of the things this framework does, so it is
+                 a row like the others rather than a disclaimer appended
+                 after the list, and the two bounds it carries sit inside it. -->
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Measure</span>
-                <span>One bounded real-agent pilot, and what it does not settle</span>
+                <span>What is measured, and what deliberately is not</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-08">
-                <p>A first bounded real-agent A/B pilot, one model and three fixtures across six attempts in total, completed with every attempt succeeding in both modes. Modes C and D have executable integrity contracts rather than a real-agent performance result.</p>
-                <p data-claim-id="CLM-10">Command-level timing evidence exists for specific mechanical operations, recorded in the framework's benchmark evidence. No claim is made about human authoring or review time.</p>
-                <p data-claim-id="CLM-09"><strong>Limitation:</strong> this is not a statistically powered efficiency comparison, and no comparative study of task quality or rework rate has been run at all. One model, three of ten fixtures, one attempt per cell, no baseline and no control group. Until that changes the silence is deliberate.</p>
+                <p>The benchmark harness runs a real-agent A/B and records the outcome as a machine-checkable contract rather than a headline: one model, three fixtures, six attempts, every attempt completing in both modes. Modes C and D run as integrity contracts, so what they establish is that a run was well formed, not that it was faster.</p>
+                <p data-claim-id="CLM-10">Command-level timing exists for specific mechanical operations and is recorded with the framework's benchmark evidence. Nothing measures how long a person spends writing or reviewing code.</p>
+                <p data-claim-id="CLM-09"><strong>Scope:</strong> this page makes no efficiency or task-quality claim anywhere, and it will not until a study exists that carries one. Six attempts against no baseline and no control group is not that study.</p>
               </div>
             </li>
           </ul>
@@ -1433,7 +1325,7 @@ pip install .</code></pre>
               <strong>It moves at the speed the field moves.</strong> A
               methodology that needs rewriting every time a model, an agent
               or a tool changes is already behind. Adapters absorb that
-              churn, the three optional tools are optional precisely so no
+              churn, Graphify, RTK and Context7 are optional precisely so no
               vendor can break the method, and the core stays where it is
               while the surface around it keeps changing.
             </p>
@@ -1456,11 +1348,16 @@ pip install .</code></pre>
                 <li>
                   <span class="label">Section 09</span>
                   <a href="#evidence">Evidence</a>
-                  <p>Eight tasks, each with its own boundary and its own limit.</p>
+                  <p>Eight capabilities, each with the check behind it and the scope it covers.</p>
                 </li>
+                <!-- Labelled GitHub, and carrying the mark. "Source" over
+                     "Public repository" named what was on the other end but
+                     nothing on the row said where it was, and this is the
+                     page's one outbound destination for code. -->
                 <li>
-                  <span class="label">Source</span>
-                  <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__" rel="noopener noreferrer" target="_blank">__EIF_REPO_CTA_LABEL_EN__</a>
+                  <span class="label">GitHub</span>
+                  <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__" rel="noopener noreferrer" target="_blank">
+                    <svg class="final-cta__mark" aria-hidden="true"><use href="#eif-mark-github" /></svg>__EIF_REPO_CTA_LABEL_EN__</a>
                   <p>Ontology, schemas, the <code>eifctl</code> package and the reproducible slice.</p>
                 </li>
               </ul>
@@ -1471,12 +1368,12 @@ pip install .</code></pre>
               <ul class="final-cta__rows">
                 <li>
                   <span class="label label--accent">LinkedIn</span>
-                  <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
+                  <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank"><svg class="final-cta__mark" aria-hidden="true"><use href="#eif-mark-linkedin" /></svg>linkedin.com/in/preosvan</a>
                   <p>Where the EIF posts appear, and the quickest way to reach me.</p>
                 </li>
                 <li>
                   <span class="label label--accent">Email</span>
-                  <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
+                  <a href="mailto:mike.arbuzov365@gmail.com"><svg class="final-cta__mark final-cta__mark--stroked" aria-hidden="true"><use href="#eif-mark-mail" /></svg>mike.arbuzov365@gmail.com</a>
                   <p>For anything longer than a comment: questions, critique, adoption on a real repository.</p>
                 </li>
               </ul>
@@ -1497,119 +1394,7 @@ pip install .</code></pre>
            needs a twin here. Only the three route notes and the two section
            labels translate; EIF and P1..P4 read the same in both. -->
       <template data-i18n-id="hero.figure">
-        <svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
-          <g data-tip="Проєкти обертаються навколо одного спільного рівня фреймворку. У кожного власний репозиторій, власна памʼять і власні правила пакетів.">
-            <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
-            <circle class="svg-hit" cx="310" cy="266" r="176" />
-          </g>
-
-          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
-            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
-            <line class="svg-hit" x1="310" y1="266" x2="310" y2="442" />
-          </g>
-          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
-            <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
-            <line class="svg-hit" x1="310" y1="266" x2="158" y2="178" />
-          </g>
-          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
-            <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
-            <line class="svg-hit" x1="310" y1="266" x2="462" y2="178" />
-          </g>
-          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
-            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
-            <line class="svg-hit" x1="310" y1="266" x2="310" y2="90" />
-          </g>
-
-          <g data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації.">
-            <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
-            <path class="svg-hit" d="M 300 306 C 282 348 282 392 300 428" />
-          </g>
-          <g data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття.">
-            <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
-            <path class="svg-hit" d="M 320 428 C 338 392 338 348 320 306" />
-          </g>
-          <g data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний.">
-            <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
-            <path class="svg-hit" d="M 310 240 C 322 208 400 196 452 190" />
-          </g>
-
-          <text class="scale__note" x="274" y="334" text-anchor="end" data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації.">метод і досвід</text>
-          <text class="scale__note scale__note--up" x="346" y="334" data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття.">перевірений урок</text>
-          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle" data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний.">якщо доречно</text>
-
-          <g data-tip="EIF, рівень фреймворку. Спільна операційна основа: онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички.">
-            <circle class="scale__core" cx="310" cy="266" r="42" />
-            <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
-          </g>
-
-          <g class="scale__project scale__project--active" data-tip="P1, проєкт із відкритою роботою. Задача, завелика для однієї сесії, стає пакетом сесій усередині цього репозиторію.">
-            <circle cx="310" cy="442" r="17" />
-            <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
-          </g>
-          <g class="scale__project" data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку.">
-            <circle cx="158" cy="178" r="15" />
-            <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
-          </g>
-          <g class="scale__project scale__project--receiving" data-tip="P4 отримує урок від P1. Він доходить лише туди, де він доречний, і ніколи автоматично.">
-            <circle cx="462" cy="178" r="15" />
-            <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
-          </g>
-          <g class="scale__project" data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку.">
-            <circle cx="310" cy="90" r="15" />
-            <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
-          </g>
-
-          <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
-          <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
-
-          <g data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж здобутий у ньому урок пропонують нагору.">
-            <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
-            <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
-          </g>
-          <text class="scale__section-label" x="196" y="482" data-tip="ПАКЕТ. Одна одиниця роботи, завелика для однієї сесії, зі своїми правилами відкриття й закриття.">ПАКЕТ</text>
-          <g data-tip="Звʼязок пакета з однією з його сесій.">
-            <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
-            <line class="svg-hit" x1="310" y1="459" x2="310" y2="492" />
-          </g>
-          <g data-tip="Звʼязок пакета з однією з його сесій.">
-            <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
-            <line class="svg-hit" x1="238" y1="492" x2="238" y2="516" />
-          </g>
-          <g data-tip="Звʼязок пакета з однією з його сесій.">
-            <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
-            <line class="svg-hit" x1="310" y1="492" x2="310" y2="516" />
-          </g>
-          <g data-tip="Звʼязок пакета з однією з його сесій.">
-            <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-            <line class="svg-hit" x1="382" y1="492" x2="382" y2="516" />
-          </g>
-          <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
-            <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
-            <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="14" />
-          </g>
-          <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
-            <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
-            <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="14" />
-          </g>
-          <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
-            <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
-            <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="14" />
-          </g>
-          <text class="scale__section-label" x="196" y="546" data-tip="СЕСІЇ. Три запуски всередині цього пакета, по черзі.">СЕСІЇ</text>
-
-          <!-- The curator's tip is on its ring, not on the dot that travels
-               it: a 4px mark moving on a 27s cycle is not something anyone
-               should have to chase to read a label. -->
-          <g data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і ніколи не підвищує сам.">
-            <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
-            <circle class="svg-hit" cx="310" cy="266" r="62" />
-          </g>
-          <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
-
-          <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
-          <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
-          <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
-        </svg>
+        <!-- eif:include partials/orbit-figure.uk.html -->
       </template>
 
       <template data-i18n-id="hero.body">
@@ -1626,7 +1411,15 @@ pip install .</code></pre>
           <a href="#methodology">Що таке EIF</a>
           <a href="#layers">Три рівні</a>
           <a href="#learning">Як система навчається</a>
-          <a href="#evidence">Поточні докази</a>
+          <a
+            class="hero__ctas-repo"
+            href="__EIF_REPO_CTA_HREF__"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            <svg class="hero__ctas-mark" aria-hidden="true"><use href="#eif-mark-github" /></svg>
+            GitHub
+          </a>
         </nav>
       </template>
 
@@ -1879,83 +1672,37 @@ pip install .</code></pre>
             <span class="label label--accent">Один фреймворк, багато проєктів</span>
             <h3>Фреймворк спільний. Пам&rsquo;ять у кожного проєкту своя.</h3>
             <p>
-              Читайте малюнок як одне коло: вниз, упоперек і вгору. Метод і
-              попередній досвід спускаються в сесію ще до першого рядка
-              реалізації: онтологія й модель повноважень, правила та
-              обмеження, сценарії роботи, шаблони й навички агента, а разом із
-              ними історія самого проєкту. Нижньою смугою йде пакет із трьох
-              сесій. Більшість того, що вони виробляють, випаровується разом
-              із ними, дещо осідає на рівні проєкту, і зрідка один перевірений
-              урок піднімається правою дугою на рівень фреймворку, звідки його
-              може дістати будь-який інший проєкт.
+              У центрі один спільний робочий рівень, і кожен проєкт на власній
+              орбіті навколо нього. У центрі лежить те, що придатне будь-де:
+              онтологія й модель повноважень, правила та обмеження, сценарії
+              роботи, шаблони й навички агента. Кожен проєкт має власний
+              репозиторій і власну пам&rsquo;ять і бере з центру потрібне ще до
+              того, як почне працювати. Під P1 відкрито пакет із трьох сесій, бо
+              задача завелика для однієї. Метод і власна історія проєкту
+              спускаються в ці сесії ще до першого рядка реалізації, а коли
+              пакет закривається, перевірений урок може піднятися назад у центр
+              і звідти дійти до іншого проєкту лише там, де він доречний.
             </p>
             <ul class="figure-legend">
+              <li class="figure-legend__item figure-legend__item--dot">
+                <strong>У центрі рівень фреймворку.</strong> Там лежить усе багаторазове, і кожен проєкт обертається навколо нього з власним репозиторієм, власною пам&rsquo;яттю та власними правилами пакетів.
+              </li>
               <li class="figure-legend__item figure-legend__item--dotted">
-                <strong>Спершу спускаються метод і досвід.</strong> Обидва потрапляють у сесію <em>до того</em>, як вона щось реалізує: їх шукають, а не згадують.
+                <strong>Спершу вниз ідуть метод і досвід.</strong> Обидва потрапляють у сесію <em>до того</em>, як вона щось реалізує: їх шукають, а не згадують.
               </li>
               <li class="figure-legend__item figure-legend__item--bracket">
-                <strong>Один пакет, три сесії.</strong> Вони йдуть по черзі під пунктирною смугою, і пакет закривається раніше, ніж щось із набутого пропонують нагору.
-              </li>
-              <li class="figure-legend__item figure-legend__item--mark">
-                <strong>Більшість сесії випаровується.</strong> Перевірене осідає на рівні проєкту як стійка пам&rsquo;ять, решта зникає разом із сесією.
+                <strong>Один пакет, три сесії.</strong> Вони йдуть по черзі під P1, і пакет закривається раніше, ніж здобуте в ньому пропонують нагору.
               </li>
               <li class="figure-legend__item figure-legend__item--dashed-accent">
-                <strong>Підвищення це виняток.</strong> Підйом намальовано пунктиром, бо урок доходить до рівня фреймворку лише за явним рішенням.
+                <strong>Підйом назад це виняток.</strong> Урок доходить до центру лише за явним рішенням, а пунктирна гілка несе його до іншого проєкту лише там, де він доречний.
               </li>
               <li class="figure-legend__item figure-legend__item--dot-warn">
-                <strong>Куратор.</strong> Постійно стежить за станом самого рівня фреймворку, у власному ритмі, поза будь-яким окремим підвищенням.
+                <strong>Куратор не спиняється.</strong> Амброва крапка, що обходить центр, це єдиний тут неперервний рух: він стежить за станом самого рівня фреймворку у власному ритмі й нічого не підвищує сам.
               </li>
             </ul>
           </figcaption>
 
-          <svg
-            class="hero__figure"
-            aria-hidden="true"
-            viewBox="20 64 340 292"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <line class="hero__shelf" x1="84" y1="92" data-tip="Рівень фреймворку. Методологія багаторазового використання, спільна для проєктів, змінюється лише за явним рішенням." x2="330" y2="92" />
-            <line class="hero__shelf" x1="84" y1="202" data-tip="Рівень проєкту. Стійке знання про цей репозиторій: рішення, обмеження, факти й ризики, у кожного свій статус і позначка доказовості." x2="330" y2="202" />
-            <line class="hero__shelf hero__shelf--session" data-tip="Смуга сесії, намальована пунктиром, бо вона не зберігається. Міркування, глухі кути й вивід команд зникають разом із сесією." x1="84" y1="312" x2="330" y2="312" />
-
-            <path class="hero__descent" fill="none" data-tip="Метод спускається з рівня фреймворку ще до того, як сесія щось реалізує."
-              d="M 84 92 C 44 140 44 264 84 312 L 140 312" />
-            <path class="hero__descent hero__descent--project" fill="none" data-tip="Власний попередній досвід проєкту, який підтягують у сесію, а не згадують з історії чату."
-              d="M 84 202 C 58 234 58 288 84 312 L 208 312" />
-
-            <path class="hero__ascent" fill="none" data-tip="Підвищення, намальоване пунктиром, бо це виняток. Урок доходить до рівня фреймворку лише за явним рішенням, яке ухвалює ретроспектива по багатьох сесіях."
-              d="M 208 202 L 330 202 C 356 178 356 114 330 92" />
-
-            <g class="hero__packet"> data-tip="Один пакет, три сесії. Вони йдуть по черзі, і пакет закривається раніше, ніж щось із набутого пропонують нагору."
-              <line x1="140" y1="306" x2="140" y2="318" />
-              <line x1="208" y1="306" x2="208" y2="318" />
-              <line x1="276" y1="306" x2="276" y2="318" />
-              <path class="hero__packet-rule" fill="none"
-                d="M 128 332 L 128 342 L 288 342 L 288 332" />
-            </g>
-
-            <g class="hero__lost"> data-tip="Те, що випаровується. Більша частина сесії це робочий контекст, і він не має зберігатися."
-              <circle cx="112" cy="312" r="3.5" />
-              <circle cx="172" cy="312" r="3.5" />
-              <circle cx="240" cy="312" r="3.5" />
-              <circle cx="304" cy="312" r="3.5" />
-            </g>
-
-            <circle class="hero__kept hero__kept--1" cx="140" cy="312" r="4" />
-            <circle class="hero__kept hero__kept--2" cx="208" cy="312" r="4" />
-            <circle class="hero__kept hero__kept--3" cx="276" cy="312" r="4" />
-
-            <rect class="hero__settled hero__settled--1" data-tip="Те, що осідає як памʼять проєкту. Перевірене в сесії й збережене саме тому, що перевірене." x="133" y="196" width="14" height="6" rx="1" />
-            <rect class="hero__settled hero__settled--2" x="201" y="196" width="14" height="6" rx="1" />
-            <rect class="hero__settled hero__settled--3" x="269" y="196" width="14" height="6" rx="1" />
-            <rect class="hero__settled hero__settled--top" data-tip="Урок, який дійшов до рівня фреймворку. Це рідкість, і звідси його може дістати будь-який інший проєкт." x="300" y="86" width="14" height="6" rx="1" />
-
-            <circle class="hero__pulse hero__pulse--method" cx="0" cy="0" r="4" />
-            <circle class="hero__pulse hero__pulse--experience" cx="0" cy="0" r="4" />
-            <circle class="hero__pulse hero__pulse--promoted" cx="0" cy="0" r="4" />
-
-            <circle class="hero__curator" cx="0" cy="0" r="3" data-tip="Куратор у власному повільнішому ритмі. Він ранжує те, що зіпсувалося в базі, і призначає відповідального, але ніколи не підвищує сам." />
-          </svg>
+          <!-- eif:include partials/orbit-figure.uk.html -->
         </figure>
       </template>
 
@@ -2158,31 +1905,35 @@ pip install .</code></pre>
           </div>
 
           <svg class="kb-map" aria-hidden="true" viewBox="0 0 420 300" preserveAspectRatio="xMidYMid meet">
-            <line class="kb-map__lane" x1="20" y1="272" x2="400" y2="272" />
+              <line class="kb-map__lane" x1="20" y1="278" x2="172" y2="278" />
 
-            <path class="kb-map__link" fill="none" d="M 70 190 L 120 90" />
-            <path class="kb-map__link" fill="none" d="M 70 190 L 215 150" />
-            <path class="kb-map__link" fill="none" d="M 120 90 L 215 150" />
-            <path class="kb-map__link" fill="none" d="M 215 150 L 320 80" />
-            <path class="kb-map__link" fill="none" d="M 320 80 L 370 190" />
-            <path class="kb-map__link" fill="none" d="M 215 150 L 370 190" />
-            <path class="kb-map__link kb-map__link--dead" fill="none" data-tip="Посилання на виключений артефакт нікуди не зникає, бо сам артефакт лишається читабельним. Просто пошук за замовчуванням ним не йде." d="M 215 150 L 272 232" />
+              <path class="kb-map__link" fill="none" d="M 132 100 L 96 206" />
+              <path class="kb-map__link" fill="none" d="M 132 100 L 218 158" />
+              <path class="kb-map__link" fill="none" d="M 96 206 L 218 158" />
+              <path class="kb-map__link" fill="none" d="M 218 158 L 312 86" />
+              <path class="kb-map__link" fill="none" d="M 312 86 L 356 200" />
+              <path class="kb-map__link" fill="none" d="M 218 158 L 356 200" />
+              <path class="kb-map__link kb-map__link--dead" fill="none" data-tip="Посилання на виключений артефакт нікуди не зникає, бо сам артефакт лишається читабельним. Просто пошук за замовчуванням ним не йде." d="M 218 158 L 252 250" />
 
-            <path class="kb-map__query" fill="none" data-tip="Пошук заходить із боку індексу й іде звʼязками, а не перечитує всі файли. Офлайн, за ключовими словами й підрядками, без сервісу векторних представлень." d="M 26 266 C 56 260 50 226 70 190" />
+              <path class="kb-map__query" fill="none" data-tip="Пошук заходить із боку індексу й іде посиланнями, замість читати кожен файл. Офлайн, за словами й підрядками, без зовнішньої служби." d="M 26 272 C 50 266 60 240 96 206" />
 
-            <circle class="kb-map__node kb-map__node--s1" cx="70" cy="190" r="8" />
-            <circle class="kb-map__node kb-map__node--s2" cx="120" cy="90" r="8" />
-            <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" data-tip="Один артефакт знання, повʼязаний із кількома сусідами. Звичайний файл із заголовком: тип, межі, статус, упевненість, джерело й посилання на сусідів." cx="215" cy="150" r="10" />
-            <circle class="kb-map__node kb-map__node--s4" cx="320" cy="80" r="8" />
-            <circle class="kb-map__node kb-map__node--s5" cx="370" cy="190" r="8" />
-            <circle class="kb-map__node kb-map__node--excluded" data-tip="Відхилений або замінений. Читати можна, але за замовчуванням він не потрапляє у видачу, щоб закрите питання не відкрилося саме собою, і його позначає куратор." cx="272" cy="232" r="8" />
+              <circle class="kb-map__node kb-map__node--s1" cx="96" cy="206" r="8" />
+              <circle class="kb-map__node kb-map__node--s2" cx="132" cy="100" r="8" />
+              <circle class="kb-map__node kb-map__node--hub kb-map__node--s3" data-tip="Один артефакт знання, повʼязаний із кількома сусідами. Звичайний файл із заголовком: тип, межі, статус, упевненість, джерело й посилання на сусідів." cx="218" cy="158" r="10" />
+              <circle class="kb-map__node kb-map__node--s4" cx="312" cy="86" r="8" />
+              <circle class="kb-map__node kb-map__node--s5" cx="356" cy="200" r="8" />
+              <circle class="kb-map__node kb-map__node--excluded" data-tip="Відхилений або замінений. Читати можна, але за замовчуванням він не потрапляє у видачу, щоб закрите питання не відкрилося саме собою, і його позначає куратор." cx="252" cy="250" r="8" />
 
-            <circle class="kb-map__flag" cx="272" cy="232" r="15" fill="none" />
-            <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
+              <circle class="kb-map__flag" cx="252" cy="250" r="15" fill="none" />
+              <circle class="kb-map__pulse" cx="0" cy="0" r="5" />
 
-            <text class="kb-map__note" x="20" y="292">індекс</text>
-            <text class="kb-map__note kb-map__note--excluded" x="294" y="237">замінено</text>
-          </svg>
+              <text class="kb-map__note" x="20" y="298">індекс</text>
+              <text class="kb-map__note" x="132" y="82" text-anchor="middle">рішення</text>
+              <text class="kb-map__note" x="86" y="230" text-anchor="middle">інцидент</text>
+              <text class="kb-map__note" x="312" y="68" text-anchor="middle">урок</text>
+              <text class="kb-map__note" x="356" y="224" text-anchor="middle">правило</text>
+              <text class="kb-map__note kb-map__note--excluded" x="268" y="258">відхилено</text>
+            </svg>
 
           <ul class="figure-legend">
             <li class="figure-legend__item figure-legend__item--dot">Кожне коло - один артефакт, кожна лінія між двома з них - посилання, оголошене в заголовку самого файлу.</li>
@@ -2355,94 +2106,94 @@ pip install .</code></pre>
 
       <template data-i18n-id="evidence.body">
         <div class="section__head">
-          <span class="label">09 &middot; Поточні завдання й докази</span>
-          <h2 id="evidence-heading">Що вже перевірено у чітко визначених межах</h2>
+          <span class="label">09 &middot; Можливості й докази</span>
+          <h2 id="evidence-heading">Що працює вже сьогодні і на чому тримається кожне твердження</h2>
         </div>
         <p class="section__lede">
-          Вісім завдань, які керований агент справді виконує з цим
-          фреймворком: кожне зі своїм доказом і межею, а не одна загальна
-          заява про можливості.
+          Вісім речей, які фреймворк робить зараз. У кожному рядку: що саме
+          працює, чим це перевірено і які межі має ця перевірка. Межі стоять
+          у самому рядку, а не в застереженні внизу сторінки.
         </p>
         <ul class="integrations__list evidence__tasks">
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Встановлення</span>
-              <span>Пакет eifctl, придатний до встановлення, із сімома підкомандами</span>
+              <span>Пакет eifctl із сімома командами</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-02">
-              <p><code>pip install .</code> із клону збирає справжній wheel із <code>pyproject.toml</code>. Встановлений у чисте віртуальне середовище, він дає робочу команду <code>eifctl</code> (<code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code>, <code>version</code>) і окремий інструмент контрактів для бенчмарку. Цей шлях перевірено повним синтетичним завданням від початку до кінця, а не самою лише перевіркою імпорту.</p>
-              <p><strong>Обмеження:</strong> увесь прохід спирається на адаптер Claude Code для власного запуску, а докази для режимів C і D це детерміновані контракти, а не результат із реальним агентом.</p>
+              <p><code>pip install .</code> із клону збирає справжній wheel із <code>pyproject.toml</code> і дає робочу команду <code>eifctl</code>: <code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code> і <code>version</code>. Вона працює без клону фреймворку поруч, а зібраний пакет проходить повний синтетичний прогін від запуску до закриття сесії, а не саму лише перевірку імпорту, і разом із ним постачається окремий інструмент контрактів для бенчмарку.</p>
+              <p><strong>Межі:</strong> перевірено встановлення з клону в чисте віртуальне середовище, причому початкове налаштування в цьому прогоні йде через адаптер Claude Code. Встановлення за назвою з індексу пакетів це окремий крок, і швидкий старт друкує не його.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Впровадження</span>
-              <span>Співіснування з уже налаштованим репозиторієм</span>
+              <span>Співіснування з репозиторієм, який уже має власні правила</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-11">
-              <p>Перевірка перед впровадженням виявляє наявне керування проєктом ще до першого запису й не продовжує роботу без явного рішення про співіснування; у режимі <code>coexist</code> згенерований блок поступається наявним правилам, а не оголошує себе єдиним джерелом повноважень.</p>
-              <p><strong>Обмеження:</strong> виявлення керування спирається на евристику за довжиною вмісту, а не на семантику; перевірено на одній синтетичній фікстурі та повторних запусках проти однієї реальної приватної цілі.</p>
+              <p>Перед першим записом іде перевірка репозиторію. Якщо проєкт уже має власні правила, робота спиняється й вимагає явного рішення, а не перебирає керування на себе. У режимі співіснування згенерований блок поступається наявним правилам, а не оголошує себе єдиним джерелом повноважень.</p>
+              <p><strong>Межі:</strong> наявні правила розпізнаються за обсягом і формою файлів, а не за їхнім змістом. Перевірено на синтетичній фікстурі та повторних прогонах проти одного реального приватного репозиторію.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
-              <span class="label label--accent">Пошук</span>
-              <span>Здобуття досвіду ще до початку реалізації</span>
+              <span class="label label--accent">Пошук досвіду</span>
+              <span>Досвід приходить ще до початку реалізації</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Пошук без мережі за ключовими словами, чутливий до життєвого циклу знання й до схеми, показує доречні перевірені факти (зокрема українською), за замовчуванням приховує відхилене чи замінене та окремо розрізняє стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code>.</p>
-              <p><strong>Обмеження:</strong> це офлайн-оцінка за ключовими словами й підрядками, не семантичний пошук; перевірено на невеликих тестових індексах.</p>
+              <p>Пошук працює без мережі по власному індексу проєкту, з урахуванням схеми кожного артефакта та його стану в життєвому циклі. Відхилене й замінене лишається читабельним, але за замовчуванням не потрапляє у видачу, а <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code> повертаються як три різні відповіді, а не як одна порожня. Українські артефакти індексуються й повертаються нарівні з рештою.</p>
+              <p><strong>Межі:</strong> це збіг за словами й підрядками, а не пошук за змістом. Жодної зовнішньої служби, і нічого не виходить за межі машини.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Планування</span>
-              <span>Виконання, обмежене доказами</span>
+              <span>Роботу обмежують ще до того, як вона почалася</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-04">
-              <p>Роботу окреслюють як сесію або пакет виконання з явним оцінювачем, бюджетами ітерацій і віддалених запусків та названою умовою зупинки (докладніше - у <a href="#loop">циклі доказів</a>).</p>
-              <p><strong>Обмеження:</strong> це методологічний контракт, а не гарантія меншої кількості повторів чи нижчої вартості.</p>
+              <p>Одиниця роботи відкривається як сесія або пакет виконання: наперед названий спосіб перевірки результату, бюджети на ітерації та віддалені запуски й умова зупинки, яка не залежить від того, чи агент вирішив, що вже досить (докладніше - у <a href="#loop">циклі доказів</a>).</p>
+              <p><strong>Межі:</strong> це контракт, який робочий процес накладає сам на себе. Він задає, чим робота обмежена, а не скільки спроб піде на конкретне завдання.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Перевірка</span>
-              <span>Екземпляр проєкту перевіряє власну цілісність</span>
+              <span>Екземпляр перевіряє власну цілісність</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
-              <p>Вбудований засіб перевірки звіряє коректність схеми конфігурації й lock-файлу, дайджести маніфесту з новим обчисленням, узгодженість адаптера з конфігурацією, цілісність маркерів і розбіжності між конфігурацією та згенерованою точкою входу.</p>
-              <p><strong>Обмеження:</strong> перевірка обмежена власним маніфестом пакета, це не інструмент загальної перевірки цілісності файлів.</p>
+              <p>Вбудований засіб перевірки наново обчислює дайджести маніфесту з файлів на диску, звіряє конфігурацію й lock-файл зі схемами й перевіряє, що активний адаптер збігається з конфігурацією, що згенерована точка входу не розійшлася з конфігурацією, яка її створила, і що маркери блоку цілі.</p>
+              <p><strong>Межі:</strong> перевіряється саме той пакет EIF, яким ця команда керує. Це не інструмент загальної перевірки цілісності файлів усього репозиторію.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Перемикання</span>
-              <span>Перехід між будь-якими двома з чотирьох адаптерів</span>
+              <span>Чотири адаптери для чотирьох агентів і будь-який перехід між ними</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-03">
-              <p>Повна матриця перемикань (12 упорядкованих пар серед Claude Code, Cursor, Codex і Hermes) підтверджує, що після кожного перемикання лишається рівно один активний блок EIF, правильно визначено новий адаптер і збережено вміст проєкту.</p>
-              <p><strong>Обмеження:</strong> набір адаптерів заморожено на цих чотирьох. Claude Code і Cursor входять у набір v0.1, Codex і Hermes лишаються експериментальними, а частину властивостей доведено спільно для всіх адаптерів, а не окремо для кожної пари.</p>
+              <p>Claude Code, Cursor, Codex і Hermes. Пройдено всі дванадцять упорядкованих пар: після кожного перемикання лишається рівно один активний блок EIF, точка входу нового адаптера веде до правильного джерела, а вміст самого проєкту лишається таким, як був.</p>
+              <p><strong>Межі:</strong> адаптерів свідомо саме чотири, а ядро фреймворку це звичайний Markdown, на який можна навести будь-якого іншого агента. Різняться вони механікою, а не статусом: у Cursor немає перехоплення викликів, тож його адаптер постачає правила, а контракти Codex і Hermes блокують команду, а не переписують її.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Локалізація</span>
-              <span>Українські поверхні проєкту, ще не повна локалізація відповідей</span>
+              <span>Українські поверхні проєкту, які задає конфігурація</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-07">
-              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу перевірено українською, а мову задає конфігурація кожного окремого екземпляра.</p>
-              <p><strong>Обмеження:</strong> це не стосується довільних відповідей самого агента в сесії.</p>
+              <p>Пошук, формування Knowledge Delta, закриття сесії та згенерований вміст точки входу подаються тією мовою, яку оголосив екземпляр; українську перевірено нарівні з англійською. Мова тут це налаштування, а не зашитий стандарт.</p>
+              <p><strong>Межі:</strong> це стосується поверхонь, які формує сам фреймворк. Те, що агент каже у вільній відповіді, це його власна поведінка, а не те, що відтворює EIF.</p>
             </div>
           </li>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Вимірювання</span>
-              <span>Один обмежений пілот із реальним агентом, і чого він не вирішує</span>
+              <span>Що виміряно, а про що навмисно не йдеться</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-08">
-              <p>Перший обмежений пілот A/B із реальним агентом, одна модель і три тестові приклади на шість спроб загалом, завершився успіхом у кожній спробі в обох режимах. Режими C і D мають виконувані контракти цілісності, а не результат продуктивності з реальним агентом.</p>
-              <p data-claim-id="CLM-10">Хронометраж на рівні окремих команд існує для конкретних механічних операцій і записаний у бенчмарках фреймворку. Про час людини на створення чи перевірку коду заяв не робимо.</p>
-              <p data-claim-id="CLM-09"><strong>Обмеження:</strong> це не статистично потужне порівняння ефективності, а порівняльного дослідження якості завдань чи частки переробок не проводили взагалі. Одна модель, три тестові приклади з десяти, одна спроба на комірку, без базової лінії й без контрольної групи. Доки це не зміниться, мовчанка навмисна.</p>
+              <p>Стенд бенчмарку проганяє A/B із реальним агентом і записує результат як контракт, який можна перевірити машинно, а не як гучний заголовок: одна модель, три тестові набори, шість прогонів, і кожен завершився успішно в обох режимах. Режими C і D виконуються як контракти цілісності, тож доводять, що прогін був коректним, а не що він був швидшим.</p>
+              <p data-claim-id="CLM-10">Хронометраж окремих механічних команд існує й зберігається разом із доказами бенчмарку. Ніщо тут не міряє, скільки часу людина витрачає на написання чи перевірку коду.</p>
+              <p data-claim-id="CLM-09"><strong>Межі:</strong> ця сторінка ніде не заявляє ні про швидкість, ні про якість роботи, і не заявлятиме, доки не буде дослідження, яке це витримає. Шість прогонів без базової лінії й без контрольної групи таким дослідженням не є.</p>
             </div>
           </li>
         </ul>
@@ -2623,10 +2374,9 @@ pip install .</code></pre>
             <strong>Швидкість тут задає сама галузь.</strong> Методологія,
             яку доводиться переписувати щоразу, коли змінюється модель, агент
             чи інструмент, уже відстала. Цю мінливість беруть на себе
-            адаптери, а три необов&rsquo;язкові інструменти лишаються
-            необов&rsquo;язковими саме для того, щоб жоден постачальник не міг
-            зламати метод. Ядро лишається на місці, поки поверхня навколо
-            нього змінюється далі.
+            адаптери, а Graphify, RTK і Context7 лишаються необов&rsquo;язковими
+            саме для того, щоб жоден постачальник не міг зламати метод. Ядро
+            лишається на місці, поки поверхня навколо нього змінюється далі.
           </p>
         </div>
 
@@ -2642,11 +2392,12 @@ pip install .</code></pre>
               <li>
                 <span class="label">Розділ 09</span>
                 <a href="#evidence">Докази</a>
-                <p>Вісім завдань, у кожного власна межа й власне обмеження.</p>
+                <p>Вісім можливостей: у кожної своя перевірка й свої межі.</p>
               </li>
               <li>
-                <span class="label">Джерело</span>
-                <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__" rel="noopener noreferrer" target="_blank">__EIF_REPO_CTA_LABEL_UK__</a>
+                <span class="label">GitHub</span>
+                <a class="final-cta__repo" href="__EIF_REPO_CTA_HREF__" rel="noopener noreferrer" target="_blank">
+                  <svg class="final-cta__mark" aria-hidden="true"><use href="#eif-mark-github" /></svg>__EIF_REPO_CTA_LABEL_UK__</a>
                 <p>Онтологія, схеми, пакет <code>eifctl</code> і відтворюваний вертикальний зріз.</p>
               </li>
             </ul>
@@ -2657,12 +2408,12 @@ pip install .</code></pre>
             <ul class="final-cta__rows">
               <li>
                 <span class="label label--accent">LinkedIn</span>
-                <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank">linkedin.com/in/preosvan</a>
+                <a href="https://www.linkedin.com/in/preosvan/" rel="me noopener noreferrer" target="_blank"><svg class="final-cta__mark" aria-hidden="true"><use href="#eif-mark-linkedin" /></svg>linkedin.com/in/preosvan</a>
                 <p>Там виходять дописи про EIF, і це найшвидший спосіб мене знайти.</p>
               </li>
               <li>
                 <span class="label label--accent">Пошта</span>
-                <a href="mailto:mike.arbuzov365@gmail.com">mike.arbuzov365@gmail.com</a>
+                <a href="mailto:mike.arbuzov365@gmail.com"><svg class="final-cta__mark final-cta__mark--stroked" aria-hidden="true"><use href="#eif-mark-mail" /></svg>mike.arbuzov365@gmail.com</a>
                 <p>Для всього, що довше за коментар: питання, критика, впровадження на реальному репозиторії.</p>
               </li>
             </ul>

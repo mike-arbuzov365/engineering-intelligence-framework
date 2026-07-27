@@ -23,6 +23,14 @@
   width: 100%;
 }
 
+/* One width for every tag, so the three of them stack into a column with
+   two straight edges instead of a ragged left one. Right-aligning
+   variable-width boxes is not a column, and the raggedness moved when the
+   language changed: "Local"/"Network" differ by one character, "Локально"/
+   "Мережа" by two.
+   min-width rather than width, and a floor in ch of the mono face they are
+   set in, so a longer word in a third language grows the box instead of
+   overflowing it. */
 .cap-tag {
   font-family: var(--eif-font-mono);
   font-size: var(--eif-size-label);
@@ -33,6 +41,8 @@
   border: 1px solid var(--eif-rule);
   border-radius: 2px;
   padding: 0.05rem 0.45rem;
+  min-width: 11ch;
+  text-align: center;
 }
 
 /* Amber is this page's one word for "leaves the boundary", used on the

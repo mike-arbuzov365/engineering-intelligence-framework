@@ -1,0 +1,143 @@
+<!-- The orbit mark, in Ukrainian. Twin of orbit-figure.en.html: same
+     geometry, same class names, translated tips and route notes. Expanded
+     at build time wherever an `eif:include` comment names this path, which
+     is inside the Ukrainian template for the hero and for section 03.
+     (Not quoting the marker literally: HTML comments do not nest.)
+
+     Keep the shapes in step with the English file. Only text changes here:
+     EIF and P1..P4 read the same in both languages. -->
+<svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 508" preserveAspectRatio="xMidYMid meet">
+  <g data-tip="Проєкти обертаються навколо одного спільного рівня фреймворку. У кожного власний репозиторій, власна памʼять і власні правила пакетів.">
+    <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+    <circle class="svg-hit" cx="310" cy="266" r="176" />
+  </g>
+
+  <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+    <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+    <line class="svg-hit" x1="310" y1="266" x2="310" y2="442" />
+  </g>
+  <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+    <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+    <line class="svg-hit" x1="310" y1="266" x2="158" y2="178" />
+  </g>
+  <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+    <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+    <line class="svg-hit" x1="310" y1="266" x2="462" y2="178" />
+  </g>
+  <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+    <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+    <line class="svg-hit" x1="310" y1="266" x2="310" y2="90" />
+  </g>
+
+  <g data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації.">
+    <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
+    <path class="svg-hit" d="M 300 306 C 282 348 282 392 300 428" />
+  </g>
+  <g data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття.">
+    <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
+    <path class="svg-hit" d="M 320 428 C 338 392 338 348 320 306" />
+  </g>
+  <g data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний.">
+    <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+    <path class="svg-hit" d="M 310 240 C 322 208 400 196 452 190" />
+  </g>
+
+  <text class="scale__note" x="274" y="334" text-anchor="end" data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації.">метод і досвід</text>
+  <text class="scale__note scale__note--up" x="346" y="334" data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття.">перевірений урок</text>
+  <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle" data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний.">якщо доречно</text>
+
+  <g data-tip="EIF, рівень фреймворку. Спільна операційна основа: онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички.">
+    <circle class="scale__core" cx="310" cy="266" r="42" />
+    <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+  </g>
+
+  <g class="scale__project scale__project--active" data-tip="P1, проєкт із відкритою роботою. Задача, завелика для однієї сесії, стає пакетом сесій усередині цього репозиторію.">
+    <circle cx="310" cy="442" r="17" />
+    <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+  </g>
+  <g class="scale__project" data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку.">
+    <circle cx="158" cy="178" r="15" />
+    <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
+  </g>
+  <g class="scale__project scale__project--receiving" data-tip="P4 отримує урок від P1. Він доходить лише туди, де він доречний, і ніколи автоматично.">
+    <circle cx="462" cy="178" r="15" />
+    <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
+  </g>
+  <g class="scale__project" data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку.">
+    <circle cx="310" cy="90" r="15" />
+    <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
+  </g>
+
+  <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
+  <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+
+  <g data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж здобутий у ньому урок пропонують нагору.">
+    <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+    <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+  </g>
+  <text class="scale__section-label" x="196" y="482" data-tip="ПАКЕТ. Одна одиниця роботи, завелика для однієї сесії, зі своїми правилами відкриття й закриття.">ПАКЕТ</text>
+  <g data-tip="Звʼязок пакета з однією з його сесій.">
+    <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+    <line class="svg-hit" x1="310" y1="459" x2="310" y2="492" />
+  </g>
+  <g data-tip="Звʼязок пакета з однією з його сесій.">
+    <line class="scale__stem" x1="238" y1="492" x2="238" y2="510" />
+    <line class="svg-hit" x1="238" y1="492" x2="238" y2="510" />
+  </g>
+  <g data-tip="Звʼязок пакета з однією з його сесій.">
+    <line class="scale__stem" x1="310" y1="492" x2="310" y2="510" />
+    <line class="svg-hit" x1="310" y1="492" x2="310" y2="510" />
+  </g>
+  <g data-tip="Звʼязок пакета з однією з його сесій.">
+    <line class="scale__stem" x1="382" y1="492" x2="382" y2="510" />
+    <line class="svg-hit" x1="382" y1="492" x2="382" y2="510" />
+  </g>
+
+  <!-- Кружечки з підписами замість голих крапок, і на крок менші за вузли
+       проєктів над ними: сесія це той самий тип обʼєкта, на рівень нижче,
+       і малюнок тепер каже це тією самою мовою. -->
+  <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
+    <g class="scale__session scale__session--1">
+      <circle cx="238" cy="522" r="12" />
+      <text class="scale__node-label" x="238" y="527" text-anchor="middle">S1</text>
+    </g>
+    <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="16" />
+  </g>
+  <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
+    <g class="scale__session scale__session--2">
+      <circle cx="310" cy="522" r="12" />
+      <text class="scale__node-label" x="310" y="527" text-anchor="middle">S2</text>
+    </g>
+    <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="16" />
+  </g>
+  <g data-tip="Одна сесія. Її міркування зникають разом із нею, а лишається тільки те, що вона перевірила.">
+    <g class="scale__session scale__session--3">
+      <circle cx="382" cy="522" r="12" />
+      <text class="scale__node-label" x="382" y="527" text-anchor="middle">S3</text>
+    </g>
+    <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="16" />
+  </g>
+  <!-- Підпис починається там само, де S1, а не на лінії пакета вище: кожен
+       підпис починається там, де починається те, що він називає. -->
+  <text class="scale__section-label" x="226" y="556" data-tip="СЕСІЇ. Три запуски всередині цього пакета, по черзі.">СЕСІЇ</text>
+
+  <!-- Куратор малюється останнім, поверх усього, за чим він стежить.
+       Крапка на пунктирному кільці, у власному 27-секундному ритмі. Від
+       спроби зробити з нього промінь із хвостом лишилася тільки аура:
+       мʼяке амброве сяйво, що дихає під крапкою, аби мітка лишалася
+       живою, поки вона мала й далеко від усього іншого. Підказка сидить
+       на кільці, а не на крапці: ганятися за міткою, яка обходить коло за
+       27 секунд, щоб прочитати підпис, ніхто не має. -->
+  <g class="scale__curator" data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і ніколи не підвищує сам.">
+    <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
+    <g class="scale__curator-marker">
+      <circle class="scale__curator-halo" cx="310" cy="204" r="11" />
+      <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+    </g>
+    <circle class="svg-hit" cx="310" cy="266" r="62" />
+  </g>
+
+  <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
+  <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
+  <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+</svg>

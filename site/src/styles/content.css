@@ -130,6 +130,38 @@
   color: var(--eif-fg-muted);
 }
 
+/* A mark means the row leaves this page. GitHub, LinkedIn and mail carry
+   one; Architecture and Evidence do not, because they scroll further down
+   the screen you are already on. That is the same rule the hero reads by,
+   where three plain pills sit next to one marked GitHub pill, and it is why
+   the two in-page rows are not given invented glyphs to match.
+
+   gap on the anchor rather than a margin on the glyph, so the underline
+   that marks the link does not run under it. */
+.final-cta__rows a:has(.final-cta__mark) {
+  gap: 0.55em;
+}
+
+.final-cta__mark {
+  flex: none;
+  width: 1.05em;
+  height: 1.05em;
+  fill: currentColor;
+}
+
+/* Mail is drawn rather than borrowed - it is not a vendor - so it is a
+   stroked glyph beside two filled brand marks. Slightly wider to carry the
+   same optical weight as they do at this size. */
+.final-cta__mark--stroked {
+  width: 1.15em;
+  height: 1.15em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 @media (max-width: 720px) {
   .final-cta__grid {
     grid-template-columns: 1fr;

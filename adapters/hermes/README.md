@@ -4,10 +4,11 @@ Status: dynamic active-source resolver implemented and tested (77
 acceptance checks in `scripts/tests/test_hermes_adapter.py`, including a
 real, pinned-version proof against the actual installed Hermes threat
 scanner), plus real runtime proof against the actual installed Hermes
-Agent CLI (see "Runtime-validation status" below). Marked **experimental,
-supported** - does not change EIF's v0.1 required-adapter set
-(`core/policies/decisions.md` D-09; Claude Code and Cursor remain the only
-required pair). `SOUL.md` is out of scope for this adapter - a separate
+Agent CLI (see "Runtime-validation status" below). **Supported**, on the
+same footing as the other three (`core/policies/decisions.md` D-16,
+2026-07-27, which retired the two-tier split). What is specific to it is
+below and is about mechanics, not status: the hook contract is block-only,
+because `updatedInput` was not applied here. `SOUL.md` is out of scope for this adapter - a separate
 personality/identity mechanism (loaded from `HERMES_HOME` only, never the
 working directory), unrelated to project context.
 

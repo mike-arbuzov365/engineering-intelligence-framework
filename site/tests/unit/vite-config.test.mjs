@@ -2,6 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  assertNoNestedComment,
+  expandPartials,
   normalizePublicUrl,
   resolveProductionUrls,
   resolveRepositoryUrl,
@@ -61,6 +63,74 @@ test('the repository URL resolves in every mode, not only production', () => {
   assert.equal(
     resolveRepositoryUrl('test-production', {}),
     'https://github.invalid/eif-website-test-profile',
+  );
+});
+
+test('an include marker is replaced in place, at the marker\'s own indentation', () => {
+  const html = [
+    '<div>',
+    '  <!-- eif:include partials/thing.html -->',
+    '</div>',
+  ].join('\n');
+
+  const out = expandPartials(html, () => '<svg>\n  <circle />\n</svg>\n');
+
+  assert.equal(
+    out,
+    ['<div>', '  <svg>', '    <circle />', '  </svg>', '</div>'].join('\n'),
+  );
+});
+
+test('every marker for the same partial expands, so two places cannot drift apart', () => {
+  // The reason this plugin exists: the orbit mark is drawn in the hero and
+  // again in section 03, in two languages.
+  const html = [
+    '<!-- eif:include partials/orbit.html -->',
+    '<!-- eif:include partials/orbit.html -->',
+  ].join('\n');
+
+  let reads = 0;
+  const out = expandPartials(html, () => {
+    reads += 1;
+    return '<svg />';
+  });
+
+  assert.equal(reads, 2);
+  assert.equal(out, '<svg />\n<svg />');
+});
+
+test('a marker that is not alone on its line is left alone', () => {
+  // Otherwise a partial documenting its own marker inside a comment would
+  // recurse, and prose quoting one would be replaced by a drawing.
+  const html = '<p>write <!-- eif:include partials/x.html --> to include it</p>';
+  assert.equal(
+    expandPartials(html, () => {
+      throw new Error('should not read');
+    }),
+    html,
+  );
+});
+
+test('an include path may not escape src/', () => {
+  assert.throws(
+    () => expandPartials('<!-- eif:include ../../secrets.html -->', () => ''),
+    /must stay under src/,
+  );
+});
+
+test('a partial that opens a comment inside a comment is refused', () => {
+  // HTML comments do not nest: the first `-->` closes the outermost `<!--`
+  // and the rest spills into the document as text, taking the <head> with
+  // it. The only symptom is a parse warning, so it is caught here instead.
+  const nested = ['<!-- header', '     see <!-- eif:include x.html --> above', '-->', '<svg />'].join(
+    '\n',
+  );
+  assert.throws(() => assertNoNestedComment('partials/x.html', nested), /do not nest/);
+  assert.throws(() => expandPartials('<!-- eif:include partials/x.html -->', () => nested), /do not nest/);
+
+  // Sequential comments are fine; only nesting is the defect.
+  assert.doesNotThrow(() =>
+    assertNoNestedComment('partials/x.html', '<!-- one -->\n<svg />\n<!-- two -->'),
   );
 });
 

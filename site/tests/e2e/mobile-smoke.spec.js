@@ -9,7 +9,7 @@ test('mobile poster, navigation and touch targets fit at 390x844', async ({ page
   );
   expect(overflow).toBe(false);
 
-  for (const selector of ['#lang-toggle', '.hero__ctas a:first-child']) {
+  for (const selector of ['#lang-toggle', '.hero__ctas a:first-child', '.hero__ctas-repo']) {
     const box = await page.locator(selector).boundingBox();
     expect(box, `${selector} has no rendered box`).not.toBeNull();
     expect(box.height, `${selector} is shorter than 44px`).toBeGreaterThanOrEqual(44);

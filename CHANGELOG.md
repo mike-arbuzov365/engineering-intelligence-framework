@@ -15,7 +15,119 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [0.1.0] - 2026-07-27
+
+First public release, and the public extraction of a private production
+instance that has run this methodology daily since May 2026. The repository
+is functional, reviewable and installable from a clone, and the presentation
+site is live. What this release does not claim is listed under Known
+limitations below, in the same file as what it does.
+
 ### Added
+
+**Methodology core**
+
+- Four-axis authority model (normative, empirical, agent-execution,
+  knowledge-lifecycle) replacing a single ranked source hierarchy. A
+  normative source disagreeing with an empirical one is recorded as a
+  discrepancy, not resolved by rank.
+- Knowledge taxonomy, confidence levels, and a status lifecycle
+  (`draft` -> `validated` -> `superseded`/`deprecated`, plus `rejected`
+  for hypotheses only) with append-only retraction.
+- Three-tier context model: reusable framework method, durable project
+  knowledge, ephemeral session state, with Knowledge Delta governing
+  promotion between them.
+- Two-loop learning model: an inner per-session loop, and an outer
+  [retro loop](playbooks/run-retro.md) that asks what repeats across many
+  sessions. Promotion is driven by the outer loop, because one session
+  cannot establish that its lesson generalizes.
+- Bounded Evidence Loop contract: named evaluator, iteration and
+  remote-run budgets, failure signatures, and `PASS`/`BLOCKED`/`DEFERRED`
+  exits.
+
+**Operating layer**
+
+- 12 playbooks, 14 templates, 8 invokable skills covering session
+  preparation/execution/closeout, execution-packet planning/execution/
+  review, knowledge search/ingest/lint, the bounded evidence loop, and
+  retro.
+- Execution packets: a canonical artifact set for work spanning more than
+  one session, carrying charter, facts, decisions and roadmap across
+  sessions so later ones do not reopen settled questions.
+
+**Tooling**
+
+- Installable `eifctl` package with 7 subcommands (`init`, `doctor`,
+  `search`, `render`, `privacy-scan`, `validate`, `version`), verified
+  from a built wheel in a clean virtual environment whose path contains a
+  space and non-ASCII text. **Not published to PyPI.**
+- Instance bootstrap and upgrade with real provenance, a sha256-hashed
+  runtime bundle, and transactional rollback proven by fault injection
+  after each commit stage and partway through individual writes.
+- Instance self-verification (`eif_verify_runtime.py`): config/lock schema
+  validity, per-file bundle hashes, adapter/config consistency, marker
+  integrity, and drift between config and the generated entrypoint.
+- Adoption onto an existing, already-governed repository: a preflight that
+  stops before any write when there is no coexistence decision on record,
+  a `coexist` mode that defers to existing rules, configurable knowledge
+  paths with path-escape validation, and finding-specific privacy-scan
+  suppressions.
+- Offline, Unicode-aware, lifecycle-aware knowledge retrieval that reports
+  unparseable, schema-invalid and not-found as three distinct outcomes
+  rather than collapsing them into "no results".
+
+**Adapters** (scope frozen at four)
+
+- Claude Code, Cursor, Codex and Hermes, all four supported (D-16), each
+  re-verified against that agent's own primary or installed source rather
+  than a documentation page, with real installed-CLI runtime proof from
+  isolated home directories. What differs between them is hook mechanics,
+  stated per adapter: Cursor has no tool-call hook to enforce through, and
+  the Codex and Hermes contracts block rather than rewrite.
+- All 12 directed switching pairs proven, with exactly one active EIF
+  block and project content preserved after every switch.
+
+**Optional integrations** (none required; each degrades to a named core path)
+
+- RTK shell-output compression: version/argv/native-search/diff canaries,
+  a command registry, and content-free local telemetry. A failed required
+  canary reports `degraded`; raw proxy routes record zero savings.
+- Graphify structural graph: query/path/explain canaries and an artifact
+  lifecycle bound to source commit, graph digest, repository identity and
+  reviewed scope. Only `fresh` reports healthy.
+- Vendor docs: declares Context7 over MCP, with generated routing guidance
+  and a reviewable per-adapter config template.
+
+**Governance and safety**
+
+- Privacy scanner, frontmatter/config/lock validation, link checking, and
+  Knowledge Delta classification, each with its own test suite and each
+  runnable from a project instance's own bundle.
+- Controlled merge entrypoint that re-verifies checks, Knowledge Delta and
+  review state twice before merging, pinned to a verified head SHA.
+- Public claims-evidence ledger recording, per claim, what is `OBSERVED`
+  vs `UNVERIFIED` and the exact wording each claim does and does not
+  permit.
+- Issue templates that require the command and real output rather than a
+  recollection, including an evidence-report template for contributing
+  verification of anything the repository lists as unverified.
+
+**Localization**
+
+- English-canonical framework docs with a per-instance documentation
+  locale. Ukrainian is the first locale pack: status messages, Knowledge
+  Delta, closeout headings and knowledge retrieval.
+
+**Presentation**
+
+- Bilingual site source in [`site/`](site/README.md), locally buildable,
+  gated on claim citations, byte budgets, two browser engines, axe and
+  Lighthouse. Published to GitHub Pages, which re-runs the same fail-closed
+  verifiers before it serves anything.
+
+**Release and publication**
 
 - [`scripts/eif_release.py`](scripts/eif_release.py): builds the sdist and
   wheel, validates both the way a package index will (`twine check --strict`,
@@ -24,7 +136,7 @@ of the entry rather than a footnote.
   from it. It prints the publish commands and stops. Publication takes owner
   credentials and stays an owner decision, which is the same boundary
   everything else here observes: EIF generates what a person then chooses to
-  run. Passes end to end on `0.1.0.dev0`.
+  run. Passes end to end.
 - [`docs/product/linkedin-series.md`](docs/product/linkedin-series.md): the
   rules everything published about EIF is written under. Audience, claim
   boundaries, voice rules, commenting rules, and the sentences the series
@@ -136,7 +248,7 @@ of the entry rather than a footnote.
   accumulates in and why adapters exist, stated as mechanism rather than as
   an outcome claim nothing here has measured.
 - The site's release-status notes moved off the site, into
-  [`docs/product/pre-release.md`](docs/product/pre-release.md). The
+  [`docs/product/release-status.md`](docs/product/release-status.md). The
   quickstart used to spend a heading, a lede clause and a closing paragraph
   arguing about whether this is a release. The command it prints is
   `pip install .`, which works from a clone, and the page never printed the
@@ -264,7 +376,7 @@ of the entry rather than a footnote.
 ### Fixed
 
 - CI's own frontmatter validation was failing, and had been since the two
-  files that break it were added. `docs/product/pre-release.md` and
+  files that break it were added. `docs/product/release-status.md` and
   `docs/product/linkedin-series.md` carried `type: reference` and
   `status: active`, neither of which exists in the ontology, and CI
   validates `docs/product/*.md`, so the single required PR job could not
@@ -282,7 +394,7 @@ of the entry rather than a footnote.
   resolved in every mode and still overridable per build, and the pending
   line is removed rather than left permanently empty.
 - The installable package was missing two of its own declared resources.
-  `docs/product/linkedin-series.md` and `docs/product/pre-release.md` are
+  `docs/product/linkedin-series.md` and `docs/product/release-status.md` are
   inside a tree that `scripts/sync_package_sources.py` bundles into the
   wheel, and neither had ever been copied - a wheel built before this would
   have shipped without them. The drift survived because the only sync check
@@ -309,121 +421,13 @@ of the entry rather than a footnote.
   omitted `architecture/instance-contract.md`,
   `architecture/merge-enforcement.md` and the whole `research/` tree.
 
-## [0.1.0] - unreleased
-
-First public extraction from a private production instance that has run
-this methodology daily since May 2026. The repository is functional and
-reviewable; it is not a stable release, and the checklist that would make
-it one lives in
-[Definition of Public-Ready](docs/architecture/HOW-EIF-WORKS.md#definition-of-public-ready).
-
-### Added
-
-**Methodology core**
-
-- Four-axis authority model (normative, empirical, agent-execution,
-  knowledge-lifecycle) replacing a single ranked source hierarchy. A
-  normative source disagreeing with an empirical one is recorded as a
-  discrepancy, not resolved by rank.
-- Knowledge taxonomy, confidence levels, and a status lifecycle
-  (`draft` -> `validated` -> `superseded`/`deprecated`, plus `rejected`
-  for hypotheses only) with append-only retraction.
-- Three-tier context model: reusable framework method, durable project
-  knowledge, ephemeral session state, with Knowledge Delta governing
-  promotion between them.
-- Two-loop learning model: an inner per-session loop, and an outer
-  [retro loop](playbooks/run-retro.md) that asks what repeats across many
-  sessions. Promotion is driven by the outer loop, because one session
-  cannot establish that its lesson generalizes.
-- Bounded Evidence Loop contract: named evaluator, iteration and
-  remote-run budgets, failure signatures, and `PASS`/`BLOCKED`/`DEFERRED`
-  exits.
-
-**Operating layer**
-
-- 12 playbooks, 14 templates, 8 invokable skills covering session
-  preparation/execution/closeout, execution-packet planning/execution/
-  review, knowledge search/ingest/lint, the bounded evidence loop, and
-  retro.
-- Execution packets: a canonical artifact set for work spanning more than
-  one session, carrying charter, facts, decisions and roadmap across
-  sessions so later ones do not reopen settled questions.
-
-**Tooling**
-
-- Installable `eifctl` package with 7 subcommands (`init`, `doctor`,
-  `search`, `render`, `privacy-scan`, `validate`, `version`), verified
-  from a built wheel in a clean virtual environment whose path contains a
-  space and non-ASCII text. **Not published to PyPI.**
-- Instance bootstrap and upgrade with real provenance, a sha256-hashed
-  runtime bundle, and transactional rollback proven by fault injection
-  after each commit stage and partway through individual writes.
-- Instance self-verification (`eif_verify_runtime.py`): config/lock schema
-  validity, per-file bundle hashes, adapter/config consistency, marker
-  integrity, and drift between config and the generated entrypoint.
-- Adoption onto an existing, already-governed repository: a preflight that
-  stops before any write when there is no coexistence decision on record,
-  a `coexist` mode that defers to existing rules, configurable knowledge
-  paths with path-escape validation, and finding-specific privacy-scan
-  suppressions.
-- Offline, Unicode-aware, lifecycle-aware knowledge retrieval that reports
-  unparseable, schema-invalid and not-found as three distinct outcomes
-  rather than collapsing them into "no results".
-
-**Adapters** (scope frozen at four)
-
-- Claude Code and Cursor as the two required v0.1 adapters (D-09).
-- Codex and Hermes as experimental-supported, each re-verified against
-  that agent's own primary or installed source rather than a
-  documentation page, with real installed-CLI runtime proof from isolated
-  home directories.
-- All 12 directed switching pairs proven, with exactly one active EIF
-  block and project content preserved after every switch.
-
-**Optional integrations** (none required; each degrades to a named core path)
-
-- RTK shell-output compression: version/argv/native-search/diff canaries,
-  a command registry, and content-free local telemetry. A failed required
-  canary reports `degraded`; raw proxy routes record zero savings.
-- Graphify structural graph: query/path/explain canaries and an artifact
-  lifecycle bound to source commit, graph digest, repository identity and
-  reviewed scope. Only `fresh` reports healthy.
-- Vendor docs: declares Context7 over MCP, with generated routing guidance
-  and a reviewable per-adapter config template.
-
-**Governance and safety**
-
-- Privacy scanner, frontmatter/config/lock validation, link checking, and
-  Knowledge Delta classification, each with its own test suite and each
-  runnable from a project instance's own bundle.
-- Controlled merge entrypoint that re-verifies checks, Knowledge Delta and
-  review state twice before merging, pinned to a verified head SHA.
-- Public claims-evidence ledger recording, per claim, what is `OBSERVED`
-  vs `UNVERIFIED` and the exact wording each claim does and does not
-  permit.
-- Issue templates that require the command and real output rather than a
-  recollection, including an evidence-report template for contributing
-  verification of anything the repository lists as unverified.
-
-**Localization**
-
-- English-canonical framework docs with a per-instance documentation
-  locale. Ukrainian is the first locale pack: status messages, Knowledge
-  Delta, closeout headings and knowledge retrieval.
-
-**Presentation**
-
-- Bilingual site source in [`site/`](site/README.md), locally buildable,
-  gated on claim citations, byte budgets, two browser engines, axe and
-  Lighthouse. **Not deployed.**
-
 ### Known limitations
 
 Stated here rather than left to be discovered:
 
 - **Not on PyPI.** No `pip install` from a package index.
 - **No quality or rework claim.** No comparative study has been run.
-- **Benchmark is one bounded pilot**: one model, three of ten fixtures,
+- **The benchmark is one bounded run**: one model, three of ten fixtures,
   one attempt per A/B cell, six attempts total. Modes C/D have executable
   integrity contracts but no real-agent result. This cannot support a
   directional efficiency claim.

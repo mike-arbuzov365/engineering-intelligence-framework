@@ -1,0 +1,158 @@
+<!-- The orbit mark, in English. One source, expanded at build time by the
+     eif-partials plugin in vite.config.js wherever an `eif:include` comment
+     names this path. (Written that way rather than quoted: HTML comments do
+     not nest, so a literal marker inside this header would end it early and
+     spill the rest of the paragraph into the page.)
+
+     It is drawn twice on the page - as the hero mark and as section 03's
+     figure - because it is the same model in both places: the poster at the
+     top and the explained diagram further down. Two hand-maintained copies
+     of a 60-shape SVG with a tooltip on every shape would have drifted on
+     the first edit, and each language would have had its own copy of the
+     drift. Edit this file; both places move together.
+
+     aria-hidden because it is decorative: section 03 carries this content
+     as written prose and a five-line key, and the hero deliberately carries
+     no key at all. -->
+<svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 508" preserveAspectRatio="xMidYMid meet">
+  <g data-tip="Projects orbit one shared framework layer. Each keeps its own repository, its own memory and its own packet rules.">
+    <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+    <circle class="svg-hit" cx="310" cy="266" r="176" />
+  </g>
+
+  <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+    <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+    <line class="svg-hit" x1="310" y1="266" x2="310" y2="442" />
+  </g>
+  <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+    <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+    <line class="svg-hit" x1="310" y1="266" x2="158" y2="178" />
+  </g>
+  <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+    <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+    <line class="svg-hit" x1="310" y1="266" x2="462" y2="178" />
+  </g>
+  <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+    <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+    <line class="svg-hit" x1="310" y1="266" x2="310" y2="90" />
+  </g>
+
+  <g data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation.">
+    <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
+    <path class="svg-hit" d="M 300 306 C 282 348 282 392 300 428" />
+  </g>
+  <g data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes.">
+    <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
+    <path class="svg-hit" d="M 320 428 C 338 392 338 348 320 306" />
+  </g>
+  <g data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies.">
+    <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+    <path class="svg-hit" d="M 310 240 C 322 208 400 196 452 190" />
+  </g>
+
+  <text class="scale__note" x="274" y="334" text-anchor="end" data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation.">method + experience</text>
+  <text class="scale__note scale__note--up" x="346" y="334" data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes.">validated lesson</text>
+  <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle" data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies.">if it applies</text>
+
+  <g data-tip="EIF, the framework layer. One shared operating layer: ontology, the authority model, rules, playbooks, templates and skills.">
+    <circle class="scale__core" cx="310" cy="266" r="42" />
+    <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+  </g>
+
+  <g class="scale__project scale__project--active" data-tip="P1, the project with work open in it. A task too large for one session becomes a packet of sessions inside this repository.">
+    <circle cx="310" cy="442" r="17" />
+    <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
+  </g>
+  <g class="scale__project" data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer.">
+    <circle cx="158" cy="178" r="15" />
+    <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
+  </g>
+  <g class="scale__project scale__project--receiving" data-tip="P4 receives a lesson from P1. It arrives only where it applies, never automatically.">
+    <circle cx="462" cy="178" r="15" />
+    <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
+  </g>
+  <g class="scale__project" data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer.">
+    <circle cx="310" cy="90" r="15" />
+    <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
+  </g>
+
+  <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
+  <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
+
+  <g data-tip="The packet groups its sessions. They run in order, and it closes before anything learned is offered upward.">
+    <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+    <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+  </g>
+  <text class="scale__section-label" x="196" y="482" data-tip="PACKET. One unit of work too large for a single session, with its own open and close rules.">PACKET</text>
+  <g data-tip="The packet’s link to one of its sessions.">
+    <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+    <line class="svg-hit" x1="310" y1="459" x2="310" y2="492" />
+  </g>
+  <g data-tip="The packet’s link to one of its sessions.">
+    <line class="scale__stem" x1="238" y1="492" x2="238" y2="510" />
+    <line class="svg-hit" x1="238" y1="492" x2="238" y2="510" />
+  </g>
+  <g data-tip="The packet’s link to one of its sessions.">
+    <line class="scale__stem" x1="310" y1="492" x2="310" y2="510" />
+    <line class="svg-hit" x1="310" y1="492" x2="310" y2="510" />
+  </g>
+  <g data-tip="The packet’s link to one of its sessions.">
+    <line class="scale__stem" x1="382" y1="492" x2="382" y2="510" />
+    <line class="svg-hit" x1="382" y1="492" x2="382" y2="510" />
+  </g>
+
+  <!-- Named circles rather than bare dots, and a step smaller than the
+       project nodes above them: a session is the same kind of thing as a
+       project, one level down, and the figure now says so in the same
+       visual language rather than degrading it to punctuation. -->
+  <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
+    <g class="scale__session scale__session--1">
+      <circle cx="238" cy="522" r="12" />
+      <text class="scale__node-label" x="238" y="527" text-anchor="middle">S1</text>
+    </g>
+    <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="16" />
+  </g>
+  <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
+    <g class="scale__session scale__session--2">
+      <circle cx="310" cy="522" r="12" />
+      <text class="scale__node-label" x="310" y="527" text-anchor="middle">S2</text>
+    </g>
+    <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="16" />
+  </g>
+  <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
+    <g class="scale__session scale__session--3">
+      <circle cx="382" cy="522" r="12" />
+      <text class="scale__node-label" x="382" y="527" text-anchor="middle">S3</text>
+    </g>
+    <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="16" />
+  </g>
+  <!-- Aligned to S1's own left edge, not to the packet rail above it: each
+       label starts where the thing it names starts. At x=196 it hung 30
+       units clear of the first session and read as floating. -->
+  <text class="scale__section-label" x="226" y="556" data-tip="SESSIONS. The three runs inside this packet, in order.">SESSIONS</text>
+
+  <!-- The curator, drawn last so it sits over everything it watches.
+
+       A 4-unit dot on a dotted ring, which is the weight it should have:
+       a comet with a tapered tail was tried here and read as an alarm
+       rather than as a standing watch. What it keeps from that attempt is
+       the halo - a soft amber aura breathing under the dot on a shorter
+       period than the orbit it travels, so the mark stays alive on the
+       frames where it is small and far from anything else.
+
+       The tip is on the ring rather than on the dot: a 4-unit mark
+       travelling a 27-second cycle is not something anyone should have to
+       chase to read a label. -->
+  <g class="scale__curator" data-tip="The curator. It watches the framework layer’s own health on its own rhythm, outside any single promotion, and merges nothing itself.">
+    <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
+    <g class="scale__curator-marker">
+      <circle class="scale__curator-halo" cx="310" cy="204" r="11" />
+      <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
+    </g>
+    <circle class="svg-hit" cx="310" cy="266" r="62" />
+  </g>
+
+  <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
+  <circle class="scale__pulse scale__pulse--up" cx="0" cy="0" r="5" />
+  <circle class="scale__pulse scale__pulse--out" cx="0" cy="0" r="5" />
+</svg>

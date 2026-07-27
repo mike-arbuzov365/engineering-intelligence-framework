@@ -26,9 +26,11 @@ the whole-file-skip or git-root-only claims in them.
 product family - OpenAI's own framing (`ChatGPT Codex is OpenAI's coding
 agent across the ChatGPT desktop app on macOS and Windows, CLI, IDE
 integrations, mobile Remote Control, and Cloud`), not a separate product
-per surface. This adapter is marked **experimental, supported** - it does
-not change EIF's v0.1 required-adapter set (Claude Code and Cursor remain
-the only required pair; see `core/policies/decisions.md`).
+per surface. This adapter is **supported**, on the same footing as the
+other three (D-16, 2026-07-27, which retired the two-tier split; see
+`core/policies/decisions.md`). What is specific to it is stated below and
+is about mechanics, not status: the hook contract is block-only, because
+`updatedInput` mutation is unverified here.
 
 ## Verified evidence
 

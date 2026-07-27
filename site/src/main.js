@@ -133,6 +133,12 @@ function initLoopScene() {
 // for touch, where ":hover" does not apply, and keeps aria-expanded correct
 // for assistive tech. Safe to call again after a language swap - listeners
 // attach to whatever `.reveal__trigger` elements exist at call time.
+//
+// One row open at a time within a list. Independent toggles left eight
+// paragraphs of detail stacked open in section 09 and the screen stopped
+// being scannable: the list is a set of alternatives, not eight things to
+// read at once. Scoped to the row's own list so the two lists on the page
+// never close each other.
 function initRevealRows() {
   document.querySelectorAll('.reveal__trigger').forEach((trigger) => {
     // Static HTML is expanded for the no-JS path. Once enhancement is
@@ -141,8 +147,17 @@ function initRevealRows() {
     trigger.setAttribute('aria-expanded', 'false');
     trigger.addEventListener('click', () => {
       const row = trigger.closest('.reveal');
-      const isOpen = row.classList.toggle('is-open');
-      trigger.setAttribute('aria-expanded', String(isOpen));
+      const willOpen = !row.classList.contains('is-open');
+
+      const list = row.parentElement;
+      for (const sibling of list.querySelectorAll(':scope > .reveal.is-open')) {
+        if (sibling === row) continue;
+        sibling.classList.remove('is-open');
+        sibling.querySelector('.reveal__trigger')?.setAttribute('aria-expanded', 'false');
+      }
+
+      row.classList.toggle('is-open', willOpen);
+      trigger.setAttribute('aria-expanded', String(willOpen));
     });
   });
 }

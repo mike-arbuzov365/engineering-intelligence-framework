@@ -10,6 +10,15 @@
   display: none !important;
 }
 
+/* The <symbol> sprite at the top of <body>. width/height are already 0 on
+   the tag itself; this keeps it out of the flow regardless. */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
 html {
   background: var(--eif-bg);
 }

@@ -28,8 +28,12 @@ generated from one route registry plus the provider capability matrix and
 cannot modify an entrypoint or user configuration.
 
 **Adapter scope is frozen as of this round** (2026-07-18): these four
-adapters (two required - Claude Code, Cursor; two experimental supported -
-Codex, Hermes) are the complete v0.1 set. See
+adapters are the complete v0.1 set, and all four are supported (D-16,
+2026-07-27, superseding the two-tier split D-09 recorded). The real
+differences between them are per-adapter mechanics, stated in each
+adapter's own README, not a tier: Cursor has no tool-call hook mechanism to
+enforce through, and the Codex and Hermes hook contracts are block-only
+because `updatedInput` mutation is unverified on both. See
 [`parity-matrix.json`](parity-matrix.json) for per-adapter capabilities and
 [`switch-matrix.json`](switch-matrix.json) for the full directed switching
 matrix (every ordered pair, 12 total) - both machine-readable and each

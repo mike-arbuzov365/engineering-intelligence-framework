@@ -140,21 +140,69 @@ test.describe('evidence', () => {
     await page.goto('/#evidence');
     const install = page.locator('#evidence .reveal').nth(0);
     await expect(install).toContainText('pip install .');
-    // Release status is docs/product/pre-release.md's job, not this row's.
+    // Release status is docs/product/release-status.md's job, not this row's.
     // What stays here is the bound on the evidence itself.
     await expect(install).not.toContainText('PyPI');
-    await expect(install).toContainText('Claude Code adapter for its own bootstrap step');
+    await expect(install).toContainText('Claude Code adapter');
   });
 
-  test('bounded pilot and timing limits live in the row they qualify', async ({ page }) => {
+  test('every row carries its own scope line, and none of them apologises', async ({ page }) => {
     await page.goto('/#evidence');
     // Was a "Bounded proof on record" block trailing the whole section,
-    // which read as a disclaimer appended to a page of claims.
+    // which read as a disclaimer appended to a page of claims. Then the
+    // per-row bound was labelled "Limitation:", which read as an apology
+    // attached to every capability. It is the scope of the check now, in the
+    // row the check belongs to.
     await expect(page.locator('.evidence__proof')).toHaveCount(0);
+    const scopes = page.locator('#evidence .reveal__detail strong', { hasText: 'Scope:' });
+    await expect(scopes).toHaveCount(8);
+    await expect(page.locator('#evidence')).not.toContainText('Limitation:');
+    // Nothing on this page presents itself as unreleased or provisional.
+    for (const word of ['pilot', 'Pre-release', 'pre-release', 'not yet']) {
+      await expect(page.locator('#evidence')).not.toContainText(word);
+    }
+  });
+
+  test('the switch row names four supported adapters, with no tier among them', async ({ page }) => {
+    await page.goto('/#evidence');
+    const swap = page.locator('#evidence .reveal').nth(5);
+    await expect(swap).toContainText('Four adapters for four agents');
+    await expect(swap).toContainText('twelve ordered pairs');
+    // D-16 retired the required/experimental split: what differs between the
+    // four is hook mechanics, and the row says so instead of labelling two of
+    // them as provisional.
+    await expect(swap).not.toContainText('experimental');
+    await expect(swap).toContainText('mechanics, not status');
+  });
+
+  test('the Ukrainian rows read as Ukrainian, not as a word-for-word carry-over', async ({
+    page,
+  }) => {
+    await page.goto('/#evidence');
+    await page.locator('#lang-toggle').click();
+    const section = page.locator('#evidence');
+    await expect(section).toContainText('Чотири адаптери для чотирьох агентів');
+    await expect(section.locator('.reveal__detail strong', { hasText: 'Межі:' })).toHaveCount(8);
+
+    const text = await section.innerText();
+    // The three that made the Measure row unreadable: "комірка" for a table
+    // cell, "мовчанка" for a deliberate absence of a claim, and "пілот" for
+    // a benchmark run. All three are literal carries that mean something
+    // else, or nothing, in Ukrainian.
+    for (const carriedOver of ['комірка', 'комірку', 'мовчанка', 'пілот', 'Обмеження:']) {
+      expect(text).not.toContain(carriedOver);
+    }
+  });
+
+  test('the measured/not-measured boundary survives, stated plainly', async ({ page }) => {
+    await page.goto('/#evidence');
     const measure = page.locator('#evidence .reveal').nth(7);
-    await expect(measure).toContainText('not a statistically powered efficiency comparison');
-    await expect(measure).toContainText('No claim is made about human authoring or review time');
+    await expect(measure).toContainText('one model, three fixtures, six attempts');
+    await expect(measure).toContainText('makes no efficiency or task-quality claim');
     await expect(measure).toContainText('no baseline and no control group');
+    await expect(measure).toContainText(
+      'Nothing measures how long a person spends writing or reviewing code',
+    );
   });
 });
 
@@ -168,7 +216,7 @@ test.describe('quickstart', () => {
     // print the package-index form, which is the one thing here that would
     // fail for a reader; that guarantee is what lets the screen drop the
     // release-status notes it used to carry. Those now live in
-    // docs/product/pre-release.md, off the page.
+    // docs/product/release-status.md, off the page.
     await expect(section).not.toContainText('pip install engineering-intelligence-framework');
     await expect(section).not.toContainText('not yet published');
     await expect(section).not.toContainText('eif_release.py');
@@ -196,11 +244,12 @@ test.describe('quickstart', () => {
 test.describe('honesty guardrails after the limitations section was removed', () => {
   test('the no-quality-claim now lives with the evidence it qualifies', async ({ page }) => {
     await page.goto('/#evidence');
-    // It has moved twice, and both moves went the same direction: out of a
+    // It has moved three times, all in the same direction: out of a
     // standalone limitations section, into a proof block under the ledger,
-    // and now into the Measure row itself, beside the pilot it qualifies.
+    // then into the Measure row beside the run it qualifies, and finally
+    // into plain language there.
     const measure = page.locator('#evidence .reveal').nth(7);
-    await expect(measure).toContainText('no comparative study of task quality');
+    await expect(measure).toContainText('no efficiency or task-quality claim anywhere');
     await expect(measure).toContainText('no baseline and no control group');
   });
 
@@ -328,6 +377,6 @@ test.describe('evidence no-js', () => {
     ]) {
       expect(text.toLowerCase()).toContain(word.toLowerCase());
     }
-    expect(text).toContain('Limitation:');
+    expect(text).toContain('Scope:');
   });
 });

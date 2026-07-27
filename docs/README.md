@@ -21,7 +21,7 @@
 - `product/` - what is claimed publicly and what backs it:
   [`claims-evidence.md`](product/claims-evidence.md) - every public claim
   with its evidence and its bound;
-  [`pre-release.md`](product/pre-release.md) - where the release actually
+  [`release-status.md`](product/release-status.md) - where the release actually
   stands, what no claim is made about, and the release-day checklist;
   [`linkedin-series.md`](product/linkedin-series.md) - the rules everything
   published about EIF is written under: audience, claim boundaries, voice,

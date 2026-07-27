@@ -18,11 +18,11 @@ this project applies to every other claim it makes about itself - see
   machine-readable schemas, decision ledger, self-governance CI.
 - A vertical slice (one synthetic demo, one adapter) end to end, including
   existing-repository adoption hardening driven by a real pilot.
-- Four agent adapters ported: two required for v0.1 (Claude Code, Cursor),
-  two experimental-supported (Codex, Hermes) - each re-verified against
-  its own primary/installed source, with a full directed switching matrix
-  across all 12 ordered pairs. **Adapter scope is now frozen** at these
-  four.
+- Four supported agent adapters ported - Claude Code, Cursor, Codex and
+  Hermes - each re-verified against its own primary/installed source, with
+  a full directed switching matrix across all 12 ordered pairs. **Adapter
+  scope is now frozen** at these four, and all four are supported (D-16,
+  2026-07-27, retiring the earlier two-tier split).
 - Reproducible dependency/license checking - default mode reads a
   committed SBOM instead of scanning the invoking environment, confirmed
   identical on Windows and Ubuntu CI.

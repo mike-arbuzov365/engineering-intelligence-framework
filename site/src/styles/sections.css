@@ -106,8 +106,8 @@
   border-color: var(--eif-fg-muted);
 }
 
-/* Filled and small, exactly as it is drawn: the curator is a 3-unit dot in
-   every figure, so it must not become the largest thing in the key. */
+/* Filled and small, exactly as it is drawn: the curator is a 3-to-4-unit
+   dot in every figure, so it must not become the largest thing in the key. */
 .figure-legend__item--dot-warn::before {
   width: 0.4rem;
   height: 0.4rem;
@@ -210,14 +210,25 @@
    sessions inside them. Read as a pair - the explanation on the left, the
    figure on the right - so the figure can stay small enough to take in at
    once instead of running the width of the page. */
+/* The prose column is sized to the measure it is already capped at, and the
+   figure takes the rest. It used to be `1fr` beside a 22rem figure, which
+   at this container width made the text column 752px wide while its own
+   `max-width: var(--eif-measure)` held the text at 608 - so 144px of the
+   row was dead space between the two, and the drawing was squeezed into a
+   column narrower than the gap it was leaving behind. */
 .scale {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 21rem);
+  grid-template-columns: minmax(0, var(--eif-measure)) minmax(0, 1fr);
   gap: var(--eif-space-5);
   align-items: center;
+  justify-items: center;
   margin: var(--eif-space-6) 0 0;
   padding-top: var(--eif-space-4);
   border-top: 1px solid var(--eif-rule);
+}
+
+.scale__caption {
+  justify-self: start;
 }
 
 .scale__caption h3 {
@@ -279,13 +290,17 @@
   color: var(--eif-fg);
 }
 
-/* .scale is the container; the drawing inside it is the circuit that used
-   to be the hero mark, and it keeps its own class names. Both selectors are
-   listed so the container works with either figure. */
+/* The drawing inside .scale is the orbit, the same partial the hero mark is
+   expanded from. Both class names are listed because the SVG carries both:
+   .scale__map is what it is, .hero__figure is what pauses it in the hero.
+
+   Capped so a very wide viewport does not blow a 380x508 portrait drawing
+   up past the height of the prose it sits beside. */
 .scale__map,
 .scale .hero__figure {
   display: block;
   width: 100%;
+  max-width: 27rem;
   height: auto;
   margin: 0;
 }
@@ -388,8 +403,19 @@
   opacity: 0.9;
 }
 
-.scale__session {
-  fill: var(--eif-accent);
+/* Drawn like the project nodes, one step smaller: same object, one level
+   down. They were bare filled dots, which read as punctuation under the
+   packet bracket rather than as the three runs the bracket groups. */
+.scale__session circle {
+  fill: var(--eif-bg);
+  stroke: var(--eif-accent);
+  stroke-width: 1.5;
+}
+
+/* A step down from the 13px the project nodes carry, matching the step
+   down in radius. At the shared size S1 filled its circle edge to edge. */
+.scale__session .scale__node-label {
+  font-size: 11px;
 }
 
 .scale__lift {
@@ -425,11 +451,35 @@
   stroke-dasharray: 5 4;
 }
 
+/* The curator. A 4-unit dot on a dotted ring, which is the weight it
+   should carry: it watches, it does not intervene. A tapered comet was
+   tried here to make it more present and read as an alarm instead - it
+   dominated a figure whose subject is the green circuit.
+
+   What survived that attempt is the halo: a soft amber aura breathing
+   under the dot, which keeps the mark alive without making it loud. */
 .scale__curator-ring {
   stroke: var(--eif-warn);
   stroke-width: 1;
   stroke-dasharray: 1 5;
   opacity: 0.65;
+}
+
+/* Rotated as one group so the dot and its halo can never separate.
+   transform-box is stated rather than assumed: the user-unit origin below
+   is only meaningful against the view box. */
+.scale__curator-marker {
+  transform-box: view-box;
+  transform-origin: 310px 266px;
+}
+
+/* fill-box, unlike the group above it: this one scales about its own centre
+   while its parent rotates about the core. */
+.scale__curator-halo {
+  fill: var(--eif-warn);
+  opacity: 0.15;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 .scale__curator-dot {
@@ -1125,9 +1175,12 @@
    Paired the same way as the multi-project figure - explanation and legend
    on one side, figure on the other - so the two read as the same kind of
    object rather than two different treatments. */
+/* Same correction as .scale above: the prose column is sized to the measure
+   it is capped at anyway, so the drawing gets the width that was previously
+   sitting empty between the two columns. */
 .knowledge-base {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+  grid-template-columns: minmax(0, var(--eif-measure)) minmax(0, 1fr);
   column-gap: var(--eif-space-5);
   row-gap: var(--eif-space-3);
   margin-top: var(--eif-space-5);
@@ -1140,10 +1193,17 @@
   grid-row: 1;
 }
 
+/* Centred in its own column and capped, rather than stretched to whatever
+   the column happens to be: the graph is 420x300 and goes flat and thin
+   long before it goes usefully large. */
 .knowledge-base .kb-map {
   grid-column: 2;
   grid-row: 1 / span 2;
   align-self: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 26rem;
+  height: auto;
 }
 
 .knowledge-base > .figure-legend {
@@ -1182,7 +1242,14 @@
   font-size: clamp(1.15rem, 2vw, 1.55rem);
 }
 
-.knowledge-base > p {
+/* Scoped to the lead, not to `.knowledge-base > p`. The paragraph moved
+   inside .knowledge-base__lead when this block became a grid, and a
+   direct-child selector stopped matching it: it lost its top margin and its
+   muted colour in one go, so it sat hard against the heading at full
+   foreground weight while the same paragraph in section 08 read correctly.
+   Written the way .capabilities__lead p is written, because they are the
+   same object on two screens. */
+.knowledge-base__lead p {
   max-width: var(--eif-measure);
   margin-top: var(--eif-space-1);
   color: var(--eif-fg-muted);

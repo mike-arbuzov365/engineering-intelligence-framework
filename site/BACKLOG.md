@@ -566,7 +566,7 @@ ever carried was reported as a leaked machine path.
   lede and a closing caveat all argued about release status. The commands
   work from a clone and the page never printed the package-index form, so
   the status notes were not protecting the reader from anything. They moved
-  to [`docs/product/pre-release.md`](../docs/product/pre-release.md), and an
+  to [`docs/product/release-status.md`](../docs/product/release-status.md), and an
   end-to-end test now asserts they are gone and that the failing install
   form never appears.
 - **The closing screen performed an attitude.** "Right now disagreement is

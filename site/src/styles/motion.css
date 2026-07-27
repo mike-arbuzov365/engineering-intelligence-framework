@@ -288,13 +288,22 @@
   .scale__session--2 { animation-name: eif-scale-session-2; }
   .scale__session--3 { animation-name: eif-scale-session-3; }
 
-  .scale__curator-dot {
-    transform-origin: 310px 266px;
+  /* The dot and its halo turn as one group. Linear, and on a 27s period
+     unrelated to anything else on the figure: the curator must never look
+     like it is taking a turn in the 16s promotion sequence. */
+  .scale__curator-marker {
     animation: eif-scale-curator 27s linear infinite;
   }
 
   .scale__curator-ring {
     animation: eif-scale-curator-ring 27s var(--eif-ease) infinite;
+  }
+
+  /* The aura breathes on a much shorter period than the orbit it travels,
+     which is what keeps a 4-unit dot readable as something running rather
+     than as a stray mark. */
+  .scale__curator-halo {
+    animation: eif-scale-curator-halo 4.5s var(--eif-ease) infinite;
   }
 
   .loop__pulse {
@@ -357,9 +366,12 @@
      is allowed to follow, on a 14s cycle. The curator's flag breathes on
      its own longer period over the excluded node - it is a standing
      observation, not an event in the search. */
+  /* The walk is the sentence beside the figure: in from the index, onto an
+     incident, along to the decision that answered it, through the hub, to
+     the lesson and the rule it became. Every leg is a link that is drawn. */
   .kb-map__pulse {
     offset-path: path(
-      "M 26 266 C 56 260 50 226 70 190 L 120 90 L 215 150 L 320 80 L 370 190"
+      "M 26 272 C 50 266 60 240 96 206 L 132 100 L 218 158 L 312 86 L 356 200"
     );
     offset-rotate: 0deg;
     animation: eif-kb-query 14s var(--eif-ease) infinite;
@@ -559,6 +571,11 @@
 @keyframes eif-scale-curator-ring {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.85; }
+}
+
+@keyframes eif-scale-curator-halo {
+  0%, 100% { opacity: 0.1; transform: scale(0.85); }
+  50% { opacity: 0.24; transform: scale(1.12); }
 }
 
 @keyframes eif-plane-pulse {

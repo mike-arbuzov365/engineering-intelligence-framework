@@ -69,7 +69,13 @@
 @media (min-width: 1080px) {
   .hero__content {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 27rem);
+    /* The mark yields to the row of controls beside it rather than the
+       other way round. At a flat 27rem the figure column took enough of a
+       1080-wide layout to push the fourth pill onto a second line, and the
+       row flipped between one line and two over a couple of pixels of
+       slack. It caps at 27rem from about 1350px up, which is where it was
+       already sitting. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, min(27rem, 32vw));
     grid-template-rows: auto auto auto;
     gap: var(--eif-space-2) var(--eif-space-5);
     align-items: center;
@@ -202,6 +208,9 @@
   color: var(--eif-fg-muted);
 }
 
+/* One row of four: three destinations on this page and one that leaves it.
+   The fourth used to be a fourth scroll anchor, which left the hero's
+   loudest row going nowhere at all. */
 .hero__ctas {
   margin-top: var(--eif-space-4);
   display: flex;
@@ -227,6 +236,12 @@
     justify-content: space-between;
     padding: 0.7em 0.95em;
   }
+
+  /* The repository pill has no caret to push away from, so it centres its
+     own contents instead of splitting them to the edges. */
+  .hero__ctas .hero__ctas-repo {
+    justify-content: center;
+  }
 }
 
 .hero__ctas a {
@@ -245,7 +260,9 @@
   background: color-mix(in srgb, var(--eif-fg) 3%, transparent);
   transition: color var(--eif-duration-fast) var(--eif-ease),
     border-color var(--eif-duration-fast) var(--eif-ease),
-    background-color var(--eif-duration-fast) var(--eif-ease);
+    background-color var(--eif-duration-fast) var(--eif-ease),
+    box-shadow var(--eif-duration-fast) var(--eif-ease),
+    transform var(--eif-duration-fast) var(--eif-ease);
 }
 
 .hero__ctas a::after {
@@ -269,4 +286,36 @@
 .hero__ctas a:hover::after,
 .hero__ctas a:focus-visible::after {
   transform: rotate(45deg) translate(15%, -15%);
+}
+
+/* The one filled control on the page. Everything else - every integration
+   row, every disclosure, the closing screen - is outlined or plain text, so
+   a single solid accent pill is unambiguous at this size. It carries the
+   mark instead of the caret the three anchors carry: one says "further down
+   this page", the other says "off this page, to GitHub". */
+.hero__ctas .hero__ctas-repo {
+  background: var(--eif-accent);
+  border-color: var(--eif-accent);
+  color: var(--eif-charcoal-950);
+  font-weight: 700;
+}
+
+.hero__ctas .hero__ctas-repo::after {
+  content: none;
+}
+
+.hero__ctas .hero__ctas-repo:hover,
+.hero__ctas .hero__ctas-repo:focus-visible {
+  color: var(--eif-charcoal-950);
+  background: color-mix(in srgb, var(--eif-accent) 86%, #ffffff);
+  border-color: color-mix(in srgb, var(--eif-accent) 86%, #ffffff);
+  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--eif-accent) 70%, transparent);
+  transform: translateY(-1px);
+}
+
+.hero__ctas-mark {
+  flex: none;
+  width: 1.15em;
+  height: 1.15em;
+  fill: currentColor;
 }

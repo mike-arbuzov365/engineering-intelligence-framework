@@ -22,10 +22,10 @@
     },
     {
       "id": "CLM-03",
-      "summary": "Two required adapters and two experimental-supported adapters exist, with different verification depth.",
+      "summary": "Four supported adapters exist, with per-adapter differences in hook mechanics rather than in status.",
       "status": "OBSERVED",
       "allowedWording": "A full directed switching matrix across all four registered adapters (12 ordered pairs) proves exactly one active EIF block, correct destination-source resolution, project-content preservation, and doctor success after every switch.",
-      "limitations": "Codex and Hermes are experimental-supported, not required v0.1 adapters; hook-based enforcement is not built for Cursor; some properties are proven adapter-generically rather than independently for all 12 pairs.",
+      "limitations": "Adapter scope is frozen at these four. Cursor has no tool-call hook mechanism, so its adapter ships Rules rather than hooks; the Codex and Hermes hook contracts are block-only because updatedInput mutation is unverified on both. Some properties are proven adapter-generically rather than independently for all 12 pairs. The two-tier required/experimental split this row used to record was retired by D-16 (2026-07-27).",
       "forbiddenWording": ["Fully runtime validated.", "Two production-ready adapters.", "Every property independently proven for every pair."],
       "source": "docs/product/claims-evidence.md - rows \"The Cursor adapter's entrypoint is generated correctly\", \"The Hermes adapter's active entrypoint is resolved and generated correctly\", \"Switching a project between any two of the four registered adapters is safe and complete\""
     },

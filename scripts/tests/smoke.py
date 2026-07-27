@@ -15,11 +15,10 @@ Covers:
   - all four v0.1 adapters (claude-code, cursor, codex, hermes):
     greenfield init, correct active entrypoint, exactly one EIF block,
     doctor passes, repeat init is idempotent, project-owned text survives.
-    Per D-09, only claude-code and cursor are ratified as required; codex
-    and hermes remain experimental-supported. This suite checks all four
-    as defense-in-depth (catching a regression here is cheaper than at
-    release), not as a claim that all four are product-required - see
-    adapters/README.md for the ratified scope.
+    All four are supported adapters (D-16, 2026-07-27, retiring the
+    two-tier split D-09 recorded), which is why all four are checked here
+    rather than two being checked as defense-in-depth - see
+    adapters/README.md for the frozen scope.
   - one minimal adapter-switch cycle touching all four adapters
     (claude-code -> cursor -> codex -> hermes -> claude-code), proving
     switching doesn't corrupt files, without the full 12-directed-pair
@@ -71,9 +70,9 @@ Result = tuple[bool, str]
 # no-parent-directory, no-coexistence entrypoint each adapter resolves to
 # on a plain greenfield init. Codex and Hermes have dynamic resolution in
 # general (see adapters/codex/README.md, adapters/hermes/README.md) but
-# both have one unambiguous default when nothing else is present. Required
-# status (D-09): claude-code and cursor are ratified required; codex and
-# hermes are experimental-supported, not required.
+# both have one unambiguous default when nothing else is present. All four
+# are supported adapters (D-16); the differences between them are hook
+# mechanics, not status.
 ADAPTERS = [
     ("claude-code", "CLAUDE.md"),
     ("cursor", ".cursor/rules/eif/governance.mdc"),
@@ -210,7 +209,7 @@ def check_doctor_catches_corruption(tmp_path: Path) -> list[Result]:
 
 
 # --------------------------------------------------------------------------
-# Four adapters (two D-09-required, two experimental-supported - see ADAPTERS)
+# Four supported adapters (D-16 - see ADAPTERS)
 # --------------------------------------------------------------------------
 
 def check_adapter(tmp_path: Path, adapter: str, entry_rel: str) -> list[Result]:

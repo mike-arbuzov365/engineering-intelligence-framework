@@ -111,6 +111,33 @@ test.describe('optional capabilities', () => {
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
   });
 
+  test('opening a row closes the one that was open, in each list independently', async ({
+    page,
+  }) => {
+    await page.goto('/#evidence');
+    const rows = page.locator('#evidence .reveal__trigger');
+    await rows.nth(0).click();
+    await expect(rows.nth(0)).toHaveAttribute('aria-expanded', 'true');
+
+    // Independent toggles left all eight rows of section 09 stacked open and
+    // the screen stopped being scannable: the list is a set of alternatives,
+    // not eight things to read at once.
+    await rows.nth(3).click();
+    await expect(rows.nth(3)).toHaveAttribute('aria-expanded', 'true');
+    await expect(rows.nth(0)).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('#evidence .reveal.is-open')).toHaveCount(1);
+
+    // Clicking the open row again closes it rather than leaving it stuck.
+    await rows.nth(3).click();
+    await expect(page.locator('#evidence .reveal.is-open')).toHaveCount(0);
+
+    // The two lists on the page do not close each other.
+    await rows.nth(2).click();
+    await page.locator('#integrations .reveal__trigger').nth(0).click();
+    await expect(page.locator('#evidence .reveal.is-open')).toHaveCount(1);
+    await expect(page.locator('#integrations .reveal.is-open')).toHaveCount(1);
+  });
+
   test('core-safe fallback is stated for every integration, not just enabled ones', async ({
     page,
   }) => {

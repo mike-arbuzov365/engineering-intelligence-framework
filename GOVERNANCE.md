@@ -2,13 +2,13 @@
 
 ## Current phase
 
-Engineering Intelligence Framework is in **pre-release, single-maintainer**
+Engineering Intelligence Framework is at **v0.1.0, single-maintainer**
 phase. It is extracted from a private production instance (referred to as
 an "instance" throughout the docs) maintained by one owner. This document
 describes governance as it exists today and how it is expected to evolve
-after `v0.1.0`.
+as the project takes contributors.
 
-## Decision making (pre-v0.1)
+## Decision making at 0.x
 
 - The maintainer makes all decisions on scope, architecture, naming,
   licensing, and release timing.
@@ -19,7 +19,7 @@ after `v0.1.0`.
   [`docs/architecture/HOW-EIF-WORKS.md`](docs/architecture/HOW-EIF-WORKS.md#roadmap)
   for the current direction.
 
-## After v0.1.0
+## After 0.1
 
 The project intends to move toward:
 

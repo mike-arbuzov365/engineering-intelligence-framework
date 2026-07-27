@@ -139,7 +139,9 @@ Stage 1.9) benchmark corpus packet for the methodology this decision
 governs.
 
 ### D-09: Required v0.1 adapters
-**Status: ratified 2026-07-16 (owner decision).** Required tested adapters
+**Status: ratified 2026-07-16 (owner decision). Adapter tiering superseded
+by D-16, 2026-07-27 - all four adapters are supported; the rest of this
+entry stands.** Required tested adapters
 for the current v0.1 scope: **Claude Code** and **Cursor**. Graphify and RTK
 remain optional integrations - neither adapter depends on them. See
 [`adapters/README.md`](../../adapters/README.md#recommended-v01-priority)
@@ -151,6 +153,33 @@ for - the two should not be conflated. Codex and Hermes remain deferred, not
 ratified as required. (Moved here from a misplaced position under "Open"
 in the prior revision of this file - its own status text already said
 ratified; only the section placement was wrong.)
+
+### D-16: All four adapters are supported; the two-tier split is retired
+**Status: ratified 2026-07-27 (owner decision). Supersedes the tiering in
+D-09.** All four registered adapters - **Claude Code**, **Cursor**,
+**Codex** and **Hermes** - are supported adapters of the v0.1 set. The
+"two required, two experimental-supported" split that D-09 recorded is
+withdrawn.
+
+**Why it changes.** D-09 was written on 2026-07-16 from what had been
+tested at the time, and "experimental" described the state of the evidence
+rather than the state of the adapter. It has since stopped being true of
+either: all four are in daily use by the owner across real work, Codex and
+Hermes both ship hook contracts, and the switching matrix exercises every
+one of the twelve ordered pairs among the four with no distinction drawn
+between them. The label was carried forward on documents rather than on
+evidence, and it was reading on the public site as a warning about two
+adapters that do not warrant one.
+
+**What does not change.** The adapter scope stays frozen at these four
+(`adapters/README.md`). The verification differences that are real stay
+stated where they belong, per adapter, and none of them is a tier:
+Cursor has no tool-call hook mechanism to enforce through, so its adapter
+ships Rules rather than hooks; Codex's and Hermes's hook contracts are
+block-only because `updatedInput` mutation is unverified on both, so
+neither claims transparent rewrite support. D-09's other content - that
+Graphify and RTK remain optional and that no adapter depends on them -
+stands unchanged.
 
 ### D-05/D-08: CLI name and distribution model
 **Status: ratified 2026-07-16 (owner decision).** CLI command `eifctl`;

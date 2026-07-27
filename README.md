@@ -19,11 +19,13 @@ directory.
 
 <!-- The one place the public URL goes. site/.env.production carries the same
      value as EIF_SITE_URL and the two must not drift. -->
-**Live site:** <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>,
-published by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on
-any change under `site/`. The deploy runs the same fail-closed verifiers the
-local gate does, so a claim violation or an unsubstituted build marker stops
-it rather than reaching the page.
+**Live site:** <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>
+
+Published by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on
+any change under `site/`. The deploy re-runs the same fail-closed verifiers
+the local gate does, so an unknown claim ID, forbidden wording, a leaked
+private path, a third-party runtime request or an unsubstituted build marker
+stops it rather than reaching the page.
 
 ## The problem
 

@@ -135,12 +135,19 @@ Ordered, with the manual steps marked. Nothing here runs itself.
    The workflow cannot do this for itself: its `GITHUB_TOKEN` may deploy to
    a Pages site but may not create one, so `configure-pages`'s
    `enablement: true` fails with "Resource not accessible by integration".
-7. **Manual, once:** upload
+7. **Done 2026-07-27:** the site serves at
+   <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>.
+   Checked against the real URL rather than against the workflow's green
+   tick: the served page reports `eif:deploy-status: deployable`, its
+   canonical and `og:image` are absolute under that origin, its `git clone`
+   line and closing Source row carry the real repository, no `__EIF_*__`
+   marker survives, and the console is clean.
+8. **Manual, once, still open:** upload
    [`.github/social-preview.png`](../../.github/social-preview.png) at
    Settings -> General -> Social preview. It is generated from the same
    brand source as the site's own card by
    `npm --prefix site run generate:social-assets`, at the 1280x640 GitHub
    asks for. Without it, every link to this repository renders as GitHub's
-   generic auto-card.
-8. Re-read this file. Any line that stopped being true is a line to change,
+   generic auto-card. There is no API for this one, so it stays a click.
+9. Re-read this file. Any line that stopped being true is a line to change,
    not a line to leave.

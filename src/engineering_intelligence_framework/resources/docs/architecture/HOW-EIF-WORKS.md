@@ -844,11 +844,14 @@ formally ratified (the file is explicit about which is which).
 
 ### Launch
 - [ ] `v0.1.0` tag exists.
-- [ ] Website is live. The deploy is wired and self-enabling
-      ([`.github/workflows/pages.yml`](../../.github/workflows/pages.yml),
-      D-15) and the production URL is committed. Unchecked until a real URL
-      answers with the built page, which is the only evidence that would
-      justify ticking it.
+- [x] Website is live at
+      <https://mike-arbuzov365.github.io/engineering-intelligence-framework/>,
+      deployed by [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
+      (D-15). Checked against the real URL, not the workflow's own success:
+      the served page reports `eif:deploy-status: deployable`, its canonical
+      and `og:image` are absolute under that origin, its `git clone` line and
+      closing Source row carry the real repository, no `__EIF_*__` marker
+      survives, and the console is clean.
 - [ ] Article published.
 - [ ] Launch sequence prepared.
 - [x] Feedback/issue intake ready: `.github/ISSUE_TEMPLATE/` ships a bug

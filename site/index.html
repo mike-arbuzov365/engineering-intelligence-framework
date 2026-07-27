@@ -114,37 +114,63 @@
              and section 03 carries this content for assistive tech. -->
         <div class="hero__aside i18n-block" data-i18n-id="hero.figure" data-i18n-reinit="hero">
         <svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
-          <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+          <g data-tip="Projects orbit one shared framework layer. Each keeps its own repository, its own memory and its own packet rules.">
+            <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+            <circle class="svg-hit" cx="310" cy="266" r="176" />
+          </g>
 
-          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
-          <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
-          <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
-          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+            <line class="svg-hit" x1="310" y1="266" x2="310" y2="442" />
+          </g>
+          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+            <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+            <line class="svg-hit" x1="310" y1="266" x2="158" y2="178" />
+          </g>
+          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+            <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+            <line class="svg-hit" x1="310" y1="266" x2="462" y2="178" />
+          </g>
+          <g data-tip="A project’s link to the shared layer. It retrieves method from here and, rarely, sends a validated lesson back.">
+            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+            <line class="svg-hit" x1="310" y1="266" x2="310" y2="90" />
+          </g>
 
-          <path class="scale__descend" fill="none" data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation." d="M 300 306 C 282 348 282 392 300 428" />
-          <path class="scale__lift" fill="none" data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes." d="M 320 428 C 338 392 338 348 320 306" />
-          <path class="scale__lift scale__lift--relay" fill="none" data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies." d="M 310 240 C 322 208 400 196 452 190" />
+          <g data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation.">
+            <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
+            <path class="svg-hit" d="M 300 306 C 282 348 282 392 300 428" />
+          </g>
+          <g data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes.">
+            <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
+            <path class="svg-hit" d="M 320 428 C 338 392 338 348 320 306" />
+          </g>
+          <g data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies.">
+            <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+            <path class="svg-hit" d="M 310 240 C 322 208 400 196 452 190" />
+          </g>
 
-          <text class="scale__note" x="274" y="334" text-anchor="end">method + experience</text>
-          <text class="scale__note scale__note--up" x="346" y="334">validated lesson</text>
-          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle">if it applies</text>
+          <text class="scale__note" x="274" y="334" text-anchor="end" data-tip="Method and prior experience descending. Both arrive in the session before its first line of implementation.">method + experience</text>
+          <text class="scale__note scale__note--up" x="346" y="334" data-tip="A validated lesson climbing back. Only what the packet verified, and only after the packet closes.">validated lesson</text>
+          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle" data-tip="Dashed because it is conditional. A lesson reaches another project only by an explicit decision, and only where it applies.">if it applies</text>
 
-          <circle class="scale__core" cx="310" cy="266" r="42" data-tip="EIF, the framework layer. One shared operating layer: ontology, the authority model, rules, playbooks, templates and skills." />
-          <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+          <g data-tip="EIF, the framework layer. One shared operating layer: ontology, the authority model, rules, playbooks, templates and skills.">
+            <circle class="scale__core" cx="310" cy="266" r="42" />
+            <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+          </g>
 
-          <g class="scale__project scale__project--active"> data-tip="P1, the project with work open in it. A task too large for one session becomes a packet of sessions inside this repository."
+          <g class="scale__project scale__project--active" data-tip="P1, the project with work open in it. A task too large for one session becomes a packet of sessions inside this repository.">
             <circle cx="310" cy="442" r="17" />
             <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
           </g>
-          <g class="scale__project"> data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer."
+          <g class="scale__project" data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer.">
             <circle cx="158" cy="178" r="15" />
             <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
           </g>
-          <g class="scale__project scale__project--receiving"> data-tip="P4 receives a lesson from P1. It arrives only where it applies, never automatically."
+          <g class="scale__project scale__project--receiving" data-tip="P4 receives a lesson from P1. It arrives only where it applies, never automatically.">
             <circle cx="462" cy="178" r="15" />
             <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
           </g>
-          <g class="scale__project"> data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer."
+          <g class="scale__project" data-tip="Another project repository. It keeps its own memory and its own packet rules, and shares only the framework layer.">
             <circle cx="310" cy="90" r="15" />
             <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
           </g>
@@ -152,18 +178,48 @@
           <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
           <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
 
-          <path class="scale__packet-rule" fill="none" data-tip="The packet groups its sessions. They run in order, and it closes before anything learned is offered upward." d="M 196 502 L 196 492 L 424 492 L 424 502" />
-          <text class="scale__section-label" x="196" y="482">PACKET</text>
-          <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
-          <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
-          <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
-          <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-          <circle class="scale__session scale__session--1" data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it." cx="238" cy="522" r="6" />
-          <circle class="scale__session scale__session--2" data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it." cx="310" cy="522" r="6" />
-          <circle class="scale__session scale__session--3" data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it." cx="382" cy="522" r="6" />
-          <text class="scale__section-label" x="196" y="546">SESSIONS</text>
+          <g data-tip="The packet groups its sessions. They run in order, and it closes before anything learned is offered upward.">
+            <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+            <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+          </g>
+          <text class="scale__section-label" x="196" y="482" data-tip="PACKET. One unit of work too large for a single session, with its own open and close rules.">PACKET</text>
+          <g data-tip="The packet’s link to one of its sessions.">
+            <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+            <line class="svg-hit" x1="310" y1="459" x2="310" y2="492" />
+          </g>
+          <g data-tip="The packet’s link to one of its sessions.">
+            <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
+            <line class="svg-hit" x1="238" y1="492" x2="238" y2="516" />
+          </g>
+          <g data-tip="The packet’s link to one of its sessions.">
+            <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
+            <line class="svg-hit" x1="310" y1="492" x2="310" y2="516" />
+          </g>
+          <g data-tip="The packet’s link to one of its sessions.">
+            <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
+            <line class="svg-hit" x1="382" y1="492" x2="382" y2="516" />
+          </g>
+          <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
+            <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
+            <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="14" />
+          </g>
+          <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
+            <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
+            <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="14" />
+          </g>
+          <g data-tip="One session. Its reasoning is ephemeral; only what it validates outlives it.">
+            <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
+            <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="14" />
+          </g>
+          <text class="scale__section-label" x="196" y="546" data-tip="SESSIONS. The three runs inside this packet, in order.">SESSIONS</text>
 
-          <circle class="scale__curator-ring" cx="310" cy="266" r="62" data-tip="The curator. It watches the framework layer’s own health on its own rhythm, outside any single promotion, and merges nothing itself." fill="none" />
+          <!-- The curator's tip is on its ring, not on the dot that travels
+               it: a 4px mark moving on a 27s cycle is not something anyone
+               should have to chase to read a label. -->
+          <g data-tip="The curator. It watches the framework layer’s own health on its own rhythm, outside any single promotion, and merges nothing itself.">
+            <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
+            <circle class="svg-hit" cx="310" cy="266" r="62" />
+          </g>
           <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
 
           <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
@@ -1185,8 +1241,31 @@
             governance docs, the <code>eifctl</code> package and one
             reproducible vertical slice.
           </p>
-          <pre class="quickstart__command"><code>pip install .
+          <!-- The button is inside the block and static in the markup, so a
+               no-JS reader still sees the commands and main.js only has to
+               wire the click. Labels are attributes rather than text nodes
+               because the button's own content is an icon, and both labels
+               have to exist at once for the copied state to swap without a
+               second DOM lookup. -->
+          <div class="code-block">
+            <pre class="quickstart__command"><code>pip install .
 eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en</code></pre>
+            <button
+              class="code-block__copy"
+              type="button"
+              data-copy-label="Copy"
+              data-copied-label="Copied"
+              aria-label="Copy"
+            >
+              <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+                <rect x="7" y="7" width="9" height="10" rx="1.5" />
+                <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+              </svg>
+              <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M4.5 10.5 8 14l7.5-8" />
+              </svg>
+            </button>
+          </div>
           <p>
             The first line installs the <code>eifctl</code> command from the
             clone. The second initializes a separate, runnable project
@@ -1306,37 +1385,63 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
            labels translate; EIF and P1..P4 read the same in both. -->
       <template data-i18n-id="hero.figure">
         <svg class="scale__map hero__figure" aria-hidden="true" viewBox="120 60 380 500" preserveAspectRatio="xMidYMid meet">
-          <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+          <g data-tip="Проєкти обертаються навколо одного спільного рівня фреймворку. У кожного власний репозиторій, власна памʼять і власні правила пакетів.">
+            <circle class="scale__orbit" cx="310" cy="266" r="176" fill="none" />
+            <circle class="svg-hit" cx="310" cy="266" r="176" />
+          </g>
 
-          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
-          <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
-          <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
-          <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="442" />
+            <line class="svg-hit" x1="310" y1="266" x2="310" y2="442" />
+          </g>
+          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+            <line class="scale__spoke" x1="310" y1="266" x2="158" y2="178" />
+            <line class="svg-hit" x1="310" y1="266" x2="158" y2="178" />
+          </g>
+          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+            <line class="scale__spoke" x1="310" y1="266" x2="462" y2="178" />
+            <line class="svg-hit" x1="310" y1="266" x2="462" y2="178" />
+          </g>
+          <g data-tip="Звʼязок проєкту зі спільним рівнем. Звідси він отримує метод і, зрідка, віддає назад перевірений урок.">
+            <line class="scale__spoke" x1="310" y1="266" x2="310" y2="90" />
+            <line class="svg-hit" x1="310" y1="266" x2="310" y2="90" />
+          </g>
 
-          <path class="scale__descend" fill="none" data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації." d="M 300 306 C 282 348 282 392 300 428" />
-          <path class="scale__lift" fill="none" data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття." d="M 320 428 C 338 392 338 348 320 306" />
-          <path class="scale__lift scale__lift--relay" fill="none" data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний." d="M 310 240 C 322 208 400 196 452 190" />
+          <g data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації.">
+            <path class="scale__descend" fill="none" d="M 300 306 C 282 348 282 392 300 428" />
+            <path class="svg-hit" d="M 300 306 C 282 348 282 392 300 428" />
+          </g>
+          <g data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття.">
+            <path class="scale__lift" fill="none" d="M 320 428 C 338 392 338 348 320 306" />
+            <path class="svg-hit" d="M 320 428 C 338 392 338 348 320 306" />
+          </g>
+          <g data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний.">
+            <path class="scale__lift scale__lift--relay" fill="none" d="M 310 240 C 322 208 400 196 452 190" />
+            <path class="svg-hit" d="M 310 240 C 322 208 400 196 452 190" />
+          </g>
 
-          <text class="scale__note" x="274" y="334" text-anchor="end">метод і досвід</text>
-          <text class="scale__note scale__note--up" x="346" y="334">перевірений урок</text>
-          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle">якщо доречно</text>
+          <text class="scale__note" x="274" y="334" text-anchor="end" data-tip="Униз ідуть метод і попередній досвід. Обидва потрапляють у сесію ще до першого рядка реалізації.">метод і досвід</text>
+          <text class="scale__note scale__note--up" x="346" y="334" data-tip="Нагору піднімається перевірений урок. Лише те, що пакет перевірив, і лише після його закриття.">перевірений урок</text>
+          <text class="scale__note scale__note--relay" x="378" y="170" text-anchor="middle" data-tip="Пунктир, бо це умовний шлях. Урок доходить до іншого проєкту лише за явним рішенням і лише там, де він доречний.">якщо доречно</text>
 
-          <circle class="scale__core" cx="310" cy="266" r="42" data-tip="EIF, рівень фреймворку. Спільна операційна основа: онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички." />
-          <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+          <g data-tip="EIF, рівень фреймворку. Спільна операційна основа: онтологія, модель повноважень, правила, сценарії роботи, шаблони й навички.">
+            <circle class="scale__core" cx="310" cy="266" r="42" />
+            <text class="scale__core-label" x="310" y="272" text-anchor="middle">EIF</text>
+          </g>
 
-          <g class="scale__project scale__project--active"> data-tip="P1, проєкт із відкритою роботою. Задача, завелика для однієї сесії, стає пакетом сесій усередині цього репозиторію."
+          <g class="scale__project scale__project--active" data-tip="P1, проєкт із відкритою роботою. Задача, завелика для однієї сесії, стає пакетом сесій усередині цього репозиторію.">
             <circle cx="310" cy="442" r="17" />
             <text class="scale__node-label" x="310" y="447" text-anchor="middle">P1</text>
           </g>
-          <g class="scale__project"> data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку."
+          <g class="scale__project" data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку.">
             <circle cx="158" cy="178" r="15" />
             <text class="scale__node-label" x="158" y="183" text-anchor="middle">P2</text>
           </g>
-          <g class="scale__project scale__project--receiving"> data-tip="P4 отримує урок від P1. Він доходить лише туди, де він доречний, і ніколи автоматично."
+          <g class="scale__project scale__project--receiving" data-tip="P4 отримує урок від P1. Він доходить лише туди, де він доречний, і ніколи автоматично.">
             <circle cx="462" cy="178" r="15" />
             <text class="scale__node-label" x="462" y="183" text-anchor="middle">P4</text>
           </g>
-          <g class="scale__project"> data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку."
+          <g class="scale__project" data-tip="Інший репозиторій проєкту. Він має власну памʼять і власні правила пакетів, а спільним лишається тільки рівень фреймворку.">
             <circle cx="310" cy="90" r="15" />
             <text class="scale__node-label" x="310" y="95" text-anchor="middle">P3</text>
           </g>
@@ -1344,18 +1449,48 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           <circle class="scale__ripple scale__ripple--p1" cx="310" cy="442" r="17" fill="none" />
           <circle class="scale__ripple scale__ripple--p3" cx="462" cy="178" r="15" fill="none" />
 
-          <path class="scale__packet-rule" fill="none" data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж набуте пропонують нагору." d="M 196 502 L 196 492 L 424 492 L 424 502" />
-          <text class="scale__section-label" x="196" y="482">ПАКЕТ</text>
-          <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
-          <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
-          <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
-          <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
-          <circle class="scale__session scale__session--1" data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене." cx="238" cy="522" r="6" />
-          <circle class="scale__session scale__session--2" data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене." cx="310" cy="522" r="6" />
-          <circle class="scale__session scale__session--3" data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене." cx="382" cy="522" r="6" />
-          <text class="scale__section-label" x="196" y="546">СЕСІЇ</text>
+          <g data-tip="Пакет обʼєднує свої сесії. Вони йдуть по черзі, і він закривається раніше, ніж набуте пропонують нагору.">
+            <path class="scale__packet-rule" fill="none" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+            <path class="svg-hit" d="M 196 502 L 196 492 L 424 492 L 424 502" />
+          </g>
+          <text class="scale__section-label" x="196" y="482" data-tip="ПАКЕТ. Одна одиниця роботи, завелика для однієї сесії, зі своїми правилами відкриття й закриття.">ПАКЕТ</text>
+          <g data-tip="Звʼязок пакета з однією з його сесій.">
+            <line class="scale__stem" x1="310" y1="459" x2="310" y2="492" />
+            <line class="svg-hit" x1="310" y1="459" x2="310" y2="492" />
+          </g>
+          <g data-tip="Звʼязок пакета з однією з його сесій.">
+            <line class="scale__stem" x1="238" y1="492" x2="238" y2="516" />
+            <line class="svg-hit" x1="238" y1="492" x2="238" y2="516" />
+          </g>
+          <g data-tip="Звʼязок пакета з однією з його сесій.">
+            <line class="scale__stem" x1="310" y1="492" x2="310" y2="516" />
+            <line class="svg-hit" x1="310" y1="492" x2="310" y2="516" />
+          </g>
+          <g data-tip="Звʼязок пакета з однією з його сесій.">
+            <line class="scale__stem" x1="382" y1="492" x2="382" y2="516" />
+            <line class="svg-hit" x1="382" y1="492" x2="382" y2="516" />
+          </g>
+          <g data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене.">
+            <circle class="scale__session scale__session--1" cx="238" cy="522" r="6" />
+            <circle class="svg-hit svg-hit--dot" cx="238" cy="522" r="14" />
+          </g>
+          <g data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене.">
+            <circle class="scale__session scale__session--2" cx="310" cy="522" r="6" />
+            <circle class="svg-hit svg-hit--dot" cx="310" cy="522" r="14" />
+          </g>
+          <g data-tip="Одна сесія. Її міркування тимчасові, переживає її лише перевірене.">
+            <circle class="scale__session scale__session--3" cx="382" cy="522" r="6" />
+            <circle class="svg-hit svg-hit--dot" cx="382" cy="522" r="14" />
+          </g>
+          <text class="scale__section-label" x="196" y="546" data-tip="СЕСІЇ. Три запуски всередині цього пакета, по черзі.">СЕСІЇ</text>
 
-          <circle class="scale__curator-ring" cx="310" cy="266" r="62" data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і сам нічого не зливає." fill="none" />
+          <!-- The curator's tip is on its ring, not on the dot that travels
+               it: a 4px mark moving on a 27s cycle is not something anyone
+               should have to chase to read a label. -->
+          <g data-tip="Куратор. Стежить за станом самого рівня фреймворку у власному ритмі, поза будь-яким окремим підвищенням, і сам нічого не зливає.">
+            <circle class="scale__curator-ring" cx="310" cy="266" r="62" fill="none" />
+            <circle class="svg-hit" cx="310" cy="266" r="62" />
+          </g>
           <circle class="scale__curator-dot" cx="310" cy="204" r="4" />
 
           <circle class="scale__pulse scale__pulse--down" cx="0" cy="0" r="5" />
@@ -2209,8 +2344,25 @@ eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale en
           Клонування репозиторію дає онтологію, схеми, документи керування,
           пакет <code>eifctl</code> і один відтворюваний вертикальний зріз.
         </p>
-        <pre class="quickstart__command"><code>pip install .
+        <div class="code-block">
+          <pre class="quickstart__command"><code>pip install .
 eifctl init --project-name &lt;name&gt; --instance-path &lt;path&gt; --locale uk</code></pre>
+          <button
+            class="code-block__copy"
+            type="button"
+            data-copy-label="Копіювати"
+            data-copied-label="Скопійовано"
+            aria-label="Копіювати"
+          >
+            <svg class="code-block__icon code-block__icon--copy" viewBox="0 0 20 20" aria-hidden="true">
+              <rect x="7" y="7" width="9" height="10" rx="1.5" />
+              <path d="M13 5.5V4.5A1.5 1.5 0 0 0 11.5 3H5.5A1.5 1.5 0 0 0 4 4.5v7A1.5 1.5 0 0 0 5.5 13h1" />
+            </svg>
+            <svg class="code-block__icon code-block__icon--done" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M4.5 10.5 8 14l7.5-8" />
+            </svg>
+          </button>
+        </div>
         <p>
           Перший рядок встановлює команду <code>eifctl</code> із клонованого
           репозиторію. Другий створює окремий екземпляр проєкту, готовий до

@@ -39,17 +39,39 @@
   cursor: help;
 }
 
-/* Only the shape under the pointer lifts, so the figure answers rather than
-   lighting up. Transform on an SVG child needs its own box as the origin,
-   otherwise it scales about the whole viewBox and the shape jumps across the
-   drawing. */
+/* A 1px dashed stroke is not a hover target anyone can hit. Every thin line
+   that carries a tip gets an invisible twin at 18 units of the viewBox laid
+   over it, and the tip sits on the group holding both, so the wide twin and
+   the drawn shape answer the same. `pointer-events: stroke` rather than
+   `all`, or the twin's own (empty) fill area would swallow hovers meant for
+   whatever sits inside a large circle. */
+.svg-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 18;
+  pointer-events: stroke;
+}
+
+/* Dots are small and stationary; a filled disc reads better than a ring for
+   them, and 14 units is a comfortable target around a 6-unit mark. */
+.svg-hit--dot {
+  fill: transparent;
+  stroke: none;
+  pointer-events: fill;
+}
+
+/* The whole group answers, so the group takes the cursor. */
 svg [data-tip] {
-  transform-box: fill-box;
-  transform-origin: center;
+  cursor: help;
+}
+
+/* The shape under the pointer brightens, so the figure answers rather than
+   lighting up as a whole. */
+svg [data-tip] > :not(.svg-hit) {
   transition: opacity var(--eif-duration-fast) var(--eif-ease);
 }
 
-svg [data-tip]:hover {
+svg [data-tip]:hover > :not(.svg-hit) {
   opacity: 1;
 }
 

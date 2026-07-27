@@ -8,6 +8,7 @@ import './styles/content.css';
 import './styles/reveal.css';
 import './styles/motion.css';
 import './styles/figure-tip.css';
+import './styles/code-block.css';
 import './styles/lang-toggle.css';
 
 // Collapse enhanced disclosures only after the main module and its styles
@@ -258,6 +259,63 @@ function initFigureTips() {
   };
 }
 
+// --- Copy button on command blocks. Progressive enhancement: the button is
+// hidden by CSS until .js is on, so a reader without a script sees the
+// commands rather than a control that cannot work.
+//
+// The confirmation is the button itself changing, not a toast. Two labels
+// ship as attributes so the swap is a class change and an aria-label, with
+// nothing to construct at click time and nothing to translate here.
+// navigator.clipboard is unavailable on an insecure origin and can be denied
+// by permission policy, and in both cases it rejects rather than degrading.
+// The selection-based path still works there, so a button that looks like it
+// copies actually copies instead of silently doing nothing.
+async function writeClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    // fall through
+  }
+
+  const staging = document.createElement('textarea');
+  staging.value = text;
+  staging.setAttribute('readonly', '');
+  staging.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
+  document.body.append(staging);
+  staging.select();
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch {
+    copied = false;
+  }
+  staging.remove();
+  return copied;
+}
+
+function initCopyButtons() {
+  document.querySelectorAll('.code-block__copy').forEach((button) => {
+    const block = button.closest('.code-block');
+    const code = block?.querySelector('code');
+    if (!code) return;
+
+    let resetTimer;
+    button.addEventListener('click', async () => {
+      // Confirm nothing unless something was actually copied. A check mark
+      // over an empty clipboard is worse than no button.
+      if (!(await writeClipboard(code.innerText.trim()))) return;
+      clearTimeout(resetTimer);
+      button.classList.add('is-copied');
+      button.setAttribute('aria-label', button.dataset.copiedLabel);
+      resetTimer = setTimeout(() => {
+        button.classList.remove('is-copied');
+        button.setAttribute('aria-label', button.dataset.copyLabel);
+      }, 2000);
+    });
+  });
+}
+
 const REINIT_HANDLERS = {
   loop: initLoopScene,
   reveal: initRevealRows,
@@ -295,10 +353,11 @@ function initLanguageToggle() {
       if (block.dataset.i18nReinit) kinds.add(block.dataset.i18nReinit);
     });
     kinds.forEach((kind) => REINIT_HANDLERS[kind]?.());
-    // Unconditional: tooltip text lives inside the swapped markup, so every
-    // figure on the page needs rebinding after a language change, not only
-    // the blocks that declare a reinit handler of their own.
+    // Unconditional: tooltip text and the copy button's own labels live
+    // inside the swapped markup, so both need rebinding after a language
+    // change, not only the blocks that declare a reinit handler.
     initFigureTips();
+    initCopyButtons();
   }
 
   function setLanguage(next) {
@@ -333,3 +392,4 @@ initRevealRows();
 initLanguageToggle();
 initHeroFigure();
 initFigureTips();
+initCopyButtons();

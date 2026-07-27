@@ -1,0 +1,87 @@
+/* A command block with its own copy button, in the corner of the block
+   rather than floating beside it. The button is always visible: revealing it
+   on hover is the common pattern and it hides the one affordance the block
+   has from anyone who does not think to hover, including every touch
+   reader. */
+.code-block {
+  position: relative;
+  max-width: var(--eif-content-max);
+  /* The <pre> used to carry the surrounding space itself; zeroing its margin
+     to fit the button moved that job here. */
+  margin: var(--eif-space-3) 0;
+}
+
+.code-block .quickstart__command {
+  margin: 0;
+  padding-right: 3.5rem;
+}
+
+.code-block__copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* 44px coarse-pointer target (D-07) at a 32px visual size: the padding
+     carries the difference so the button does not sit as a large slab on
+     top of the first line of the command. */
+  width: 44px;
+  height: 44px;
+  padding: 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--eif-fg-muted);
+  cursor: pointer;
+  transition: color var(--eif-duration-fast) var(--eif-ease),
+    border-color var(--eif-duration-fast) var(--eif-ease),
+    background-color var(--eif-duration-fast) var(--eif-ease);
+}
+
+.code-block__copy:hover,
+.code-block__copy:focus-visible {
+  color: var(--eif-fg);
+  border-color: var(--eif-rule);
+  background: color-mix(in srgb, var(--eif-fg) 5%, transparent);
+}
+
+.code-block__copy.is-copied {
+  color: var(--eif-accent);
+  border-color: var(--eif-accent);
+}
+
+.code-block__icon {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* One button, two glyphs, swapped by state. Both ship in the markup so the
+   confirmation does not wait on anything being created at click time. */
+.code-block__icon--done {
+  display: none;
+}
+
+.code-block__copy.is-copied .code-block__icon--copy {
+  display: none;
+}
+
+.code-block__copy.is-copied .code-block__icon--done {
+  display: block;
+}
+
+/* Without a script the button cannot copy anything, so it is not shown at
+   all rather than presented as a control that silently does nothing. The
+   commands themselves stay selectable. */
+.code-block__copy {
+  display: none;
+}
+
+.js .code-block__copy {
+  display: inline-flex;
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engineering-intelligence-framework.dev/schemas/workspace-lock.schema.json",
+  "title": "EIF materialized private workspace lock",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["lock_schema_version", "workspace", "bundle", "generated_at"],
+  "properties": {
+    "lock_schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision", "profile"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "profile": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        }
+      }
+    },
+    "bundle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "manifest", "digest"],
+      "properties": {
+        "path": {
+          "const": ".eif/workspace-runtime"
+        },
+        "manifest": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256", "kind", "name", "mode"],
+            "properties": {
+              "path": {
+                "type": "string",
+                "pattern": "^(rules|skills|playbooks|templates|knowledge)/[A-Za-z0-9._/-]+$"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["rule", "skill", "playbook", "template", "knowledge"]
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+              },
+              "mode": {
+                "type": "string",
+                "enum": ["required", "default", "optional"]
+              }
+            }
+          }
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        }
+      }
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

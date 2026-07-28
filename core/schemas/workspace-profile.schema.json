@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engineering-intelligence-framework.dev/schemas/workspace-profile.schema.json",
+  "title": "EIF private workspace profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "name", "framework", "artifacts"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "framework": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires"],
+      "properties": {
+        "requires": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "name", "path", "mode"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["rule", "skill", "playbook", "template", "knowledge"]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^(rules|skills|playbooks|templates|knowledge)/[A-Za-z0-9._/-]+$"
+          },
+          "mode": {
+            "type": "string",
+            "enum": ["required", "default", "optional"]
+          }
+        }
+      }
+    }
+  }
+}

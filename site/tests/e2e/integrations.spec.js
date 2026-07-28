@@ -16,10 +16,13 @@ test.describe('optional capabilities', () => {
     // guidance and a template, it does not configure the MCP server.
     await expect(rows.nth(2)).toContainText('EIF does not install it');
     // The bridge table was a third restatement of the flow figure and these
-    // rows; it is gone, and the core path is named in the figure's legend.
+    // rows; it is gone, and the fallback path is named in the figure's legend.
     await expect(page.locator('#integrations .capability-map')).toHaveCount(0);
+    await expect(page.locator('#integrations .capabilities__lead h3')).toHaveText(
+      'Every tool has a fallback path when it is unavailable',
+    );
     await expect(page.locator('#integrations .capabilities > .figure-legend')).toContainText(
-      'core path',
+      'fallback path',
     );
   });
 
@@ -59,6 +62,9 @@ test.describe('optional capabilities', () => {
   test('boundary tags translate with the rest of the section', async ({ page }) => {
     await page.goto('/#integrations');
     await page.locator('#lang-toggle').click();
+    await expect(page.locator('#integrations .capabilities__lead h3')).toHaveText(
+      'Для кожного інструмента є резервний шлях на випадок недоступності',
+    );
     const tags = page.locator('#integrations .cap-tag');
     await expect(tags.nth(0)).toHaveText('Локально');
     await expect(tags.nth(2)).toHaveText('Мережа');

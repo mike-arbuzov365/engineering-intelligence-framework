@@ -315,8 +315,8 @@
   }
 
   /* Optional capabilities: one row per tool, taken in turn on an 18s cycle.
-     In each row the solid route and its dashed core path run at the same
-     pace and arrive together - the claim is that the core path exists, not
+     In each row the solid route and its dashed fallback path run at the same
+     pace and arrive together - the claim is that the fallback path exists, not
      that it is slower. The only asymmetry drawn is RTK's: some of what
      enters stops at the gate, which is compression, the one thing here that
      is actually measured. */

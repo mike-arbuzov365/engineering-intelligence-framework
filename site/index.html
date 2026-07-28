@@ -388,8 +388,8 @@
                 <p>
                   <strong>Retrieval, not recall.</strong> A session opens by
                   searching durable knowledge for prior lessons, rejected
-                  approaches and repeat failures. Skipping it because a task
-                  looks simple is the anti-pattern the playbook names first.
+                  approaches and repeat failures. Work under EIF begins with
+                  this step, even when a task looks simple.
                 </p>
               </li>
               <li class="ledger__outcome ledger__outcome--packet">
@@ -879,7 +879,7 @@
                the way it reads on a phone, which is where it was working.
 
                All three capabilities in one shape: a solid route with the
-               tool, a dashed core path without it, both arriving at the same
+               tool, a dashed fallback path without it, both arriving at the same
                place. The tool names are proper nouns and read the same in
                both languages, so the SVG needs no translation. Deliberately
                shows no quantity anywhere: CLM-06 permits saying compression
@@ -887,9 +887,9 @@
           <div class="capabilities">
             <div class="capabilities__lead">
               <span class="label label--accent">What happens when one is missing</span>
-              <h3>Every tool has a named path that runs without it</h3>
+              <h3>Every tool has a fallback path when it is unavailable</h3>
               <p>
-                EIF takes the core path and reports the tool as unavailable
+                EIF takes the fallback path and reports the tool as unavailable
                 instead of quietly substituting a guess: source search
                 instead of the graph, unfiltered output instead of
                 compression, local documentation instead of a live lookup.
@@ -941,7 +941,7 @@
                  right had no key at all. -->
             <ul class="figure-legend">
               <li class="figure-legend__item">Solid: the route with the tool available.</li>
-              <li class="figure-legend__item figure-legend__item--dashed">Dashed: the core path that runs without it. Both arrive.</li>
+              <li class="figure-legend__item figure-legend__item--dashed">Dashed: the fallback path used when the tool is unavailable. Both routes arrive.</li>
               <li class="figure-legend__item figure-legend__item--dotted-warn">Amber: the two boundaries. RTK drops output before it costs context; only Context7 leaves this computer.</li>
               <li class="figure-legend__item figure-legend__item--box">The box on the right is the context the agent has to spend.</li>
             </ul>
@@ -1445,13 +1445,13 @@ pip install .</code></pre>
       <template data-i18n-id="methodology.body">
         <div class="section__head">
           <span class="label">02 &middot; Методологія</span>
-          <h2 id="methodology-heading">Інженерний інтелект робить досвід повторно використовуваним</h2>
+          <h2 id="methodology-heading">Інженерний інтелект - це система навколо агента</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-15">
-          Під час закриття сесія створює Knowledge Delta. Цей артефакт EIF
-          фіксує зміни у знаннях. Його перевіряють, залишають у проєкті або
-          явно підвищують до правила, сценарію роботи, шаблону чи навички
-          агента.
+          EIF задає керований потік навчання: перевірений Knowledge Delta сесії
+          можна класифікувати, перевірити, залишити в проєкті або підвищити до
+          рівня повторно використовуваних правил, сценаріїв роботи, шаблонів і
+          навичок агента.
         </p>
         <div class="methodology__definition" data-claim-id="CLM-15">
           <div class="methodology__lead">
@@ -1492,7 +1492,7 @@ pip install .</code></pre>
           <h2 id="layers-heading">Три рівні інженерного інтелекту</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-13">
-          EIF розділяє повторно використовувану методологію, стійке знання
+          EIF відокремлює повторно використовувану методологію, стійке знання
           проєкту й тимчасовий контекст сесії. Knowledge Delta визначає, чи
           переходить знання на інший рівень.
         </p>
@@ -1539,7 +1539,7 @@ pip install .</code></pre>
         <figure class="ledger" data-claim-id="CLM-15">
           <figcaption class="ledger__caption">
             <span class="label label--accent">Дві сесії одного пакета</span>
-            <h3>Сесія отримує досвід до початку роботи</h3>
+            <h3>Сесія отримує досвід до початку реалізації</h3>
             <p>
               Схема показує шлях одного пакета через дві сесії. Вона пояснює,
               що сесії отримують до реалізації, що зберігається після закриття
@@ -1631,9 +1631,9 @@ pip install .</code></pre>
               <span class="label">До реалізації</span>
               <p>
                 <strong>Спочатку пошук.</strong> Сесія шукає в стійкому знанні
-                попередні уроки, відхилені підходи й повторювані збої. Плейбук
-                вважає пропуск цього кроку для «простого» завдання
-                антипатерном.
+                попередні уроки, відхилені підходи й повторювані збої. Робота за
+                EIF починається з цього кроку, навіть якщо завдання здається
+                простим.
               </p>
             </li>
             <li class="ledger__outcome ledger__outcome--packet">
@@ -1692,7 +1692,7 @@ pip install .</code></pre>
                 <strong>Підвищення рівня потребує рішення.</strong> Урок доходить до рівня фреймворку лише за явним рішенням. До іншого проєкту він переходить, лише якщо доречний.
               </li>
               <li class="figure-legend__item figure-legend__item--dot-warn">
-                <strong>Куратор працює окремо.</strong> Амброва крапка показує цикл догляду за фреймворком. Куратор стежить за його станом, але сам нічого не підвищує.
+                <strong>Куратор постійно стежить за станом фреймворку.</strong> Бурштинова крапка рухається навколо центра й показує окремий безперервний цикл перевірки. Куратор виявляє проблеми, але сам не зливає зміни.
               </li>
             </ul>
           </figcaption>
@@ -1743,7 +1743,7 @@ pip install .</code></pre>
       <template data-i18n-id="session.body">
         <div class="section__head">
           <span class="label">05 &middot; Сесія</span>
-          <h2 id="session-heading">Сесія обмежує роботу й фіксує навчання</h2>
+          <h2 id="session-heading">Сесія - це одиниця контрольованої роботи й навчання</h2>
         </div>
         <p class="section__lede" data-claim-id="CLM-14">
           Перед нетривіальною роботою EIF вимагає знайти попередній досвід.
@@ -1977,10 +1977,10 @@ pip install .</code></pre>
           <div class="capabilities">
             <div class="capabilities__lead">
               <span class="label label--accent">Що відбувається, коли інструмента немає</span>
-              <h3>У кожного інструмента є названий шлях, який працює без нього</h3>
+              <h3>Для кожного інструмента є резервний шлях на випадок недоступності</h3>
               <p>
                 Якщо інструмент недоступний, EIF прямо про це повідомляє й
-                переходить на базовий шлях. Це пошук у вихідних файлах замість
+                переходить на резервний шлях. Це пошук у вихідних файлах замість
                 графа, нефільтрований вивід замість стиснення або локальна
                 документація замість запиту в мережу.
               </p>
@@ -2011,7 +2011,7 @@ pip install .</code></pre>
               <line class="cap-flow__route cap-flow__route--external" data-tip="Єдиний відрізок, який виходить за межі цього компʼютера. Запит Context7 іде до зовнішньої служби документації, а вихідний код фреймворк не надсилає." x1="300" y1="206" x2="392" y2="206" />
               <line class="cap-flow__gate" x1="300" y1="186" x2="300" y2="220" />
               <text class="cap-flow__note" x="300" y="178" text-anchor="middle">іде в мережу</text>
-              <line class="cap-flow__core" x1="92" y1="234" data-tip="Без Context7: локальна документація або знання з навчання, і про недоступність провайдера повідомляють прямо, а не підміняють її тихо." x2="392" y2="234" />
+              <line class="cap-flow__core" x1="92" y1="234" data-tip="Без Context7 EIF використовує локальну документацію або знання моделі. Про недоступність провайдера повідомляють прямо." x2="392" y2="234" />
 
               <rect class="cap-flow__context" data-tip="Вікно контексту агента. Усе, що сюди потрапляє, вже оплачено токенами." x="400" y="20" width="34" height="228" rx="8" />
 
@@ -2026,7 +2026,7 @@ pip install .</code></pre>
 
             <ul class="figure-legend">
               <li class="figure-legend__item">Суцільна лінія показує маршрут із доступним інструментом.</li>
-              <li class="figure-legend__item figure-legend__item--dashed">Пунктир показує базовий шлях без інструмента. Обидва маршрути доходять до результату.</li>
+              <li class="figure-legend__item figure-legend__item--dashed">Пунктир показує резервний шлях, коли інструмент недоступний. Обидва маршрути доходять до результату.</li>
               <li class="figure-legend__item figure-legend__item--dotted-warn">Бурштиновим позначено дві межі. RTK відкидає вивід до його потрапляння в контекст. Із трьох інструментів лише Context7 виходить за межі цього комп&rsquo;ютера.</li>
               <li class="figure-legend__item figure-legend__item--box">Прямокутник праворуч показує контекст, який агент має витратити.</li>
             </ul>
@@ -2136,7 +2136,7 @@ pip install .</code></pre>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-01">
               <p>Пошук працює без мережі за індексом проєкту й враховує схему та стан кожного артефакту. Відхилені й замінені артефакти лишаються читабельними, але за замовчуванням не потрапляють у видачу. Стани <code>unparseable</code>, <code>schema-invalid</code> і <code>not-found</code> повертаються окремо. Українські артефакти індексуються нарівні з англійськими.</p>
-              <p><strong>Межі:</strong> це збіг за словами й підрядками, а не пошук за змістом. Жодної зовнішньої служби, і нічого не виходить за межі машини.</p>
+              <p><strong>Межі:</strong> це збіг за словами й підрядками, а не пошук за змістом. Зовнішні служби не використовуються. Нічого не виходить за межі машини.</p>
             </div>
           </li>
           <li class="reveal">

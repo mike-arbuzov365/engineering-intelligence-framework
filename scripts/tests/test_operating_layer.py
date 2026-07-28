@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
@@ -112,12 +113,17 @@ def check_bounded_loop_contract() -> list[Result]:
         "Session layer: .session-context is gitignored",
         ".session-context/" in gitignore,
     ))
-    session_context = FRAMEWORK_ROOT / ".session-context"
-    committed_like_files = list(session_context.glob("*.md")) if session_context.exists() else []
+    tracked_session_context = subprocess.run(
+        ["git", "ls-files", "--", ".session-context"],
+        cwd=FRAMEWORK_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     results.append(check(
-        "Session layer: repository contains no durable session-context files",
-        not committed_like_files,
-        ", ".join(p.name for p in committed_like_files),
+        "Session layer: repository tracks no ephemeral session-context files",
+        not tracked_session_context,
+        tracked_session_context,
     ))
     runtime_docs = (
         "docs/architecture/HOW-EIF-WORKS.md",
@@ -193,6 +199,47 @@ def check_planning_chain_contract() -> list[Result]:
     return results
 
 
+def check_private_workspace_layer_contract() -> list[Result]:
+    results: list[Result] = []
+    architecture = (
+        FRAMEWORK_ROOT / "docs" / "architecture" / "HOW-EIF-WORKS.md"
+    ).read_text(encoding="utf-8")
+    decisions = (
+        FRAMEWORK_ROOT / "core" / "policies" / "decisions.md"
+    ).read_text(encoding="utf-8")
+    site_claims = (
+        FRAMEWORK_ROOT / "site" / "src" / "content" / "claims.json"
+    ).read_text(encoding="utf-8")
+
+    results.append(check(
+        "private workspace: architecture keeps workspace inside L2",
+        "optional durable scope inside this\n  layer" in architecture
+        and "does not create a fourth layer" in architecture,
+    ))
+    results.append(check(
+        "private workspace: public EIF remains the only distribution",
+        "not a copy\nof the framework" in architecture
+        and "only framework distribution" in decisions,
+    ))
+    results.append(check(
+        "private workspace: D-18 limits its D-17 supersession",
+        "Partially supersedes D-17\nonly for registry storage and workspace propagation"
+        in decisions,
+    ))
+    results.append(check(
+        "private workspace: promotion remains explicit across scopes",
+        "L3 session -> L2 project -> L2 private workspace -> L1 public framework"
+        in architecture
+        and architecture.count("explicit") >= 3,
+    ))
+    results.append(check(
+        "private workspace: site claim still presents exactly three layers",
+        "into three layers" in site_claims
+        and "four layers" not in site_claims.casefold(),
+    ))
+    return results
+
+
 def main() -> int:
     all_results = (
         check_playbooks()
@@ -200,6 +247,7 @@ def main() -> int:
         + check_skills()
         + check_bounded_loop_contract()
         + check_planning_chain_contract()
+        + check_private_workspace_layer_contract()
     )
     for _, line in all_results:
         print(line)

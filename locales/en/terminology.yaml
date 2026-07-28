@@ -74,6 +74,18 @@ terms:
   benchmark:
     preferred: "benchmark"
     class: "industry-established"
+  private_workspace:
+    preferred: "private workspace"
+    class: "eif-defined"
+  project_registry:
+    preferred: "project registry"
+    class: "industry-established"
+  workspace_profile:
+    preferred: "workspace profile"
+    class: "eif-defined"
+  workspace_materialization:
+    preferred: "workspace materialization"
+    class: "industry-established"
   engineering_intelligence:
     preferred: "Engineering Intelligence"
     class: "eif-defined"

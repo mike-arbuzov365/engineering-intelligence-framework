@@ -69,7 +69,7 @@ const SOCIAL_CARD_HTML = `<!doctype html><html><head><meta charset="utf-8" />
 <body>
   <div class="card">
     <div class="mark">${faviconSvg}</div>
-    <p class="eyebrow">Engineering Intelligence Framework &middot; v0.1.1</p>
+    <p class="eyebrow">Engineering Intelligence Framework &middot; v0.2.0</p>
     <h1>A quality-first control plane<br />for governed AI-agent<br />software development.</h1>
     <p>Persistent engineering knowledge, explicit source identity, controlled execution and evidence, not chat history.</p>
   </div>
@@ -114,7 +114,7 @@ const GITHUB_PREVIEW_HTML = `<!doctype html><html><head><meta charset="utf-8" />
       <div class="rule"></div>
       <h1>Engineering<br />Intelligence Framework</h1>
       <p>A quality-first control plane for governed AI-agent software development.</p>
-      <p class="foot">v0.1.1 &nbsp;&middot;&nbsp; Apache-2.0 &nbsp;&middot;&nbsp; Python 3.11+</p>
+      <p class="foot">v0.2.0 &nbsp;&middot;&nbsp; Apache-2.0 &nbsp;&middot;&nbsp; Python 3.11+</p>
     </div>
     <div class="orbit">${orbitSvg}</div>
   </div>

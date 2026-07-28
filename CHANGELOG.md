@@ -15,6 +15,56 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-28
+
+First private-workspace release. It adds an optional user-owned workspace
+inside the project intelligence layer. The public EIF package remains the
+only framework distribution.
+
+### Added
+
+- `eifctl workspace new|doctor` creates and verifies a local private
+  workspace repository without creating a remote, choosing visibility,
+  pushing, or publishing anything.
+- Registry schema v2 keeps stable logical project identities in committed
+  state and moves machine-local paths into a separate ignored locations
+  file. A named dry-run-first v1-to-v2 migration rolls both files back on
+  failure.
+- Workspace profiles resolve required, default, optional, and explicitly
+  overridden artifacts. Selected content is staged, hashed, verified, and
+  materialized into each project with a separate workspace lock.
+- Fleet planning now compares framework and workspace provenance
+  independently, preflights every active project before the first write,
+  and reports the exact completed, failed-axis, and untouched sets.
+- `eifctl projects detach` removes only workspace-managed runtime and lock
+  files. It is plan-only by default and keeps the logical registration
+  unless removal is explicitly requested.
+- Synthetic workspace, resolution, transaction, fleet, migration, and
+  installed-wheel coverage.
+
+### Changed
+
+- Ratified D-18 defines the private workspace as optional durable scope
+  inside L2, not a fourth intelligence layer or a private framework fork.
+- `eifctl` now exposes 11 commands, adding `workspace`.
+- Project lifecycle documentation now distinguishes the public framework
+  update axis from the private workspace update axis and documents the
+  migration ledger and review boundary.
+
+### Fixed
+
+- Pinned-runtime verification now disables bytecode writes, so a fleet
+  dry-run does not leave `__pycache__` in a connected project.
+
+### Known limitations
+
+- Workspace profiles and fleet coordination are experimental within 0.x.
+- EIF does not create GitHub repositories, choose their visibility, or push
+  project history.
+- Fleet apply is preflighted but is not atomic across repositories. Earlier
+  successful projects remain updated if a later apply fails.
+- The package remains distributed through GitHub Releases, not PyPI.
+
 ## [0.1.3] - 2026-07-28
 
 Small planning-continuity patch. It adds the missing steps between a raw
@@ -559,7 +609,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.0
 [0.1.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1

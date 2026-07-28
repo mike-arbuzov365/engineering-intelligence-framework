@@ -3,7 +3,7 @@
 <!-- Canonical source document. README, website copy, articles, diagrams,
 FAQ, and launch posts should all derive from this file, not diverge from it. -->
 
-**Status: v0.1.0, released 2026-07-27** (revised across two independent
+**Status: v0.2.0, released 2026-07-28** (revised across two independent
 review passes, both 2026-07-15 - see
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for what
 that review changed). Extracted and genericized from a private production
@@ -128,9 +128,10 @@ workspace follows the same rule: it references a released EIF package and
 keeps only user-owned workspace rules, skills, playbooks, templates,
 knowledge, profiles and project identities.
 
-This is the ratified architecture contract for the 0.2.0 vertical slice.
-It is not an Available CLI capability until the workspace commands, schemas
-and behavioral tests described by that release are present.
+This is the ratified architecture contract implemented by the 0.2.0
+vertical slice. The workspace commands, schemas, migrations, transactions,
+fleet behavior, and synthetic tests are present. The capability remains
+experimental within 0.x.
 
 ## The three-layer context model
 

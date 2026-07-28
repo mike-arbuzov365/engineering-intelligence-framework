@@ -58,23 +58,32 @@ source produced the current instance and lets `eifctl doctor`
 | `bundle.manifest` / `bundle.digest` | Every file copied from the framework source into this instance's pinned runtime bundle, individually hashed, plus one combined digest - `doctor` re-verifies every file's hash, not just the combined digest, so a single tampered or corrupted file is caught precisely. |
 | `knowledge_index` | Present only when `eif_init.py` actually created or regenerated a knowledge index this run - lets `doctor` detect a hand-edited index (hash mismatch) or one that lost its ownership marker. |
 
-## Private project registry
+## Private workspace configuration
 
-`.eif/projects.yaml` is not part of a project instance. It is a user-owned
-inventory for a private control repository:
+A workspace is an EIF project instance with four additional contracts:
 
-```yaml
-schema_version: 1
-projects:
-  - name: project-a
-    path: ../../project-a
-```
+| File | Committed? | Purpose |
+|---|---|---|
+| `.eif/workspace.yaml` | yes, private | Opaque workspace identity and roots for registry, profiles, and workspace content |
+| `.eif/projects.yaml` | yes, private | Registry v2 logical identities, profile selection, status, and declared exceptions, with no machine paths |
+| `.eif/local-state/project-locations.yaml` | no | Machine-local path mapping keyed by stable project ID |
+| `workspace/profiles/*.yaml` | yes, private | Deterministic required, default, optional, and override artifact selection |
 
-The schema is
-[`core/schemas/project-registry.schema.json`](../../core/schemas/project-registry.schema.json).
-Paths are stored relative to the registry where the filesystem permits it.
-Use `eifctl projects add`, `remove`, `status`, and `upgrade` rather than
-editing the file during an update workflow.
+The enforced schemas are
+[`workspace-config.schema.json`](../../core/schemas/workspace-config.schema.json),
+[`project-registry.schema.json`](../../core/schemas/project-registry.schema.json),
+[`project-locations.schema.json`](../../core/schemas/project-locations.schema.json),
+and
+[`workspace-profile.schema.json`](../../core/schemas/workspace-profile.schema.json).
+Use `eifctl workspace new|doctor` and `eifctl projects` commands rather than
+hand-editing state during creation, migration, fleet update, or detach.
+
+Each connected project receives a generated
+`.eif/workspace.lock.yaml`, validated by
+[`workspace-lock.schema.json`](../../core/schemas/workspace-lock.schema.json).
+It records workspace identity, revision, selected profile, overrides,
+exceptions, and selected artifact hashes, but no local path or credential.
+The corresponding `.eif/workspace-runtime/` is ignored and regenerable.
 
 ## Validating your own config
 

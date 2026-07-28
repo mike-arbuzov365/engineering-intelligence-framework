@@ -19,7 +19,7 @@ an OBSERVED label read from the code itself. -->
 
 # Release status
 
-Where the current v0.1 line actually stands, and everything the website used to say
+Where the current 0.x line actually stands, and everything the website used to say
 about its own release status, in one place off the page.
 
 The website is a description of the framework, not a status board for it.
@@ -62,13 +62,12 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.1.3` in [`pyproject.toml`](../../pyproject.toml) is a
-  locally validated release candidate dated 2026-07-28 in
-  [`CHANGELOG.md`](../../CHANGELOG.md). It is not tagged or published yet.
-  The latest public version remains `v0.1.1`.
+- **Version.** `0.2.0` in [`pyproject.toml`](../../pyproject.toml) is dated
+  2026-07-28 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
+  GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.0)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
@@ -86,11 +85,13 @@ the page does not make: no timing figure appears anywhere on it.
   nothing in this repository performs it. That is the same boundary
   everything else here observes: EIF generates what a person then chooses
   to run.
-- **Project lifecycle commands are included.** `eifctl new` creates a local
-  git repository; `eifctl projects add` connects an existing EIF instance
-  to a private registry; `eifctl upgrade` and `eifctl projects upgrade`
-  provide plan-before-apply updates from the installed release package. See
-  the [`project lifecycle guide`](../guides/project-lifecycle.md).
+- **Private-workspace and project lifecycle commands are included.**
+  `eifctl workspace new` creates a local user-owned workspace inside L2;
+  `eifctl new` creates a local project repository; `eifctl projects add`
+  connects an existing EIF instance; and the upgrade commands plan before
+  applying separate framework and workspace provenance axes. Detach removes
+  only workspace-managed state. See the
+  [`project lifecycle guide`](../guides/project-lifecycle.md).
 - **Adapter scope is frozen** at four adapters - Claude Code, Cursor, Codex
   and Hermes - and all four are supported (D-16, 2026-07-27, retiring the
   two-tier split D-09 recorded). See [`ROADMAP.md`](../../ROADMAP.md).

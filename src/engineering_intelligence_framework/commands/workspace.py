@@ -251,7 +251,7 @@ def workspace_problems(
             problems.append(
                 f"active project has no machine-local location: {project['name']}"
             )
-        if location is not None:
+        if project["status"] == "active" and location is not None:
             for problem in verify_workspace_materialization(location):
                 problems.append(f"{project['name']}: {problem}")
 

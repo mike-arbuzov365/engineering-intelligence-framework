@@ -16,7 +16,8 @@ experimental. -->
 Status: **experimental**. Describes how a project instance records where it
 came from and how it is upgraded. The installable-package distribution model
 is ratified in D-05/D-08. D-17 defines the user-owned private project
-registry and update workflow.
+registry and update workflow. D-18 defines the optional private workspace
+scope inside L2.
 
 ## What a project instance is
 
@@ -28,6 +29,8 @@ A project instance is any repository initialized (or adopted) by
 | `.eif/config.yaml` | **you** (created once by eif_init, never overwritten without `--force`) | yes | Desired settings: project name, adapter choice, locale, governance, privacy, integrations |
 | `.eif/framework.lock.yaml` | **EIF** (fully regenerated every init/upgrade) | yes | Exact provenance: framework commit, dirty flag, hashed bundle manifest, generated adapter entrypoint, timestamp |
 | `.eif/runtime/` | **EIF** (fully regenerated every init/upgrade) | **no** (gitignored - see below) | Pinned *source* bundle of the scripts/schemas/ontology/locales/templates the instance's own commands run against. Still needs `pip install -r .eif/runtime/requirements.txt` - not a self-contained interpreter environment. |
+| `.eif/workspace.lock.yaml` | **EIF workspace materializer** | yes, when connected | Separate private-workspace provenance: opaque workspace identity, revision, selected profile, overrides, exceptions, and artifact hashes. Contains no path or credential. |
+| `.eif/workspace-runtime/` | **EIF workspace materializer** | **no** (gitignored) | Pinned, selected workspace artifacts. Agents consume this copy, never the live workspace checkout. Absent when no workspace is connected or after detach. |
 | `CLAUDE.md` (EIF-managed block only) | split: EIF owns the marked block, you own everything else | yes | Agent entrypoint - the `EIF:BEGIN`/`EIF:END` block is regenerated on upgrade, content outside it is never touched |
 | `knowledge/` | **you** | yes | The instance's own knowledge artifacts - never modified by init or upgrade |
 | `.gitignore` (EIF-managed block only) | split, same pattern as CLAUDE.md | yes | Ignores `.eif/runtime/`, `.eif/runtime.next/`, `.eif/runtime.previous/`, `*.bak-*` so the regenerable bundle and backups are never committed by accident |
@@ -96,24 +99,60 @@ sha256-hashed both from the source (building the manifest) and again after
 staging (`verify_staged_bundle`), so a copy-time corruption is caught before
 the bundle ever goes live.
 
-## Private project registry and fleet updates
+## Private workspace, registry and fleet updates
 
-`.eif/projects.yaml` is a user-owned registry that belongs in a private
-control repository. Its schema is
-[`project-registry.schema.json`](../../core/schemas/project-registry.schema.json).
-Each entry stores a unique project name and a local path. The registry is
-not part of a project instance and is never copied into the public EIF
-repository.
+The optional private workspace is an EIF project instance with additional
+user-owned workspace configuration and content. It is durable scope inside
+L2. It is not a second framework distribution and is deliberately excluded
+from its own registry.
 
-`eifctl projects upgrade` is plan-only by default. With `--apply`, it
-preflights every registered project before the first write, including dirty
-working-tree refusal and current-runtime verification. It then applies the
-same single-project transaction described below to each project in order.
+The workspace separates committed logical state from machine-local state:
+
+| Path | Owner | Committed? | Purpose |
+|---|---|---|---|
+| `.eif/workspace.yaml` | user | yes, private | Workspace identity plus registry, profile, and content roots |
+| `.eif/projects.yaml` | user | yes, private | Registry v2: stable project IDs, names, selected profiles, status, and declared exceptions, with no filesystem paths |
+| `.eif/local-state/project-locations.yaml` | user/machine | no | Local path mapping keyed by stable project ID |
+| `workspace/profiles/*.yaml` | user | yes, private | Required, default, optional, and explicitly overridden artifact selection |
+| `planning/migration-ledger.md` | user | yes, private | Review record for changes that need project migrations |
+
+The public schemas are
+[`workspace-config.schema.json`](../../core/schemas/workspace-config.schema.json),
+[`project-registry.schema.json`](../../core/schemas/project-registry.schema.json),
+[`project-locations.schema.json`](../../core/schemas/project-locations.schema.json),
+and
+[`workspace-profile.schema.json`](../../core/schemas/workspace-profile.schema.json).
+A named v1-to-v2 registry migration is dry-run-first and commits the logical
+registry and locations file as one rollback unit.
+
+Workspace materialization resolves the selected profile deterministically,
+rejects undeclared collisions, stages the selected files, hashes each file
+and the combined manifest, verifies the stage, and then transactionally
+replaces `.eif/workspace-runtime/` and `.eif/workspace.lock.yaml`. Required
+artifacts may be omitted only through a schema-validated, named exception.
+Agents are instructed to read the pinned runtime, not the live workspace.
+
+`eifctl projects upgrade` is plan-only by default. It compares two
+independent provenance axes per active project:
+
+1. the installed public EIF version against `.eif/framework.lock.yaml`;
+2. the private workspace revision and profile against
+   `.eif/workspace.lock.yaml`.
+
+Before the first write it preflights every target, including dirty-tree
+refusal, current framework-runtime verification, workspace resolution, and
+workspace transaction staging. With `--apply`, it updates projects in order,
+framework axis first and workspace axis second.
 
 The fleet operation itself is not atomic across repositories. If a later
-apply fails, earlier successful projects remain updated, no later project
-is touched, and the command reports the completed set. Project commits
-therefore remain separate review and rollback units.
+apply fails, earlier successful projects remain updated, the failed axis is
+reported, and no later project is touched. Project commits remain separate
+review and rollback units.
+
+`eifctl projects detach` is also plan-only by default. Apply removes only
+`.eif/workspace-runtime/` and `.eif/workspace.lock.yaml`. It preserves
+project-owned content and keeps the logical entry as `detached` unless
+registration removal is explicitly requested.
 
 ## Transactional init/upgrade
 
@@ -273,11 +312,11 @@ Intentionally simple and conservative for v0.1:
   `core/schemas/framework-lock.schema.json`), so an instance is always
   checked against the framework version it is actually pinned to.
 
-No automatic cross-version config migration exists yet. The v0.1.1,
-v0.1.2 and v0.1.3 lifecycle updates handle the current compatible config
-and lock shapes. The first breaking shape change
-must ship a named, tested migration before the fleet update path can apply
-it.
+No automatic cross-version project-config migration exists yet. The v0.1.1
+through v0.1.3 project config and framework lock remain compatible with
+v0.2.0. Registry v1 has a named v1-to-v2 migration. Future breaking config,
+profile, workspace-lock, or knowledge-schema changes must ship a named,
+tested migration before the fleet update path can apply them.
 
 ## Adoption (existing repositories)
 

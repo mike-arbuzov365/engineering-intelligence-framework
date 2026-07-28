@@ -269,6 +269,7 @@
               <div>
                 <h3>Project layer</h3>
                 <p>Architecture, decisions, domain facts, incidents, risks and local conventions that belong to one project.</p>
+                <p data-claim-id="CLM-16">An optional private workspace can coordinate several projects inside L2. It selects and pins shared rules, skills, playbooks and templates into each project without becoming another layer or owning project content.</p>
               </div>
               <p class="layers__examples">What this system knows</p>
             </article>
@@ -1037,11 +1038,11 @@
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Install</span>
-                <span>An installable eifctl with ten commands</span>
+                <span>An installable eifctl with eleven commands</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-02">
-                <p>The wheel attached to GitHub Releases, or <code>pip install .</code> from a clone, gives you a working <code>eifctl</code>. Its ten commands cover project creation, connection, guarded updates, verification, retrieval, rendering and validation. The installed wheel is exercised through the complete project lifecycle and a synthetic task, not by an import check.</p>
-                <p><strong>Scope:</strong> the artifact is available on GitHub Releases, but it is not published to PyPI. <code>eifctl new</code> creates a local repository, not a GitHub remote. Multi-project updates are preflighted but not atomic across repositories.</p>
+                <p>The wheel attached to GitHub Releases, or <code>pip install .</code> from a clone, gives you a working <code>eifctl</code>. Its eleven commands cover private-workspace and project creation, connection, guarded two-axis updates, verification, retrieval, rendering and validation. The installed wheel is exercised through the workspace lifecycle and a synthetic task, not by an import check.</p>
+                <p><strong>Scope:</strong> the artifact is available on GitHub Releases, but it is not published to PyPI. Each creation command makes a local repository, not a GitHub remote. Multi-project updates are preflighted but not atomic across repositories.</p>
               </div>
             </li>
             <li class="reveal">
@@ -1516,6 +1517,7 @@ pip install .</code></pre>
             <div>
               <h3>Рівень проєкту</h3>
               <p>Архітектура, рішення, доменні факти, інциденти, ризики й локальні правила одного проєкту.</p>
+              <p data-claim-id="CLM-16">У межах Р2 кілька проєктів може координувати приватний робочий простір. Він вибирає та фіксує спільні правила, навички, сценарії роботи й шаблони в кожному проєкті, але не стає новим рівнем і не володіє даними проєкту.</p>
             </div>
             <p class="layers__examples">Що знає ця система</p>
           </article>
@@ -2112,11 +2114,11 @@ pip install .</code></pre>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Встановлення</span>
-              <span>Пакет eifctl із десятьма командами</span>
+              <span>Пакет eifctl з одинадцятьма командами</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-02">
-              <p>Wheel із GitHub Releases або <code>pip install .</code> із клону встановлює <code>eifctl</code>. Десять команд охоплюють створення й підключення проєктів, безпечне оновлення, перевірку, пошук досвіду, формування артефактів і валідацію. Встановлений пакет проходить повний життєвий цикл проєкту та синтетичну задачу, а не лише перевірку імпорту.</p>
-              <p><strong>Межі:</strong> пакет доступний у GitHub Releases, але не опублікований на PyPI. <code>eifctl new</code> створює локальний репозиторій, а не GitHub remote. Оновлення кількох проєктів проходить попередню перевірку, але не є однією атомарною транзакцією.</p>
+              <p>Файл wheel із GitHub Releases або <code>pip install .</code> із клону встановлює <code>eifctl</code>. Одинадцять команд охоплюють створення приватного робочого простору й проєктів, підключення, безпечне оновлення двох осей, перевірку, пошук досвіду, формування артефактів і валідацію. Встановлений пакет проходить життєвий цикл робочого простору та синтетичну задачу, а не лише перевірку імпорту.</p>
+              <p><strong>Межі:</strong> пакет доступний у GitHub Releases, але не опублікований на PyPI. Кожна команда створення формує локальний репозиторій, а не GitHub remote. Оновлення кількох проєктів проходить попередню перевірку, але не є однією атомарною транзакцією.</p>
             </div>
           </li>
           <li class="reveal">

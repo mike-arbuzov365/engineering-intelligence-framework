@@ -153,7 +153,7 @@ const LINKEDIN_BANNER_HTML = `<!doctype html><html><head><meta charset="utf-8" /
   .orbit .scale__project--receiving circle{stroke-width:2.4;}
   .orbit .scale__core-label{font-size:20px;}
   .orbit .scale__node-label,.orbit .scale__section-label{font-size:15px;}
-  .orbit .scale__note{font-size:14px;}
+  .orbit .scale__note{font-size:13px;}
   .orbit .scale__session .scale__node-label{font-size:13px;}
   .orbit .scale__descend{stroke-width:1.4;}
   .orbit .scale__ripple{stroke-width:2.6;}

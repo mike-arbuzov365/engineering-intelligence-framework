@@ -8,7 +8,7 @@ review_after: 2026-10-28
 
 # Project lifecycle
 
-This guide describes the v0.1.1 path from installing EIF to safely updating
+This guide describes the v0.1.2 path from installing EIF to safely updating
 one or more private project repositories.
 
 ## The ownership model
@@ -36,7 +36,7 @@ inventory.
 
 ## Install a released package
 
-EIF is not published to PyPI. Open
+EIF is not published to PyPI. The latest public package is v0.1.1. Open
 [GitHub Releases](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases),
 download the `.whl` file attached to the release, then install the local
 file:
@@ -46,7 +46,8 @@ python -m pip install ./engineering_intelligence_framework-0.1.1-py3-none-any.wh
 eifctl version
 ```
 
-Installing from a checked-out release is also supported:
+The v0.1.2 candidate can be tested from its checked-out branch before its
+GitHub artifact is published:
 
 ```bash
 python -m pip install .
@@ -186,7 +187,10 @@ reviewed. The regenerable `.eif/runtime/` remains ignored.
 
 ## Current compatibility boundary
 
-v0.1.1 updates instances whose config and lock schemas remain compatible.
+The v0.1.1 and v0.1.2 lifecycle updates instances whose config and lock
+schemas remain compatible. v0.1.2 also keeps package provenance stable when
+Python creates bytecode in the installed resource tree and makes repeated
+managed-block updates byte-idempotent.
 It does not provide an automatic migration for a future breaking config,
 knowledge-schema, or private-vocabulary change. A future release that bumps
 one of those schemas must ship and test a named migration before users can

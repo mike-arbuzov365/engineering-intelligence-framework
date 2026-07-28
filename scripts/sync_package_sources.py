@@ -33,7 +33,7 @@ FRAMEWORK_ROOT = Path(__file__).resolve().parents[1]
 PKG_ROOT = FRAMEWORK_ROOT / "src" / "engineering_intelligence_framework"
 
 sys.path.insert(0, str(FRAMEWORK_ROOT / "scripts"))
-from eif_init import BUNDLE_SCRIPTS  # noqa: E402 - single source of truth for what eif_init.py itself bundles into a project instance's .eif/runtime/; read, not re-typed here.
+from eif_init import BUNDLE_SCRIPTS, is_portable_resource_file  # noqa: E402 - single source of truth for what eif_init.py itself bundles into a project instance's .eif/runtime/; read, not re-typed here.
 
 # Every _impl module actually needed by the 6 non-trivial eifctl
 # subcommands (init, doctor, search, render, privacy-scan, validate) -
@@ -85,7 +85,7 @@ def iter_resource_files(tree: str) -> list[Path]:
     src_root = FRAMEWORK_ROOT / tree
     if not src_root.is_dir():
         raise FileNotFoundError(f"mandatory resource source missing: {tree}/")
-    return sorted(f for f in src_root.rglob("*") if f.is_file())
+    return sorted(f for f in src_root.rglob("*") if is_portable_resource_file(f))
 
 
 def planned_copies() -> list[tuple[Path, Path]]:

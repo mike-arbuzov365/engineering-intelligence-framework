@@ -19,7 +19,7 @@ an OBSERVED label read from the code itself. -->
 
 # Release status
 
-Where v0.1.1 actually stands, and everything the website used to say
+Where the current v0.1 line actually stands, and everything the website used to say
 about its own release status, in one place off the page.
 
 The website is a description of the framework, not a status board for it.
@@ -62,9 +62,10 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.1.1` in [`pyproject.toml`](../../pyproject.toml),
-  released 2026-07-28, tagged `v0.1.1`, and dated in
-  [`CHANGELOG.md`](../../CHANGELOG.md).
+- **Version.** `0.1.2` in [`pyproject.toml`](../../pyproject.toml) is a
+  locally validated release candidate dated 2026-07-28 in
+  [`CHANGELOG.md`](../../CHANGELOG.md). It is not tagged or published yet.
+  The latest public version remains `v0.1.1`.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
   [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1)

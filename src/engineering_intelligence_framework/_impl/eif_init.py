@@ -245,6 +245,21 @@ def resolve_framework_release_version(
     return fallback
 
 
+def is_portable_resource_file(path: Path) -> bool:
+    """Whether *path* is source-controlled framework content.
+
+    Python may compile resource-tree ``*.py`` fixtures after a wheel is
+    installed. Those interpreter artifacts are neither release inputs nor
+    portable project runtime content, so they must not affect provenance or
+    get copied into an instance.
+    """
+    return (
+        path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix.lower() not in {".pyc", ".pyo"}
+    )
+
+
 def collect_bundle_sources(framework_root: Path) -> list[tuple[Path, str]]:
     sources: list[tuple[Path, str]] = []
     for script in BUNDLE_SCRIPTS:
@@ -257,7 +272,7 @@ def collect_bundle_sources(framework_root: Path) -> list[tuple[Path, str]]:
         if not src_root.is_dir():
             raise FileNotFoundError(f"mandatory bundle source missing: {tree}/")
         for f in sorted(src_root.rglob("*")):
-            if f.is_file():
+            if is_portable_resource_file(f):
                 rel = f"{tree}/{f.relative_to(src_root).as_posix()}"
                 sources.append((f, rel))
     return sources

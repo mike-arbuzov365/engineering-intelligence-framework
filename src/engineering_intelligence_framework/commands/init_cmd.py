@@ -59,7 +59,10 @@ def _resource_manifest_digest(resources_root: Path) -> str:
     bundle.digest. Always computable (unlike wheel_sha256): this is a
     live filesystem read, not install-metadata that may be absent."""
     entries = []
-    for f in sorted(p for p in resources_root.rglob("*") if p.is_file()):
+    for f in sorted(
+        p for p in resources_root.rglob("*")
+        if eif_init.is_portable_resource_file(p)
+    ):
         rel = f.relative_to(resources_root).as_posix()
         entries.append((rel, hashlib.sha256(f.read_bytes()).hexdigest()))
     h = hashlib.sha256()

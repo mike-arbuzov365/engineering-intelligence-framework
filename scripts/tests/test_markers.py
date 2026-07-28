@@ -74,6 +74,35 @@ def main() -> int:
                          action3 == "update-block" and "head text" in updated and "tail text" in updated
                          and "old managed content" not in updated and "managed content" in updated))
 
+    # The tail already contains the line break immediately after END. A
+    # canonical managed block contains one too, so an update must collapse
+    # that duplicated boundary and remain byte-identical on every rerun.
+    expected_lf = f"head text\n{BLOCK}tail text\n"
+    updated_lf, action4 = render_merged_content(expected_lf, BLOCK, BEGIN, END)
+    rerun_lf, action5 = render_merged_content(updated_lf, BLOCK, BEGIN, END)
+    results.append(check(
+        "render_merged_content: LF update does not grow a trailing blank line",
+        action4 == "update-block" and updated_lf == expected_lf,
+        repr(updated_lf),
+    ))
+    results.append(check(
+        "render_merged_content: repeated LF update is byte-idempotent",
+        action5 == "update-block" and rerun_lf == expected_lf,
+        repr(rerun_lf),
+    ))
+
+    block_crlf = BLOCK.replace("\n", "\r\n")
+    expected_crlf = f"head text\r\n{block_crlf}tail text\r\n"
+    updated_crlf, action6 = render_merged_content(expected_crlf, block_crlf, BEGIN, END)
+    rerun_crlf, action7 = render_merged_content(updated_crlf, block_crlf, BEGIN, END)
+    results.append(check(
+        "render_merged_content: repeated CRLF update is byte-idempotent",
+        action6 == action7 == "update-block"
+        and updated_crlf == expected_crlf
+        and rerun_crlf == expected_crlf,
+        repr(rerun_crlf),
+    ))
+
     # --- render_merged_content: malformed shapes raise, caller writes nothing ---
     try:
         render_merged_content(f"{END}\nstray\n{BEGIN} x -->\n", BLOCK, BEGIN, END)

@@ -15,6 +15,21 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-07-28
+
+Small dogfood stabilization patch. It changes no methodology or project
+schema.
+
+### Fixed
+
+- Installed-package provenance and project runtime manifests now ignore
+  interpreter-generated `__pycache__`, `.pyc`, and `.pyo` files. Resource
+  digests are stable across Python installs and runtime bundles contain only
+  portable release inputs.
+- Repeated upgrades no longer add a blank line after EIF-managed blocks.
+  The marker merge preserves the existing project-owned tail byte for byte
+  with both LF and CRLF line endings.
+
 ## [0.1.1] - 2026-07-28
 
 Small stabilization release for using the public package with real private
@@ -516,6 +531,7 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0

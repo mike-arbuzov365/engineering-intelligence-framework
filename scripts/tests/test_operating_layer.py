@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import re
+import subprocess
 from pathlib import Path
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
@@ -112,12 +113,17 @@ def check_bounded_loop_contract() -> list[Result]:
         "Session layer: .session-context is gitignored",
         ".session-context/" in gitignore,
     ))
-    session_context = FRAMEWORK_ROOT / ".session-context"
-    committed_like_files = list(session_context.glob("*.md")) if session_context.exists() else []
+    tracked_session_context = subprocess.run(
+        ["git", "ls-files", "--", ".session-context"],
+        cwd=FRAMEWORK_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
     results.append(check(
-        "Session layer: repository contains no durable session-context files",
-        not committed_like_files,
-        ", ".join(p.name for p in committed_like_files),
+        "Session layer: repository tracks no ephemeral session-context files",
+        not tracked_session_context,
+        tracked_session_context,
     ))
     runtime_docs = (
         "docs/architecture/HOW-EIF-WORKS.md",
@@ -133,8 +139,116 @@ def check_bounded_loop_contract() -> list[Result]:
     return results
 
 
+def check_planning_chain_contract() -> list[Result]:
+    results: list[Result] = []
+    idea_playbook = (PLAYBOOKS_DIR / "idea-planning.md").read_text(encoding="utf-8")
+    prd_playbook = (PLAYBOOKS_DIR / "product-requirements-planning.md").read_text(encoding="utf-8")
+    packet_playbook = (PLAYBOOKS_DIR / "execution-packet-planning.md").read_text(encoding="utf-8")
+    operating_protocol = (PLAYBOOKS_DIR / "engineering-intelligence-operating-protocol.md").read_text(encoding="utf-8")
+    idea_template = (TEMPLATES_DIR / "idea.md").read_text(encoding="utf-8")
+    prd_template = (TEMPLATES_DIR / "prd.md").read_text(encoding="utf-8")
+    idea_skill = (SKILLS_DIR / "plan-idea" / "SKILL.md").read_text(encoding="utf-8")
+    prd_skill = (SKILLS_DIR / "plan-prd" / "SKILL.md").read_text(encoding="utf-8")
+
+    for label in ("OBSERVED", "INFERRED", "ASSUMED", "PROPOSED"):
+        results.append(check(
+            f"idea planning: template declares {label}",
+            label in idea_template,
+        ))
+    results.append(check(
+        "idea planning: approval stays explicit",
+        "approval source" in idea_playbook.casefold()
+        and "status: draft" in idea_playbook
+        and "plan-prd" in idea_template,
+    ))
+    results.append(check(
+        "PRD planning: approved-idea boundary is explicit",
+        "approved idea" in prd_playbook.casefold()
+        and "idea approval source" in prd_template.casefold()
+        and "must not route to execution" in prd_playbook,
+    ))
+    for field in (
+        "Functional requirements",
+        "Non-functional requirements",
+        "Acceptance criteria",
+        "Traceability",
+        "Rollout, migration and operability",
+    ):
+        results.append(check(
+            f"PRD planning: template contains {field}",
+            field in prd_template,
+        ))
+    results.append(check(
+        "planning chain: packet carries idea/PRD inputs forward",
+        "idea-planning.md" in packet_playbook
+        and "product-requirements-planning.md" in packet_playbook
+        and "carry-over ledger" in packet_playbook,
+    ))
+    results.append(check(
+        "planning chain: operating protocol routes idea and PRD",
+        "idea-planning.md" in operating_protocol
+        and "product-requirements-planning.md" in operating_protocol,
+    ))
+    results.append(check(
+        "planning chain: skills remain thin playbook entrypoints",
+        "playbooks/idea-planning.md" in idea_skill
+        and "playbooks/product-requirements-planning.md" in prd_skill
+        and len(idea_skill.splitlines()) < 80
+        and len(prd_skill.splitlines()) < 80,
+    ))
+    return results
+
+
+def check_private_workspace_layer_contract() -> list[Result]:
+    results: list[Result] = []
+    architecture = (
+        FRAMEWORK_ROOT / "docs" / "architecture" / "HOW-EIF-WORKS.md"
+    ).read_text(encoding="utf-8")
+    decisions = (
+        FRAMEWORK_ROOT / "core" / "policies" / "decisions.md"
+    ).read_text(encoding="utf-8")
+    site_claims = (
+        FRAMEWORK_ROOT / "site" / "src" / "content" / "claims.json"
+    ).read_text(encoding="utf-8")
+
+    results.append(check(
+        "private workspace: architecture keeps workspace inside L2",
+        "optional durable scope inside this\n  layer" in architecture
+        and "does not create a fourth layer" in architecture,
+    ))
+    results.append(check(
+        "private workspace: public EIF remains the only distribution",
+        "not a copy\nof the framework" in architecture
+        and "only framework distribution" in decisions,
+    ))
+    results.append(check(
+        "private workspace: D-18 limits its D-17 supersession",
+        "Partially supersedes D-17\nonly for registry storage and workspace propagation"
+        in decisions,
+    ))
+    results.append(check(
+        "private workspace: promotion remains explicit across scopes",
+        "L3 session -> L2 project -> L2 private workspace -> L1 public framework"
+        in architecture
+        and architecture.count("explicit") >= 3,
+    ))
+    results.append(check(
+        "private workspace: site claim still presents exactly three layers",
+        "into three layers" in site_claims
+        and "four layers" not in site_claims.casefold(),
+    ))
+    return results
+
+
 def main() -> int:
-    all_results = check_playbooks() + check_templates() + check_skills() + check_bounded_loop_contract()
+    all_results = (
+        check_playbooks()
+        + check_templates()
+        + check_skills()
+        + check_bounded_loop_contract()
+        + check_planning_chain_contract()
+        + check_private_workspace_layer_contract()
+    )
     for _, line in all_results:
         print(line)
 

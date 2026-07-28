@@ -5,6 +5,8 @@ Step-by-step instructions for recurring engineering-intelligence operations.
 | Playbook | Covers |
 |---|---|
 | [`engineering-intelligence-operating-protocol.md`](engineering-intelligence-operating-protocol.md) | Entry point: routing, skill index, stop conditions |
+| [`idea-planning.md`](idea-planning.md) | Turning a raw idea into an evidence-based, approved planning artifact |
+| [`product-requirements-planning.md`](product-requirements-planning.md) | Turning an approved idea into traceable product requirements |
 | [`bounded-evidence-loop.md`](bounded-evidence-loop.md) | Bounded action/observation/adaptation cycles with evidence and budget guards |
 | [`session-preparation.md`](session-preparation.md) | Scoping work, task vs. packet routing |
 | [`session-execution.md`](session-execution.md) | Running a prepared task or session |

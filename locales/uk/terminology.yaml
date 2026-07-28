@@ -83,6 +83,20 @@ terms:
   benchmark:
     preferred: "бенчмарк"
     class: "industry-established"
+  private_workspace:
+    preferred: "приватний робочий простір"
+    preserve_in_identifiers: "workspace"
+    class: "eif-defined"
+  project_registry:
+    preferred: "реєстр проєктів"
+    class: "industry-established"
+  workspace_profile:
+    preferred: "профіль робочого простору"
+    class: "eif-defined"
+  workspace_materialization:
+    preferred: "матеріалізація робочого простору"
+    explanatory: "підготувати й зафіксувати вибрані файли"
+    class: "industry-established"
   engineering_intelligence:
     preferred: "Engineering Intelligence"
     explanatory: "інженерний інтелект"

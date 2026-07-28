@@ -225,6 +225,30 @@ instance to installed-package provenance requires explicit
 operation. Creating a GitHub remote, choosing repository visibility and
 pushing are separate owner decisions, not implicit effects of EIF.
 
+### D-18: Private workspace scope belongs inside L2
+**Status: ratified 2026-07-28 (owner decision). Partially supersedes D-17
+only for registry storage and workspace propagation.** The public EIF
+release remains the only framework distribution. A user may create an
+optional private workspace repository that is itself an EIF project
+instance and coordinates several independent project instances. This
+workspace is durable scope inside L2. It does not create a fourth layer,
+fork the framework or become a second framework distribution.
+
+The committed registry stores stable project identities, display names,
+profiles and lifecycle status. Machine-specific project paths move to a
+gitignored local-state file. This replaces D-17's rule that committed
+registry entries store local paths; D-17's package provenance, independent
+project ownership, preflight-all-then-sequential update contract and
+explicit remote-publication boundary remain ratified.
+
+Projects keep framework and workspace provenance separate. The public
+release is recorded by `.eif/framework.lock.yaml`; an optional, deterministic
+workspace snapshot is recorded by `.eif/workspace.lock.yaml` and materialized
+under gitignored `.eif/workspace-runtime/`. Promotion remains explicit:
+session learning may become project knowledge, project knowledge may be
+accepted into private workspace scope, and only a separate framework
+decision may promote a reusable lesson into public EIF.
+
 ### D-13: Fail-closed CI runner consolidation
 **Status: superseded by D-14 (2026-07-19).** Policy checks that share one
 Python environment ran as sequential steps in one fail-closed job. The

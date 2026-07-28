@@ -2,6 +2,15 @@
 
 Reusable artifact templates.
 
+## Product planning
+
+[`idea.md`](idea.md) turns a raw request or opportunity into a sourced,
+bounded artifact with an explicit approval and route.
+[`prd.md`](prd.md) turns an approved idea into traceable product
+requirements with observable acceptance criteria. See
+[`playbooks/idea-planning.md`](../playbooks/idea-planning.md) and
+[`playbooks/product-requirements-planning.md`](../playbooks/product-requirements-planning.md).
+
 ## Single-session task
 
 [`task-scope.md`](task-scope.md) (scope/stop-condition declaration before

@@ -3,7 +3,7 @@
 <!-- Canonical source document. README, website copy, articles, diagrams,
 FAQ, and launch posts should all derive from this file, not diverge from it. -->
 
-**Status: v0.1.0, released 2026-07-27** (revised across two independent
+**Status: v0.2.0, released 2026-07-28** (revised across two independent
 review passes, both 2026-07-15 - see
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for what
 that review changed). Extracted and genericized from a private production
@@ -102,25 +102,36 @@ which model or tool is driving them:
 
 EIF ships as a **framework** (this repository): ontology, playbooks,
 templates, skills, adapter definitions, and optional integration guides. A
-**project instance** is a specific project (or workspace of projects) that
-adopts the framework, adds its own project-specific knowledge, registry,
-and configuration, and runs it day to day.
+**project instance** is a specific project that adopts the framework, adds
+its own project-specific knowledge and configuration, and runs it day to
+day. An optional **private workspace scope** can coordinate several
+independent project instances and share selected operating artifacts across
+them. The workspace repository is also an EIF project instance, not a copy
+of the framework.
 
 ```text
 engineering-intelligence-framework (public, versioned)
   |
-  |  referenced from the project's persistent agent-instruction file
+  |  installed into independent project instances
   v
-your-project-instance (private)
+your private workspace (optional, L2)
   |
-  |  contributes generalizable lessons back
+  |  distributes selected, pinned workspace artifacts
   v
-engineering-intelligence-framework (evolves)
+your independent project instances (L2)
 ```
 
 A project instance should never need to fork the framework to use it -
-project-specific content lives in the instance's own repository/registry,
-declared via `.eif/config.yaml`, not by editing framework source in place.
+project-specific content lives in the project's own repository, declared
+via `.eif/config.yaml`, not by editing framework source in place. A private
+workspace follows the same rule: it references a released EIF package and
+keeps only user-owned workspace rules, skills, playbooks, templates,
+knowledge, profiles and project identities.
+
+This is the ratified architecture contract implemented by the 0.2.0
+vertical slice. The workspace commands, schemas, migrations, transactions,
+fleet behavior, and synthetic tests are present. The capability remains
+experimental within 0.x.
 
 ## The three-layer context model
 
@@ -133,9 +144,12 @@ are navigational shorthand, not the concepts' names:
   skills that apply to any project instance, independent of tech stack.
 - **L2 - project layer.** A specific project or set of related projects.
   Architecture, decisions, domain facts, incidents, risks and local
-  conventions. References the framework layer via the persistent
-  agent-instruction file; contributes generalizable lessons back to it
-  through a Knowledge Delta and an explicit promotion decision.
+  conventions. A private workspace is optional durable scope inside this
+  layer. It can distribute selected operating artifacts to independent
+  projects without owning their product content or becoming a framework
+  layer. Projects and workspaces reference the framework through their
+  persistent agent instructions and contribute generalizable lessons back
+  through Knowledge Delta and explicit promotion decisions.
 - **L3 - session layer.** Ephemeral, single-session working state (current
   task plan, in-progress reasoning, scratch files). Never treated as
   durable knowledge on its own - it either gets promoted into a project
@@ -146,6 +160,20 @@ Mixing these layers is the single most common failure mode this framework
 exists to prevent: session-scoped assumptions leaking into project-level
 "facts" without going through validation, or project-specific detail
 leaking into what should be reusable, tech-stack-agnostic methodology.
+
+The private workspace does not create a fourth layer. It adds a governed
+distribution boundary within L2:
+
+```text
+L3 session -> L2 project -> L2 private workspace -> L1 public framework
+                explicit       explicit               explicit
+                retention      acceptance              promotion
+```
+
+These arrows are decisions, not automatic synchronization. A session can
+propose a project Knowledge Delta. A project may then propose a reusable
+workspace artifact. Moving anything from private workspace scope into the
+public framework requires a separate framework-level review and release.
 
 **Layer, not tier, is deliberate.** These are not storage classes ordered
 by durability alone; each holds a different *kind* of thing and answers a
@@ -259,6 +287,15 @@ and the primary-source research and rejected patterns are documented in
 [`docs/research/bounded-evidence-loops.md`](../research/bounded-evidence-loops.md).
 
 ## Execution packets
+
+EIF separates product definition from implementation planning. A raw
+opportunity first becomes a sourced idea artifact when the problem, user,
+value or minimum useful scope is still unsettled. An approved idea becomes
+a PRD when observable product behavior and acceptance requirements still
+need definition. Only then does implementation route to one task scope or,
+for larger work, an execution packet. See
+[`playbooks/idea-planning.md`](../../playbooks/idea-planning.md) and
+[`playbooks/product-requirements-planning.md`](../../playbooks/product-requirements-planning.md).
 
 For work larger than a single session, EIF uses execution packets: a
 planning artifact set (charter, facts, decisions, roadmap) created before

@@ -42,6 +42,10 @@ The terminology has three classes:
 | promotion | підвищення рівня | EIF-defined scope | Moving validated knowledge to a broader layer by an explicit decision. Avoid `промоція` and `промоутити`. |
 | retrospective | ретроспектива | Industry-established | The outer review across multiple sessions. `Ретро` is acceptable as a short UI label after the full term is introduced. |
 | benchmark | бенчмарк | Industry-established | A reproducible evaluation with stated fixtures, modes, measures, and limits. Do not use it for an informal timing claim. |
+| private workspace | приватний робочий простір | EIF-defined scope | Optional user-owned durable scope inside L2. Keep `workspace` in commands, schema keys, and paths. It is not a private EIF distribution. |
+| project registry | реєстр проєктів | Industry-established | The committed logical inventory of connected projects. In v2 it contains no machine-local path. |
+| workspace profile | профіль робочого простору | EIF-defined scope | A deterministic selection policy for required, default, optional, and overridden workspace artifacts. |
+| workspace materialization | матеріалізація робочого простору | Industry-established mechanism | Staging, hashing, verifying, and pinning selected workspace artifacts into a project. In explanatory prose, prefer `підготувати й зафіксувати вибрані файли` when the mechanism itself is not the topic. |
 
 ## EIF-defined terms
 
@@ -83,6 +87,15 @@ first mention. In Ukrainian explanatory prose, follow it with `пакет роб
 observable goal, declared evaluator, iteration and remote-run budgets, and
 explicit stop conditions. The Ukrainian explanatory form is `обмежений цикл
 доказів`. It is a methodology contract, not a claim of autonomous convergence.
+
+### private workspace
+
+`private workspace` is an EIF scope term. It names an optional user-owned
+repository that coordinates project identities, local profiles, and selected
+operating artifacts across independent projects. It is an EIF project
+instance inside L2, not a fourth layer and not a private copy of the public
+framework. In Ukrainian prose, use `приватний робочий простір`. Keep
+`workspace` unchanged in commands, schema keys, and paths.
 
 ## Translation rules
 

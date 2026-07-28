@@ -5,7 +5,7 @@ lock_schema_version: 1
 framework:
   source_type: git
 instance:
-  eif_instance_version: 0.1.0
+  eif_instance_version: 0.2.0
   migration_status: greenfield
 adapter:
   name: claude-code
@@ -22,119 +22,199 @@ bundle:
   - path: core/ontology/status-lifecycle.md
     sha256: 18ee456f191f4b2de048c7cca21f4480e7810f2705126eaa297eff1c00498c2b
   - path: core/schemas/benchmark-fixture-manifest.schema.json
-    sha256: 71910139001e45f47e9855c79297cc594c3f6ceea93a2d9ee6a329411bb71c1c
+    sha256: 25e6c5b3ed055cdc1e0640ed2334905b4c58d869f9a359a2942c1c2e3403a5fe
+  - path: core/schemas/benchmark-integration-input.schema.json
+    sha256: 3fc375ce3fac8e51fda5cf2d7875e05b923a725346ada2278f2ee775348395bc
   - path: core/schemas/benchmark-result.schema.json
-    sha256: ffb267ade91126678e7123d25ec535a7f9609089cc29c264bacbbafeea464a69
+    sha256: f18cb814ee667e31667b2a08bcf4c8d95c69efe700a1aa24894a07361d14897b
   - path: core/schemas/eif-config.schema.json
-    sha256: f0cd6238458262496837b7c584b42f56843c973d6234cc80f31fbb5bcd471d09
+    sha256: 2027a473f816cad16b5f1b56fdc482a67b4d25cb8887439bfe9d6283641b5763
   - path: core/schemas/framework-lock.schema.json
     sha256: e794c3e344bb19e7c11257f626ecb3f7ac36fe0c97d53eec902a152aa532638f
+  - path: core/schemas/graphify-artifact-metadata.schema.json
+    sha256: ff80341d0ad7f26cd5038f5e4093af4390095b8966734193429908538d7feb91
+  - path: core/schemas/graphify-scope-manifest.schema.json
+    sha256: ee1c617d31a98713635f71a3d38a143fceb121219f8416da5aae2255e21be504
   - path: core/schemas/integration-health-result.schema.json
-    sha256: 3a4140160e9e8b3a2f6af14158d7a5d22cb09d3767322cbd2d100d2855fcbc58
+    sha256: c3e645c73761f6301466f4da650b21c2d1c8c2c575a50c522e7b1813827a1c19
   - path: core/schemas/integration-provider-manifest.schema.json
-    sha256: 3c8a586efeb9e29bd1b8b1d551cfe94f247afcaafb796b152a32df44147c1b32
+    sha256: 78a59951ca6e65e35fe8905f8db23cac37b23b60fe196f5d02a08f42e0872ee0
   - path: core/schemas/knowledge-frontmatter.schema.json
     sha256: be3ff7b0b8bdaa55d98939fd2957e4f31f973c8c89f932c66011cb914ad08b5e
+  - path: core/schemas/project-locations.schema.json
+    sha256: 7fd1c7809e80e52a35743129a07aab224ebdd837efab0af18da600775f0cfc0d
+  - path: core/schemas/project-registry-v1.schema.json
+    sha256: 257a5794f49672f8448f5c15d1f70b04b120144cf296771b6ad0d3b12f492151
+  - path: core/schemas/project-registry.schema.json
+    sha256: a9a9f5008dec9b55bf4bdeed0ad812be246426d683cafc8d05ea45610d514fbf
+  - path: core/schemas/rtk-adapter-capabilities.schema.json
+    sha256: bbde0999f68b147d8c78d6b16c6eca7ac390350fa042d44fe072afa98df675d7
   - path: core/schemas/rtk-command-registry.schema.json
-    sha256: e389937a0d782717c86d9018d3b24ec8ee03e4fe6e126174c74e4a67c2fd6079
+    sha256: f46b754d60b1a0ef6928bd18bae06dc72abfb88ec40e88ee53a5d175aa0e450a
   - path: core/schemas/rtk-telemetry-event.schema.json
-    sha256: 3aa1d82f9d3ed94b21d20b94641e4a9575b4fc302cb93f69dcc7c9cd9c0ce9c9
+    sha256: f429d4e5bb00a6069cae4868312efcca90c08d6bf0a1247ba4a646ddbde3f02e
+  - path: core/schemas/workspace-config.schema.json
+    sha256: 92534650e8df1ec09e1e059f29722d6808923a2091b603b52384a4b3d496486b
+  - path: core/schemas/workspace-lock.schema.json
+    sha256: 3be7d2214fa269220cccaa27aa3240dfb38fc328335e254bb5dc12714bfda697
+  - path: core/schemas/workspace-overrides.schema.json
+    sha256: 2418236ee7967e02705e6041e5144ca37ec88885a5b6cccfa57145ffd2a5ca99
+  - path: core/schemas/workspace-profile.schema.json
+    sha256: 5fe7e1365066a8b4ca7b0ee4db770e81d5603133dd1c50afb1424a1b427a0943
   - path: docs/architecture/HOW-EIF-WORKS.md
-    sha256: faf304eef8c3e3b981b2b7645838dc1e5461ff9736ee4f1f60e52cf5a66ea646
+    sha256: f67ff791ca9b114ef4b5133802bc4f8d7d2fafab8049001478682de500aadb38
   - path: docs/architecture/instance-contract.md
-    sha256: d075d81e6ef6a9b7de871a42fbc0a7285ccd59e8ee0dc206f54c20a2a2d79214
+    sha256: 73d28b9fa1ee4b37f473c41ad01d774cde30926dee0266b0bd6db94386647183
   - path: docs/architecture/merge-enforcement.md
-    sha256: 1fa32b9c30483e2c7cce4903d845d1938f28da0d81c12c0a2cabeb48065e97c3
+    sha256: c744ab2e020129acebedf6de8152c16abd313bcca162ac7bcc94581ea858c57b
   - path: docs/product/claims-evidence.md
-    sha256: 1da82a9ec3bac8fb77368c4c9b9f43c000966c3f4904f49c9f83fe6560a30c4c
+    sha256: 544fa07d50016716566fbc4951d087f949b18339db8cb8c6a53e480f6b812f6c
+  - path: docs/product/linkedin-series.md
+    sha256: 840955d3f1cbc6cf81f94ee4e9259227a94a85f168696bd815d7135ed57ef3dd
+  - path: docs/product/release-status.md
+    sha256: c2a831dfb2cfb302dc8dc91d9037297af86771d1ca70184f5b415dacaed5a18f
+  - path: docs/reference/config.md
+    sha256: c2f5af3a055cd9eb28862f62af39c6c5586c8bbf87f3ce182917c5e6f726eaf5
+  - path: docs/reference/terminology.md
+    sha256: a0b2acdb49717502d0d15034deef3d1a2740c807cffe8a129be17da02e18b32c
   - path: docs/research/bounded-evidence-loops.md
-    sha256: eb2318bc70b9b1d03e7d3534c92bd662ee4014d10e72d071f5b394a7f2157ffe
+    sha256: dfdbffc112d61f1abfe6230a41948b030c73c8e30217984b34704ff58664180b
   - path: eif_adapters.py
     sha256: 83b94b361e3470f6d74e2368fb4c1e49dcef3d01af7935f91548bc259ef119bb
   - path: eif_check_links.py
-    sha256: 820731dc662903b1d22d9bff5bbc3466f091d7bfc45e45b42d4b5b051e837213
+    sha256: 764baba73975fdb7ad69f3df42f8afacd35e1284f45189d035dacd4f970e6272
   - path: eif_generate_index.py
     sha256: fde36d7c595307a4698741c787f07ebce14b764356e85bb72119d3b7060edbbb
+  - path: eif_graphify.py
+    sha256: 999306b8358a6d75631dcc527bdc33f770c786235859e98a3156e48a23d65561
   - path: eif_integrations.py
-    sha256: 26aa93cf9ac386fc5af398d9519a372c0f5d8041ac7c05d1051bde054e201d21
+    sha256: b3797b7fd3ba52ef7ba372c5494d4c855de017f500303d07646c42cd45af7df4
   - path: eif_locale.py
     sha256: 9487cf4aaf3c974c177fea02cd9bc47794a5e4372c3256907ac44dcb30657056
   - path: eif_markers.py
-    sha256: 676e31b9df8848887d5a707b08d24844d9349657bf7c34ed090ad429f6fbac70
+    sha256: 1772465b81aeb5b547d00d64fa88674a34e26aca5857e9accd1f5779a67328bb
   - path: eif_privacy_scan.py
     sha256: 450ac1bc62473b5bce271c654f0fde1d868f7cc94571f566b27aef850a0bf639
   - path: eif_render.py
     sha256: 732f733e4c1ad847939c393af559d716aad88e73330019d82fcbed15de658933
   - path: eif_rtk_telemetry.py
-    sha256: 61ccd387f60a6d68c1df30b5664edc05b048d68e7b8144b9d5a03178417764a6
+    sha256: 37956dbc06a452390cf9df95caa0c3f2986fbbf31d83d0a0291b8888c1d9e961
   - path: eif_search_knowledge.py
     sha256: f9947ee083292cbad174c171e907f0085d637ae7899d0f3fe62ab84394dc97ee
   - path: eif_validate_frontmatter.py
-    sha256: 7f176aedb423943dc4f504eb78f017cae4ae441b6e3dd59672147ce2054da1d9
+    sha256: 196f96750d305bceac422675d262be48c973b4c9f84a6d8da74c22ff40f4dfdf
   - path: eif_verify_runtime.py
-    sha256: a60998996213225c285a965d0a9ea5c4ba570ac4fe33b8174981cd0b7ea6cc3e
+    sha256: 8a1ae6f508d083f9cc89d816174caf3186c716a71a171bc999cdf9fe3bdc41a7
   - path: integrations/README.md
-    sha256: 9b8e778aad39778125d42d527efcad251a8182674fe0dd21bf15b064e2b5d296
+    sha256: 8c58653c2d05825fb6834db65b5a0c3e99c06ad8e491fe025c1ff09ca11fe9de
   - path: integrations/graphify/README.md
-    sha256: 58728e673fe269380e820ce62eb92b45a8c7b0d08cf0204543891361ce9b5247
+    sha256: 1ff379a8d87c73520bc7b73864988440cbb818df491f04803d8eb12a61884489
   - path: integrations/graphify/fixtures/structural-canary/canary.py
-    sha256: 1fca45ea60641dcfddaa5c4b25d3c6b7e86b244309ed61b748a9a3a059a2f558
+    sha256: bb1ba0ed2b80bee15e1633d54ff2f29ccc0993cc9946936ddbb8525e50a0b4fb
   - path: integrations/graphify/fixtures/structural-canary/graphify-out/graph.json
-    sha256: 6eb8d96b0df5c0e29821e1e3f921d75daf2f4eb3b1c05a629edf54d03ce62b0b
+    sha256: 5f3a3645ee14020f39389a04cb6d210194cc744104122847b566ba832adf8aed
   - path: integrations/graphify/manifest.json
-    sha256: 1b22d9c547360e52b61fd072f1901b5b327484909145479b83585340ec283afd
+    sha256: 7172745c8f35c26fc28f2ac0cfb054ed284be0fad952d090b02facd193b193ba
+  - path: integrations/graphify/scope-manifest.example.json
+    sha256: 1c0efd93e3004353d35fed2f0f100e7194f9340d2af0183bff10fd8f942312bf
   - path: integrations/rtk/README.md
-    sha256: f0813d1c8ff02d427ec0774b42f95c4816602e0d82df6326c6540bd45448bda6
+    sha256: 51ce94b1eb8ce56c155c391fd75897461a54c0d7db370bdafbfc18522ca32216
+  - path: integrations/rtk/adapter-capabilities.json
+    sha256: e1154f08a00308fc81c0bdfe7349aee1dd526177a0345bc4547ae80d8ec4cb7b
   - path: integrations/rtk/command-registry.json
-    sha256: 19c34871098191cc8e64bb9230894054da689802cce987eb7ee064f9d6190567
+    sha256: 439575945f2ec5a7af33795316ae54e4ab05b045a179e2c8840b38552726aa7f
   - path: integrations/rtk/generated-instructions.md
-    sha256: eebbd7cfa10acdbd40f58a0401037b54dd1638afa2926da32bd22a17a671cf78
+    sha256: 366fa4b181831ce439a8c33350c6ab9c3f55b5ca2fef458261a5181541b1177e
+  - path: integrations/rtk/generated/adapters/rtk-claude-code.md
+    sha256: 47cb2d7838721bcf78064927e994d185e7bbd918cab6ac98de10cdbc99cc417b
+  - path: integrations/rtk/generated/adapters/rtk-codex.md
+    sha256: a569c03139c692b483a35c7facc0df4ba1b6e247acc38c4a68791144570d0d17
+  - path: integrations/rtk/generated/adapters/rtk-cursor.md
+    sha256: e205a1396303a9470864ea0b9f9af8c8e2832a8d54009af9dedd48b8661debca
+  - path: integrations/rtk/generated/adapters/rtk-hermes.md
+    sha256: cc464ea66880280c64a5224da06ac3d3786ce0efa8e9a51cd4f46c58a548402a
+  - path: integrations/rtk/generated/hooks/claude-code.json
+    sha256: cb222c00e17c28196c0d4c30315c839f179e15c18c417bdbfc1463237b41aa08
+  - path: integrations/rtk/generated/hooks/codex.json
+    sha256: 345821ec85b9f1461ea6aeaa78117414e070c2f81c7f38317094bec0193508f7
+  - path: integrations/rtk/generated/hooks/cursor.json
+    sha256: 025c0d8b46421539a15225d4db8bdcd504f3346ece3d1e609cb5b35527087e5a
+  - path: integrations/rtk/generated/hooks/hermes.json
+    sha256: a10d5ee85ddb0c0e15dcae08904eea2af4db5b170b43c2d1636616a993c49f3b
   - path: integrations/rtk/manifest.json
-    sha256: 0964a5f14837024c2034af7c9a98aca77f3855a17a5e0bf10c436eae908bc8bf
+    sha256: 9523dd8c44cb911b5071b95a508d370624cfa5b9adcb089570e5dba90d7c06f4
   - path: integrations/vendor-docs/README.md
-    sha256: 9e6b08dad339c4072d8a811d86d68965ec92441cfda7fe2d925b48c991483b62
+    sha256: 0dae6217e68e655395fd82517be106bddd16b39ef44e0582244f4825e1d45491
+  - path: integrations/vendor-docs/generated/mcp/claude-code.json
+    sha256: c7f1185ed6aa795df483c7739a19d18e72d9a3f0b5cf4282ce1c24b960779576
+  - path: integrations/vendor-docs/generated/mcp/codex.json
+    sha256: 4eadd614958bce8e2e91cd10ac7b850570e76ccc84c11c20170d17715e52653a
+  - path: integrations/vendor-docs/generated/mcp/cursor.json
+    sha256: 90cd045e16cc7a170ed0f525b9644d639ebe2f777ec251bf0f5c7fee814737ca
+  - path: integrations/vendor-docs/generated/mcp/hermes.json
+    sha256: b5504ecca12bfae0ca5c031885626b4fd9556d8c7772d625d18cb373760d5a48
+  - path: integrations/vendor-docs/generated/vendor-docs-instructions.md
+    sha256: 6fd1d6ff8f18b756e62cac3292b27b7403673afb87a91311f3679d54cfcec419
+  - path: integrations/vendor-docs/manifest.json
+    sha256: 510e49ff2f5516efd09672388f5245ac8ab1cde668bb8fa7d4ec110dace16a51
+  - path: integrations/vendor-docs/usage-policy.json
+    sha256: 740666992f63784dbf482186505729a5a54ea5c33bb9b1290ce734e022987c4c
   - path: locales/README.md
-    sha256: 375a14313a4329137391b76fc53423e53fc8e5410f3e2aecd4ac9fbf326b8d00
+    sha256: 760ec9bb1b1f7fbecbc646fe04f2edadcf7be3cbb093521500eb83bc8a1c5b0d
   - path: locales/en/messages.yaml
     sha256: d036e90857ee00d769fc6ca41aa62b9b167e638a0d669eec199c84aed069fab2
   - path: locales/en/templates/knowledge-delta.md
     sha256: 3ace3bae293280d6ad8907a7998ea671bf918c0d28ceb2dcc6cd9f4ece819820
   - path: locales/en/templates/session-closeout.md
     sha256: f92d3e3add85051ac679a99ab3becf4afd9b5972ecee76e571496c3840aff437
+  - path: locales/en/terminology.yaml
+    sha256: 850cafa2cc052e9e04c8a54410dff04da2822717f1dbc283578870b929d7016f
   - path: locales/uk/messages.yaml
-    sha256: d3dbd38bf520d39aef15819610e125dc3a9b377047d8b81c61b2a182c20eb462
+    sha256: 434decf52c0aaa31e820244472c4dc1ed296d85b49f16ba2657148d3483ab07f
   - path: locales/uk/templates/knowledge-delta.md
-    sha256: 846e5aa6e1a093a04a8c2f40c0f52c0c7c416580c996c6a00e9ba7009733599c
+    sha256: 24f6a2a01f9ed9f9ed69927d90239e6a87aa64d3baa76ff06e60f4030ac5704c
   - path: locales/uk/templates/session-closeout.md
-    sha256: d32aa42909e511c3711582ea2f449bd2ea87efb52fad4cbbf9e2659297566549
+    sha256: ecfbc795654319b26d55d78145407628959f303e9998f79b49ab5237326d1c2b
+  - path: locales/uk/terminology.yaml
+    sha256: b080bcf71539e9f30b2b9bd7e164513ee51bb1edca3e5b4449a4a583ca808e37
   - path: playbooks/README.md
-    sha256: 7912d5e86d216bd1c3e69c558a14177096be1d8305f2e403e701858f75a92e7a
+    sha256: 504d633ca45bf1e39977a6f285270e698625d0d4721774e629f6226baf422d7e
   - path: playbooks/bounded-evidence-loop.md
-    sha256: c248bf2df18f67b6323696faf84311af5c61c09ac8eab4725fe1098f445156dd
+    sha256: 991433674dfc657a3c1873ffc643645f4c81e7cb0b3e46f7ae67907806eee0ed
   - path: playbooks/engineering-intelligence-operating-protocol.md
-    sha256: 251dc7185e8fdf513da9d52548ad70348816b6520a36b3f858123eaa1a1a6100
+    sha256: e7ee7b9cdce0938a3300d99b99449a83d71e30edbd3fadd7c1a91e144bc3371b
   - path: playbooks/execution-packet-execution.md
-    sha256: 9f37d9c92c388e67e18160e49e6f045730287892579d260a14bca163315bdbe7
+    sha256: 6f75b58700eb8944ab2105767e84c55aeb79a5be38b05d96eeea80ec0f647389
   - path: playbooks/execution-packet-planning.md
-    sha256: bf2eee32b00a1795fe5138fc310ccc4e8902964bf98d02a13a7bd098d514f3a0
+    sha256: cc703e74b2ec1b1c99607cdc489d185fa9c02412447dccd78270db024d06415b
   - path: playbooks/execution-packet-review.md
     sha256: afb88d12be5472180a07491bbe492b9ee3a95dc8a592201324998a7643818152
+  - path: playbooks/idea-planning.md
+    sha256: 92a643d56daabcd8ea7547f8f7d48dea30fdcb9fe1ac27bfe590a459fceca0fc
+  - path: playbooks/knowledge-curator.md
+    sha256: 8edb7d3ba97837b74f4a39884c575a8f197e0e198f20582ce30f386bfc45a289
   - path: playbooks/knowledge-ingest.md
-    sha256: 040ccfd42e863658acaf011465fa47b3649a82f08be3adb53a391b1d3a66f0a1
+    sha256: 1b2a0feeb5f99a495d5b986494503ad3bacd45a281644ed8e0df5dd883382a50
   - path: playbooks/knowledge-lint.md
     sha256: 103bb82753ca796c4bafbe2d942023f192b3b08faa12bce5045c926ec6f2c233
   - path: playbooks/knowledge-search.md
     sha256: cbc0530ed689d0f5a7b5b0bede52460ea7f8f3255317708a6722984ef3927a48
+  - path: playbooks/product-requirements-planning.md
+    sha256: 36cddf53d36ca5a93fe45555a3adc862fc4d23517fb8ee9f97b089819d41697f
+  - path: playbooks/run-retro.md
+    sha256: 19a209d849cab2fef6ee852741dbde7e5c0ee449e3736fa4ab9d0723ada4437f
   - path: playbooks/session-closeout.md
     sha256: 0595c512f64e9a9aa2d9a0078336361a091842d0fc6743b452c663de9129c8e5
   - path: playbooks/session-execution.md
-    sha256: a4532a6a2e08bd8ee197fc4c101af403a8d6cb83fbe2b17cd4ed1e3a663d626c
+    sha256: 34f46fecd9e364e5a3225a83cee723530b57f7f1531f1f4b44f0a12e4b3292fc
   - path: playbooks/session-preparation.md
     sha256: b0d30ce54d76cd6bab0f05a6d512e7d8c2801fe1fa90bc9e555ab3821a04837b
   - path: requirements.txt
     sha256: 1703de02d8ce47a319e3ea207d1b7af05ac451a02dac5705b67d55104b54abae
   - path: skills/README.md
-    sha256: ddd203c20d92c2cb7ad73beb80fcc8ef1cd5998511336ff7a49046a934870db2
+    sha256: c1f1df477530f2eaf9e567f6c68ebd6b58058743be8140c296ad94d59eb6ac68
+  - path: skills/knowledge-curator/SKILL.md
+    sha256: fcbb256ee7e2eef4f217a8a8365d8e8d64d8fa25b02c7286a058f6135fef9e38
   - path: skills/knowledge-ingest/SKILL.md
     sha256: b1d8c7e568e631ec6194c0a70fd86cfc20196788eeeb46a9b744c6d8da2e426a
   - path: skills/knowledge-lint/SKILL.md
@@ -143,18 +223,28 @@ bundle:
     sha256: 8a4488b3e0818d7b1da24a2c8a26418a285f9dffa97b9ec1e4eef8eaed515783
   - path: skills/plan-execution-packet/SKILL.md
     sha256: 568c656b15c68a0cc2fa3f08dbe59e61b467efad6767c45527d75b8b66aaa8aa
+  - path: skills/plan-idea/SKILL.md
+    sha256: 56a4baaad03156859587bf9f661dfece166f59148e042f3bc99e7d578d243c91
+  - path: skills/plan-prd/SKILL.md
+    sha256: 4310bcac516e6a530ca73162e7d1dbbfb9ac9a393a0d35d1c8491b0c1a1f4c02
   - path: skills/review-execution-packet/SKILL.md
     sha256: 7a2446c61b650d76fa93fe51d0c514121579139effb30472a8aed4c74d701591
   - path: skills/run-bounded-evidence-loop/SKILL.md
-    sha256: d85e93fb11be720d4c4c0c1242a2943c2ba852d6d8555fa400721f8202787891
+    sha256: fb16163b11b218a9081bf4071f0f69c7feb8bcb833e58a2fc5bb8338dac27b90
   - path: skills/run-execution-packet/SKILL.md
-    sha256: 68ed3c3bd94cee8aeaf15572078ef8ed307ff4729f219519013e80eff721e1cf
+    sha256: 5bfd02481b26d591c6d7b549f2777730db5471b9cd150de601f99c9e7b97b013
+  - path: skills/run-retro/SKILL.md
+    sha256: 3f1ccf0529063dda71e6442d7e9871d54567c785435db003945cced3ea42b077
   - path: templates/README.md
-    sha256: 579b28f27bc0eca42f5615d1d182f284de36588a93ab3286d6e936b8a783a413
+    sha256: 81b06f1eefe266f539c00e5948b6afee2a190768599c68f2d2323bcf48bbf249
   - path: templates/agent-instructions.md
-    sha256: d87768140f8afbfc692517f453e89f96392ca09996faaaec531ac2ebc1691e2b
+    sha256: 092e7f813c7082600641b7edf62f640dd85724b6635f9c0150f4935f10729c7f
   - path: templates/bounded-evidence-loop.md
-    sha256: 338d099ad52587cef7af92b5052d0c6df1cf234592c818aa976fedee91aa3c6b
+    sha256: 8c078c554c60e11b3af344bade49658f81aa3337e68e9676aa483e0d1997224d
+  - path: templates/curator-report.md
+    sha256: 00cd796b2703394983b67d8ce0c6d74b2afd3d8166138fb7b90223d5cca0dafa
+  - path: templates/idea.md
+    sha256: cb1fe6d8b8526e88cace80f68110a577bd545565f0d18ee891ccee48f38c74e0
   - path: templates/knowledge-delta.md
     sha256: a3ab23101f97a60585ff51bd69eb927d70ec0ea4c6dfd72a782b23e7498cd7b2
   - path: templates/packet-charter.md
@@ -171,16 +261,22 @@ bundle:
     sha256: beb44ce3ecdd871c8a7eed333bc331cf30dd8592b9909c80be5c0c1791c420fc
   - path: templates/packet-start.md
     sha256: 1c38ecb96079734d42e166b64986ccc586eb7ea1722bb4cca69cd0a7dd9b1c9f
+  - path: templates/prd.md
+    sha256: 860708573bc9045d597363fe91fed15fbc04bd604f4cbcf07943d6403cefb384
+  - path: templates/retro.md
+    sha256: bdef4431e930b14aab42ef42c013f9993ae2db3a1e1f2e71df397e0e8c996437
   - path: templates/session-closeout.md
-    sha256: 1d3d5a136019ccc7f75d326a9ae44e0215af32cd4f304585108188b0044c8b8f
+    sha256: 82e740f157d5afaed5a97c48454f07937b7d7288fc276ad40f36508e005662cf
   - path: templates/session-launch.md
-    sha256: 9ab38c61ad6dfdb1643dde30f9a7286cefd391d73720db2d6efc8d03030aa1d3
+    sha256: 278d4422d72ba6357f4d6ed1c2389786f90f8f0ef37de2eb0de15aaf191681f0
   - path: templates/task-scope.md
     sha256: 66555e2692a6417bf8cbfa01bffdef5f218598b00d108eeccb42e01fa3ba9643
-  digest: sha256:3ed60a67e5c30493d8da4d4d241ebefbe36d80f4c17c371507797f1741810ab3
-generated_at: '2026-07-21T13:01:47.023482+00:00'
+  - path: templates/workspace-migration-ledger.md
+    sha256: f01b0a5fc7ce845d4f78cef9c902e6d404f14ce3bef10ed9b57b37b2af959c93
+  digest: sha256:14b25418201e9104801522cad5f48c8161b3f9748d67c4f6bc9574da291fc083
+generated_at: '2026-07-28T20:51:31.292737+00:00'
 git:
-  commit_sha: e93c53ba477413b336c393b9b9baffb12cf13e2d
+  commit_sha: f06bb33ef823f9d231ac5fde5cf78ad56765edc2
   dirty: false
 knowledge_index:
   path: knowledge/index.md

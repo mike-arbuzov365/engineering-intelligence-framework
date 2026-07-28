@@ -9,6 +9,7 @@ and runs doctor afterward.
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -53,6 +54,8 @@ def _verify_pinned_runtime(instance_path: Path) -> int:
     if not script.exists():
         print("eifctl upgrade: pinned runtime is absent; this run will rehydrate it from the installed package.")
         return 0
+    env = os.environ.copy()
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
     proc = subprocess.run(
         [
             sys.executable,
@@ -61,6 +64,7 @@ def _verify_pinned_runtime(instance_path: Path) -> int:
             "--instance-path", str(instance_path),
         ],
         cwd=instance_path,
+        env=env,
         text=True,
         encoding="utf-8",
         errors="replace",

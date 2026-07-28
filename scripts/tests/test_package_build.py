@@ -108,6 +108,10 @@ def clean_checkout_export(framework_root: Path, dest_dir: Path) -> None:
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     results: list[bool] = []
 
     # A tempdir whose own name has a space and a non-ASCII character -
@@ -217,11 +221,36 @@ def main() -> int:
             version_proc.stdout + version_proc.stderr,
         ))
 
-        # --- 4a. v0.1.1 project lifecycle UX: create a local git repo,
-        # connect it to a private registry, plan a rehydrating upgrade, then
-        # apply it from the installed wheel.
-        control_dir = tmp_root / "private control"
-        control_dir.mkdir()
+        # --- 4a. v0.2 private-workspace lifecycle UX: create the local
+        # workspace, connect a local git project, then plan and apply both
+        # provenance axes from the installed wheel.
+        control_dir = tmp_root / "private workspace"
+        workspace_new = run([
+            str(eifctl_exe), "workspace", "new", str(control_dir),
+            "--workspace-name", "test-workspace",
+            "--adapter", "codex",
+            "--locale", "uk",
+        ], cwd=tmp_root)
+        results.append(check(
+            "eifctl workspace new creates a local private workspace without a framework checkout",
+            workspace_new.returncode == 0
+            and (control_dir / ".git").exists()
+            and (control_dir / ".eif" / "workspace.yaml").exists()
+            and (control_dir / ".eif" / "projects.yaml").exists()
+            and (control_dir / "workspace" / "profiles" / "default.yaml").exists()
+            and (control_dir / "planning" / "migration-ledger.md").exists()
+            and "no remote" in workspace_new.stdout,
+            workspace_new.stdout + workspace_new.stderr,
+        ))
+        workspace_doctor = run([
+            str(eifctl_exe), "workspace", "doctor",
+            "--workspace-path", str(control_dir),
+        ], cwd=tmp_root)
+        results.append(check(
+            "wheel-installed workspace doctor accepts the clean bootstrap",
+            workspace_doctor.returncode == 0 and "PASS" in workspace_doctor.stdout,
+            workspace_doctor.stdout + workspace_doctor.stderr,
+        ))
         registry_path = control_dir / ".eif" / "projects.yaml"
         new_project = tmp_root / "new project створено"
         new_proc = run([
@@ -249,6 +278,17 @@ def main() -> int:
             and (new_lock.get("package") or {}).get("version") == installed_version,
             str({"config": new_config.get("framework"), "instance": new_lock.get("instance"), "package": new_lock.get("package")}),
         ))
+        run(["git", "add", "-A"], cwd=control_dir)
+        commit_workspace = run([
+            "git", "-c", "user.name=EIF Test", "-c", "user.email=eif-test@example.invalid",
+            "commit", "-m", "bootstrap workspace and registry",
+        ], cwd=control_dir)
+        results.append(check(
+            "private workspace and logical registry can be committed without machine-local paths",
+            commit_workspace.returncode == 0
+            and str(new_project) not in (control_dir / ".eif" / "projects.yaml").read_text(encoding="utf-8"),
+            commit_workspace.stdout + commit_workspace.stderr,
+        ))
         run(["git", "add", "-A"], cwd=new_project)
         commit_new = run([
             "git", "-c", "user.name=EIF Test", "-c", "user.email=eif-test@example.invalid",
@@ -273,11 +313,58 @@ def main() -> int:
             "--apply",
         ], cwd=control_dir)
         results.append(check(
-            "projects upgrade rehydrates and verifies every registered project",
+            "projects upgrade applies and verifies both framework and workspace axes",
             apply_new.returncode == 0
             and (new_project / ".eif" / "runtime" / "eif_verify_runtime.py").exists()
+            and (new_project / ".eif" / "workspace-runtime").exists()
+            and (new_project / ".eif" / "workspace.lock.yaml").exists()
             and "SUCCESS updated 1 project(s)" in apply_new.stdout,
             apply_new.stdout + apply_new.stderr,
+        ))
+        run(["git", "add", "-A"], cwd=new_project)
+        commit_update = run([
+            "git", "-c", "user.name=EIF Test", "-c", "user.email=eif-test@example.invalid",
+            "commit", "-m", "apply workspace",
+        ], cwd=new_project)
+        results.append(check(
+            "two-axis project update can be committed cleanly",
+            commit_update.returncode == 0,
+            commit_update.stdout + commit_update.stderr,
+        ))
+        detach_plan = run([
+            str(eifctl_exe), "projects", "detach", "new-project",
+            "--registry", str(registry_path),
+        ], cwd=control_dir)
+        results.append(check(
+            "projects detach is plan-only by default",
+            detach_plan.returncode == 0
+            and "plan only" in detach_plan.stdout
+            and (new_project / ".eif" / "workspace.lock.yaml").exists(),
+            detach_plan.stdout + detach_plan.stderr,
+        ))
+        detach_apply = run([
+            str(eifctl_exe), "projects", "detach", "new-project",
+            "--registry", str(registry_path),
+            "--apply",
+        ], cwd=control_dir)
+        detached_registry = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+        results.append(check(
+            "projects detach removes only workspace-managed state and keeps a detached logical entry",
+            detach_apply.returncode == 0
+            and not (new_project / ".eif" / "workspace-runtime").exists()
+            and not (new_project / ".eif" / "workspace.lock.yaml").exists()
+            and (new_project / ".eif" / "framework.lock.yaml").exists()
+            and detached_registry["projects"][0]["status"] == "detached",
+            detach_apply.stdout + detach_apply.stderr,
+        ))
+        detached_doctor = run([
+            str(eifctl_exe), "workspace", "doctor",
+            "--workspace-path", str(control_dir),
+        ], cwd=tmp_root)
+        results.append(check(
+            "workspace doctor accepts an explicitly detached project",
+            detached_doctor.returncode == 0 and "PASS" in detached_doctor.stdout,
+            detached_doctor.stdout + detached_doctor.stderr,
         ))
 
         init_proc = run(
@@ -292,6 +379,11 @@ def main() -> int:
 
         lock_path = project_dir / ".eif" / "framework.lock.yaml"
         lock_text = lock_path.read_text(encoding="utf-8") if lock_path.exists() else ""
+        lock_data = yaml.safe_load(lock_text) if lock_text else {}
+        runtime_manifest_paths = [
+            item.get("path", "")
+            for item in (lock_data.get("bundle", {}).get("manifest", []) if lock_data else [])
+        ]
         results.append(check(
             "framework.lock.yaml records package provenance (source_type: installed-package)",
             "source_type: installed-package" in lock_text and "distribution: engineering-intelligence-framework" in lock_text,
@@ -311,6 +403,14 @@ def main() -> int:
             "framework.lock.yaml records wheel_sha256 (installed from a local wheel path, direct_url.json has the hash)",
             "wheel_sha256:" in lock_text,
             lock_text,
+        ))
+        results.append(check(
+            "installed-wheel runtime manifest excludes interpreter-generated bytecode",
+            not any(
+                "__pycache__" in path or path.endswith((".pyc", ".pyo"))
+                for path in runtime_manifest_paths
+            ),
+            str(runtime_manifest_paths),
         ))
 
         doctor_proc = run([str(eifctl_exe), "doctor", "--instance-path", str(project_dir)], cwd=tmp_root)
@@ -573,6 +673,46 @@ else:
         )
         resources_root = Path(find_resources.stdout.strip()) if find_resources.returncode == 0 else None
         if resources_root and resources_root.is_dir():
+            digest_command = [
+                str(venv_python), "-c",
+                "import sys\n"
+                "from pathlib import Path\n"
+                "from engineering_intelligence_framework.commands.init_cmd import _resource_manifest_digest\n"
+                "print(_resource_manifest_digest(Path(sys.argv[1])))",
+                str(resources_root),
+            ]
+            digest_before_bytecode = run(digest_command, env={"PYTHONIOENCODING": "utf-8"})
+            bytecode_dir = resources_root / "integrations" / "__pycache__"
+            bytecode_dir.mkdir(parents=True, exist_ok=True)
+            bytecode_file = bytecode_dir / "generated.cpython-311.pyc"
+            bytecode_file.write_bytes(b"interpreter-generated test bytecode")
+            try:
+                digest_after_bytecode = run(digest_command, env={"PYTHONIOENCODING": "utf-8"})
+                doctor_with_bytecode = run(
+                    [str(eifctl_exe), "doctor", "--instance-path", str(project_dir)],
+                    cwd=tmp_root,
+                )
+                results.append(check(
+                    "installed-package resource digest ignores interpreter-generated bytecode",
+                    digest_before_bytecode.returncode == 0
+                    and digest_after_bytecode.returncode == 0
+                    and digest_before_bytecode.stdout == digest_after_bytecode.stdout,
+                    digest_before_bytecode.stdout + digest_before_bytecode.stderr
+                    + digest_after_bytecode.stdout + digest_after_bytecode.stderr,
+                ))
+                results.append(check(
+                    "eifctl doctor remains healthy when Python creates resource-tree bytecode",
+                    doctor_with_bytecode.returncode == 0
+                    and "all checks passed" in doctor_with_bytecode.stdout,
+                    doctor_with_bytecode.stdout + doctor_with_bytecode.stderr,
+                ))
+            finally:
+                bytecode_file.unlink(missing_ok=True)
+                try:
+                    bytecode_dir.rmdir()
+                except OSError:
+                    pass
+
             # A template file, not a *.schema.json: corrupting a JSON schema
             # file here would ALSO be parsed by check_schema() for the
             # config/lock validation checks that run first in

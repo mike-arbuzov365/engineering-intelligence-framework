@@ -123,6 +123,9 @@ GITIGNORE_BLOCK = (
     ".eif/runtime/\n"
     ".eif/runtime.next/\n"
     ".eif/runtime.previous/\n"
+    ".eif/workspace-runtime/\n"
+    ".eif/workspace-runtime.next/\n"
+    ".eif/workspace-runtime.previous/\n"
     ".eif/local-state/\n"
     "graphify-out/\n"
     "*.next\n"
@@ -245,6 +248,21 @@ def resolve_framework_release_version(
     return fallback
 
 
+def is_portable_resource_file(path: Path) -> bool:
+    """Whether *path* is source-controlled framework content.
+
+    Python may compile resource-tree ``*.py`` fixtures after a wheel is
+    installed. Those interpreter artifacts are neither release inputs nor
+    portable project runtime content, so they must not affect provenance or
+    get copied into an instance.
+    """
+    return (
+        path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix.lower() not in {".pyc", ".pyo"}
+    )
+
+
 def collect_bundle_sources(framework_root: Path) -> list[tuple[Path, str]]:
     sources: list[tuple[Path, str]] = []
     for script in BUNDLE_SCRIPTS:
@@ -257,7 +275,7 @@ def collect_bundle_sources(framework_root: Path) -> list[tuple[Path, str]]:
         if not src_root.is_dir():
             raise FileNotFoundError(f"mandatory bundle source missing: {tree}/")
         for f in sorted(src_root.rglob("*")):
-            if f.is_file():
+            if is_portable_resource_file(f):
                 rel = f"{tree}/{f.relative_to(src_root).as_posix()}"
                 sources.append((f, rel))
     return sources
@@ -504,11 +522,16 @@ def commit_transaction(stages: list[_Stage]) -> None:
         # found by testing the "before lock commit" injection point, where
         # entrypoint.next/.gitignore.next were staged but never committed.
         for stage in stages:
-            if stage not in committed and stage.next_path.exists():
+            next_path = getattr(stage, "next_path", None)
+            if (
+                stage not in committed
+                and next_path is not None
+                and next_path.exists()
+            ):
                 if stage.is_dir:
-                    shutil.rmtree(stage.next_path, ignore_errors=True)
+                    shutil.rmtree(next_path, ignore_errors=True)
                 else:
-                    stage.next_path.unlink(missing_ok=True)
+                    next_path.unlink(missing_ok=True)
         raise
     for stage in stages:
         stage.cleanup()

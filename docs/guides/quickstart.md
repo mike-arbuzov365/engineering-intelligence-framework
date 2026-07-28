@@ -15,6 +15,12 @@ with real captured command output, see
 this page doesn't duplicate that content, it summarizes it and adds a real
 timing measurement.
 
+For real private repositories, install the v0.2.0 wheel and create a
+user-owned workspace with `eifctl workspace new`. That workspace is optional
+L2 scope, not a private copy of EIF. The
+[`project lifecycle guide`](project-lifecycle.md) covers registry v2,
+machine-local paths, profiles, the two update axes, and detach.
+
 ## What you need
 
 - Python 3.11+
@@ -80,6 +86,7 @@ Two different numbers, deliberately not conflated:
   default, see [`integrations/README.md`](../../integrations/README.md).
 - The installable `eifctl` package's own quickstart (same steps, different
   invocation - `eifctl init` instead of `python scripts/eif_init.py`) -
-  see the root [`README.md`](../../README.md#get-started). Creation,
-  registration and multi-project updates are covered separately in the
+  see the root [`README.md`](../../README.md#get-started). Workspace
+  creation, registration, profile materialization, multi-project updates,
+  and detach are covered separately in the
   [`project lifecycle guide`](project-lifecycle.md).

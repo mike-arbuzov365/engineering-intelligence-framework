@@ -8,7 +8,8 @@ The narrative follows the canonical framework architecture:
 
 1. why chat history is not engineering memory;
 2. what Engineering Intelligence and the methodology mean;
-3. the three intelligence layers;
+3. the three intelligence layers, with the optional private workspace inside
+   L2 rather than presented as another layer;
 4. the control plane and session lifecycle;
 5. bounded execution and governed learning;
 6. optional integrations, current evidence, quickstart, and where to read on
@@ -139,6 +140,11 @@ push-triggered deploy is a boundary rather than a contradiction of D-14.
 profile. Both reuse the site's orbit figure from the same brand source. They
 are written outside `public/` because the site never serves them and copying
 them into every `dist/` would be dead weight.
+
+The same command emits `.github/linkedin-banner.png` at 1584x396. Its left
+side is intentionally quiet so a profile avatar does not cover the title on
+desktop or mobile. The banner states stable project identity and license,
+not a temporary pre-release status.
 
 ## Structure
 

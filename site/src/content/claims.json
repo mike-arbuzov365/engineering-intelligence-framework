@@ -1,6 +1,6 @@
 {
   "note": "Public claim manifest for the EIF website. Every material on-page claim must cite one of these IDs. Source column points at the row topic in the framework repo's docs/product/claims-evidence.md claim register (not a private path). Do not strengthen wording beyond 'allowedWording'.",
-  "generated": "2026-07-23",
+  "generated": "2026-07-28",
   "claims": [
     {
       "id": "CLM-01",
@@ -13,10 +13,10 @@
     },
     {
       "id": "CLM-02",
-      "summary": "A ten-command installable wheel, including project creation, connection and guarded updates, passed bounded local package evidence; it is available on GitHub Releases but not on PyPI.",
+      "summary": "An eleven-command installable wheel, including private-workspace creation and guarded two-axis project updates, passed bounded local package evidence; it is available on GitHub Releases but not on PyPI.",
       "status": "OBSERVED",
-      "allowedWording": "EIF v0.1.1 is available as a GitHub release wheel. It has 10 commands and can create or connect private project instances, plan compatible updates across a private registry, and apply them one project at a time after every target passes preflight.",
-      "limitations": "Not published to PyPI; eifctl new creates only a local repository; fleet apply is preflighted but not atomic across repositories.",
+      "allowedWording": "EIF v0.2.0 is available as a GitHub release wheel. It has 11 commands and can create a local private workspace, connect private project instances, and plan or apply public-framework and private-workspace updates as separate provenance axes after every target passes preflight.",
+      "limitations": "Not published to PyPI; workspace and project creation are local only; fleet apply is preflighted but not atomic across repositories; workspace profiles remain experimental within 0.x.",
       "forbiddenWording": ["Published on PyPI.", "Production-ready.", "Atomic fleet migration.", "Creates and pushes a GitHub repository."],
       "source": "docs/product/claims-evidence.md - row \"An installable eifctl package works without a framework git checkout, including project lifecycle operations and a full synthetic-task journey\""
     },
@@ -136,6 +136,15 @@
       "limitations": "This is externalized system-level learning through versioned artifacts. It is not model training, fine-tuning, autonomous self-modification or evidence that task outcomes improve over time.",
       "forbiddenWording": ["Self-learning AI.", "Agents improve automatically.", "The model learns from every session."],
       "source": "docs/product/claims-evidence.md - row \"EIF defines governed learning and reusable skills\""
+    },
+    {
+      "id": "CLM-16",
+      "summary": "The optional private workspace is durable scope inside L2, with pinned materialization into independent projects.",
+      "status": "OBSERVED (architecture and lifecycle contract)",
+      "allowedWording": "EIF defines an optional private workspace inside L2. It materializes selected, hashed workspace artifacts into independent projects without copying the public framework or taking ownership of project content.",
+      "limitations": "Proven against synthetic repositories and transaction fault injection. It does not make fleet apply atomic, infer whether private vocabulary generalizes, or let agents consume a live workspace checkout.",
+      "forbiddenWording": ["A fourth intelligence layer.", "A private EIF framework fork.", "Projects always follow the latest workspace.", "Atomic fleet synchronization."],
+      "source": "docs/product/claims-evidence.md - row \"EIF provides an optional private workspace inside the project intelligence layer\""
     }
   ]
 }

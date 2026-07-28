@@ -85,9 +85,26 @@ def main() -> int:
         results.append(check("new uses installed-package provenance",
                              (lock.get("framework") or {}).get("source_type") == "installed-package"))
         registry_data = yaml.safe_load(registry.read_text(encoding="utf-8"))
-        results.append(check("registry stores one relative project path",
-                             registry_data["projects"] == [{"name": "alpha", "path": "../../alpha"}],
-                             str(registry_data)))
+        locations_path = control / ".eif" / "local-state" / "project-locations.yaml"
+        locations_data = yaml.safe_load(locations_path.read_text(encoding="utf-8"))
+        results.append(check(
+            "committed registry stores one logical identity and no path",
+            registry_data["schema_version"] == 2
+            and registry_data["projects"][0]["name"] == "alpha"
+            and registry_data["projects"][0]["profile"] == "default"
+            and registry_data["projects"][0]["status"] == "active"
+            and "path" not in registry_data["projects"][0],
+            str(registry_data),
+        ))
+        results.append(check(
+            "machine-local locations store the project path separately",
+            locations_data["schema_version"] == 1
+            and locations_data["locations"][0]["project_id"]
+            == registry_data["projects"][0]["id"]
+            and Path(locations_data["locations"][0]["path"]).resolve()
+            == alpha.resolve(),
+            str(locations_data),
+        ))
 
         existing_snapshot = sorted(p.relative_to(alpha).as_posix() for p in alpha.rglob("*"))
         rc = cli.main(["new", str(alpha), "--project-name", "must-not-overwrite"])
@@ -148,8 +165,15 @@ def main() -> int:
         rc = cli.main(["projects", "remove", "beta", "--registry", str(registry)])
         results.append(check("projects remove updates only the registry", rc == 0 and beta.exists()))
         after_remove = yaml.safe_load(registry.read_text(encoding="utf-8"))
+        locations_after_remove = yaml.safe_load(locations_path.read_text(encoding="utf-8"))
         results.append(check("projects remove leaves the other registration",
                              [p["name"] for p in after_remove["projects"]] == ["alpha"]))
+        results.append(check(
+            "projects remove also removes only beta's local mapping",
+            len(locations_after_remove["locations"]) == 1
+            and locations_after_remove["locations"][0]["project_id"]
+            == after_remove["projects"][0]["id"],
+        ))
 
         legacy = root / "legacy-git-source"
         legacy.mkdir()

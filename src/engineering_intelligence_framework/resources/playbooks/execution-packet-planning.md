@@ -36,6 +36,14 @@ between current state and existing docs, or a request for unattended
 autonomous execution. Otherwise use
 [`templates/task-scope.md`](../templates/task-scope.md) directly instead.
 
+An idea or PRD is an input, not a substitute for this packet. If the
+problem itself is not yet an approved durable artifact, start with
+[`idea-planning.md`](idea-planning.md). If an approved idea still lacks
+observable product requirements, use
+[`product-requirements-planning.md`](product-requirements-planning.md).
+Carry every approved scope item, explicit exclusion, requirement and open
+decision from those artifacts into the Facts file's carry-over ledger.
+
 ## Anatomy
 
 ```text

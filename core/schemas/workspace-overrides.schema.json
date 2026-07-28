@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engineering-intelligence-framework.dev/schemas/workspace-overrides.schema.json",
+  "title": "EIF project declarations that override workspace artifacts",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "overrides"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "overrides": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "name", "override_of", "reason", "approved_by"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["rule", "skill", "playbook", "template", "knowledge"]
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+          },
+          "override_of": {
+            "type": "string",
+            "pattern": "^workspace://(rule|skill|playbook|template|knowledge)/[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "approved_by": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

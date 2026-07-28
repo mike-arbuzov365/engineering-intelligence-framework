@@ -4,6 +4,8 @@ Slash-command-style skills for AI coding agents.
 
 | Skill | Playbook it wraps |
 |---|---|
+| [`plan-idea/`](plan-idea/SKILL.md) | `playbooks/idea-planning.md` |
+| [`plan-prd/`](plan-prd/SKILL.md) | `playbooks/product-requirements-planning.md` |
 | [`run-bounded-evidence-loop/`](run-bounded-evidence-loop/SKILL.md) | `playbooks/bounded-evidence-loop.md` |
 | [`plan-execution-packet/`](plan-execution-packet/SKILL.md) | `playbooks/execution-packet-planning.md` |
 | [`run-execution-packet/`](run-execution-packet/SKILL.md) | `playbooks/execution-packet-execution.md` |
@@ -17,5 +19,6 @@ Slash-command-style skills for AI coding agents.
 Each skill is a thin `<skill-name>/SKILL.md` pointer to its playbook (one
 canonical source per D-007, not a second copy of the workflow) with the
 native `name`/`description` skill-manifest frontmatter agent adapters
-expect. Not yet ported: knowledge-health and customer-facing skills - no
-equivalent need in a single-project-instance v0.1 adopter.
+expect. Not yet ported: customer-facing skills. Knowledge health is covered
+by the curator; community skill discovery remains a separate future
+trust-boundary workflow rather than an automatic installer.

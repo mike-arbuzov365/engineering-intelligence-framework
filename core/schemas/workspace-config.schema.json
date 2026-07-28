@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://engineering-intelligence-framework.dev/schemas/workspace-config.schema.json",
+  "title": "EIF private workspace configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "workspace", "registry", "profiles", "content"],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "const": 1
+    },
+    "workspace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "locations_path"],
+      "properties": {
+        "path": {
+          "const": ".eif/projects.yaml"
+        },
+        "locations_path": {
+          "const": ".eif/local-state/project-locations.yaml"
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root", "default"],
+      "properties": {
+        "root": {
+          "const": "workspace/profiles"
+        },
+        "default": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        }
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["root"],
+      "properties": {
+        "root": {
+          "const": "workspace"
+        }
+      }
+    }
+  }
+}

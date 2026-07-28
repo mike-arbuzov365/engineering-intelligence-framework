@@ -15,6 +15,7 @@ Usage:
     eifctl new PATH [--project-name NAME] [--registry PATH] ...
     eifctl upgrade [--instance-path PATH] [--dry-run]
     eifctl projects {add,remove,status,upgrade} ...
+    eifctl workspace {new,doctor} ...
     eifctl doctor [--instance-path PATH]
     eifctl search QUERY [--knowledge-root PATH] ...
     eifctl render {knowledge-delta,session-closeout,message} ...
@@ -26,13 +27,14 @@ from __future__ import annotations
 
 import sys
 
-from .commands import doctor, init_cmd, new, privacy_scan, projects, render, search, upgrade, validate, version
+from .commands import doctor, init_cmd, new, privacy_scan, projects, render, search, upgrade, validate, version, workspace
 
 COMMANDS = {
     "init": init_cmd.run,
     "new": new.run,
     "upgrade": upgrade.run,
     "projects": projects.run,
+    "workspace": workspace.run,
     "doctor": doctor.run,
     "search": search.run,
     "render": render.run,

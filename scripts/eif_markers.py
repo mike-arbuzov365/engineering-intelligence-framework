@@ -68,6 +68,17 @@ def render_merged_content(existing_text: str | None, managed_block: str,
     begin_idx, end_idx = found
     head = existing_text[:begin_idx]
     tail = existing_text[end_idx:]
+    # find_managed_block() stops immediately after the END marker. Therefore
+    # the existing tail normally owns the line break after that marker, while
+    # canonical managed blocks normally end with a line break too. Keeping
+    # both grows one blank line on every routine upgrade. Let the existing
+    # tail own that boundary so all project-owned tail bytes stay unchanged
+    # and repeated updates are byte-idempotent.
+    if tail.startswith(("\r\n", "\n", "\r")):
+        if managed_block.endswith("\r\n"):
+            managed_block = managed_block[:-2]
+        elif managed_block.endswith(("\n", "\r")):
+            managed_block = managed_block[:-1]
     return head + managed_block + tail, "update-block"
 
 

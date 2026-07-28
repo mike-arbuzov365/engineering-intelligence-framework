@@ -55,7 +55,18 @@ test.describe('engineering-intelligence methodology', () => {
   test('Ukrainian mode carries the same methodology structure', async ({ page }) => {
     await page.goto('/');
     await page.locator('#lang-toggle').click();
-    await expect(page.locator('#methodology')).toContainText('Інженерний інтелект');
+    await expect(page.locator('#methodology-heading')).toHaveText(
+      'Інженерний інтелект - це система навколо агента',
+    );
+    await expect(page.locator('#layers .section__lede')).toContainText(
+      'EIF відокремлює',
+    );
+    await expect(page.locator('#layers .ledger__caption h3')).toHaveText(
+      'Сесія отримує досвід до початку реалізації',
+    );
+    await expect(page.locator('#session-heading')).toHaveText(
+      'Сесія - це одиниця контрольованої роботи й навчання',
+    );
     await expect(page.locator('#layers .layers__layer')).toHaveCount(3);
     await expect(page.locator('#session .session__timeline li')).toHaveCount(4);
     await expect(page.locator('#learning .learning__flow li')).toHaveCount(6);
@@ -87,6 +98,10 @@ test.describe('engineering-intelligence methodology', () => {
       'Tier 3',
       'playbook',
       'skill',
+      'Плейбук',
+      'антипатерн',
+      'Амброва',
+      'названий шлях',
       'Орієнтація',
       'Коригування',
       'розмовою з агентом',

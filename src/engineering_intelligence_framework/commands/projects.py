@@ -6,6 +6,7 @@ live in a separate gitignored locations file.
 Commands:
     eifctl projects add PATH [--profile NAME] [--registry PATH]
     eifctl projects remove NAME [--registry PATH]
+    eifctl projects detach NAME [--registry PATH] [--apply]
     eifctl projects status [--registry PATH]
     eifctl projects upgrade [--registry PATH] [--apply] [--migrate-source]
     eifctl projects migrate-registry-v1-to-v2 [--registry PATH] [--apply]
@@ -20,6 +21,7 @@ from typing import Any
 import yaml
 
 from .. import __version__
+from .._impl.eif_init import _DeleteStage, commit_transaction
 from ..workspace_contract import (
     DEFAULT_REGISTRY,
     LOCATIONS_SCHEMA,
@@ -32,6 +34,11 @@ from ..workspace_contract import (
     migrate_registry_v1_to_v2,
     read_yaml,
     stable_project_id,
+)
+from ..workspace_materialization import (
+    WorkspaceMaterializationError,
+    materialize_workspace,
+    verify_workspace_materialization,
 )
 from . import upgrade as upgrade_cmd
 
@@ -155,10 +162,35 @@ def register_project(
     for entry in registry["projects"]:
         if entry["id"] == project_id:
             existing_path = location_by_id.get(project_id)
-            if (
-                entry["name"].casefold() == name.casefold()
-                and existing_path == project_path
-            ):
+            if entry["name"].casefold() == name.casefold():
+                if existing_path is not None and existing_path != project_path:
+                    raise RegistryError(
+                        f"project {name!r} is mapped to a different local path"
+                    )
+                changed = False
+                if existing_path is None:
+                    locations["locations"].append(
+                        {
+                            "project_id": project_id,
+                            "path": project_path.as_posix(),
+                        }
+                    )
+                    changed = True
+                if entry["status"] != "active" or entry["profile"] != profile:
+                    entry["status"] = "active"
+                    entry["profile"] = profile
+                    changed = True
+                if changed:
+                    locations["locations"].sort(
+                        key=lambda item: item["project_id"]
+                    )
+                    _write_state(
+                        registry_path,
+                        registry,
+                        locations_path,
+                        locations,
+                    )
+                    return name, "reactivated"
                 return name, "already-registered"
             raise RegistryError(
                 f"stable project id {project_id!r} is already assigned to "
@@ -226,6 +258,52 @@ def _lock_status(project_path: Path | None) -> tuple[str, str, str]:
     return str(source_type), str(version), health
 
 
+def _workspace_root(registry_path: Path) -> Path | None:
+    candidate = registry_path.parent.parent.resolve()
+    return (
+        candidate
+        if (candidate / ".eif" / "workspace.yaml").is_file()
+        else None
+    )
+
+
+def _workspace_status(
+    project_path: Path | None,
+) -> tuple[str, str]:
+    if project_path is None:
+        return "-", "location-missing"
+    lock_path = project_path / ".eif" / "workspace.lock.yaml"
+    runtime = project_path / ".eif" / "workspace-runtime"
+    if not lock_path.exists() and not runtime.exists():
+        return "-", "not-materialized"
+    if not lock_path.exists():
+        return "-", "missing-lock"
+    try:
+        lock = yaml.safe_load(lock_path.read_text(encoding="utf-8")) or {}
+        revision = (lock.get("workspace") or {}).get("revision", "unknown")
+        shown = revision[:12] if isinstance(revision, str) else "unknown"
+    except (OSError, yaml.YAMLError):
+        return "unknown", "invalid-lock"
+    problems = verify_workspace_materialization(project_path)
+    return shown, "ready" if not problems else "invalid"
+
+
+def _detach_workspace_managed(project_path: Path) -> None:
+    runtime = project_path / ".eif" / "workspace-runtime"
+    lock = project_path / ".eif" / "workspace.lock.yaml"
+    stages = []
+    if runtime.exists():
+        stages.append(
+            _DeleteStage("workspace-runtime", runtime, is_dir=True)
+        )
+    if lock.exists():
+        stages.append(
+            _DeleteStage("workspace-lock", lock, is_dir=False)
+        )
+    if stages:
+        commit_transaction(stages)
+
+
 def run(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
@@ -246,6 +324,21 @@ def run(argv: list[str]) -> int:
     remove.add_argument("name")
     remove.add_argument("--registry", default=None)
     remove.add_argument("--locations", default=None)
+
+    detach = sub.add_parser(
+        "detach",
+        help="Plan or remove only workspace-managed state from one project.",
+    )
+    detach.add_argument("name")
+    detach.add_argument("--registry", default=None)
+    detach.add_argument("--locations", default=None)
+    detach.add_argument("--apply", action="store_true")
+    detach.add_argument(
+        "--remove-registration",
+        action="store_true",
+        help="Also remove logical registry and local-location entries.",
+    )
+    detach.add_argument("--allow-dirty-project", action="store_true")
 
     status = sub.add_parser(
         "status",
@@ -349,16 +442,77 @@ def run(argv: list[str]) -> int:
             )
             return 0
 
+        if args.command == "detach":
+            matches = [
+                (entry, path)
+                for entry, path in projects
+                if entry["name"] == args.name
+            ]
+            if not matches:
+                raise RegistryError(
+                    f"project not found in registry: {args.name}"
+                )
+            entry, path = matches[0]
+            if path is None:
+                raise RegistryError(
+                    f"project has no machine-local location: {args.name}"
+                )
+            dirty, detail = upgrade_cmd._git_dirty(path)
+            if dirty and not args.allow_dirty_project:
+                suffix = f": {detail}" if detail else ""
+                raise RegistryError(
+                    "project working tree is dirty; commit or stash before "
+                    f"detach{suffix}"
+                )
+            print(
+                f"eifctl projects detach: project={entry['name']} "
+                f"workspace-runtime={'present' if (path / '.eif' / 'workspace-runtime').exists() else 'absent'} "
+                f"workspace-lock={'present' if (path / '.eif' / 'workspace.lock.yaml').exists() else 'absent'} "
+                f"registration={'remove' if args.remove_registration else 'keep-as-detached'}"
+            )
+            if not args.apply:
+                print(
+                    "eifctl projects detach: plan only; no files were written. "
+                    "Re-run with --apply."
+                )
+                return 0
+
+            _detach_workspace_managed(path)
+            if args.remove_registration:
+                registry["projects"] = [
+                    project
+                    for project in registry["projects"]
+                    if project["id"] != entry["id"]
+                ]
+                locations["locations"] = [
+                    location
+                    for location in locations["locations"]
+                    if location["project_id"] != entry["id"]
+                ]
+            else:
+                entry["status"] = "detached"
+            _write_state(registry_path, registry, locations_path, locations)
+            print(
+                f"eifctl projects detach: SUCCESS {entry['name']}; "
+                "project-owned knowledge, rules, skills, history and product "
+                "files were not touched"
+            )
+            return 0
+
         if args.command == "status":
             print(f"EIF project registry: {registry_path}")
-            print("ID\tNAME\tPROFILE\tSTATUS\tSOURCE\tCURRENT\tRUNTIME\tPATH")
+            print(
+                "ID\tNAME\tPROFILE\tSTATUS\tFRAMEWORK\tFW_CURRENT\t"
+                "FW_RUNTIME\tWORKSPACE\tWS_RUNTIME\tPATH"
+            )
             for entry, path in projects:
                 source, version, health = _lock_status(path)
+                workspace_revision, workspace_health = _workspace_status(path)
                 shown_path = str(path) if path is not None else "-"
                 print(
                     f"{entry['id']}\t{entry['name']}\t{entry['profile']}\t"
                     f"{entry['status']}\t{source}\t{version}\t{health}\t"
-                    f"{shown_path}"
+                    f"{workspace_revision}\t{workspace_health}\t{shown_path}"
                 )
             print(
                 f"eifctl projects: {len(projects)} project(s); "
@@ -387,9 +541,16 @@ def run(argv: list[str]) -> int:
         if args.allow_dirty_project:
             common.append("--allow-dirty-project")
 
+        workspace_root = _workspace_root(registry_path)
+        workspace_plans: dict[str, dict[str, Any]] = {}
         print(
             f"eifctl projects: preflighting {len(active)} project(s) "
             f"for EIF {__version__}"
+            + (
+                f" and workspace {workspace_root}"
+                if workspace_root is not None
+                else ""
+            )
         )
         for entry, path in active:
             assert path is not None
@@ -404,6 +565,40 @@ def run(argv: list[str]) -> int:
                     file=sys.stderr,
                 )
                 return rc
+            if workspace_root is not None:
+                try:
+                    workspace_plan = materialize_workspace(
+                        workspace_root,
+                        path,
+                        profile_name=entry["profile"],
+                        required_exceptions=entry.get(
+                            "required_exceptions", []
+                        ),
+                        framework_version=__version__,
+                        dry_run=True,
+                        allow_dirty_project=args.allow_dirty_project,
+                    )
+                except WorkspaceMaterializationError as exc:
+                    print(
+                        f"eifctl projects: workspace preflight failed for "
+                        f"{entry['name']}: {exc}; no project was updated",
+                        file=sys.stderr,
+                    )
+                    return 1
+                workspace_plans[entry["id"]] = workspace_plan
+                current_workspace, current_health = _workspace_status(path)
+                print(
+                    "  framework: "
+                    f"current={_lock_status(path)[1]} target={__version__}"
+                )
+                print(
+                    "  workspace: "
+                    f"current={current_workspace} "
+                    f"target={workspace_plan['revision'][:12]} "
+                    f"profile={entry['profile']} "
+                    f"overrides={len(workspace_plan['overrides'])} "
+                    f"health={current_health}"
+                )
 
         if not args.apply:
             print(
@@ -413,24 +608,56 @@ def run(argv: list[str]) -> int:
             return 0
 
         completed: list[str] = []
-        for entry, path in active:
+        for index, (entry, path) in enumerate(active):
             assert path is not None
             print(f"\n== apply: {entry['name']} ({path}) ==")
             rc = upgrade_cmd.run(["--instance-path", str(path), *common])
             if rc != 0:
                 done = ", ".join(completed) if completed else "none"
+                untouched = ", ".join(
+                    item[0]["name"] for item in active[index + 1 :]
+                ) or "none"
                 print(
-                    f"eifctl projects: stopped at {entry['name']}; "
-                    f"already updated: {done}. No later project was touched.",
+                    f"eifctl projects: failed={entry['name']} axis=framework; "
+                    f"completed={done}; untouched={untouched}",
                     file=sys.stderr,
                 )
                 return rc
+            if workspace_root is not None:
+                try:
+                    materialize_workspace(
+                        workspace_root,
+                        path,
+                        profile_name=entry["profile"],
+                        required_exceptions=entry.get(
+                            "required_exceptions", []
+                        ),
+                        framework_version=__version__,
+                        allow_dirty_project=True,
+                    )
+                except (WorkspaceMaterializationError, RuntimeError) as exc:
+                    done = ", ".join(completed) if completed else "none"
+                    untouched = ", ".join(
+                        item[0]["name"] for item in active[index + 1 :]
+                    ) or "none"
+                    print(
+                        f"eifctl projects: failed={entry['name']} "
+                        f"axis=workspace after framework axis succeeded; "
+                        f"completed={done}; untouched={untouched}; error={exc}",
+                        file=sys.stderr,
+                    )
+                    return 1
             completed.append(entry["name"])
         print(
             f"\neifctl projects: SUCCESS updated {len(completed)} "
             f"project(s) to EIF {__version__}"
+            + (
+                " and the selected workspace revisions"
+                if workspace_root is not None
+                else ""
+            )
         )
         return 0
-    except (RegistryError, WorkspaceContractError) as exc:
+    except (RegistryError, WorkspaceContractError, RuntimeError) as exc:
         print(f"eifctl projects: {exc}", file=sys.stderr)
         return 1

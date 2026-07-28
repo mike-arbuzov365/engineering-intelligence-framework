@@ -522,11 +522,16 @@ def commit_transaction(stages: list[_Stage]) -> None:
         # found by testing the "before lock commit" injection point, where
         # entrypoint.next/.gitignore.next were staged but never committed.
         for stage in stages:
-            if stage not in committed and stage.next_path.exists():
+            next_path = getattr(stage, "next_path", None)
+            if (
+                stage not in committed
+                and next_path is not None
+                and next_path.exists()
+            ):
                 if stage.is_dir:
-                    shutil.rmtree(stage.next_path, ignore_errors=True)
+                    shutil.rmtree(next_path, ignore_errors=True)
                 else:
-                    stage.next_path.unlink(missing_ok=True)
+                    next_path.unlink(missing_ok=True)
         raise
     for stage in stages:
         stage.cleanup()

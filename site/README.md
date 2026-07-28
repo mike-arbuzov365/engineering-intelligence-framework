@@ -134,10 +134,11 @@ marker from reaching a public page. The full gate stays local and unhosted:
 push-triggered deploy is a boundary rather than a contradiction of D-14.
 
 `generate:social-assets` also emits `.github/social-preview.png` at
-1280x640, from the same brand source as the site's own card, for the
-repository's Social preview setting. It is written outside `public/` because
-the site never serves it and copying it into every `dist/` would be dead
-weight.
+1280x640 for the repository's Social preview setting and
+`.github/linkedin-banner.png` at 1584x396 for the maintainer's LinkedIn
+profile. Both reuse the site's orbit figure from the same brand source. They
+are written outside `public/` because the site never serves them and copying
+them into every `dist/` would be dead weight.
 
 ## Structure
 

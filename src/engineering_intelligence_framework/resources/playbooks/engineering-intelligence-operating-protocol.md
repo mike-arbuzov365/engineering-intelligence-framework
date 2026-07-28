@@ -5,6 +5,8 @@ scope: framework
 confidence: high
 created: 2026-07-19
 related:
+  - idea-planning.md
+  - product-requirements-planning.md
   - session-preparation.md
   - execution-packet-planning.md
   - knowledge-search.md
@@ -51,6 +53,10 @@ of them.
 Before starting non-trivial work, classify it explicitly (see
 [`session-preparation.md`](session-preparation.md) Step 1):
 
+- **Idea** - the problem, user, value or minimum useful scope is not yet a
+  durable approved artifact.
+- **PRD** - the idea is approved, but required behavior, quality
+  constraints or acceptance evidence still need definition.
 - **Single task** - one fix, one question, one small bounded change.
 - **Execution packet** - 2+ sessions, an architectural decision, factual
   conflicts to resolve first, or a request for unattended autonomous
@@ -62,6 +68,8 @@ Record the classification before implementation starts, not after.
 
 | Situation | Use |
 |---|---|
+| Raw request or opportunity needs definition | [`idea-planning.md`](idea-planning.md) |
+| Approved idea needs requirements | [`product-requirements-planning.md`](product-requirements-planning.md) |
 | Starting any non-trivial task | [`session-preparation.md`](session-preparation.md) |
 | Iterative test/fix/refine work | [`bounded-evidence-loop.md`](bounded-evidence-loop.md) |
 | Work needs a packet | [`execution-packet-planning.md`](execution-packet-planning.md) |

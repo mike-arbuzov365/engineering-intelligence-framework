@@ -260,6 +260,15 @@ and the primary-source research and rejected patterns are documented in
 
 ## Execution packets
 
+EIF separates product definition from implementation planning. A raw
+opportunity first becomes a sourced idea artifact when the problem, user,
+value or minimum useful scope is still unsettled. An approved idea becomes
+a PRD when observable product behavior and acceptance requirements still
+need definition. Only then does implementation route to one task scope or,
+for larger work, an execution packet. See
+[`playbooks/idea-planning.md`](../../playbooks/idea-planning.md) and
+[`playbooks/product-requirements-planning.md`](../../playbooks/product-requirements-planning.md).
+
 For work larger than a single session, EIF uses execution packets: a
 planning artifact set (charter, facts, decisions, roadmap) created before
 implementation starts, executed across one or more sessions, and closed out

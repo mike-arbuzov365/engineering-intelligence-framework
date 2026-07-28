@@ -8,8 +8,9 @@ review_after: 2026-10-28
 
 # Project lifecycle
 
-This guide describes the v0.1.2 path from installing EIF to safely updating
-one or more private project repositories.
+This guide describes the v0.1.3 path from installing EIF to safely updating
+one or more private project repositories. The lifecycle commands themselves
+were introduced in v0.1.1 and stabilized in v0.1.2.
 
 ## The ownership model
 
@@ -46,7 +47,7 @@ python -m pip install ./engineering_intelligence_framework-0.1.1-py3-none-any.wh
 eifctl version
 ```
 
-The v0.1.2 candidate can be tested from its checked-out branch before its
+The v0.1.3 candidate can be tested from its checked-out branch before its
 GitHub artifact is published:
 
 ```bash
@@ -187,10 +188,11 @@ reviewed. The regenerable `.eif/runtime/` remains ignored.
 
 ## Current compatibility boundary
 
-The v0.1.1 and v0.1.2 lifecycle updates instances whose config and lock
-schemas remain compatible. v0.1.2 also keeps package provenance stable when
+The v0.1.1, v0.1.2 and v0.1.3 lifecycle updates instances whose config and
+lock schemas remain compatible. v0.1.2 keeps package provenance stable when
 Python creates bytecode in the installed resource tree and makes repeated
-managed-block updates byte-idempotent.
+managed-block updates byte-idempotent. v0.1.3 changes the planning operating
+set, not the lifecycle schemas.
 It does not provide an automatic migration for a future breaking config,
 knowledge-schema, or private-vocabulary change. A future release that bumps
 one of those schemas must ship and test a named migration before users can

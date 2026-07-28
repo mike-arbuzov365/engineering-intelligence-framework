@@ -62,7 +62,7 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.1.2` in [`pyproject.toml`](../../pyproject.toml) is a
+- **Version.** `0.1.3` in [`pyproject.toml`](../../pyproject.toml) is a
   locally validated release candidate dated 2026-07-28 in
   [`CHANGELOG.md`](../../CHANGELOG.md). It is not tagged or published yet.
   The latest public version remains `v0.1.1`.

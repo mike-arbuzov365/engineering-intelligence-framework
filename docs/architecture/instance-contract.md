@@ -273,9 +273,9 @@ Intentionally simple and conservative for v0.1:
   `core/schemas/framework-lock.schema.json`), so an instance is always
   checked against the framework version it is actually pinned to.
 
-No automatic cross-version config migration exists yet. The v0.1.1 and
-v0.1.2 lifecycle updates handle the current compatible config and lock
-shapes. The first breaking shape change
+No automatic cross-version config migration exists yet. The v0.1.1,
+v0.1.2 and v0.1.3 lifecycle updates handle the current compatible config
+and lock shapes. The first breaking shape change
 must ship a named, tested migration before the fleet update path can apply
 it.
 

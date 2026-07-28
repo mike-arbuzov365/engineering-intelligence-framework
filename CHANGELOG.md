@@ -15,6 +15,34 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-07-28
+
+Small planning-continuity patch. It adds the missing steps between a raw
+idea and a prepared implementation packet. It does not change project
+schemas or add the planned private workspace runtime.
+
+### Added
+
+- Canonical `plan-idea` and `plan-prd` skills, backed by one playbook and
+  one reusable template each. The flow keeps source evidence, assumptions,
+  approval and routing explicit from idea to PRD to task or execution
+  packet.
+- Structural tests for the planning chain, including the approved-idea
+  boundary, observable PRD acceptance criteria and carry-over into packet
+  planning.
+- A fully prepared, sanitized
+  [EIF 0.2.0 execution packet](planning/packets/EIF-020-private-workspace/00-README.md)
+  for the optional private workspace scope. It is planning evidence only,
+  not an Available capability claim.
+
+### Changed
+
+- The operating protocol now routes raw ideas and approved ideas that still
+  need requirements before it classifies implementation as one task or an
+  execution packet.
+- The public operating set now contains 15 playbooks, 17 templates and 11
+  skills.
+
 ## [0.1.2] - 2026-07-28
 
 Small dogfood stabilization patch. It changes no methodology or project
@@ -531,7 +559,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.3...HEAD
+[0.1.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.2
 [0.1.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0

@@ -133,8 +133,74 @@ def check_bounded_loop_contract() -> list[Result]:
     return results
 
 
+def check_planning_chain_contract() -> list[Result]:
+    results: list[Result] = []
+    idea_playbook = (PLAYBOOKS_DIR / "idea-planning.md").read_text(encoding="utf-8")
+    prd_playbook = (PLAYBOOKS_DIR / "product-requirements-planning.md").read_text(encoding="utf-8")
+    packet_playbook = (PLAYBOOKS_DIR / "execution-packet-planning.md").read_text(encoding="utf-8")
+    operating_protocol = (PLAYBOOKS_DIR / "engineering-intelligence-operating-protocol.md").read_text(encoding="utf-8")
+    idea_template = (TEMPLATES_DIR / "idea.md").read_text(encoding="utf-8")
+    prd_template = (TEMPLATES_DIR / "prd.md").read_text(encoding="utf-8")
+    idea_skill = (SKILLS_DIR / "plan-idea" / "SKILL.md").read_text(encoding="utf-8")
+    prd_skill = (SKILLS_DIR / "plan-prd" / "SKILL.md").read_text(encoding="utf-8")
+
+    for label in ("OBSERVED", "INFERRED", "ASSUMED", "PROPOSED"):
+        results.append(check(
+            f"idea planning: template declares {label}",
+            label in idea_template,
+        ))
+    results.append(check(
+        "idea planning: approval stays explicit",
+        "approval source" in idea_playbook.casefold()
+        and "status: draft" in idea_playbook
+        and "plan-prd" in idea_template,
+    ))
+    results.append(check(
+        "PRD planning: approved-idea boundary is explicit",
+        "approved idea" in prd_playbook.casefold()
+        and "idea approval source" in prd_template.casefold()
+        and "must not route to execution" in prd_playbook,
+    ))
+    for field in (
+        "Functional requirements",
+        "Non-functional requirements",
+        "Acceptance criteria",
+        "Traceability",
+        "Rollout, migration and operability",
+    ):
+        results.append(check(
+            f"PRD planning: template contains {field}",
+            field in prd_template,
+        ))
+    results.append(check(
+        "planning chain: packet carries idea/PRD inputs forward",
+        "idea-planning.md" in packet_playbook
+        and "product-requirements-planning.md" in packet_playbook
+        and "carry-over ledger" in packet_playbook,
+    ))
+    results.append(check(
+        "planning chain: operating protocol routes idea and PRD",
+        "idea-planning.md" in operating_protocol
+        and "product-requirements-planning.md" in operating_protocol,
+    ))
+    results.append(check(
+        "planning chain: skills remain thin playbook entrypoints",
+        "playbooks/idea-planning.md" in idea_skill
+        and "playbooks/product-requirements-planning.md" in prd_skill
+        and len(idea_skill.splitlines()) < 80
+        and len(prd_skill.splitlines()) < 80,
+    ))
+    return results
+
+
 def main() -> int:
-    all_results = check_playbooks() + check_templates() + check_skills() + check_bounded_loop_contract()
+    all_results = (
+        check_playbooks()
+        + check_templates()
+        + check_skills()
+        + check_bounded_loop_contract()
+        + check_planning_chain_contract()
+    )
     for _, line in all_results:
         print(line)
 

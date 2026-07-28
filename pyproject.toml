@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "engineering-intelligence-framework"
-version = "0.1.2"
+version = "0.1.3"
 description = "A quality-first control plane for governed AI-agent software development."
 readme = "README.md"
 license = "Apache-2.0"

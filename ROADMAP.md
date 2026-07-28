@@ -47,6 +47,10 @@ this project applies to every other claim it makes about itself - see
   cannot reach the page; the browser gate stays local.
 - GitHub release `v0.1.0`, with installable wheel and source distribution
   artifacts; package-index publication remains a separate decision.
+- v0.1.1 project lifecycle stabilization: local project creation, explicit
+  connection to a private project registry, plan-before-apply single-project
+  and registry updates, and safe migration from git-source to
+  installed-package provenance.
 - Repository community and security intake: Discussions, evidence/bug issue
   forms, private vulnerability reporting, dependency alerts, secret
   scanning, and protected `main` with the consolidated PR check required.

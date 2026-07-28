@@ -191,31 +191,39 @@ dependency mechanism itself; no git submodule as the v0.1 default; no
 copy-pasted standalone scripts as the primary public UX.
 **Evidence:** `eifctl` checked directly against PyPI's JSON API (HTTP 404)
 and the npm registry (HTTP 404) - no exact package-name collision. A real
-package (`pyproject.toml`, `src/engineering_intelligence_framework/`, 7
-subcommands - `init`, `doctor`, `search`, `render`, `privacy-scan`,
-`validate`, `version` - each a thin wrapper over the exact same tested
-`scripts/eif_*.py` functions) was built to a wheel and installed into a
-clean venv whose own path contained a space and non-ASCII text, then
-exercised end to end against a project path also containing a space and
-non-ASCII text: init (fresh, routine upgrade, `--force` reconfigure with
-a locale switch), doctor, validate, render, privacy-scan, uninstall/
-reinstall - `scripts/tests/test_package_build.py`, 23/23 checks.
-**The specific condition that kept this provisional in the prior revision
-of this entry - independent Windows AND Ubuntu verification - is now
-closed**: the CI matrix added in this same PR
-(`.github/workflows/ci.yml`'s `package-build` job) ran this exact suite
-on Windows and Ubuntu, Python 3.11 and 3.12 (4 combinations), and all 4
-passed, confirmed twice across two separate commits/runs on this PR.
-**Limitations, real and not resolved by this ratification:** not published
-to PyPI (out of scope this round by explicit instruction); this PR itself
-is intentionally not merged this round (stops at a green,
-independently-reviewable state); one unrelated, pre-existing CI job on
-this PR (`Knowledge Delta completeness`) failed against an apparent
-external GitHub API disruption during this round (a raw `gh api` call
-returning GitHub's own HTML error page instead of JSON, reproduced
-directly outside CI too, on an unrelated PR number as well) - flagged as
-a separate, unrelated finding, not fixed here, and not a defect in the
-package this decision ratifies.
+package (`pyproject.toml`, `src/engineering_intelligence_framework/`) is
+built as a wheel and source distribution. At v0.1.1 it exposes ten tested
+subcommands: `init`, `new`, `upgrade`, `projects`, `doctor`, `search`,
+`render`, `privacy-scan`, `validate`, and `version`. The installed-wheel
+suite exercises the package from a clean virtual environment, including
+new-project creation, private-registry connection, plan-before-apply
+updates, runtime rehydration, and the existing governed-task journey.
+Independent Windows and Ubuntu verification on Python 3.11 and 3.12 closed
+the original cross-platform condition.
+**Limitations, real and not resolved by this ratification:** release wheels
+and source archives are attached to GitHub Releases, but the distribution
+is not published to PyPI. Package-index publication remains an explicit
+owner action.
+
+### D-17: Public release package with a private project registry
+**Status: ratified 2026-07-28 (owner decision).** The public EIF release is
+the canonical framework source for routine users. Connected projects stay
+independent repositories and retain their own configuration, knowledge and
+product content. A user may keep a machine-readable project registry in a
+private control repository and use it to plan and apply compatible EIF
+updates across those projects.
+
+The registry stores project names and local paths only. It is user-owned,
+is never sent to the public EIF repository, and does not make a
+multi-repository update atomic. `eifctl projects upgrade --apply` must
+preflight every registered project before the first write, then update one
+project at a time and stop on the first failure. Moving an older git-sourced
+instance to installed-package provenance requires explicit
+`--migrate-source`; it must not use `--force` or overwrite user config.
+
+`eifctl new` creates a local git repository and can register it in the same
+operation. Creating a GitHub remote, choosing repository visibility and
+pushing are separate owner decisions, not implicit effects of EIF.
 
 ### D-13: Fail-closed CI runner consolidation
 **Status: superseded by D-14 (2026-07-19).** Policy checks that share one

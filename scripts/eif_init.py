@@ -81,6 +81,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -216,6 +217,32 @@ def resolve_framework_state(framework_root: Path) -> tuple[str | None, str | Non
 
 def hash_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def resolve_framework_release_version(
+    framework_root: Path,
+    package_version: str | None = None,
+    fallback: str = "0.1.0-dev",
+) -> str:
+    """Resolve the release version that materialized an instance.
+
+    Installed-package provenance is authoritative when present. A source
+    checkout reads its own pyproject.toml. Plain source bundles may not carry
+    either, so they retain the explicit fallback instead of fabricating a
+    package or git-derived version.
+    """
+    if package_version:
+        return package_version
+    pyproject = framework_root / "pyproject.toml"
+    if pyproject.exists():
+        try:
+            project = (tomllib.loads(pyproject.read_text(encoding="utf-8")) or {}).get("project") or {}
+            version = project.get("version")
+            if isinstance(version, str) and version.strip():
+                return version.strip()
+        except (OSError, tomllib.TOMLDecodeError):
+            pass
+    return fallback
 
 
 def collect_bundle_sources(framework_root: Path) -> list[tuple[Path, str]]:
@@ -812,17 +839,23 @@ def _default_index_path(knowledge_root: str) -> str:
     return f"{knowledge_root.rstrip('/')}/index.md"
 
 
-def check_source_type_consistency(source_type: str, existing_lock: dict | None, force: bool) -> str | None:
+def check_source_type_consistency(
+    source_type: str,
+    existing_lock: dict | None,
+    force: bool,
+    allow_source_migration: bool = False,
+) -> str | None:
     """A routine upgrade must resolve to the SAME framework.source_type this
     instance was already generated from - never a silent installed-package
     -> source-checkout migration (or any other kind change) just because
-    this invocation happens to look different from the last one. `force`
-    is the only way to knowingly cross this boundary - already an explicit
-    reconfigure for every other field, so making it explicit here too is
-    consistent, not a new bar. Returns an error message, or None if there
+    this invocation happens to look different from the last one. An explicit
+    source-migration acknowledgement can cross only this boundary while
+    retaining routine-upgrade semantics and byte-preserving user config;
+    `force` remains the broader reconfiguration path. Returns an error
+    message, or None if there
     is no existing lock, no recorded source_type (a lock from before this
-    field existed), force was passed, or the kind matches."""
-    if existing_lock is None or force:
+    field existed), either acknowledgement was passed, or the kind matches."""
+    if existing_lock is None or force or allow_source_migration:
         return None
     existing_source_type = (existing_lock.get("framework") or {}).get("source_type")
     if existing_source_type is None or existing_source_type == source_type:
@@ -831,8 +864,9 @@ def check_source_type_consistency(source_type: str, existing_lock: dict | None, 
         f"this instance was previously generated from framework.source_type "
         f"{existing_source_type!r}, but this invocation resolves to "
         f"{source_type!r} - refusing to silently change provenance kind on "
-        f"a routine upgrade. Re-run with --force to explicitly migrate (e.g. "
-        f"installed-package -> source-checkout, or vice versa)."
+        f"a routine upgrade. Re-run with --allow-source-migration to change "
+        f"provenance while preserving user-owned config, or --force only "
+        f"when an actual config reconfiguration is also intended."
     )
 
 
@@ -1108,6 +1142,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--adoption-mode", default=None, choices=["greenfield", "coexist"], help="Ignored on a routine upgrade (preserved from existing config); honored on init/reconfigure. Required (either value) when the adoption preflight detects pre-existing entrypoint content on init - see scripts/eif_preflight.py.")
     ap.add_argument("--manage-knowledge-index", action=argparse.BooleanOptionalAction, default=None, help="Whether eif_init.py may generate/regenerate the knowledge index file. Default: on for greenfield, off for coexist (explicit opt-in required there - a coexisting project may already manage its own knowledge). Ignored on a routine upgrade (preserved from existing config); honored on init/--force reconfigure.")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--allow-source-migration",
+        action="store_true",
+        help="Allow framework.source_type to change while retaining routine-upgrade semantics and preserving user-owned config byte-for-byte. Prefer this over --force when only provenance changes.",
+    )
     ap.add_argument("--force", action="store_true", help="Explicit reconfiguration: only flags you actually pass override the existing config; nothing resets to a CLI default. Backs up the existing config first.")
     args = ap.parse_args(argv)
 
@@ -1191,6 +1230,15 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     existing_config = loaded_config.data  # None only when truly absent
+    release_version = resolve_framework_release_version(
+        framework_root,
+        package_version=args.package_version,
+    )
+    if existing_config is None and args.framework_version is None:
+        # A fresh project records the release that actually created it. The
+        # config field remains user-owned on later routine upgrades; exact
+        # current provenance continues to live in the regenerated lock.
+        args.framework_version = release_version
 
     # Lock fail-closed policy (documented in docs/architecture/instance-
     # contract.md#config-and-lock-failure-states): the lock is EIF-managed,
@@ -1220,7 +1268,12 @@ def main(argv: list[str] | None = None) -> int:
         existing_lock = loaded_lock.data
 
     # --- Source-type consistency (adoption-hardening round) ---
-    source_type_error = check_source_type_consistency(source_type, existing_lock, args.force)
+    source_type_error = check_source_type_consistency(
+        source_type,
+        existing_lock,
+        args.force,
+        allow_source_migration=args.allow_source_migration,
+    )
     if source_type_error:
         print(f"eif-init: {source_type_error}", file=sys.stderr)
         return 1
@@ -1611,7 +1664,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     lock_data = render_lock_data(
         source_type, git_prov, package_prov, source_bundle_prov, adapter, entrypoint, ".eif/runtime",
-        manifest, digest, migration_status, "0.1.0",
+        manifest, digest, migration_status, release_version,
         datetime.datetime.now(datetime.timezone.utc).isoformat(),
         knowledge_index=lock_knowledge_index,
         effective_root_markers=effective_root_markers,

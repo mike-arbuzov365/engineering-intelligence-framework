@@ -217,6 +217,69 @@ def main() -> int:
             version_proc.stdout + version_proc.stderr,
         ))
 
+        # --- 4a. v0.1.1 project lifecycle UX: create a local git repo,
+        # connect it to a private registry, plan a rehydrating upgrade, then
+        # apply it from the installed wheel.
+        control_dir = tmp_root / "private control"
+        control_dir.mkdir()
+        registry_path = control_dir / ".eif" / "projects.yaml"
+        new_project = tmp_root / "new project створено"
+        new_proc = run([
+            str(eifctl_exe), "new", str(new_project),
+            "--project-name", "new-project",
+            "--adapter", "codex",
+            "--locale", "uk",
+            "--registry", str(registry_path),
+        ], cwd=tmp_root)
+        results.append(check(
+            "eifctl new creates a local git repo, EIF instance, and private registry entry",
+            new_proc.returncode == 0
+            and (new_project / ".git").exists()
+            and (new_project / "AGENTS.md").exists()
+            and registry_path.exists(),
+            new_proc.stdout + new_proc.stderr,
+        ))
+        new_lock = yaml.safe_load((new_project / ".eif" / "framework.lock.yaml").read_text(encoding="utf-8"))
+        new_config = yaml.safe_load((new_project / ".eif" / "config.yaml").read_text(encoding="utf-8"))
+        installed_version = version_proc.stdout.strip().split()[1]
+        results.append(check(
+            "new project config and lock record the actual installed package version",
+            (new_config.get("framework") or {}).get("version") == installed_version
+            and (new_lock.get("instance") or {}).get("eif_instance_version") == installed_version
+            and (new_lock.get("package") or {}).get("version") == installed_version,
+            str({"config": new_config.get("framework"), "instance": new_lock.get("instance"), "package": new_lock.get("package")}),
+        ))
+        run(["git", "add", "-A"], cwd=new_project)
+        commit_new = run([
+            "git", "-c", "user.name=EIF Test", "-c", "user.email=eif-test@example.invalid",
+            "commit", "-m", "bootstrap",
+        ], cwd=new_project)
+        results.append(check("new project bootstrap can be committed cleanly", commit_new.returncode == 0, commit_new.stdout + commit_new.stderr))
+        shutil.rmtree(new_project / ".eif" / "runtime")
+        plan_new = run([
+            str(eifctl_exe), "projects", "upgrade",
+            "--registry", str(registry_path),
+        ], cwd=control_dir)
+        results.append(check(
+            "projects upgrade is plan-only by default and does not recreate runtime",
+            plan_new.returncode == 0
+            and "no files were written" in plan_new.stdout
+            and not (new_project / ".eif" / "runtime").exists(),
+            plan_new.stdout + plan_new.stderr,
+        ))
+        apply_new = run([
+            str(eifctl_exe), "projects", "upgrade",
+            "--registry", str(registry_path),
+            "--apply",
+        ], cwd=control_dir)
+        results.append(check(
+            "projects upgrade rehydrates and verifies every registered project",
+            apply_new.returncode == 0
+            and (new_project / ".eif" / "runtime" / "eif_verify_runtime.py").exists()
+            and "SUCCESS updated 1 project(s)" in apply_new.stdout,
+            apply_new.stdout + apply_new.stderr,
+        ))
+
         init_proc = run(
             [str(eifctl_exe), "init", "--project-name", "pkgtest", "--adapter", "claude-code", "--instance-path", str(project_dir)],
             cwd=tmp_root,

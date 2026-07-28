@@ -15,6 +15,26 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-07-28
+
+Small stabilization release for using the public package with real private
+projects. It adds the missing create, connect and update lifecycle without
+changing the methodology's core model.
+
+### Added
+
+- `eifctl new` creates a greenfield EIF project as a local git repository in
+  a temporary sibling directory, then atomically moves it into place. It can
+  register the completed project in a private project registry.
+- `eifctl upgrade` plans or applies a guarded update from the installed EIF
+  package. It blocks dirty repositories, verifies the pinned runtime,
+  preserves user config and runs `doctor` after the transaction.
+- `eifctl projects add|remove|status|upgrade` manages a schema-validated,
+  user-owned private registry. Fleet updates preflight every project before
+  the first write and remain plan-only until `--apply` is explicit.
+- A project lifecycle guide documents the exact GitHub artifact, private
+  registry, source-migration and compatibility boundaries.
+
 ### Changed
 
 - Added one bilingual terminology contract and matching machine-readable
@@ -23,6 +43,18 @@ of the entry rather than a footnote.
 - Reworked Ukrainian project templates and presentation-site copy for clearer
   sentences, consistent terminology, and the canonical `Knowledge Delta`,
   `execution packet`, and `Bounded Evidence Loop` names.
+- Fresh package-based instances now record the actual installed release
+  version instead of the old development placeholder.
+- Migrating an older git-sourced instance to installed-package provenance
+  uses explicit `--migrate-source` and preserves `.eif/config.yaml`.
+
+### Fixed
+
+- Frontmatter validation now handles both flat and nested configured
+  knowledge paths, deduplicates overlaps and skips only EIF's generated
+  managed index. A hand-authored frontmatter-less index still fails closed.
+- Fleet dry-runs now reject dirty repositories, so `--apply` cannot start
+  changing earlier projects before discovering an unsafe later target.
 
 ## [0.1.0] - 2026-07-27
 
@@ -484,5 +516,6 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1
 [0.1.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0

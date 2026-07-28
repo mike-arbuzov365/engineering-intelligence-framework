@@ -1037,11 +1037,11 @@
             <li class="reveal">
               <button class="reveal__trigger" aria-expanded="true" disabled>
                 <span class="label label--accent">Install</span>
-                <span>An installable eifctl with seven subcommands</span>
+                <span>An installable eifctl with ten commands</span>
               </button>
               <div class="reveal__detail" data-claim-id="CLM-02">
-                <p><code>pip install .</code> from a clone builds a real wheel from <code>pyproject.toml</code> and gives you a working <code>eifctl</code>: <code>init</code>, <code>doctor</code>, <code>search</code>, <code>render</code>, <code>privacy-scan</code>, <code>validate</code> and <code>version</code>. It runs with no framework checkout beside it, and the installed wheel is exercised by a full synthetic task from bootstrap to closeout - not by an import check - including delivery of the standalone benchmark contract tool.</p>
-                <p><strong>Scope:</strong> proven from a clone into a clean virtual environment, with that walkthrough bootstrapping through the Claude Code adapter. Installing by name from a package index is a separate step, and it is not the command the quickstart prints.</p>
+                <p>The wheel attached to GitHub Releases, or <code>pip install .</code> from a clone, gives you a working <code>eifctl</code>. Its ten commands cover project creation, connection, guarded updates, verification, retrieval, rendering and validation. The installed wheel is exercised through the complete project lifecycle and a synthetic task, not by an import check.</p>
+                <p><strong>Scope:</strong> the artifact is available on GitHub Releases, but it is not published to PyPI. <code>eifctl new</code> creates a local repository, not a GitHub remote. Multi-project updates are preflighted but not atomic across repositories.</p>
               </div>
             </li>
             <li class="reveal">
@@ -2112,11 +2112,11 @@ pip install .</code></pre>
           <li class="reveal">
             <button class="reveal__trigger" aria-expanded="true" disabled>
               <span class="label label--accent">Встановлення</span>
-              <span>Пакет eifctl із сімома командами</span>
+              <span>Пакет eifctl із десятьма командами</span>
             </button>
             <div class="reveal__detail" data-claim-id="CLM-02">
-              <p><code>pip install .</code> із клону збирає wheel із <code>pyproject.toml</code> і встановлює <code>eifctl</code> із сімома командами. Пакет працює без сусіднього клону фреймворку. Синтетичний прогін охоплює шлях від запуску до закриття сесії, а не лише імпорт.</p>
-              <p><strong>Межі:</strong> встановлення перевірено з клону в чисте віртуальне середовище. Початкове налаштування в цьому прогоні використовує адаптер Claude Code. Встановлення з індексу пакетів ще не перевірено.</p>
+              <p>Wheel із GitHub Releases або <code>pip install .</code> із клону встановлює <code>eifctl</code>. Десять команд охоплюють створення й підключення проєктів, безпечне оновлення, перевірку, пошук досвіду, формування артефактів і валідацію. Встановлений пакет проходить повний життєвий цикл проєкту та синтетичну задачу, а не лише перевірку імпорту.</p>
+              <p><strong>Межі:</strong> пакет доступний у GitHub Releases, але не опублікований на PyPI. <code>eifctl new</code> створює локальний репозиторій, а не GitHub remote. Оновлення кількох проєктів проходить попередню перевірку, але не є однією атомарною транзакцією.</p>
             </div>
           </li>
           <li class="reveal">

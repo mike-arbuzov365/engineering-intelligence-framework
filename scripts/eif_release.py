@@ -157,14 +157,20 @@ def main() -> int:
     print("[eif-release] PASS - artifacts in dist/ are installable and index-valid")
     print()
     print("  Publication is not automated and is not performed by this script.")
-    print("  To publish, an owner with credentials runs, in this order:")
+    print("  To attach the validated artifacts to the matching GitHub Release,")
+    print("  an owner with credentials creates the tag and release:")
     print()
-    print("    python -m twine upload --repository testpypi dist/*")
-    print(f"    pip install --index-url https://test.pypi.org/simple/ {name}")
-    print("    python -m twine upload dist/*")
+    print(f"    git tag -a v{version} -m \"Engineering Intelligence Framework v{version}\"")
+    print(f"    git push origin v{version}")
+    print(
+        f"    gh release create v{version} "
+        f"dist/{wheels[0].name} dist/{sdists[0].name} "
+        "--verify-tag --generate-notes"
+    )
     print()
-    print("  Until that happens, the working install path is a clone plus")
-    print("    pip install .")
+    print("  PyPI publication is a separate owner decision and is not part of")
+    print(f"  this release. After the GitHub Release exists, install its wheel;")
+    print("  installing from a clone with `pip install .` also remains supported.")
     return 0
 
 

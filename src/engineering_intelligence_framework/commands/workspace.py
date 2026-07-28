@@ -22,19 +22,12 @@ from ..workspace_contract import (
     stable_project_id,
     validate_data,
 )
+from ..workspace_materialization import verify_workspace_materialization
 from . import doctor as doctor_cmd
 from . import new as new_cmd
 
 WORKSPACE_CONFIG_SCHEMA = "workspace-config.schema.json"
 WORKSPACE_PROFILE_SCHEMA = "workspace-profile.schema.json"
-WORKSPACE_IGNORE_BEGIN = "# EIF:BEGIN workspace"
-WORKSPACE_IGNORE_END = "# EIF:END workspace"
-WORKSPACE_IGNORE_BLOCK = f"""{WORKSPACE_IGNORE_BEGIN}
-.eif/local-state/
-.eif/workspace-runtime/
-.eif/workspace-runtime.next/
-.eif/workspace-runtime.previous/
-{WORKSPACE_IGNORE_END}"""
 FAULT_ENV = "EIF_WORKSPACE_TEST_FAIL_AFTER"
 
 
@@ -119,16 +112,17 @@ def _write_workspace_scaffold(workspace: Path, name: str) -> None:
 
     gitignore = workspace / ".gitignore"
     existing = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
-    begin_count = existing.count(WORKSPACE_IGNORE_BEGIN)
-    end_count = existing.count(WORKSPACE_IGNORE_END)
-    if begin_count != end_count or begin_count > 1:
-        raise WorkspaceError("workspace .gitignore markers are malformed")
-    if begin_count == 0:
-        suffix = "" if not existing or existing.endswith("\n") else "\n"
-        gitignore.write_text(
-            existing + suffix + "\n" + WORKSPACE_IGNORE_BLOCK + "\n",
-            encoding="utf-8",
-        )
+    for required_ignore in (
+        ".eif/local-state/",
+        ".eif/workspace-runtime/",
+        ".eif/workspace-runtime.next/",
+        ".eif/workspace-runtime.previous/",
+    ):
+        if required_ignore not in existing:
+            raise WorkspaceError(
+                f"base EIF project did not generate required ignore: "
+                f"{required_ignore}"
+            )
 
 
 def create_workspace(
@@ -257,6 +251,9 @@ def workspace_problems(
             problems.append(
                 f"active project has no machine-local location: {project['name']}"
             )
+        if location is not None:
+            for problem in verify_workspace_materialization(location):
+                problems.append(f"{project['name']}: {problem}")
 
     git_root = _git(workspace, "rev-parse", "--show-toplevel")
     if git_root.returncode != 0 or Path(git_root.stdout.strip()).resolve() != workspace:

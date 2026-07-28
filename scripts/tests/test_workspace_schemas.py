@@ -77,6 +77,10 @@ VALID = {
             "revision": "1" * 40,
             "profile": "default",
         },
+        "resolution": {
+            "overrides": [],
+            "required_exceptions": [],
+        },
         "bundle": {
             "path": ".eif/workspace-runtime",
             "manifest": [

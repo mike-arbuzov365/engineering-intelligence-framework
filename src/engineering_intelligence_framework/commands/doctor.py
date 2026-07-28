@@ -16,6 +16,7 @@ import yaml
 
 from .._impl import eif_verify_runtime
 from ..resources import framework_root
+from ..workspace_materialization import verify_workspace_materialization
 from .init_cmd import DISTRIBUTION_NAME, _resource_manifest_digest
 
 
@@ -76,5 +77,10 @@ def run(argv: list[str]) -> int:
         for p in package_problems:
             print(f"eifctl doctor: {p}", file=sys.stderr)
         if package_problems:
+            rc = 1
+        workspace_problems = verify_workspace_materialization(instance_path)
+        for problem in workspace_problems:
+            print(f"eifctl doctor: {problem}", file=sys.stderr)
+        if workspace_problems:
             rc = 1
         return rc

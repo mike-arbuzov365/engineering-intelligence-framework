@@ -4,7 +4,7 @@
   "title": "EIF materialized private workspace lock",
   "type": "object",
   "additionalProperties": false,
-  "required": ["lock_schema_version", "workspace", "bundle", "generated_at"],
+  "required": ["lock_schema_version", "workspace", "resolution", "bundle", "generated_at"],
   "properties": {
     "lock_schema_version": {
       "type": "integer",
@@ -26,6 +26,65 @@
         "profile": {
           "type": "string",
           "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        }
+      }
+    },
+    "resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overrides", "required_exceptions"],
+      "properties": {
+        "overrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "name", "override_of", "reason", "approved_by"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": ["rule", "skill", "playbook", "template", "knowledge"]
+              },
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+              },
+              "override_of": {
+                "type": "string",
+                "pattern": "^workspace://(rule|skill|playbook|template|knowledge)/[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approved_by": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        "required_exceptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["artifact", "reason", "approved_by"],
+            "properties": {
+              "artifact": {
+                "type": "string",
+                "pattern": "^[a-z-]+/[A-Za-z0-9._-]+$"
+              },
+              "reason": {
+                "type": "string",
+                "minLength": 1
+              },
+              "approved_by": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
         }
       }
     },

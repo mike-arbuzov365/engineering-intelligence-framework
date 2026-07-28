@@ -43,7 +43,7 @@ VALID = {
         "locations": [
             {
                 "project_id": "sample-project-12345678",
-                "path": "C:/local/sample",
+                "path": "machine-local/sample",
             }
         ],
     },
@@ -149,7 +149,7 @@ def main() -> int:
         )
 
     leaked_path = copy.deepcopy(VALID["project-registry.schema.json"])
-    leaked_path["projects"][0]["path"] = "C:/private/project"
+    leaked_path["projects"][0]["path"] = "machine-local/private-project"
     results.append(
         check(
             "registry v2 rejects a machine path",

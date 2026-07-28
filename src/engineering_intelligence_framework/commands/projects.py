@@ -135,6 +135,14 @@ def register_project(
         else default_locations_path(registry_path).resolve()
     )
     project_path = project_path.resolve()
+    workspace_root = registry_path.parent.parent
+    if (
+        (workspace_root / ".eif" / "workspace.yaml").exists()
+        and project_path == workspace_root.resolve()
+    ):
+        raise RegistryError(
+            "a private workspace cannot register itself in its own project registry"
+        )
     name = _project_identity(project_path)
     project_id = stable_project_id(name)
     registry = load_registry(registry_path, allow_missing=True)

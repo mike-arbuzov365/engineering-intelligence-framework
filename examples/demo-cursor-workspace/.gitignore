@@ -2,6 +2,9 @@
 .eif/runtime/
 .eif/runtime.next/
 .eif/runtime.previous/
+.eif/workspace-runtime/
+.eif/workspace-runtime.next/
+.eif/workspace-runtime.previous/
 .eif/local-state/
 graphify-out/
 *.next

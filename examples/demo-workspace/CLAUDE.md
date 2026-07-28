@@ -25,12 +25,19 @@ yours; the lock is EIF-managed and rewritten on every upgrade).
    `python .eif/runtime/eif_search_knowledge.py --knowledge-root "knowledge" --framework-root .eif/runtime "<your task in a few words>"`
 3. Write a task-scope file from `.eif/runtime/templates/task-scope.md` before
    changing code, for anything bigger than a one-line fix.
-4. Before opening a PR, audit the instance itself:
+4. If `.eif/workspace.lock.yaml` exists, use only the pinned artifacts listed
+   in its manifest under `.eif/workspace-runtime/`. Never read operating
+   policy live from a workspace checkout. `required` artifacts are
+   safeguards, `default` artifacts apply unless the lock records an approved
+   project override, and `optional` artifacts apply because the selected
+   profile included them. Run `eifctl doctor --instance-path .` before work
+   so a missing snapshot, hash drift or invalid override fails closed.
+5. Before opening a PR, audit the instance itself:
    `python .eif/runtime/eif_verify_runtime.py --framework-root .eif/runtime`
    - checks config/lock schemas, bundle file hashes, config/adapter/lock/
    entrypoint consistency, and CLAUDE.md/.gitignore marker integrity
    in one pass.
-5. If `.eif/config.yaml` enables an optional integration, read
+6. If `.eif/config.yaml` enables an optional integration, read
    `.eif/runtime/integrations/README.md` and use the same doctor result as its
    capability gate. Only `healthy` is usable without qualification. Graphify
    output is navigation evidence and must be verified against source; a

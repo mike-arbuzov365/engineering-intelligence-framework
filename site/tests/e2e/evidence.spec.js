@@ -149,16 +149,16 @@ test.describe('evidence', () => {
     }
   });
 
-  test('the install row states the command that works, not the index it is not on', async ({
+  test('the install row states the release channel and update boundaries', async ({
     page,
   }) => {
     await page.goto('/#evidence');
     const install = page.locator('#evidence .reveal').nth(0);
     await expect(install).toContainText('pip install .');
-    // Release status is docs/product/release-status.md's job, not this row's.
-    // What stays here is the bound on the evidence itself.
-    await expect(install).not.toContainText('PyPI');
-    await expect(install).toContainText('Claude Code adapter');
+    await expect(install).toContainText('GitHub Releases');
+    await expect(install).toContainText('not published to PyPI');
+    await expect(install).toContainText('local repository, not a GitHub remote');
+    await expect(install).toContainText('not atomic across repositories');
   });
 
   test('every row carries its own scope line, and none of them apologises', async ({ page }) => {

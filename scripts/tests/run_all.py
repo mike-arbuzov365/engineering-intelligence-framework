@@ -58,6 +58,7 @@ SUITES = [
     "test_graphify_integration.py",
     "test_vendor_docs_integration.py",
     "test_init.py",
+    "test_project_commands.py",
     "test_journey.py",
     "test_adoption.py",
     "test_cursor_adapter.py",

@@ -13,12 +13,12 @@
     },
     {
       "id": "CLM-02",
-      "summary": "A seven-subcommand installable wheel, including the RTK, Graphify and benchmark C/D contracts, passed bounded local package evidence; it is not on PyPI.",
+      "summary": "A ten-command installable wheel, including project creation, connection and guarded updates, passed bounded local package evidence; it is available on GitHub Releases but not on PyPI.",
       "status": "OBSERVED",
-      "allowedWording": "A real, installable eifctl package exists with 7 subcommands, verified end to end - including a full synthetic-task journey and delivery of the standalone benchmark C/D contract tool from the installed wheel.",
-      "limitations": "Not published to PyPI; the journey uses the Claude Code adapter for its own bootstrap step; it does not exercise a genuine multi-source authority conflict or a real-agent C/D benchmark.",
-      "forbiddenWording": ["Published package.", "Official release.", "Proves authority-conflict resolution."],
-      "source": "docs/product/claims-evidence.md - row \"An installable eifctl package works without a framework git checkout\""
+      "allowedWording": "EIF v0.1.1 is available as a GitHub release wheel. It has 10 commands and can create or connect private project instances, plan compatible updates across a private registry, and apply them one project at a time after every target passes preflight.",
+      "limitations": "Not published to PyPI; eifctl new creates only a local repository; fleet apply is preflighted but not atomic across repositories.",
+      "forbiddenWording": ["Published on PyPI.", "Production-ready.", "Atomic fleet migration.", "Creates and pushes a GitHub repository."],
+      "source": "docs/product/claims-evidence.md - row \"An installable eifctl package works without a framework git checkout, including project lifecycle operations and a full synthetic-task journey\""
     },
     {
       "id": "CLM-03",

@@ -83,7 +83,7 @@ Claims, all backed:
 
 Never, in any language:
 
-- That it is production-ready, proven at scale, or an official release.
+- That it is production-ready or proven at scale.
 - That it improves quality, reduces rework, produces fewer bugs, or saves
   developer hours. None of that is measured.
 - Any comparison of governed against ungoverned work. No such study exists.
@@ -95,6 +95,11 @@ Never, in any language:
 The full list of banned strings is in
 [`site/src/content/claims.json`](../../site/src/content/claims.json), and
 the site build enforces it. Run a draft past that list before posting.
+
+It is accurate to say that EIF has a public GitHub release with attached
+wheel and source-distribution artifacts. It is not accurate to say that the
+package is published to PyPI. Installation and update wording must link to
+the [`project lifecycle guide`](../guides/project-lifecycle.md).
 
 ## Voice
 

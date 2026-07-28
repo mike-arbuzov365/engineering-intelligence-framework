@@ -58,7 +58,6 @@ const GLOBAL_FORBIDDEN_PHRASES = [
   'production-ready',
   'proven at scale',
   'published package',
-  'official release',
   'automatically merges with any existing setup',
   'zero-config adoption',
   'benchmark proves eif is more efficient',

@@ -9,13 +9,14 @@ every upgrade and had no way to detect a corrupted or partial bundle. This
 version reflects the actual, redesigned, tested implementation: config/lock
 split, transactional staged-and-verified bundle swap, real dirty-checked
 provenance with a hashed manifest, and a documented validation surface.
-Status: experimental. Does not ratify D-08 (dependency/distribution model). -->
+Status: experimental. The package distribution model is ratified by
+D-05/D-08; the instance lifecycle and compatibility boundary remain
+experimental. -->
 
 Status: **experimental**. Describes how a project instance records where it
-came from and how it is upgraded. Deliberately small and reversible; does not
-ratify the final distribution model (D-08 in
-[`../../core/policies/decisions.md`](../../core/policies/decisions.md) remains
-open).
+came from and how it is upgraded. The installable-package distribution model
+is ratified in D-05/D-08. D-17 defines the user-owned private project
+registry and update workflow.
 
 ## What a project instance is
 
@@ -86,11 +87,33 @@ the bundle would not actually match the recorded commit, so the tool stops
 and asks for `--allow-dirty` (which proceeds and records `dirty: true`)
 rather than silently claiming a false provenance guarantee. A routine
 upgrade must also resolve to the same `framework.source_type` this instance
-was already generated from, or stop and require `--force` - never a silent
-installed-package/git/source-bundle migration. Every bundled file is
+was already generated from. `eifctl upgrade --migrate-source` explicitly
+permits the supported provenance migration from a git or source-bundle
+instance to the installed package while preserving the user-owned config.
+`--force` remains an intentional reconfiguration command, not the migration
+path. Every bundled file is
 sha256-hashed both from the source (building the manifest) and again after
 staging (`verify_staged_bundle`), so a copy-time corruption is caught before
 the bundle ever goes live.
+
+## Private project registry and fleet updates
+
+`.eif/projects.yaml` is a user-owned registry that belongs in a private
+control repository. Its schema is
+[`project-registry.schema.json`](../../core/schemas/project-registry.schema.json).
+Each entry stores a unique project name and a local path. The registry is
+not part of a project instance and is never copied into the public EIF
+repository.
+
+`eifctl projects upgrade` is plan-only by default. With `--apply`, it
+preflights every registered project before the first write, including dirty
+working-tree refusal and current-runtime verification. It then applies the
+same single-project transaction described below to each project in order.
+
+The fleet operation itself is not atomic across repositories. If a later
+apply fails, earlier successful projects remain updated, no later project
+is touched, and the command reports the completed set. Project commits
+therefore remain separate review and rollback units.
 
 ## Transactional init/upgrade
 
@@ -250,8 +273,10 @@ Intentionally simple and conservative for v0.1:
   `core/schemas/framework-lock.schema.json`), so an instance is always
   checked against the framework version it is actually pinned to.
 
-No automatic cross-version config migration exists yet - the first breaking
-config-shape change is where that becomes necessary, not before.
+No automatic cross-version config migration exists yet. v0.1.1 updates the
+current compatible config and lock shapes. The first breaking shape change
+must ship a named, tested migration before the fleet update path can apply
+it.
 
 ## Adoption (existing repositories)
 
@@ -381,13 +406,13 @@ tooling stays in the framework.
 
 ## What this is not
 
-- Not a package manager or a ratified distribution model (D-08 open).
+- Not a package index client. Installation or update of the `eifctl` wheel
+  happens before an instance update.
 - Not a guarantee of forward/backward compatibility across arbitrary
   framework versions - only the conservative `schema_version`/
   `lock_schema_version` rule above.
-- Not an automatic migrator - upgrade refreshes the bundle, lock, and managed
-  blocks; anything more (config-shape migration, knowledge-schema migration,
-  private-vocabulary remapping) is future work, named where it does not exist
-  rather than implied.
+- Not a general automatic migrator. The explicit source-provenance migration
+  does not migrate a future breaking config shape, knowledge schema or
+  private vocabulary.
 - Not literally self-contained - the bundle is a pinned *source* copy; Python
   dependencies still need `pip install` once.

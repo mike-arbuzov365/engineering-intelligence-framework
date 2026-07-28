@@ -19,7 +19,7 @@ an OBSERVED label read from the code itself. -->
 
 # Release status
 
-Where v0.1.0 actually stands, and everything the website used to say
+Where v0.1.1 actually stands, and everything the website used to say
 about its own release status, in one place off the page.
 
 The website is a description of the framework, not a status board for it.
@@ -62,12 +62,12 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.1.0` in [`pyproject.toml`](../../pyproject.toml),
-  released 2026-07-27, tagged `v0.1.0`, and dated in
+- **Version.** `0.1.1` in [`pyproject.toml`](../../pyproject.toml),
+  released 2026-07-28, tagged `v0.1.1`, and dated in
   [`CHANGELOG.md`](../../CHANGELOG.md).
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
@@ -85,6 +85,11 @@ the page does not make: no timing figure appears anywhere on it.
   nothing in this repository performs it. That is the same boundary
   everything else here observes: EIF generates what a person then chooses
   to run.
+- **Project lifecycle commands are included.** `eifctl new` creates a local
+  git repository; `eifctl projects add` connects an existing EIF instance
+  to a private registry; `eifctl upgrade` and `eifctl projects upgrade`
+  provide plan-before-apply updates from the installed release package. See
+  the [`project lifecycle guide`](../guides/project-lifecycle.md).
 - **Adapter scope is frozen** at four adapters - Claude Code, Cursor, Codex
   and Hermes - and all four are supported (D-16, 2026-07-27, retiring the
   two-tier split D-09 recorded). See [`ROADMAP.md`](../../ROADMAP.md).

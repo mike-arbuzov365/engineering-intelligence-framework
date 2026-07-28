@@ -6,8 +6,8 @@ EIF gives AI coding agents persistent engineering knowledge, explicit source
 identity, controlled execution workflows, quality gates and token-efficient
 tool integrations.
 
-> **v0.1.0, released 2026-07-27.** Apache-2.0, installable from a clone or
-> the [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0),
+> **v0.1.1, released 2026-07-28.** Apache-2.0, installable from a clone or
+> the [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.1),
 > and the public extraction of a private production instance that has run
 > this methodology daily since May 2026. It is a 0.x release: what is
 > marked experimental in [`CHANGELOG.md`](CHANGELOG.md) may change shape
@@ -31,20 +31,44 @@ stops it rather than reaching the page.
 
 ## Get started
 
-EIF is not published to a package index yet. Install the released source,
-then initialize a project instance:
+EIF is not published to PyPI. The package is available as a wheel and source
+archive on [GitHub Releases](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases).
+Download the wheel attached to the latest release and install that local
+file:
+
+```bash
+python -m pip install ./engineering_intelligence_framework-0.1.1-py3-none-any.whl
+```
+
+You can also install from a clone:
 
 ```bash
 git clone https://github.com/mike-arbuzov365/engineering-intelligence-framework.git
 cd engineering-intelligence-framework
 python -m pip install .
-eifctl init ../my-project --adapter codex
+```
+
+Create a new local git repository and connect it to a private project
+registry:
+
+```bash
+eifctl new ../my-project --adapter codex --locale uk \
+  --registry ../eif-control/.eif/projects.yaml
 eifctl doctor --instance-path ../my-project
 ```
 
+For an existing repository, run `eifctl init`, then register it:
+
+```bash
+eifctl init ../existing-project --adapter codex
+eifctl projects add ../existing-project \
+  --registry ../eif-control/.eif/projects.yaml
+```
+
 Use `claude-code`, `cursor`, `codex`, or `hermes` for `--adapter`. The
-dedicated [quickstart](docs/guides/quickstart.md) explains the generated
-files, Windows commands, locale selection, and the first governed knowledge
+[project lifecycle guide](docs/guides/project-lifecycle.md) explains
+creation, connection, updates and rollback. The dedicated
+[quickstart](docs/guides/quickstart.md) covers the first governed knowledge
 retrieval.
 
 ## The problem
@@ -137,8 +161,8 @@ that isn't runnable is worse than not having the row. -->
 | `.eif/config.yaml` schema | **Available** | Validated the same way as frontmatter; `eifctl init` and the standalone `eif_init.py` generate it with real provenance |
 | Vertical-slice plan | **Built (experimental)** | [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) (design) + [`examples/demo-workspace/`](examples/demo-workspace/) (the actual, reproduced slice - see its README) |
 | Controlled merge entrypoint | **Available**, backed by repository branch protection | [`scripts/eif_merge_pr.py`](scripts/eif_merge_pr.py) re-checks policy before merging. GitHub branch protection independently requires the consolidated PR smoke check, an up-to-date branch, linear history, resolved conversations, and admin enforcement. No adapter hook is claimed as a merge guard. |
-| Installable package (`eifctl`) | **Built and released at 0.1.0, Ratified (D-05/D-08), not on a package index** | `pip install .` gives 7 tested subcommands (`init`, `doctor`, `search`, `render`, `privacy-scan`, `validate`, `version`) without requiring a framework checkout. The expanded installed-wheel suite passes 60/60 locally, including machine-readable integration states, the standalone benchmark C/D contract tool and injected upgrade rollback; the updated Windows/Ubuntu Python 3.11/3.12 matrix remains a manual release gate under D-14, not routine PR CI. [`scripts/eif_release.py`](scripts/eif_release.py) builds the sdist and wheel, validates both against what a package index requires, and installs the built wheel into a clean virtualenv; it prints the publish commands and stops, because publication takes owner credentials. See [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md). |
-| Bootstrap (`eifctl init` / `eif_init.py`) | **Available (experimental)** | Initializes or upgrades a separately runnable instance with provenance, a hashed runtime bundle, marker-safe adapter entrypoints, path validation, adoption/coexistence preflight, and transactional rollback. D-05/D-08 ratify the CLI/package model; PyPI publication and stable-release compatibility are still open. See [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md). |
+| Installable package (`eifctl`) | **Built and released at 0.1.1, Ratified (D-05/D-08), GitHub artifact only** | The wheel attached to GitHub Releases, or `pip install .` from a clone, gives 10 tested subcommands (`init`, `new`, `upgrade`, `projects`, `doctor`, `search`, `render`, `privacy-scan`, `validate`, `version`) without requiring a framework checkout. It is not published to PyPI. [`scripts/eif_release.py`](scripts/eif_release.py) builds and validates the sdist and wheel and installs the wheel into a clean virtual environment; package-index upload remains an explicit owner action. See [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md). |
+| Bootstrap and project updates (`eifctl new`, `init`, `upgrade`, `projects`) | **Available (experimental)** | Creates a local git repository, adopts an existing one, or safely refreshes connected instances from the installed package. A user-owned private registry can plan all project updates before the first write. Updates preserve `.eif/config.yaml`, project knowledge and content; source-provenance migration is explicit. GitHub remote creation, arbitrary cross-version config migration and fleet-wide atomic rollback are not claimed. See [`docs/guides/project-lifecycle.md`](docs/guides/project-lifecycle.md) and [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md). |
 | Instance self-verification (`eif_verify_runtime.py`) | **Available (experimental)** | [`scripts/eif_verify_runtime.py`](scripts/eif_verify_runtime.py) - bundled "doctor" command: config/lock schema validity, manifest digest self-consistency, per-file bundle hash verification, missing/unexpected-file classification, config/adapter/lock/entrypoint consistency, provenance (dirty/asserted) notes, `CLAUDE.md`/`.gitignore` marker integrity, and drift between `.eif/config.yaml` and the generated entrypoint block or knowledge index (a hand-edited config or index with no regeneration fails with a specific fix instruction, not a silent pass) - all from the instance's own bundle, no framework checkout needed |
 | Instance contract / upgrade / adoption | **Available (experimental)** | [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md) - provenance, upgrade-by-re-init, and safe adoption of an existing repo, hardened against a real external pilot: adoption preflight, `coexist` mode, repository-origin provenance (an existing repo with no `CLAUDE.md` is recorded `adopted`, not `greenfield`), configurable knowledge paths, path-escape validation, finding-specific privacy suppressions, tested with a realistic sanitized fixture (`scripts/tests/test_adoption.py`, 67 checks) |
 | Knowledge index / lifecycle + schema-aware retrieval | **Available (experimental)** | [`scripts/eif_generate_index.py`](scripts/eif_generate_index.py), [`scripts/eif_search_knowledge.py`](scripts/eif_search_knowledge.py) - offline, Unicode-aware keyword search that returns only eligible statuses by default (excludes rejected/superseded), and reports three honest outcomes for anything wrong: unparseable YAML, schema-invalid (parses fine, violates the ontology), or status-ineligible - never conflated with "no results." No embeddings; not tested at scale |
@@ -152,7 +176,7 @@ that isn't runnable is worse than not having the row. -->
 
 **Quickstart scope.** Cloning this repository gets you the ontology, schemas,
 governance docs, `eifctl` source package, operating layer, and one reproduced
-vertical slice. Version 0.1.0 is an early 0.x release, not a representative
+vertical slice. Version 0.1.1 is an early 0.x release, not a representative
 sample of real engineering tasks. Follow
 [`examples/demo-workspace/README.md`](examples/demo-workspace/README.md)
 for the exact commands, real captured output, and known limitations. See

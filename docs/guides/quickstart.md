@@ -80,4 +80,6 @@ Two different numbers, deliberately not conflated:
   default, see [`integrations/README.md`](../../integrations/README.md).
 - The installable `eifctl` package's own quickstart (same steps, different
   invocation - `eifctl init` instead of `python scripts/eif_init.py`) -
-  see the package row in the root [`README.md`](../../README.md#current-capability).
+  see the root [`README.md`](../../README.md#get-started). Creation,
+  registration and multi-project updates are covered separately in the
+  [`project lifecycle guide`](project-lifecycle.md).

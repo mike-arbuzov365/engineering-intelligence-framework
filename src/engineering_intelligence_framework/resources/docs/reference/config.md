@@ -58,6 +58,24 @@ source produced the current instance and lets `eifctl doctor`
 | `bundle.manifest` / `bundle.digest` | Every file copied from the framework source into this instance's pinned runtime bundle, individually hashed, plus one combined digest - `doctor` re-verifies every file's hash, not just the combined digest, so a single tampered or corrupted file is caught precisely. |
 | `knowledge_index` | Present only when `eif_init.py` actually created or regenerated a knowledge index this run - lets `doctor` detect a hand-edited index (hash mismatch) or one that lost its ownership marker. |
 
+## Private project registry
+
+`.eif/projects.yaml` is not part of a project instance. It is a user-owned
+inventory for a private control repository:
+
+```yaml
+schema_version: 1
+projects:
+  - name: project-a
+    path: ../../project-a
+```
+
+The schema is
+[`core/schemas/project-registry.schema.json`](../../core/schemas/project-registry.schema.json).
+Paths are stored relative to the registry where the filesystem permits it.
+Use `eifctl projects add`, `remove`, `status`, and `upgrade` rather than
+editing the file during an update workflow.
+
 ## Validating your own config
 
 ```

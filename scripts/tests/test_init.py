@@ -197,7 +197,8 @@ def main() -> int:
 
     # --- Source-type consistency (adoption-hardening round): a routine
     # upgrade must never silently cross installed-package <-> git <->
-    # source-bundle kinds; --force is the only way. ---
+    # source-bundle kinds; source-only migration and full reconfiguration
+    # are separate explicit acknowledgements. ---
     pkg_lock = {"framework": {"source_type": "installed-package"}}
     git_lock_stub = {"framework": {"source_type": "git"}}
     no_source_type_lock = {"framework": {}}
@@ -222,12 +223,18 @@ def main() -> int:
         eif_init.check_source_type_consistency("git", pkg_lock, force=True) is None,
     ))
     results.append(check(
+        "source-type consistency: source-only migration permits kind change without reconfigure",
+        eif_init.check_source_type_consistency(
+            "installed-package", git_lock_stub, force=False, allow_source_migration=True
+        ) is None,
+    ))
+    results.append(check(
         "source-type consistency: a lock predating this field (no recorded source_type) -> no error",
         eif_init.check_source_type_consistency("installed-package", no_source_type_lock, force=False) is None,
     ))
     results.append(check(
-        "source-type consistency: STOP message names --force as the concrete repair",
-        "--force" in (eif_init.check_source_type_consistency("git", pkg_lock, force=False) or ""),
+        "source-type consistency: STOP message prefers config-preserving source migration",
+        "--allow-source-migration" in (eif_init.check_source_type_consistency("git", pkg_lock, force=False) or ""),
     ))
 
     # --- detect_repository_origin: read-only origin classification, distinct

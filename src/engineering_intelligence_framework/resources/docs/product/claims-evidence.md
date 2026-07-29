@@ -19,8 +19,8 @@ related:
 # Public claims evidence ledger
 
 <!-- Knowledge source: vertical slice + takeover review, 2026-07-15. This
-document is the source of truth for what README/website/article/LinkedIn
-copy is allowed to say. A claim only moves to OBSERVED when this file names
+document is the source of truth for what any public copy about EIF is
+allowed to say, wherever it appears. A claim only moves to OBSERVED when this file names
 the specific evidence for it - not on the strength of how the framework is
 supposed to work.
 
@@ -33,8 +33,8 @@ frontmatter `evidence` label; its own status: validated means the table
 below accurately reflects each claim's evidence status, not that every claim
 is OBSERVED. -->
 
-Before writing any public-facing claim about EIF (README, website,
-article, LinkedIn post, demo video, FAQ), check this table. A status of
+Before writing any public-facing claim about EIF, in this repository or
+anywhere else, check this table. A status of
 `OBSERVED` requires the Evidence column to name something concrete and
 reproducible - a command, a file, a test - not "the design supports this."
 

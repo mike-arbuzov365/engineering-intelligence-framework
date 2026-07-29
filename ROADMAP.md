@@ -75,8 +75,12 @@ this project applies to every other claim it makes about itself - see
 - Broader playbook/template/skill porting - deliberately sequenced after
   the items above, and only as much as their own lessons say is actually
   needed.
-- Package-index publication and article/LinkedIn publication. These remain
-  separate owner-gated launch steps, not side effects of a GitHub release.
+- Package-index publication. It remains a separate owner-gated launch step,
+  not a side effect of a GitHub release.
+- Anything about promoting this project. Audiences, publication rules,
+  drafts and campaign planning are not framework scope and are not tracked
+  here. What stays public is the claims register, because a bound nobody can
+  check is not a bound.
 
 ## Explicit non-goals for v0.1
 

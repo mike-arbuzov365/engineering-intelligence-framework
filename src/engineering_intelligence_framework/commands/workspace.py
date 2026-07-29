@@ -12,6 +12,7 @@ from typing import Any
 
 import yaml
 
+from .._impl import eif_init
 from ..resources import framework_root
 from ..workspace_contract import (
     LOCATIONS_SCHEMA,
@@ -109,6 +110,28 @@ def _write_workspace_scaffold(workspace: Path, name: str) -> None:
         migration_template,
         encoding="utf-8",
     )
+
+    # The base project was initialized before .eif/workspace.yaml existed, so
+    # its managed .gitattributes block could not yet know this instance is a
+    # workspace. Re-render it here rather than waiting for the first upgrade,
+    # and through the same helper so there is one definition of the block.
+    lock = read_yaml(
+        workspace / ".eif" / "framework.lock.yaml",
+        "framework-lock.schema.json",
+        "framework lock",
+    )
+    gitattributes = workspace / ".gitattributes"
+    merged, _action = eif_init.render_merged_content(
+        gitattributes.read_text(encoding="utf-8") if gitattributes.exists() else None,
+        eif_init.render_gitattributes_block(
+            lock["adapter"]["entrypoint"],
+            (lock.get("knowledge_index") or {}).get("path"),
+            eif_init.workspace_content_root(workspace),
+        ),
+        eif_init.GITATTRIBUTES_MARKER,
+        eif_init.GITATTRIBUTES_END,
+    )
+    gitattributes.write_bytes(merged.encode("utf-8"))
 
     gitignore = workspace / ".gitignore"
     existing = gitignore.read_text(encoding="utf-8") if gitignore.exists() else ""
@@ -268,8 +291,29 @@ def workspace_problems(
     return problems
 
 
+def _mapping_report(workspace: Path) -> list[str]:
+    """`workspace doctor` verifies machine-local project mappings, as its own
+    help promises, but used to print nothing about them - a clean run looked
+    identical whether the registry held zero projects or ten."""
+    try:
+        _, registry, locations = _load_workspace_files(workspace.resolve())
+    except WorkspaceContractError:
+        return []
+    location_by_id = {item["project_id"]: item["path"] for item in locations["locations"]}
+    lines = [
+        f"eifctl workspace doctor: {len(registry['projects'])} registered project(s)"
+    ]
+    for project in registry["projects"]:
+        mapped = location_by_id.get(project["id"], "unmapped on this machine")
+        lines.append(
+            f"  {project['name']}\tstatus={project['status']}\t"
+            f"profile={project['profile']}\t{mapped}"
+        )
+    return lines
+
+
 def run(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(prog="eifctl workspace", description=__doc__)
     sub = ap.add_subparsers(dest="command", required=True)
 
     new = sub.add_parser("new", help="Create a local private workspace repo.")
@@ -292,6 +336,10 @@ def run(argv: list[str]) -> int:
     try:
         if args.command == "new":
             target = Path(args.path).resolve()
+            print(
+                f"eifctl workspace new: building in a temporary sibling "
+                f"directory, then moving the finished tree to {target}"
+            )
             create_workspace(
                 target,
                 name=args.workspace_name or target.name,
@@ -309,9 +357,15 @@ def run(argv: list[str]) -> int:
 
         workspace_path = Path(args.workspace_path).resolve()
         problems = workspace_problems(workspace_path)
+        for line in _mapping_report(workspace_path):
+            print(line)
         if problems:
             for problem in problems:
                 print(f"eifctl workspace doctor: FAIL {problem}", file=sys.stderr)
+            print(
+                f"eifctl workspace doctor: FAILED {workspace_path} - "
+                f"{len(problems)} problem(s) above"
+            )
             return 1
         print(f"eifctl workspace doctor: PASS {workspace_path}")
         return 0

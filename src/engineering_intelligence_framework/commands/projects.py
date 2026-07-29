@@ -306,6 +306,7 @@ def _detach_workspace_managed(project_path: Path) -> None:
 
 def run(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(
+        prog="eifctl projects",
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
@@ -462,7 +463,9 @@ def run(argv: list[str]) -> int:
                 suffix = f": {detail}" if detail else ""
                 raise RegistryError(
                     "project working tree is dirty; commit or stash before "
-                    f"detach{suffix}"
+                    f"detach, or pass --allow-dirty-project to detach anyway "
+                    f"(the usual case is repairing a project a failed upgrade "
+                    f"left modified){suffix}"
                 )
             print(
                 f"eifctl projects detach: project={entry['name']} "
@@ -530,12 +533,16 @@ def run(argv: list[str]) -> int:
             raise RegistryError(
                 "active projects have no machine-local location: "
                 + ", ".join(unresolved)
+                + ". The locations file is machine-local and gitignored on "
+                "purpose, so a workspace cloned onto another machine starts "
+                "with none. Re-run `eifctl projects add <path>` once per "
+                "project to map them here"
             )
         if not active:
             print("eifctl projects: registry contains no active projects")
             return 0
 
-        common = []
+        common = ["--defer-workspace-check"]
         if args.migrate_source:
             common.append("--migrate-source")
         if args.allow_dirty_project:
@@ -543,6 +550,7 @@ def run(argv: list[str]) -> int:
 
         workspace_root = _workspace_root(registry_path)
         workspace_plans: dict[str, dict[str, Any]] = {}
+        pending: list[str] = []
         print(
             f"eifctl projects: preflighting {len(active)} project(s) "
             f"for EIF {__version__}"
@@ -587,20 +595,35 @@ def run(argv: list[str]) -> int:
                     return 1
                 workspace_plans[entry["id"]] = workspace_plan
                 current_workspace, current_health = _workspace_status(path)
+                framework_current = _lock_status(path)[1]
+                framework_changes = framework_current != __version__
+                workspace_changes = bool(workspace_plan.get("changed", True))
+                if framework_changes or workspace_changes:
+                    pending.append(entry["name"])
                 print(
                     "  framework: "
-                    f"current={_lock_status(path)[1]} target={__version__}"
+                    f"current={framework_current} target={__version__} "
+                    f"change={'yes' if framework_changes else 'no'}"
                 )
-                print(
+                workspace_line = (
                     "  workspace: "
-                    f"current={current_workspace} "
-                    f"target={workspace_plan['revision'][:12]} "
+                    f"pinned={current_workspace} "
                     f"profile={entry['profile']} "
                     f"overrides={len(workspace_plan['overrides'])} "
-                    f"health={current_health}"
+                    f"health={current_health} "
+                    f"change={'yes' if workspace_changes else 'no'}"
                 )
+                if workspace_changes:
+                    workspace_line += f" -> {workspace_plan['revision'][:12]}"
+                print(workspace_line)
 
         if not args.apply:
+            if workspace_root is not None and not pending:
+                print(
+                    "\neifctl projects: every active project is already current "
+                    "on both axes; nothing to apply."
+                )
+                return 0
             print(
                 "\neifctl projects: plan complete; no files were written. "
                 "Re-run with --apply to update."
@@ -625,7 +648,7 @@ def run(argv: list[str]) -> int:
                 return rc
             if workspace_root is not None:
                 try:
-                    materialize_workspace(
+                    applied = materialize_workspace(
                         workspace_root,
                         path,
                         profile_name=entry["profile"],
@@ -634,6 +657,20 @@ def run(argv: list[str]) -> int:
                         ),
                         framework_version=__version__,
                         allow_dirty_project=True,
+                    )
+                    # The framework axis ran with the workspace check deferred,
+                    # so this is where the workspace guarantee is enforced.
+                    remaining = verify_workspace_materialization(path)
+                    if remaining:
+                        raise WorkspaceMaterializationError("; ".join(remaining))
+                    print(
+                        "  workspace axis: "
+                        + (
+                            "materialized "
+                            f"{applied['revision'][:12]}"
+                            if applied.get("changed", True)
+                            else "already current, nothing written"
+                        )
                     )
                 except (WorkspaceMaterializationError, RuntimeError) as exc:
                     done = ", ".join(completed) if completed else "none"

@@ -59,6 +59,15 @@ SUITES = [
     "test_vendor_docs_integration.py",
     "test_init.py",
     "test_project_commands.py",
+    # The private-workspace suites shipped with 0.2.0 but were never added
+    # here, so no workflow ran them: ci.yml runs smoke.py, release-check.yml
+    # runs this inventory, and neither reached them. Registered in 0.2.1.
+    "test_workspace_schemas.py",
+    "test_workspace_resolution.py",
+    "test_workspace_transaction.py",
+    "test_workspace_commands.py",
+    "test_workspace_fleet.py",
+    "test_line_endings.py",
     "test_journey.py",
     "test_adoption.py",
     "test_cursor_adapter.py",

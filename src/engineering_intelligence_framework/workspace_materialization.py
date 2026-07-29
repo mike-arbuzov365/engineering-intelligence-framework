@@ -53,9 +53,15 @@ def _clean_revision(workspace: Path) -> tuple[str, str]:
             f"cannot inspect workspace git state: {status.stderr.strip()}"
         )
     if status.stdout.strip():
+        dirty_files = ", ".join(
+            line[3:].strip() for line in status.stdout.strip().splitlines()[:5]
+        )
         raise WorkspaceMaterializationError(
-            "workspace working tree is dirty; commit workspace artifacts "
-            "before resolving a snapshot"
+            f"workspace working tree is dirty at {workspace}; a snapshot can "
+            "only be pinned to a commit. Review and commit the workspace "
+            f"first (uncommitted: {dirty_files}). Registering a project with "
+            "`eifctl projects add` edits the committed registry, so that "
+            "change needs its own commit before the next fleet run"
         )
     revision = _git(workspace, "rev-parse", "HEAD")
     generated_at = _git(workspace, "show", "-s", "--format=%cI", "HEAD")
@@ -70,6 +76,29 @@ def _clean_revision(workspace: Path) -> tuple[str, str]:
             "cannot read the workspace commit timestamp"
         )
     return revision.stdout.strip(), generated_at.stdout.strip()
+
+
+def _materialization_is_current(project: Path, lock_data: dict[str, Any]) -> bool:
+    """True when this project already carries exactly the snapshot that would
+    be written now: same workspace identity, profile, resolution and bundle
+    digest, and a runtime whose files still hash to the recorded manifest."""
+    lock_path = project / ".eif" / "workspace.lock.yaml"
+    if not lock_path.exists():
+        return False
+    try:
+        existing = read_yaml(lock_path, LOCK_SCHEMA, "workspace lock")
+    except WorkspaceContractError:
+        return False
+    existing_workspace = existing.get("workspace") or {}
+    if existing_workspace.get("id") != lock_data["workspace"]["id"]:
+        return False
+    if existing_workspace.get("profile") != lock_data["workspace"]["profile"]:
+        return False
+    if existing.get("resolution") != lock_data["resolution"]:
+        return False
+    if (existing.get("bundle") or {}).get("digest") != lock_data["bundle"]["digest"]:
+        return False
+    return not verify_workspace_materialization(project)
 
 
 def _project_is_clean(project: Path) -> bool:
@@ -341,21 +370,12 @@ def materialize_workspace(
         required_exceptions=required_exceptions,
         framework_version=framework_version,
     )
-    if not allow_dirty_project and not _project_is_clean(project):
-        raise WorkspaceMaterializationError(
-            "project working tree is dirty; commit or stash project changes "
-            "before materializing workspace policy"
-        )
-    if dry_run:
-        return plan
 
     eif_dir = project / ".eif"
     runtime = eif_dir / "workspace-runtime"
     runtime_next = eif_dir / "workspace-runtime.next"
     lock = eif_dir / "workspace.lock.yaml"
     lock_next = eif_dir / "workspace.lock.yaml.next"
-    shutil.rmtree(runtime_next, ignore_errors=True)
-    lock_next.unlink(missing_ok=True)
     manifest = [entry for _, entry in plan["files"]]
     lock_data = {
         "lock_schema_version": 1,
@@ -376,6 +396,27 @@ def materialize_workspace(
         "generated_at": plan["generated_at"],
     }
     validate_data(lock_data, LOCK_SCHEMA, "workspace lock")
+    plan["digest"] = lock_data["bundle"]["digest"]
+    plan["changed"] = not _materialization_is_current(project, lock_data)
+
+    # Freshness is a question about resolved CONTENT, not about how many
+    # commits the workspace has taken since. Comparing git HEAD instead meant
+    # that registering project N+1 - a commit touching only the registry -
+    # marked all N already-connected projects stale and forced a
+    # re-materialization plus a commit in each, for a byte-identical bundle.
+    if not plan["changed"]:
+        return plan
+
+    if not allow_dirty_project and not _project_is_clean(project):
+        raise WorkspaceMaterializationError(
+            "project working tree is dirty; commit or stash project changes "
+            "before materializing workspace policy"
+        )
+    if dry_run:
+        return plan
+
+    shutil.rmtree(runtime_next, ignore_errors=True)
+    lock_next.unlink(missing_ok=True)
 
     try:
         runtime_next.mkdir(parents=True)
@@ -454,7 +495,13 @@ def verify_workspace_materialization(project: Path) -> list[str]:
     if not lock_path.exists():
         return ["workspace lock is missing while workspace runtime exists"]
     if not runtime.exists():
-        return ["workspace runtime is missing while workspace lock exists"]
+        return [
+            "workspace runtime is missing while workspace lock exists. "
+            ".eif/workspace-runtime/ is deliberately gitignored, so a fresh "
+            "clone never carries it; re-materialize it from the private "
+            "workspace with `eifctl projects upgrade --registry "
+            "<workspace>/.eif/projects.yaml --apply`"
+        ]
     try:
         lock = read_yaml(lock_path, LOCK_SCHEMA, "workspace lock")
     except WorkspaceContractError as exc:

@@ -37,7 +37,7 @@ Download the wheel attached to the latest public release and install that
 local file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.0-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-0.2.1-py3-none-any.whl
 ```
 
 To install from a checkout instead:
@@ -64,12 +64,16 @@ eifctl new ../my-project --adapter codex --locale uk \
 eifctl doctor --instance-path ../my-project
 ```
 
-For an existing repository, run `eifctl init`, then register it:
+For an existing repository, run `eifctl init`, then register it. Registering
+edits the workspace's committed registry, so commit the workspace before the
+first fleet run:
 
 ```bash
 eifctl init ../existing-project --adapter codex
+eifctl doctor --instance-path ../existing-project
 eifctl projects add ../existing-project \
   --registry ../eif-control/.eif/projects.yaml
+git -C ../eif-control add -A && git -C ../eif-control commit -m "Register existing-project"
 ```
 
 Use `claude-code`, `cursor`, `codex`, or `hermes` for `--adapter`. The
@@ -174,7 +178,7 @@ that isn't runnable is worse than not having the row. -->
 | Instance contract / upgrade / adoption | **Available (experimental)** | [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md) - provenance, upgrade-by-re-init, and safe adoption of an existing repo, hardened against a real external pilot: adoption preflight, `coexist` mode, repository-origin provenance (an existing repo with no `CLAUDE.md` is recorded `adopted`, not `greenfield`), configurable knowledge paths, path-escape validation, finding-specific privacy suppressions, tested with a realistic sanitized fixture (`scripts/tests/test_adoption.py`, 67 checks) |
 | Knowledge index / lifecycle + schema-aware retrieval | **Available (experimental)** | [`scripts/eif_generate_index.py`](scripts/eif_generate_index.py), [`scripts/eif_search_knowledge.py`](scripts/eif_search_knowledge.py) - offline, Unicode-aware keyword search that returns only eligible statuses by default (excludes rejected/superseded), and reports three honest outcomes for anything wrong: unparseable YAML, schema-invalid (parses fine, violates the ontology), or status-ineligible - never conflated with "no results." No embeddings; not tested at scale |
 | Locale layer (Ukrainian project docs + retrieval) | **Available (experimental)**, 4 surfaces | [`locales/`](locales/), [`scripts/eif_locale.py`](scripts/eif_locale.py), [`scripts/eif_render.py`](scripts/eif_render.py) - status messages, Knowledge Delta, closeout headings, and Ukrainian knowledge retrieval, with a real render command and English fallback. Matched English/Ukrainian terminology packs and the [`terminology contract`](docs/reference/terminology.md) keep established and EIF-defined terms distinct. Full agent-response localization is still outside the claim; D-06/D-07 are ratified with that limit stated explicitly. |
-| Playbooks, templates, skills | **Available (v0.1 operating set)** | 15 playbooks, 17 templates, and 11 skills. The planning chain now covers a sourced [idea](playbooks/idea-planning.md), an approved-idea [PRD](playbooks/product-requirements-planning.md), implementation packet planning/execution/review, knowledge operations, the [Bounded Evidence Loop](playbooks/bounded-evidence-loop.md), the outer [retro loop](playbooks/run-retro.md), and the [knowledge curator](playbooks/knowledge-curator.md); customer workflows and automatic community-skill installation remain out of scope |
+| Playbooks, templates, skills | **Available (v0.1 operating set)** | 15 playbooks, 18 templates, and 11 skills. The planning chain now covers a sourced [idea](playbooks/idea-planning.md), an approved-idea [PRD](playbooks/product-requirements-planning.md), implementation packet planning/execution/review, knowledge operations, the [Bounded Evidence Loop](playbooks/bounded-evidence-loop.md), the outer [retro loop](playbooks/run-retro.md), and the [knowledge curator](playbooks/knowledge-curator.md); customer workflows and automatic community-skill installation remain out of scope |
 | Agent adapters | **4 supported (Claude Code, Cursor, Codex, Hermes) - adapter scope FROZEN at 4, entrypoints generated for all** | [`adapters/claude-code/README.md`](adapters/claude-code/README.md) - `eif_init` generates the correct `CLAUDE.md` entrypoint (the file Claude Code loads, per official docs + CLI `2.1.169`); instruction/skill discovery verified live; hooks not re-verified this round; no hook scripts shipped. [`adapters/cursor/README.md`](adapters/cursor/README.md) - `eif_init` generates `.cursor/rules/eif/governance.mdc` (Cursor's current Rules format, per official docs + installed `3.11.19`); code/test-validated (74 acceptance checks); real Cursor runtime consumption not yet manually confirmed - see that README's "Runtime-validation status". [`adapters/codex/README.md`](adapters/codex/README.md) - dynamic active-entrypoint resolution, re-verified against Codex's own primary Rust source (not documentation) and real installed-CLI runtime proof from an isolated `CODEX_HOME` (123 checks). [`adapters/hermes/README.md`](adapters/hermes/README.md) - dynamic active-source resolution, verified against Hermes's own installed Python source and real installed-CLI runtime proof from an isolated `HERMES_HOME` (77 checks). All 12 directed adapter-switching pairs proven - see [`adapters/switch-matrix.json`](adapters/switch-matrix.json) (81 checks). All four are supported adapters (D-16, which retired the earlier required/experimental split); what differs between them is hook mechanics, stated per adapter above, and none of it is a claim of production readiness. See [`adapters/README.md`](adapters/README.md) |
 | Optional integration contract | **Behavioral adapters built (experimental)** | RTK has version/argv/native-`rg`/diff canaries, a command registry and content-free local telemetry; Graphify has version/query/path/explain canaries plus a D-08 artifact lifecycle bound to source commit, graph digest, explicit repository identity and reviewed scope. Both remain optional and degrade to core-safe fallbacks. Focused evidence is provider/version bounded, not a general performance claim; see [`integrations/README.md`](integrations/README.md). Vendor-docs now declares a named provider (Context7, over MCP) with generated routing guidance and a reviewable per-adapter config template, but EIF does not install it and cannot probe it - see that integration's own README for the stated verification gap. |
 | Demo workspace | **Built** | [`examples/demo-workspace/`](examples/demo-workspace/) - reproduced from a clean checkout, see its own README for captured command output |

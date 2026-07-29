@@ -19,7 +19,7 @@ from . import init_cmd, projects
 
 
 def run(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(prog="eifctl new", description=__doc__)
     ap.add_argument("path", help="New project directory. It must not already exist.")
     ap.add_argument("--project-name", default=None, help="EIF project name. Default: directory name.")
     ap.add_argument("--adapter", choices=sorted(ADAPTERS), default="claude-code")

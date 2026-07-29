@@ -73,7 +73,7 @@ def _verify_pinned_runtime(instance_path: Path) -> int:
 
 
 def run(argv: list[str]) -> int:
-    ap = argparse.ArgumentParser(description=__doc__)
+    ap = argparse.ArgumentParser(prog="eifctl upgrade", description=__doc__)
     ap.add_argument("--instance-path", default=".", help="Existing EIF project instance. Default: current directory.")
     ap.add_argument("--dry-run", action="store_true", help="Plan and validate the upgrade without writing.")
     ap.add_argument(
@@ -85,6 +85,15 @@ def run(argv: list[str]) -> int:
         "--allow-dirty-project",
         action="store_true",
         help="Proceed despite uncommitted project changes. Unsafe for routine use.",
+    )
+    ap.add_argument(
+        "--defer-workspace-check",
+        action="store_true",
+        help=(
+            "Leave the workspace axis to the caller. Set by "
+            "`eifctl projects upgrade`, which materializes the workspace "
+            "immediately after this framework-axis run."
+        ),
     )
     args = ap.parse_args(argv)
 
@@ -137,7 +146,10 @@ def run(argv: list[str]) -> int:
     if rc != 0 or args.dry_run:
         return rc
 
-    rc = doctor.run(["--instance-path", str(instance_path)])
+    doctor_args = ["--instance-path", str(instance_path)]
+    if args.defer_workspace_check:
+        doctor_args.append(doctor.DEFER_WORKSPACE_FLAG)
+    rc = doctor.run(doctor_args)
     if rc == 0:
         print(f"eifctl upgrade: SUCCESS {instance_path} -> {__version__}")
     else:

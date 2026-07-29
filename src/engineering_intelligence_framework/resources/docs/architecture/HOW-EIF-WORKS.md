@@ -3,7 +3,7 @@
 <!-- Canonical source document. README, website copy, articles, diagrams,
 FAQ, and launch posts should all derive from this file, not diverge from it. -->
 
-**Status: v0.2.0, released 2026-07-28** (revised across two independent
+**Status: v0.2.1, released 2026-07-29** (revised across two independent
 review passes, both 2026-07-15 - see
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for what
 that review changed). Extracted and genericized from a private production

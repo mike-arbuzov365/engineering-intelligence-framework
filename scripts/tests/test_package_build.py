@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import json
+import re
 import shutil
 import shlex
 import subprocess
@@ -50,10 +51,24 @@ def make_python_command_shim(root: Path, python_executable: Path, stem: str, sou
     provider = root / f"{stem}.py"
     provider.write_text(source, encoding="utf-8")
     if sys.platform == "win32":
+        # The .cmd body must stay pure ASCII. cmd.exe parses a batch file in
+        # the console OEM code page, never UTF-8, and this suite deliberately
+        # runs from a temporary directory containing a space and a non-ASCII
+        # character. Interpolating those paths into the file wrote bytes
+        # cmd.exe then decoded into a path that does not exist, so the shim
+        # exited without ever starting Python: every doctor version probe came
+        # back empty, and three integration-status checks failed against the
+        # installed wheel from 0.2.0 to 0.2.3 while the product was behaving
+        # correctly. Environment variables carry the real paths as Unicode
+        # through CreateProcess, with no code page in the way. eifctl inherits
+        # this process's environment, so the shim it spawns sees them too.
+        variable = "EIF_TEST_SHIM_" + re.sub(r"[^A-Z0-9]", "_", stem.upper())
+        os.environ[f"{variable}_PYTHON"] = str(python_executable)
+        os.environ[f"{variable}_TARGET"] = str(provider)
         shim = root / f"{stem}.cmd"
         shim.write_text(
-            f'@echo off\r\n"{python_executable}" "{provider}" %*\r\n',
-            encoding="utf-8",
+            f'@echo off\r\n"%{variable}_PYTHON%" "%{variable}_TARGET%" %*\r\n',
+            encoding="ascii",
         )
     else:
         shim = root / stem

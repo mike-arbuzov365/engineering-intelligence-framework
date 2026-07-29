@@ -42,15 +42,29 @@ def config(*, enabled: bool = True, boundary: str = "local-only", policy: str = 
 
 
 class FakeRunner:
-    def __init__(self, *, version: str = "0.43.0", search_passes: bool = True):
+    def __init__(
+        self,
+        *,
+        version: str = "0.43.0",
+        search_passes: bool = True,
+        version_exit: int = 0,
+    ):
         self.version = version
         self.search_passes = search_passes
+        # An executable that is present but cannot run. 127 is what
+        # integrations._run records for FileNotFoundError; a wrapper script
+        # that cannot reach its interpreter exits 9009 through cmd.exe on
+        # Windows, and a failed spawn exits 1. All three produce no version
+        # and mean the same thing.
+        self.version_exit = version_exit
         self.calls: list[list[str]] = []
 
     def __call__(self, argv: list[str], cwd: Path | None, timeout: float) -> CompletedProcess:
         del cwd, timeout
         self.calls.append(argv)
         if argv[1:] == ["--version"]:
+            if self.version_exit != 0:
+                return CompletedProcess(argv, self.version_exit, "", "")
             return CompletedProcess(argv, 0, f"rtk {self.version}\n", "")
         if argv[1:] == ["--help"]:
             return CompletedProcess(argv, 0, "  git x\n  rg x\n  read x\n  summary x\n  proxy x\n", "")
@@ -103,6 +117,33 @@ def unit_results() -> list[bool]:
         checked_at=timestamp, which=lambda _name: "fake-rtk", runner=FakeRunner(version="9.9.9"),
     )[0]
     results.append(check("incompatible RTK version is misconfigured", incompatible["state"] == "misconfigured"))
+
+    # 0.2.4: only exit 127 counted as "could not be started", so a wrapper
+    # that failed to launch was reported as a configuration error and sent
+    # the operator to edit a value that was already correct. Every non-zero
+    # exit with nothing on stdout means the same thing and now says so.
+    for exit_code in (1, 9009):
+        dead = integrations.evaluate_integrations(
+            config(), FRAMEWORK_ROOT, FRAMEWORK_ROOT,
+            checked_at=timestamp, which=lambda _name: "fake-rtk",
+            runner=FakeRunner(version_exit=exit_code),
+        )[0]
+        probe = [item for item in dead["capabilities"] if item["id"] == "version-probe"]
+        results.append(check(
+            f"RTK probe exiting {exit_code} with no output is unavailable, not misconfigured",
+            dead["state"] == "unavailable"
+            and len(probe) == 1
+            and "could not be started" in probe[0]["evidence"]["summary"],
+            f"{dead['state']} {probe}",
+        ))
+    results.append(check(
+        "an RTK probe that exits 0 with an unusable version is still misconfigured",
+        integrations.evaluate_integrations(
+            config(), FRAMEWORK_ROOT, FRAMEWORK_ROOT,
+            checked_at=timestamp, which=lambda _name: "fake-rtk",
+            runner=FakeRunner(version="not-a-version"),
+        )[0]["state"] == "misconfigured",
+    ))
 
     healthy = integrations.evaluate_integrations(
         config(), FRAMEWORK_ROOT, FRAMEWORK_ROOT,

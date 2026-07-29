@@ -1,10 +1,28 @@
-# Benchmark fixtures record an immutable sha256 source_digest over their
-# exact bytes (core/schemas/benchmark-fixture-manifest.schema.json) - that
-# digest is only reproducible across machines if every checkout produces
-# identical bytes. Without this, core.autocrlf=true (a common Windows git
-# default) converts these files to CRLF on checkout while the git blob
-# itself stays LF, so a fresh Windows clone's source_digest would never
-# match what was recorded (Linux/CI checkouts never convert, so this
-# never surfaced there) - a real bug found via `eifctl_benchmark.py
-# validate-manifest` failing after a routine `git rebase` on Windows.
+# Every text file in this repository is stored and checked out as LF, on
+# every platform. Git for Windows ships core.autocrlf=true system-wide, and
+# without this line a Windows clone gets CRLF working-tree copies of files
+# whose blobs are LF. Git then fails its own CRLF round-trip check on them,
+# so `git status` reports AGENTS.md, README.md, CHANGELOG.md, ROADMAP.md,
+# SECURITY.md, THIRD_PARTY_NOTICES.md and skills/README.md as modified
+# forever while `git diff` shows nothing and the blob hashes are identical.
+# The first real edit to any of them then arrives as a whole-file diff.
+#
+# This is the same defect EIF fixes for the project instances it generates
+# (the managed .gitattributes block, 0.2.2). The framework's own repository
+# had it too. Adding this changes no blob: every tracked text file here is
+# already LF in the index, and the five tracked PNGs are detected as binary
+# by text=auto and are left alone.
+* text=auto eol=lf
+
+# Kept explicit even though the line above already covers it. Benchmark
+# fixtures record an immutable sha256 source_digest over their exact bytes
+# (core/schemas/benchmark-fixture-manifest.schema.json) - that digest is only
+# reproducible across machines if every checkout produces identical bytes.
+# Without a pin, core.autocrlf=true converts these files to CRLF on checkout
+# while the git blob itself stays LF, so a fresh Windows clone's
+# source_digest would never match what was recorded (Linux/CI checkouts never
+# convert, so this never surfaced there) - a real bug found via
+# `eifctl_benchmark.py validate-manifest` failing after a routine `git rebase`
+# on Windows. The pin stays so that a future change to the wildcard above
+# cannot silently unpin the one place where bytes are a recorded claim.
 docs/benchmarks/fixtures/** text eol=lf

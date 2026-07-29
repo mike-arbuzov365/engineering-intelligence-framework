@@ -68,6 +68,7 @@ SUITES = [
     "test_workspace_commands.py",
     "test_workspace_fleet.py",
     "test_line_endings.py",
+    "test_upgrade_guards.py",
     "test_journey.py",
     "test_adoption.py",
     "test_cursor_adapter.py",

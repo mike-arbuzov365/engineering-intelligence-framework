@@ -6,7 +6,7 @@ EIF gives AI coding agents persistent engineering knowledge, explicit source
 identity, controlled execution workflows, quality gates and token-efficient
 tool integrations.
 
-> **v0.2.0, locally validated and distributed through GitHub Releases.**
+> **v0.2.4, locally validated and distributed through GitHub Releases.**
 > Apache-2.0, installable as a wheel or from a clone, and not published to
 > PyPI. EIF is the public extraction of a private production instance that
 > has run this methodology daily since May 2026. It is a 0.x release: what is
@@ -37,7 +37,7 @@ Download the wheel attached to the latest public release and install that
 local file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.2-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-0.2.4-py3-none-any.whl
 ```
 
 To install from a checkout instead:

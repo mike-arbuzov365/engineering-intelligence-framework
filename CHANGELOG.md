@@ -15,6 +15,75 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-07-29
+
+Four defects, all of them things that told the operator something untrue.
+Three were found by running the tooling rather than by reading it, and the
+oldest had been failing since 0.2.0 in a suite nothing runs automatically.
+
+### Fixed
+
+- **`doctor` called an integration misconfigured when its executable never
+  started.** Only exit code 127 counted as "could not be started", which is
+  what the runner records for `FileNotFoundError`. A Windows shim that cannot
+  reach its interpreter exits 9009 through `cmd.exe`, and a failed spawn
+  exits 1, both with nothing on stdout. Both were reported as
+  `misconfigured`, which sent the operator to a configuration file to fix a
+  value that was already right. Those now report `unavailable`, whose
+  remediation already says the correct thing. A probe that exits 0 and prints
+  an unparseable or out-of-range version did start, and is still
+  `misconfigured`.
+- **`upgrade` refused to run because of drift that the upgrade repairs.** The
+  pre-flight verification of the pinned runtime failed on a drifted
+  `knowledge/index.md`, and its remediation said to run `eif_init.py` again,
+  which is precisely what the blocked command wraps. The fleet path inherited
+  the same block through its dry-run pre-flight, so one project's index drift
+  stopped every project from upgrading. `eif_verify_runtime.py` now takes
+  `--pre-upgrade`, which reports the two checks the managed-state refresh
+  regenerates (knowledge index drift, generated-block drift) as notes rather
+  than failures; `eifctl upgrade` passes it, and the post-upgrade run still
+  checks everything. Instances pinned to a runtime that predates the flag are
+  detected and run without it.
+- **`upgrade` told people to revert changes that did not exist.** On a fresh
+  clone of a connected project the framework axis succeeded, the working tree
+  stayed clean, and the command still exited 1 saying "do not commit the
+  changes. Review git diff and restore the previous lock/runtime source."
+  The only real finding was the absent `.eif/workspace-runtime/`, which is
+  gitignored by design and which every first checkout on a new machine
+  lacks. That case is now recognized: the workspace axis is deferred with an
+  explanation of what to run, and the command succeeds. When a post-upgrade
+  check genuinely fails, the message distinguishes a clean tree with nothing
+  to revert from a run that did write managed state.
+- **The framework's own repository had the line-ending defect it fixes for
+  instances.** Seven top-level Markdown files reported as modified forever
+  under `core.autocrlf=true`, with identical blobs and an empty `git diff`,
+  because nothing pinned them and git's CRLF round-trip check kept failing.
+  The first real edit to any of them would have arrived as a whole-file diff.
+  `.gitattributes` now pins the whole repository to LF. No blob changed:
+  every tracked text file was already LF in the index, and the five PNGs are
+  detected as binary.
+
+### Note on how these were found
+
+The integration-status failures had been in `scripts/tests/test_package_build.py`
+since 0.2.0, failing identically on every release since. Nothing noticed
+because that suite only runs through `run_all.py` and through
+`release-check.yml`, which is `workflow_dispatch` only and has never been
+run. The cause turned out to be in the suite: its Windows test shim is a
+`.cmd` file, `cmd.exe` parses batch files in the console OEM code page rather
+than UTF-8, and the suite deliberately runs from a directory containing a
+non-ASCII character. The shim's own interpreter path was therefore
+unreachable. The shim now carries paths through the environment and keeps its
+body ASCII. The product defect above is real and separate: it is what made a
+dead shim look like a configuration error.
+
+### Known limitations
+
+Unchanged from 0.2.3. The package is distributed through GitHub Releases
+rather than PyPI. `integrations/vendor-docs/manifest.json` still does not
+validate against the provider-manifest schema; nothing enables that
+integration, so no doctor run reaches it.
+
 ## [0.2.3] - 2026-07-29
 
 Scope correction. Promotion is not a framework concern and no longer lives
@@ -758,7 +827,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.3...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.4...HEAD
+[0.2.4]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.4
 [0.2.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.3
 [0.2.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.2
 [0.2.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.1

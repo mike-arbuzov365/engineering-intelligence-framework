@@ -183,6 +183,14 @@ restores the framework runtime; the workspace runtime comes back with the
 next `eifctl projects upgrade --apply`, because only the private workspace
 holds those artifacts.
 
+That `upgrade` succeeds and says so. A workspace member with a committed
+`.eif/workspace.lock.yaml` and no local `.eif/workspace-runtime/` is the
+expected state of a first checkout on a new machine, not a broken instance,
+so the command defers the workspace axis, prints what to run, and exits 0.
+It defers only a wholly absent runtime: a present one that has drifted or
+been corrupted still fails, closed. Before 0.2.4 this case exited 1 telling
+you not to commit changes that a clean tree did not contain.
+
 ## Update one project
 
 Install the new release wheel into the environment that provides `eifctl`.
@@ -201,6 +209,16 @@ eifctl upgrade --instance-path ../my-project
 The command refuses an uncommitted project by default. It verifies the
 currently pinned runtime when present, transactionally refreshes EIF-managed
 files from the installed package, and runs `doctor` afterward.
+
+That pre-flight verification asks whether the runtime bundle is safe to
+replace, not whether every generated file is current. Drift in the two things
+the refresh itself regenerates, `knowledge/index.md` and the generated blocks
+in the entrypoint, is reported as a note and does not block the upgrade
+(`eif_verify_runtime.py --pre-upgrade`). The `doctor` run afterwards checks
+all of it against what the refresh just wrote. Before 0.2.4 a hand-regenerated
+knowledge index blocked the upgrade and told you to run the script that the
+blocked command wraps, and because `eifctl projects upgrade` pre-flights every
+project, one project's drift stopped the whole fleet.
 
 A routine update preserves `.eif/config.yaml` byte for byte. It also
 preserves project source, knowledge artifacts, and content outside managed

@@ -148,15 +148,27 @@ def config(
 
 
 class FakeRunner:
-    def __init__(self, *, version: str = "0.9.12", fail_command: str | None = None):
+    def __init__(
+        self,
+        *,
+        version: str = "0.9.12",
+        fail_command: str | None = None,
+        version_exit: int = 0,
+    ):
         self.version = version
         self.fail_command = fail_command
+        # A configured executable that exists but cannot run: 127 from
+        # integrations._run, 9009 from cmd.exe when a wrapper cannot reach its
+        # interpreter, 1 from a failed spawn.
+        self.version_exit = version_exit
         self.calls: list[list[str]] = []
 
     def __call__(self, argv: list[str], cwd: Path | None, timeout: float) -> CompletedProcess:
         del cwd, timeout
         self.calls.append(argv)
         if argv[1:] == ["--version"]:
+            if self.version_exit != 0:
+                return CompletedProcess(argv, self.version_exit, "", "")
             return CompletedProcess(argv, 0, f"graphify {self.version}\n", "")
         command = argv[1] if len(argv) > 1 else ""
         if command == self.fail_command:
@@ -371,6 +383,20 @@ def unit_results() -> list[bool]:
 
         incompatible = evaluate(instance, config(refreshed_commit), FakeRunner(version="9.9.9"))
         results.append(check("incompatible Graphify version is misconfigured", incompatible["state"] == "misconfigured"))
+
+        # 0.2.4: a probe that never started was reported as misconfigured for
+        # every non-127 exit, which pointed the operator at a configuration
+        # file instead of at an executable that did not run.
+        for exit_code in (1, 9009):
+            dead = evaluate(instance, config(refreshed_commit), FakeRunner(version_exit=exit_code))
+            probe = [item for item in dead["capabilities"] if item["id"] == "version-probe"]
+            results.append(check(
+                f"Graphify probe exiting {exit_code} with no output is unavailable, not misconfigured",
+                dead["state"] == "unavailable"
+                and len(probe) == 1
+                and "could not be started" in probe[0]["evidence"]["summary"],
+                f"{dead['state']} {probe}",
+            ))
 
         canary_failure = evaluate(instance, config(refreshed_commit), FakeRunner(fail_command="path"))
         failed = {item["id"] for item in canary_failure["capabilities"] if item["status"] == "fail"}

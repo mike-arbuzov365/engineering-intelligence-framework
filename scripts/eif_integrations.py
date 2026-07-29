@@ -75,6 +75,27 @@ def _compatible(version: str, manifest: dict) -> bool:
     return _version_tuple(compatibility["min_inclusive"]) <= current < _version_tuple(compatibility["max_exclusive"])
 
 
+def _probe_never_started(result: subprocess.CompletedProcess) -> bool:
+    """True when a version probe produced no version because the configured
+    executable never ran, as opposed to running and reporting something
+    outside the compatible range.
+
+    127 is what _run() records for FileNotFoundError and timeouts, and it used
+    to be the only case treated this way. It is not the only way this happens.
+    On Windows a shim that cannot reach its interpreter comes back as 9009
+    from cmd.exe, and a failed spawn as 1, both with nothing on stdout.
+    Reporting those as `misconfigured` sent the operator to a configuration
+    file to fix a value that was already correct, when the real problem was an
+    executable that did not start - which is exactly what `unavailable` and
+    its remediation already say. Found by the installed-wheel packaging suite,
+    where the failing executable was the suite's own test shim.
+
+    A probe that exits 0 and prints an unparseable or out-of-range version did
+    start, and stays `misconfigured`.
+    """
+    return result.returncode != 0 and not result.stdout.strip()
+
+
 def _evidence(kind: str, summary: str) -> dict:
     return {"kind": kind, "summary": summary, "content_free": True}
 
@@ -315,7 +336,7 @@ def evaluate_rtk(
     version_result = runner(version_argv, None, 10.0)
     match = re.search(manifest["compatibility"]["version_pattern"], version_result.stdout.strip())
     detected = match.group(1) if version_result.returncode == 0 and match else None
-    if version_result.returncode == 127 and detected is None:
+    if _probe_never_started(version_result) and detected is None:
         return _base_result(
             integration,
             provider,
@@ -552,7 +573,7 @@ def evaluate_graphify(
     version_result = runner([executable, *manifest["compatibility"]["version_command"][1:]], None, 10.0)
     match = re.search(manifest["compatibility"]["version_pattern"], version_result.stdout.strip())
     detected = match.group(1) if version_result.returncode == 0 and match else None
-    if version_result.returncode == 127 and detected is None:
+    if _probe_never_started(version_result) and detected is None:
         capabilities.insert(
             0,
             _capability("version-probe", True, "fail", "probe", "configured Graphify executable could not be started"),

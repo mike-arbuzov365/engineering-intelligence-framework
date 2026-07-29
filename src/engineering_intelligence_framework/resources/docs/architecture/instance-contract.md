@@ -449,6 +449,27 @@ rendering, and self-verification. It is not a claim that the bundle
 re-implements this framework repository's entire CI - PR-workflow-specific
 tooling stays in the framework.
 
+### One verification, two questions
+
+`eif_verify_runtime.py` answers "is this instance correct" after an upgrade,
+and "is this runtime bundle safe to replace" before one. Those are not the
+same question, and running the first in place of the second was a defect
+(0.2.4): a hand-regenerated `knowledge/index.md` failed the pre-flight check
+and blocked the upgrade, whose own transaction rewrites that index and the
+lock hash recording it. The remediation it printed named `eif_init.py`, which
+is what the blocked command wraps, so the loop had no exit inside the
+command.
+
+`--pre-upgrade` scopes the run to the second question. The two checks whose
+subject the refresh regenerates, knowledge index drift and generated-block
+drift, are printed as notes rather than failures. Everything about the bundle
+itself, schemas, manifest digest, per-file hashes, missing or unexpected
+managed files, still fails closed, because those are exactly what the
+question is about. `eifctl upgrade` passes the flag and runs the full,
+unscoped verification afterwards, so nothing is skipped, only reordered. A
+pinned runtime older than the flag is detected by reading the script and run
+without it.
+
 ## What this is not
 
 - Not a package index client. Installation or update of the `eifctl` wheel

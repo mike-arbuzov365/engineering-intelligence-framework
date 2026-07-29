@@ -15,6 +15,36 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-07-29
+
+Scope correction. Promotion is not a framework concern and no longer lives
+in this repository.
+
+### Removed
+
+- `docs/product/linkedin-series.md`. It held the audience definition, the
+  voice rules, the commenting rules and the arc of a publication series:
+  all of it about promoting this project rather than about the framework.
+  It moved to the maintainer's private communications repository, where the
+  drafts, the reaction data and the named third-party threads it governs
+  already were.
+
+### Changed
+
+- `docs/README.md`, `ROADMAP.md` and `docs/product/claims-evidence.md` no
+  longer describe publication channels. The claims register is unchanged and
+  stays public, because it is the half that has to be checkable: a bound
+  nobody can verify is not a bound. What left is the promotion machinery
+  around it.
+
+### Note on the split
+
+The rule this follows: this repository holds the framework, its
+architecture, and the evidence behind every public claim. Anything about
+who we are writing for and how we reach them is a different project, and
+keeping the two apart is what stops the framework's documentation from
+slowly becoming its marketing.
+
 ## [0.2.2] - 2026-07-29
 
 Completes the line-ending contract 0.2.1 started. Found the same way and on
@@ -388,7 +418,7 @@ limitations below, in the same file as what it does.
   credentials and stays an owner decision, which is the same boundary
   everything else here observes: EIF generates what a person then chooses to
   run. Passes end to end.
-- [`docs/product/linkedin-series.md`](docs/product/linkedin-series.md): the
+- `docs/product/linkedin-series.md` (removed in 0.2.3, see that entry): the
   rules everything published about EIF is written under. Audience, claim
   boundaries, voice rules, commenting rules, and the sentences the series
   may never write regardless of how well they would perform. It sits beside
@@ -728,7 +758,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.2...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.3...HEAD
+[0.2.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.3
 [0.2.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.2
 [0.2.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.1
 [0.2.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.0

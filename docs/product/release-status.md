@@ -10,8 +10,7 @@ review_after: 2026-08-27
 
 <!-- Frontmatter corrected 2026-07-27: this carried `type: reference` and
 `status: active`, neither of which exists in the ontology, so CI's own
-frontmatter validation failed on it and on linkedin-series.md from the day
-both were added. It states what is true of this repository right now (the
+frontmatter validation failed on it from the day it was added. It states what is true of this repository right now (the
 version in pyproject.toml, that no artifact is on a package index, what the
 release script does and where it stops), which is empirical, so `fact` with
 an OBSERVED label read from the code itself. -->

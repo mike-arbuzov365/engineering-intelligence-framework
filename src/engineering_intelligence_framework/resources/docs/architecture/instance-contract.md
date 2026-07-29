@@ -34,6 +34,7 @@ A project instance is any repository initialized (or adopted) by
 | `CLAUDE.md` (EIF-managed block only) | split: EIF owns the marked block, you own everything else | yes | Agent entrypoint - the `EIF:BEGIN`/`EIF:END` block is regenerated on upgrade, content outside it is never touched |
 | `knowledge/` | **you** | yes | The instance's own knowledge artifacts - never modified by init or upgrade |
 | `.gitignore` (EIF-managed block only) | split, same pattern as CLAUDE.md | yes | Ignores `.eif/runtime/`, `.eif/runtime.next/`, `.eif/runtime.previous/`, `*.bak-*` so the regenerable bundle and backups are never committed by accident |
+| `.gitattributes` (EIF-managed block only) | split, same pattern as CLAUDE.md | yes | Pins `text eol=lf` on every generated file whose exact bytes are recorded in committed state: config, both locks, the entrypoint, the knowledge index, and a workspace's content root. Without it a checkout that converts newlines (Git for Windows enables `core.autocrlf` system-wide) fails hash checks on content nobody edited |
 
 **Why config and lock are two files, not one.** An earlier version of this
 design put framework provenance directly inside `.eif/config.yaml` and
@@ -164,7 +165,7 @@ Nothing is replaced in place. `eif_init`:
 3. **stages** every managed artifact to a `.next` path - config
    (`.eif/config.yaml.next`), the runtime bundle (`.eif/runtime.next`, then
    re-hashed against the manifest to catch corruption), the lock, the
-   `CLAUDE.md` and `.gitignore` managed blocks, and (when
+   `CLAUDE.md`, `.gitignore` and `.gitattributes` managed blocks, and (when
    `knowledge.managed`) the knowledge index;
 4. **commits** them as one ordered sequence of atomic renames - each stage
    moves its prior live file aside to `.previous`, renames its `.next` into
@@ -314,7 +315,7 @@ Intentionally simple and conservative for v0.1:
 
 No automatic cross-version project-config migration exists yet. The v0.1.1
 through v0.1.3 project config and framework lock remain compatible with
-v0.2.0. Registry v1 has a named v1-to-v2 migration. Future breaking config,
+v0.2.x. Registry v1 has a named v1-to-v2 migration. Future breaking config,
 profile, workspace-lock, or knowledge-schema changes must ship a named,
 tested migration before the fleet update path can apply them.
 
@@ -329,8 +330,8 @@ defaults make bootstrapping onto one safe:
   replaces it (backed up first);
 - an existing `CLAUDE.md` keeps all its content - the EIF block is appended,
   or on re-run replaced in place, never clobbering project rules;
-- an existing `.gitignore` keeps all its content, with the EIF block appended
-  if not already present;
+- an existing `.gitignore` or `.gitattributes` keeps all its content, with
+  the EIF block appended if not already present;
 - `--dry-run` reports exactly what would change (create/keep/overwrite,
   per file) before anything is written.
 
@@ -384,7 +385,7 @@ flag (only within-transaction rollback if a single run fails partway, see
 above). To remove an EIF instance by hand:
 
 1. Delete `.eif/` (config, lock, and the runtime bundle all live there).
-2. Restore `CLAUDE.md` and `.gitignore` to their pre-EIF content. For a
+2. Restore `CLAUDE.md`, `.gitignore` and `.gitattributes` to their pre-EIF content. For a
    git-tracked file this was never committed with the EIF block, `git
    checkout -- CLAUDE.md .gitignore` is byte-exact by construction -
    prefer it over hand-editing, which is exact-whitespace-sensitive (a

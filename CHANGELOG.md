@@ -15,6 +15,70 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-07-29
+
+Owner-walkthrough patch. Every entry below comes from running the documented
+0.2.0 path end to end on two real private repositories on Windows, not from
+a synthetic fixture. It changes no schema and needs no migration.
+
+### Fixed
+
+- The documented `eifctl init <path>` form now exists. It previously failed
+  with `unrecognized arguments`, which meant the first command of the
+  published "connect an existing repository" path did not run. The path may
+  also be given as `--instance-path`, and on a first-ever init the project
+  name defaults to the directory name instead of being required.
+- Each instance now carries an EIF-managed `.gitattributes` block pinning
+  `text eol=lf` on the config, both locks, the agent entrypoint, the
+  knowledge index, and a workspace's content root. Git for Windows enables
+  `core.autocrlf` system-wide, so a fresh clone previously checked those
+  files out converted, failed the knowledge-index hash check on content
+  nobody edited, and left every upgrade reporting files as modified with an
+  empty diff.
+- `doctor` distinguishes a line-ending conversion from a hand-edit. A file
+  that matches its recorded hash after CRLF-to-LF normalization is reported
+  as exactly that, with the normalization command, instead of accusing the
+  user of editing it.
+- A routine upgrade that resolves to identical provenance no longer rewrites
+  `.eif/framework.lock.yaml` to move its timestamp. Every fleet apply used to
+  leave every project dirty with a one-line diff that had no content behind
+  it, and that diff then blocked the next fleet run on its own clean-tree
+  gate.
+- Workspace freshness is decided by resolved content rather than by the
+  workspace's git HEAD. Registering project N+1 previously invalidated the
+  pinned snapshot of all N already-connected projects and forced a
+  re-materialization plus a commit in each, for a byte-identical bundle.
+- A pre-existing workspace-runtime problem is no longer reported as
+  `axis=framework`. The framework axis defers the workspace check to the
+  coordinated workspace step that immediately follows and can repair it, so
+  drift no longer blocks the command that fixes it.
+- `doctor` ends with its own verdict line. The wrapped script printed "all
+  checks passed" before the wrapper's checks had run, so a failing command's
+  last line claimed success.
+- The private-workspace test suites shipped in 0.2.0 were registered in no
+  runner, so no workflow executed them. They are now part of the inventory
+  that `release-check.yml` runs.
+
+### Changed
+
+- `eifctl projects upgrade` reports `change=yes` or `change=no` per axis and
+  states plainly when every active project is already current, instead of
+  inviting an apply that would write nothing.
+- `eifctl workspace doctor` prints the registered projects and their
+  machine-local mapping, which its own help already promised.
+- Error messages name the next command: a dirty workspace explains that
+  `projects add` edits committed state, a missing machine-local location
+  explains that the map is per-machine and how to rebuild it, a missing
+  workspace runtime names the command that re-materializes it, a missing
+  pinned runtime names the rehydration command, and a dirty project blocking
+  detach names `--allow-dirty-project`.
+- `eifctl --help` lists the real `projects` subcommands, `eifctl init --help`
+  documents the packaged interface rather than leaking the standalone
+  script's own required flags, and each subparser reports its true program
+  name.
+- The project lifecycle guide covers committing the registry, working from a
+  second machine, repairing a drifted snapshot, and Windows line endings.
+
 ## [0.2.0] - 2026-07-28
 
 First private-workspace release. It adds an optional user-owned workspace
@@ -609,7 +673,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.1
 [0.2.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.0
 [0.1.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.3
 [0.1.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.2

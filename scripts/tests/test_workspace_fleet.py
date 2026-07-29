@@ -42,6 +42,17 @@ def capture_cli(argv: list[str]) -> tuple[int, str]:
     return rc, stdout.getvalue() + stderr.getvalue()
 
 
+def commit_if_dirty(project: Path, message: str) -> bool:
+    """A partial fleet result is only committable when an axis actually wrote
+    something. Since 0.2.1 an axis that resolves to identical state writes
+    nothing, so "review and commit the partial result" can legitimately find
+    an already-clean tree."""
+    if not git(project, "status", "--porcelain").stdout.strip():
+        return False
+    commit_all(project, message)
+    return True
+
+
 def workspace_revision(project: Path) -> str | None:
     lock_path = project / ".eif" / "workspace.lock.yaml"
     if not lock_path.exists():
@@ -116,9 +127,12 @@ def main() -> int:
                     "fleet plan compares framework and workspace axes",
                     rc == 0
                     and "framework: current=" in plan_output
-                    and "workspace: current=" in plan_output
+                    and "workspace: pinned=" in plan_output
                     and "target=" in plan_output
-                    and "profile=default" in plan_output,
+                    and "profile=default" in plan_output
+                    # Each axis states whether it would change anything, so a
+                    # plan is readable without diffing versions by eye.
+                    and "change=yes" in plan_output,
                     plan_output,
                 )
             )
@@ -238,8 +252,8 @@ def main() -> int:
 
             # Alpha has both axes updated and beta has its framework axis
             # updated. Commit those explicit partial results before retrying.
-            commit_all(projects[0], "partial alpha")
-            commit_all(projects[1], "partial beta framework")
+            commit_if_dirty(projects[0], "partial alpha")
+            commit_if_dirty(projects[1], "partial beta framework")
             rc, output = capture_cli(
                 [
                     "projects",
@@ -261,7 +275,7 @@ def main() -> int:
                 )
             )
             for project in projects:
-                commit_all(project, "fleet workspace v2")
+                commit_if_dirty(project, "fleet workspace v2")
 
             beta = projects[1]
             owned_files = {

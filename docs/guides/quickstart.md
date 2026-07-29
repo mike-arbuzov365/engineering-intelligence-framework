@@ -15,7 +15,7 @@ with real captured command output, see
 this page doesn't duplicate that content, it summarizes it and adds a real
 timing measurement.
 
-For real private repositories, install the v0.2.0 wheel and create a
+For real private repositories, install the v0.2.1 wheel and create a
 user-owned workspace with `eifctl workspace new`. That workspace is optional
 L2 scope, not a private copy of EIF. The
 [`project lifecycle guide`](project-lifecycle.md) covers registry v2,

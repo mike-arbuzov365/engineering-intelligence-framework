@@ -8,7 +8,7 @@ review_after: 2026-10-28
 
 # Project lifecycle
 
-This guide describes the v0.2.0 path from installing EIF to safely
+This guide describes the v0.2.x path from installing EIF to safely
 coordinating one or more private project repositories.
 
 ## The ownership model
@@ -47,7 +47,7 @@ download the `.whl` file attached to the release, then install the local
 file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.0-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-0.2.1-py3-none-any.whl
 eifctl version
 ```
 
@@ -83,6 +83,12 @@ Review and commit the bootstrap in a private repository before connecting
 projects. Keep the generated default profile minimal until a real project
 proves that a shared artifact is needed.
 
+The workspace is the source of every pinned snapshot, so a snapshot can only
+be resolved against a commit. Every command that touches the registry or the
+profiles leaves the workspace dirty, and the next fleet command refuses to
+run until that change is committed. Treat "commit the workspace" as the last
+step of every workspace edit, including `eifctl projects add`.
+
 ## Create and connect a new project
 
 From a directory whose parent already exists:
@@ -112,14 +118,70 @@ eifctl init ../existing-project --adapter codex --locale uk
 eifctl doctor --instance-path ../existing-project
 eifctl projects add ../existing-project \
   --registry ../eif-control/.eif/projects.yaml
+git -C ../eif-control add -A
+git -C ../eif-control commit -m "Register existing-project"
+```
+
+`eifctl init` takes the project path positionally, or as `--instance-path`,
+and defaults to the current directory. On a first-ever init the project name
+defaults to the directory name; every later run derives it from the existing
+config. `--framework-root` belongs to the standalone
+`python scripts/eif_init.py` form only: through `eifctl` the installed
+package is the framework source and supplies its own provenance.
+
+A repository that already carries an entrypoint of its own is adopted rather
+than overwritten. When the adoption preflight finds substantial pre-existing
+content it stops and asks for `--adoption-mode greenfield` or
+`--adoption-mode coexist` explicitly, instead of guessing.
+
+A repository already running an older EIF needs no `init` at all. Register
+it and let the fleet upgrade move it:
+
+```bash
+eifctl projects add ../older-project \
+  --registry ../eif-control/.eif/projects.yaml
+git -C ../eif-control add -A
+git -C ../eif-control commit -m "Register older-project"
+eifctl projects upgrade --registry ../eif-control/.eif/projects.yaml
 ```
 
 Registration requires a valid `.eif/config.yaml` and
-`.eif/framework.lock.yaml`. It does not modify project files.
+`.eif/framework.lock.yaml`. It does not modify project files. It does modify
+the workspace's committed registry, which is why the commit above is part of
+the sequence rather than an afterthought.
 
 Registry v2 stores the logical entry in `.eif/projects.yaml` and writes the
 local path only to `.eif/local-state/project-locations.yaml`. Re-adding a
 detached project at the same path explicitly reactivates it.
+
+## Work from a second machine
+
+The locations file is machine-local and gitignored on purpose: it maps
+logical projects to wherever they happen to sit on one computer. A workspace
+cloned onto another machine therefore starts with an empty map, and a fleet
+command stops rather than guessing:
+
+```text
+active projects have no machine-local location: comms, preo-web
+```
+
+Clone the projects wherever you keep them, then map each one once:
+
+```bash
+eifctl projects add ../comms --registry ../eif-control/.eif/projects.yaml
+eifctl projects add ../preo-web --registry ../eif-control/.eif/projects.yaml
+```
+
+Re-adding an already-registered project is idempotent. It refreshes the
+local path and leaves the committed registry alone when nothing logical
+changed.
+
+A freshly cloned project is also missing both regenerable trees:
+`.eif/runtime/` and `.eif/workspace-runtime/` are gitignored, so `doctor`
+reports them until they are rehydrated. `eifctl upgrade --instance-path .`
+restores the framework runtime; the workspace runtime comes back with the
+next `eifctl projects upgrade --apply`, because only the private workspace
+holds those artifacts.
 
 ## Update one project
 
@@ -193,8 +255,18 @@ eifctl projects upgrade \
 ```
 
 The plan compares the current and target framework version separately from
-the current and target workspace revision, profile, override set, and
-materialization health. It writes nothing.
+the pinned workspace snapshot, profile, override set, and materialization
+health. Each axis states `change=yes` or `change=no`, and a plan where every
+axis is already current says so instead of inviting an apply that would do
+nothing. It writes nothing.
+
+Workspace freshness is decided by resolved content, not by how many commits
+the workspace has taken. A workspace commit that changes nothing a project
+consumes, such as registering another project or editing the ledger, leaves
+every existing snapshot valid and writes no project file. The same holds on
+the framework axis: an upgrade that resolves to identical provenance leaves
+`.eif/framework.lock.yaml` byte for byte, so a fleet pass with nothing to do
+leaves every repository clean.
 
 The apply command checks every active project before the first write. It
 then updates one project at a time, framework axis first and workspace axis
@@ -230,6 +302,20 @@ Detach removes only `.eif/workspace-runtime/` and
 history, framework runtime, and configuration remain untouched. The logical
 entry stays in the registry as `detached`; add `--remove-registration` only
 when the inventory entry and local mapping should also be removed.
+
+Detach is also the repair path when a project's workspace runtime has
+drifted beyond what a refresh can fix. Detach refuses a dirty project by
+default, so a project left modified by a failed run needs either a review
+and commit first, or `--allow-dirty-project` to proceed deliberately:
+
+```bash
+eifctl projects detach my-project \
+  --registry ../eif-control/.eif/projects.yaml \
+  --allow-dirty-project --apply
+```
+
+Then re-add the project, commit the registry, and run the fleet upgrade
+again to re-materialize a verified snapshot.
 
 ## Migrate a registry from v1
 
@@ -297,10 +383,34 @@ git -C ../my-project diff
 Commit the lock and managed-file changes in each project only after they are
 reviewed. The regenerable `.eif/runtime/` remains ignored.
 
+## Line endings on Windows
+
+EIF hashes the files it generates as LF bytes and records those hashes in
+committed state. Git for Windows enables `core.autocrlf` system-wide, so
+without an instruction to the contrary git converts those same files on
+checkout and every hash check fails on content nobody edited.
+
+Since v0.2.1 each instance carries an EIF-managed `.gitattributes` block
+pinning `text eol=lf` on the config, both locks, the agent entrypoint, the
+knowledge index, and, in a workspace, the whole content root. A project
+created or upgraded on v0.2.1 needs nothing further.
+
+A project generated before v0.2.1 and already committed with converted line
+endings needs one normalization after the upgrade writes the block:
+
+```bash
+git -C ../my-project add --renormalize .
+git -C ../my-project commit -m "Normalize EIF-managed files to LF"
+```
+
+`doctor` names this case explicitly. When a file matches its recorded hash
+after CRLF-to-LF normalization it says so, rather than reporting a hand-edit
+that never happened.
+
 ## Current compatibility boundary
 
 The v0.1.1 through v0.1.3 project config and framework lock remain compatible
-with v0.2.0. Registry v1 has the named migration above. No automatic
+with v0.2.x. Registry v1 has the named migration above. No automatic
 migration is claimed for a future breaking project-config, workspace-profile,
 knowledge-schema, or private-vocabulary change. A release that bumps one of
 those contracts must ship and test a named migration before users apply it

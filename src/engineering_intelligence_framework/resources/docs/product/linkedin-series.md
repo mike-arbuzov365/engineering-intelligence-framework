@@ -146,6 +146,13 @@ Everything below is a consequence of that rule.
   weeks for the arc.
 - 900 to 1600 characters. Long enough to say the mechanism, short enough
   that nobody has to press "see more" twice.
+- Post 1 is the one exception, and it is deliberate: up to 2800 characters
+  and two links instead of one. It is the only post that has to work for a
+  reader who sees nothing else, so it carries the whole premise, the three
+  layers, the two rules that hold them, what the thing actually is, and one
+  clear next action. Every later post assumes it and goes one level deeper
+  into a single mechanism. An exception granted twice stops being an
+  exception, so it applies to post 1 only.
 - LinkedIn does not render code blocks or markdown. Any command goes on its
   own line as plain text, at most two lines, and only where it is the
   point.
@@ -169,8 +176,8 @@ bilingual posts halve the readable length of each and read as neither.
 
 | # | Working title | The one thing a reader should take away |
 |---|---|---|
-| 1 | Chat history is not engineering memory | The problem has specific, nameable failure modes, and there is now a public repository |
-| 2 | Three layers, and a rule for each | What is allowed to survive a session, and what should evaporate |
+| 1 | The agent is good, the setup around it forgets everything | What this is, who it is for, and what to do next. The only post that has to stand alone |
+| 2 | The middle layer is where agent memory rots | Status and evidence labels, and the closeout that decides what gets in |
 | 3 | Retrieval before implementation | Storing knowledge is the easy half |
 | 4 | One session cannot promote its own lesson | Why learning runs as two loops, not one |
 | 5 | A merged PR is not evidence | Bounded execution: scope, stop conditions, closeout |

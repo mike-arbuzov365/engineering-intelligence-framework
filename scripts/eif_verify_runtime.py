@@ -102,6 +102,8 @@ EIF_BEGIN = "<!-- EIF:BEGIN"
 EIF_END = "<!-- EIF:END -->"
 GITIGNORE_BEGIN = "# EIF:BEGIN gitignore"
 GITIGNORE_END = "# EIF:END gitignore"
+GITATTRIBUTES_BEGIN = "# EIF:BEGIN gitattributes"
+GITATTRIBUTES_END = "# EIF:END gitattributes"
 
 # Files that legitimately exist under .eif/runtime/ but are NOT in the
 # manifest - by design (see eif_init.py's stage_bundle()), not an oversight.
@@ -440,6 +442,11 @@ def check_markers(instance_path: Path, entrypoint: str) -> list[str]:
         problems.extend(
             f".gitignore: {p}" for p in check_marker_integrity(gi_path.read_text(encoding="utf-8"), GITIGNORE_BEGIN, GITIGNORE_END)
         )
+    ga_path = instance_path / ".gitattributes"
+    if ga_path.exists():
+        problems.extend(
+            f".gitattributes: {p}" for p in check_marker_integrity(ga_path.read_text(encoding="utf-8"), GITATTRIBUTES_BEGIN, GITATTRIBUTES_END)
+        )
     return problems
 
 
@@ -541,6 +548,17 @@ def check_knowledge_index_drift(instance_path: Path, lock: dict | None) -> list[
                 f"ownership marker - was it hand-edited? Delete it and run eif_init.py again to regenerate."]
     actual_hash = hashlib.sha256(raw).hexdigest()
     if actual_hash != ki["sha256"]:
+        # Distinguish "someone edited this" from "git rewrote the newlines on
+        # checkout". Git for Windows ships core.autocrlf=true system-wide, so
+        # a fresh clone of a project generated before the managed
+        # .gitattributes block existed fails this check on content nobody
+        # touched. Blaming a hand-edit there sent people looking for a change
+        # that was never made.
+        if hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest() == ki["sha256"]:
+            return [f"knowledge index at {ki['path']!r} matches its recorded hash only after CRLF-to-LF "
+                    f"normalization - git checked it out with converted line endings (core.autocrlf), it was "
+                    f"not hand-edited. Re-run the upgrade to write the EIF-managed .gitattributes block, then "
+                    f"`git add --renormalize .` to store it as LF"]
         return [f"knowledge index at {ki['path']!r} does not match the hash recorded when it was generated "
                 f"(hand-edited since, or eif_init.py was interrupted) - run eif_init.py again to regenerate it"]
     return []
@@ -585,7 +603,17 @@ def main(argv: list[str] | None = None) -> int:
         report.add("manifest digest self-consistency", check_manifest_digest(lock))
         hash_mismatches, missing, unexpected = check_bundle_files(instance_path, lock)
         report.add("bundle file hashes", [f"hash mismatch (file changed since generation): {p}" for p in hash_mismatches])
-        report.add("missing managed files", [f"manifested but missing on disk: {p}" for p in missing])
+        # .eif/runtime/ is regenerable and gitignored by design, so a fresh
+        # clone legitimately has none of it. Say how to rehydrate rather than
+        # only reporting the absence.
+        runtime_absent = not (instance_path / ".eif" / "runtime").exists()
+        missing_hint = (
+            " - the pinned runtime is regenerable and gitignored, so a fresh "
+            "clone never carries it; run `eifctl upgrade --instance-path .` "
+            "to rehydrate it from the installed package"
+            if runtime_absent else ""
+        )
+        report.add("missing managed files", [f"manifested but missing on disk: {p}{missing_hint}" for p in missing[:1]] + [f"manifested but missing on disk: {p}" for p in missing[1:]])
         report.add("unexpected managed files (outside manifest, not README.md/__pycache__)", unexpected)
 
     report.add("config/adapter/lock/entrypoint consistency", check_consistency(config, lock, instance_path))
@@ -599,7 +627,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  - {n}")
 
     entrypoint = (lock.get("adapter") or {}).get("entrypoint", "CLAUDE.md") if lock else "CLAUDE.md"
-    report.add(f"marker integrity ({entrypoint}, .gitignore)", check_markers(instance_path, entrypoint))
+    report.add(f"marker integrity ({entrypoint}, .gitignore, .gitattributes)", check_markers(instance_path, entrypoint))
     report.add("config/generated-block drift (adoption.mode, knowledge paths)", check_config_block_drift(config, instance_path, entrypoint))
     report.add("knowledge index drift (ownership marker, hash)", check_knowledge_index_drift(instance_path, lock))
     integration_results = evaluate_integrations(config, framework_root, instance_path)

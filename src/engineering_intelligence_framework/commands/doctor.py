@@ -67,20 +67,35 @@ def _check_installed_package_consistency(instance_path: Path, resources_root: Pa
     return problems
 
 
+DEFER_WORKSPACE_FLAG = "--defer-workspace-check"
+
+
 def run(argv: list[str]) -> int:
+    # `eifctl projects upgrade` runs the framework axis first and the
+    # workspace axis immediately after, in one coordinated pass. Without this
+    # flag, pre-existing workspace drift failed the framework axis's
+    # post-upgrade doctor, was reported as `axis=framework` (the wrong axis),
+    # and blocked the very step that would have repaired it.
+    defer_workspace = DEFER_WORKSPACE_FLAG in argv
+    argv = [item for item in argv if item != DEFER_WORKSPACE_FLAG]
     with framework_root() as root:
         full_argv = ["--framework-root", str(root), *argv]
         rc = eif_verify_runtime.main(full_argv)
 
         instance_path = _instance_path_from_argv(argv)
-        package_problems = _check_installed_package_consistency(instance_path, root)
-        for p in package_problems:
-            print(f"eifctl doctor: {p}", file=sys.stderr)
-        if package_problems:
+        problems = _check_installed_package_consistency(instance_path, root)
+        if not defer_workspace:
+            problems += verify_workspace_materialization(instance_path)
+        for problem in problems:
+            print(f"eifctl doctor: FAIL {problem}", file=sys.stderr)
+        if problems:
             rc = 1
-        workspace_problems = verify_workspace_materialization(instance_path)
-        for problem in workspace_problems:
-            print(f"eifctl doctor: {problem}", file=sys.stderr)
-        if workspace_problems:
-            rc = 1
+        # The wrapped script prints its own "all checks passed" banner before
+        # these wrapper-level checks have run, so on failure that banner was
+        # the last line a user saw while the command exited non-zero. This
+        # line is the authoritative verdict for the command as a whole.
+        if rc == 0:
+            print(f"eifctl doctor: PASS {instance_path}")
+        else:
+            print(f"eifctl doctor: FAILED {instance_path} - see the checks above")
         return rc

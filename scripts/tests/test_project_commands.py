@@ -118,10 +118,19 @@ def main() -> int:
         rc = cli.main(["upgrade", "--instance-path", str(alpha), "--dry-run"])
         results.append(check("upgrade dry-run succeeds with a missing gitignored runtime", rc == 0))
         results.append(check("upgrade dry-run writes nothing", not runtime.exists()))
+        lock_before_rehydrate = (alpha / ".eif" / "framework.lock.yaml").read_bytes()
         rc = cli.main(["upgrade", "--instance-path", str(alpha)])
         results.append(check("upgrade rehydrates the runtime and passes doctor", rc == 0 and runtime.exists()))
-
-        commit_all(alpha, "refresh alpha runtime metadata")
+        results.append(check(
+            "rehydrating a gitignored runtime leaves the committed lock untouched",
+            (alpha / ".eif" / "framework.lock.yaml").read_bytes() == lock_before_rehydrate,
+            "the lock moved with no provenance change, so the project would need a timestamp-only commit",
+        ))
+        results.append(check(
+            "an upgrade that changes nothing leaves the project committable-clean",
+            not git(alpha, "status", "--porcelain").stdout.strip(),
+            git(alpha, "status", "--porcelain").stdout,
+        ))
         (alpha / "OWNER-NOTES.md").write_text("uncommitted owner work\n", encoding="utf-8")
         rc = cli.main(["upgrade", "--instance-path", str(alpha)])
         results.append(check("upgrade blocks a dirty project by default", rc != 0))

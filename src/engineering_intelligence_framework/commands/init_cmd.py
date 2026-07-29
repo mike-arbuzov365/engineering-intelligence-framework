@@ -71,7 +71,79 @@ def _resource_manifest_digest(resources_root: Path) -> str:
     return f"sha256:{h.hexdigest()}"
 
 
+HELP = """\
+`eifctl init` - initialize or adopt one EIF project instance in place.
+
+Usage:
+    eifctl init [PATH] [--project-name NAME] [--adapter ADAPTER]
+                [--locale {en,uk}] [--adoption-mode {greenfield,coexist}]
+                [--knowledge-root PATH] [--dry-run] [--force]
+
+PATH is the project to initialize, and may also be given as
+--instance-path PATH. It defaults to the current directory. --project-name
+defaults to that directory's name on a first-ever init and is derived from
+the existing config on every later run.
+
+--framework-root is not accepted here: the installed package IS the
+framework source, and eifctl passes its own provenance through. The
+standalone `python scripts/eif_init.py --framework-root ... ` form still
+takes it, and still works unchanged.
+
+Re-running against an existing instance is a routine upgrade: it preserves
+.eif/config.yaml byte for byte and refreshes only the lock, the pinned
+runtime and the managed entrypoint/.gitignore/.gitattributes blocks. Pass
+--force only for a deliberate reconfiguration.
+
+Every other flag is passed through to the shared implementation; see
+`python -m engineering_intelligence_framework._impl.eif_init --help` for the
+full list.
+"""
+
+
+def _normalize_target(argv: list[str]) -> tuple[list[str], Path]:
+    """Accept `eifctl init PATH` alongside `--instance-path PATH`.
+
+    Every other path-taking eifctl command (`new`, `projects add`,
+    `projects detach`, `workspace new`) takes its target positionally, the
+    documented quickstart used the positional form, and the underlying
+    eif_init parser rejected it outright with `unrecognized arguments`. The
+    two forms are equivalent here; passing both with different targets is an
+    error rather than a silent winner."""
+    positional: str | None = None
+    rest = list(argv)
+    if rest and not rest[0].startswith("-"):
+        positional = rest.pop(0)
+    if "--instance-path" in rest:
+        flag_value = rest[rest.index("--instance-path") + 1]
+        if positional is not None and Path(positional).resolve() != Path(flag_value).resolve():
+            raise ValueError(
+                f"target given twice and they differ: {positional!r} and "
+                f"--instance-path {flag_value!r}"
+            )
+        return rest, Path(flag_value).resolve()
+    if positional is not None:
+        return [*rest, "--instance-path", positional], Path(positional).resolve()
+    return [*rest, "--instance-path", "."], Path(".").resolve()
+
+
 def run(argv: list[str]) -> int:
+    if "-h" in argv or "--help" in argv:
+        print(HELP)
+        return 0
+    try:
+        argv, target = _normalize_target(argv)
+    except (ValueError, IndexError) as exc:
+        print(f"eifctl init: {exc}", file=sys.stderr)
+        return 2
+
+    # `eifctl new` already defaults the project name to the directory name;
+    # requiring it here only for `init` made the documented one-liner fail on
+    # its second run at the user. Only a first-ever init consumes it: a
+    # routine upgrade derives the name from the existing config and prints a
+    # note for any flag it ignores.
+    if not (target / ".eif" / "config.yaml").exists() and "--project-name" not in argv:
+        argv = [*argv, "--project-name", target.name]
+
     with framework_root() as root:
         package_args = [
             "--package-distribution", DISTRIBUTION_NAME,
@@ -83,7 +155,4 @@ def run(argv: list[str]) -> int:
         if wheel_sha256 is not None:
             package_args += ["--package-wheel-sha256", wheel_sha256]
 
-        full_argv = ["--framework-root", str(root), *package_args, *argv]
-        if "--instance-path" not in full_argv:
-            full_argv = [*full_argv, "--instance-path", "."]
-        return eif_init.main(full_argv)
+        return eif_init.main(["--framework-root", str(root), *package_args, *argv])

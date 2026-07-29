@@ -151,19 +151,33 @@ def render_gitattributes_block(
     knowledge_index_path: str | None,
     workspace_content_root: str | None = None,
 ) -> str:
-    """EIF hashes its generated files as LF bytes and records those hashes in
-    COMMITTED state - framework.lock.yaml's bundle manifest, the lock's
-    knowledge_index.sha256, the workspace lock's manifest. Git for Windows
-    ships core.autocrlf=true system-wide, so without these attributes a fresh
-    clone checks those same files out as CRLF and every hash check fails on
-    content nobody edited, blaming a hand-edit that never happened. The
-    inverse hurts too: each upgrade rewrites them back to LF, so git reports
-    them modified forever with an empty diff, and that invisible dirt then
-    blocks the next `projects upgrade` on its clean-tree gate. Same class of
-    bug already found and fixed for this repository's own benchmark fixtures
-    (see the root .gitattributes) - generated instances never got the same
-    protection until 0.2.1."""
+    """Every file EIF writes is written as LF bytes, and some of them have
+    those exact bytes recorded in COMMITTED state - framework.lock.yaml's
+    bundle manifest, the lock's knowledge_index.sha256, the workspace lock's
+    manifest. Git for Windows ships core.autocrlf=true system-wide, so without
+    these attributes a fresh clone checks the same files out as CRLF and every
+    hash check fails on content nobody edited, blaming a hand-edit that never
+    happened. The inverse hurts too: each upgrade rewrites them back to LF, so
+    git reports them modified forever with an empty diff, and that invisible
+    dirt then blocks the next `projects upgrade` on its clean-tree gate. Same
+    class of bug already found and fixed for this repository's own benchmark
+    fixtures (see the root .gitattributes) - generated instances never got the
+    same protection until 0.2.1.
+
+    The list therefore covers everything EIF writes, not only what it hashes.
+    0.2.1 pinned only the hashed set, which left .gitattributes and .gitignore
+    in exactly the trap the block exists to close, and both surfaced as
+    phantom modifications on the first Windows clone that exercised it."""
     paths = [
+        # This file pins itself first. 0.2.1 shipped without the self-entry
+        # and walked straight into the trap it exists to prevent: EIF writes
+        # it as LF, no attribute covered it, so core.autocrlf wanted CRLF and
+        # git reported it modified forever with an empty diff. A dirty
+        # .gitattributes is also the worst possible file to leave dirty,
+        # because git reads the attribute stack from it while deciding how to
+        # materialize everything else.
+        ".gitattributes",
+        ".gitignore",
         ".eif/config.yaml",
         ".eif/framework.lock.yaml",
         ".eif/workspace.lock.yaml",
@@ -1964,8 +1978,14 @@ def main(argv: list[str] | None = None) -> int:
             config_next = eif_dir / "config.yaml.next"
             staged_next_paths.append(config_next)
             _maybe_fault_before("config")
+            # write_bytes, for the same reason as the entrypoint and the
+            # knowledge index below: write_text applies the platform's newline
+            # translation, so on Windows this file landed as CRLF while git
+            # stored the blob as LF. With the managed .gitattributes now
+            # asserting eol=lf, that mismatch surfaced as a file permanently
+            # reported modified with an empty diff.
             _maybe_fault_partial("config", config_next, config_content)
-            config_next.write_text(config_content, encoding="utf-8")
+            config_next.write_bytes(config_content.encode("utf-8"))
             stages.append(_Stage("config", config_next, config_path, is_dir=False))
 
         runtime_next = runtime_staging_path(instance_path)
@@ -1985,7 +2005,7 @@ def main(argv: list[str] | None = None) -> int:
         staged_next_paths.append(lock_next)
         _maybe_fault_before("lock")
         _maybe_fault_partial("lock", lock_next, lock_content)
-        lock_next.write_text(lock_content, encoding="utf-8")
+        lock_next.write_bytes(lock_content.encode("utf-8"))
         stages.append(_Stage("lock", lock_next, lock_path, is_dir=False))
 
         entry_next = entry_path.with_name(entry_path.name + ".next")
@@ -2026,7 +2046,7 @@ def main(argv: list[str] | None = None) -> int:
         staged_next_paths.append(gi_next)
         _maybe_fault_before("gitignore")
         _maybe_fault_partial("gitignore", gi_next, gi_new_text)
-        gi_next.write_text(gi_new_text, encoding="utf-8")
+        gi_next.write_bytes(gi_new_text.encode("utf-8"))
         stages.append(_Stage("gitignore", gi_next, gi_path, is_dir=False))
 
         # write_bytes for the same reason as the entrypoint and the knowledge

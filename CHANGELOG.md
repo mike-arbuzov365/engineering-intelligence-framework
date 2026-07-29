@@ -79,6 +79,28 @@ a synthetic fixture. It changes no schema and needs no migration.
 - The project lifecycle guide covers committing the registry, working from a
   second machine, repairing a drifted snapshot, and Windows line endings.
 
+### Known limitations
+
+- Carried forward from 0.2.0: fleet apply is preflighted but is not atomic
+  across repositories, workspace profiles remain experimental within 0.x,
+  EIF creates no GitHub repository and pushes nothing, and the package is
+  distributed through GitHub Releases rather than PyPI.
+- `scripts/tests/test_package_build.py` fails three integration-status
+  checks against an installed wheel, on this release and on 0.2.0 alike:
+  the doctor reports a configured Graphify provider as `misconfigured`
+  rather than reaching its degraded, healthy and RTK-canary states. It was
+  never caught because `release-check.yml` is `workflow_dispatch` only and
+  has no recorded run, so the one suite that exercises an installed wheel
+  had never executed in CI. Reproduced against the `v0.2.0` tag before
+  being reported here; it is not a regression from this release, and it is
+  not fixed by it. The remaining 72 checks in that suite pass, including
+  the whole workspace lifecycle from a built wheel.
+- The packaged `integrations/vendor-docs/manifest.json` does not validate
+  against `core/schemas/integration-provider-manifest.schema.json`. Found
+  while investigating the item above, unrelated to this release's scope,
+  and left unfixed rather than changed without evidence about which of the
+  two is wrong.
+
 ## [0.2.0] - 2026-07-28
 
 First private-workspace release. It adds an optional user-owned workspace

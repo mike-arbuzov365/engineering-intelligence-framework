@@ -37,7 +37,7 @@ Download the wheel attached to the latest public release and install that
 local file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.1-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-0.2.2-py3-none-any.whl
 ```
 
 To install from a checkout instead:

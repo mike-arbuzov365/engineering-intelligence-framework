@@ -62,23 +62,27 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.2.1` in [`pyproject.toml`](../../pyproject.toml) is dated
+- **Version.** `0.2.2` in [`pyproject.toml`](../../pyproject.toml) is dated
   2026-07-29 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
   GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.1)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.2)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
-- **0.2.1 came from a real walkthrough, not a synthetic one.** The 0.2.0
+- **0.2.1 and 0.2.2 came from a real walkthrough, not a synthetic one.** The 0.2.0
   path was run end to end on two private repositories on Windows. It found
   that the published `eifctl init <path>` command did not exist, that a
   fresh Windows clone failed `doctor` on line endings alone, and that a
   fleet pass with nothing to do still dirtied every repository. Those are
   fixed and covered by `scripts/tests/test_line_endings.py`. Synthetic
   coverage did not catch them because it never cloned a project or ran the
-  documented command text.
+  documented command text. 0.2.2 exists because the same method was applied
+  again to 0.2.1 itself: installing the published wheel and cloning a real
+  connected project showed the line-ending fix was incomplete, so that suite
+  now asserts the property end to end (clone, upgrade, tree still clean)
+  rather than the mechanism.
 - **Not on a package index.** No artifact has been uploaded to PyPI or any
   other index. `pip install engineering-intelligence-framework` does not
   resolve.

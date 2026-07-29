@@ -47,7 +47,7 @@ download the `.whl` file attached to the release, then install the local
 file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.1-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-0.2.2-py3-none-any.whl
 eifctl version
 ```
 
@@ -390,12 +390,15 @@ committed state. Git for Windows enables `core.autocrlf` system-wide, so
 without an instruction to the contrary git converts those same files on
 checkout and every hash check fails on content nobody edited.
 
-Since v0.2.1 each instance carries an EIF-managed `.gitattributes` block
-pinning `text eol=lf` on the config, both locks, the agent entrypoint, the
-knowledge index, and, in a workspace, the whole content root. A project
-created or upgraded on v0.2.1 needs nothing further.
+Since v0.2.2 each instance carries an EIF-managed `.gitattributes` block
+pinning `text eol=lf` on every file EIF writes: `.gitattributes` itself,
+`.gitignore`, the config, both locks, the agent entrypoint, the knowledge
+index, and, in a workspace, the whole content root. A project created or
+upgraded on v0.2.2 needs nothing further. v0.2.1 shipped the block covering
+only the hashed files, which left the two git files reported as modified
+with an empty diff.
 
-A project generated before v0.2.1 and already committed with converted line
+A project generated before v0.2.2 and already committed with converted line
 endings needs one normalization after the upgrade writes the block:
 
 ```bash

@@ -15,6 +15,39 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-07-29
+
+Completes the line-ending contract 0.2.1 started. Found the same way and on
+the same day: by cloning a real connected project on Windows after installing
+the published 0.2.1 wheel, instead of trusting that the fix was finished.
+
+### Fixed
+
+- The managed `.gitattributes` block now covers every file EIF writes, not
+  only the ones whose bytes it hashes. 0.2.1 left `.gitattributes` and
+  `.gitignore` uncovered, so those two landed in exactly the trap the block
+  exists to close: EIF writes them as LF, `core.autocrlf` wants CRLF, and git
+  reports them modified forever with an empty diff. A dirty `.gitattributes`
+  is the worst file to leave dirty, because git reads the attribute stack
+  from it while deciding how to materialize everything else.
+- `.eif/config.yaml`, `.eif/framework.lock.yaml` and `.gitignore` are written
+  as bytes rather than through text mode. Python's newline translation was
+  landing them as CRLF on Windows while git stored LF, which the new
+  attributes then surfaced as a permanent phantom modification. The
+  entrypoint and the knowledge index already wrote bytes for this reason;
+  these three were the ones that had never needed it before.
+- `scripts/tests/test_line_endings.py` now asserts the property end to end
+  rather than the mechanism: clone a connected project with
+  `core.autocrlf=true`, upgrade it, and the tree must still be
+  committable-clean. `core.autocrlf` is set explicitly so the check means the
+  same thing on a Linux runner as on the Windows machine where the symptom
+  appeared. That check fails on 0.2.1 and passes here.
+
+### Known limitations
+
+- Unchanged from 0.2.1, including the three installed-wheel
+  integration-status checks that fail on 0.2.0, 0.2.1 and 0.2.2 alike.
+
 ## [0.2.1] - 2026-07-29
 
 Owner-walkthrough patch. Every entry below comes from running the documented
@@ -695,7 +728,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.2
 [0.2.1]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.1
 [0.2.0]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.0
 [0.1.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.3

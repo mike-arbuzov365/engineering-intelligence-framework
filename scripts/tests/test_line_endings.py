@@ -86,6 +86,20 @@ def check_gitattributes_block() -> list[tuple[bool, str]]:
             block,
         )
     )
+    results.append(
+        check(
+            "gitattributes pins itself, or it is the one file left in the trap",
+            ".gitattributes text eol=lf" in block,
+            block,
+        )
+    )
+    results.append(
+        check(
+            "the block covers everything EIF writes, not only what it hashes",
+            ".gitignore text eol=lf" in block,
+            block,
+        )
+    )
     unmanaged = init_script.render_gitattributes_block("CLAUDE.md", None)
     results.append(
         check(
@@ -213,6 +227,66 @@ def check_crlf_diagnosis(root: Path) -> list[tuple[bool, str]]:
         )
     )
     index_path.write_bytes(lf_bytes)
+    return results
+
+
+def check_autocrlf_clone_stays_clean(root: Path) -> list[tuple[bool, str]]:
+    """The promise this whole contract exists to keep, stated as one check:
+    clone a connected project on a machine that converts newlines, upgrade
+    it, and the tree is still committable-clean.
+
+    core.autocrlf is set explicitly rather than inherited, so this asserts the
+    same thing on a Linux runner as on the Windows machine where the symptom
+    was found. Without it the suite would pass everywhere the bug cannot
+    appear and fail nowhere else."""
+    results = []
+    origin = root / "autocrlf-origin"
+    origin.mkdir()
+    git(origin, "init", "-b", "main", "-q")
+    git(origin, "config", "core.autocrlf", "true")
+    (origin / "README.md").write_bytes(b"# demo\n")
+    knowledge = origin / "knowledge"
+    knowledge.mkdir()
+    (knowledge / "fact.md").write_bytes(
+        b"---\ntype: fact\nstatus: validated\nscope: project\n"
+        b"created: 2026-07-29\nreview_after: 2026-10-29\n---\n\n# Fact\n"
+    )
+    cli.main(["init", str(origin), "--adapter", "claude-code"])
+    commit_all(origin, "bootstrap with EIF")
+    results.append(
+        check(
+            "an autocrlf origin is clean right after its bootstrap commit",
+            not git(origin, "status", "--porcelain").stdout.strip(),
+            git(origin, "status", "--porcelain").stdout,
+        )
+    )
+
+    clone = root / "autocrlf-clone"
+    cloned = subprocess.run(
+        ["git", "-c", "core.autocrlf=true", "clone", "-q", str(origin), str(clone)],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    results.append(check("the project clones", cloned.returncode == 0, cloned.stderr))
+    git(clone, "config", "core.autocrlf", "true")
+    results.append(
+        check(
+            "a fresh autocrlf clone starts clean",
+            not git(clone, "status", "--porcelain").stdout.strip(),
+            git(clone, "status", "--porcelain").stdout,
+        )
+    )
+
+    rc = cli.main(["upgrade", "--instance-path", str(clone)])
+    results.append(check("upgrade rehydrates the cloned project", rc == 0))
+    git(clone, "update-index", "--refresh")
+    dirty = git(clone, "status", "--porcelain").stdout.strip()
+    results.append(
+        check(
+            "upgrading a fresh autocrlf clone leaves no phantom modifications",
+            not dirty,
+            f"dirty={dirty!r} numstat={git(clone, 'diff', '--numstat').stdout!r}",
+        )
+    )
     return results
 
 
@@ -345,6 +419,7 @@ def main() -> int:
             root = Path(tmp)
             results += check_instance_line_endings(root)
             results += check_crlf_diagnosis(root)
+            results += check_autocrlf_clone_stays_clean(root)
             results += check_lock_idempotence(root)
             results += check_workspace_freshness(root)
     finally:

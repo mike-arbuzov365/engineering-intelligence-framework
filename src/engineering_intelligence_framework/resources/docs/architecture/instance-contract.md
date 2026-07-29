@@ -385,7 +385,11 @@ flag (only within-transaction rollback if a single run fails partway, see
 above). To remove an EIF instance by hand:
 
 1. Delete `.eif/` (config, lock, and the runtime bundle all live there).
-2. Restore `CLAUDE.md`, `.gitignore` and `.gitattributes` to their pre-EIF content. For a
+2. Delete the EIF-managed `.gitattributes` block first, before restoring
+   anything from git. While it is in place git materializes text files
+   according to it, so a checkout performed with it still present can hand
+   back bytes the repository never had. Then restore `CLAUDE.md`,
+   `.gitignore` and `.gitattributes` to their pre-EIF content. For a
    git-tracked file this was never committed with the EIF block, `git
    checkout -- CLAUDE.md .gitignore` is byte-exact by construction -
    prefer it over hand-editing, which is exact-whitespace-sensitive (a

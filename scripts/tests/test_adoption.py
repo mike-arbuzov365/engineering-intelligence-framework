@@ -411,6 +411,17 @@ def main() -> int:
         # ---------------------------------------------------------------
         import shutil as _shutil
         _shutil.rmtree(inst3 / ".eif")
+        # Order matters, and this is the second instance of the gap the
+        # comment below describes. A managed .gitattributes changes how git
+        # materializes text files, so while it is still on disk a checkout
+        # rewrites CLAUDE.md to LF and rollback lands on bytes the fixture
+        # never had. Remove EIF's managed files first, restore from git
+        # second. A fixture that never tracked one needs it deleted, not
+        # checked out.
+        if git(["ls-files", "--error-unmatch", ".gitattributes"], inst3).returncode == 0:
+            git(["checkout", "--", ".gitattributes"], inst3)
+        else:
+            (inst3 / ".gitattributes").unlink(missing_ok=True)
         git(["checkout", "--", "CLAUDE.md", ".gitignore"], inst3)
         # Real gap this test surfaced: the documented rollback (delete .eif/,
         # restore CLAUDE.md/.gitignore) does not by itself account for a
@@ -423,8 +434,13 @@ def main() -> int:
         # The suppression edit to config.yaml lived under .eif/, already
         # removed - compare directly against the pristine, never-installed
         # fixture snapshot for a true "back to before eif_init ever ran" proof.
+        leftover = sorted(set(after_rollback) - set(pristine_snapshot))
+        missing = sorted(set(pristine_snapshot) - set(after_rollback))
+        changed = sorted(k for k in set(after_rollback) & set(pristine_snapshot)
+                         if after_rollback[k] != pristine_snapshot[k])
         results.append(check("9. rollback restores every file to the pristine, pre-install snapshot exactly",
-                             after_rollback == pristine_snapshot))
+                             after_rollback == pristine_snapshot,
+                             f"leftover={leftover} missing={missing} changed={changed}"))
 
         # ---------------------------------------------------------------
         # 10. runtime verification passes after install and after reinstall

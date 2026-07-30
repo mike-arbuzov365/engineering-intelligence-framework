@@ -5,12 +5,120 @@ terms:
   ai_system:
     preferred: "AI system"
     class: "standards-aligned"
+  generative_ai:
+    preferred: "generative AI"
+    class: "industry-established"
+  large_language_model:
+    preferred: "large language model (LLM)"
+    short: "LLM"
+    class: "industry-established"
   ai_agent:
     preferred: "AI agent"
     class: "standards-aligned"
   ai_coding_agent:
     preferred: "AI coding agent"
     class: "industry-established"
+  agentic_ai_system:
+    preferred: "agentic AI system"
+    class: "emerging-industry"
+  agentic_software_development:
+    preferred: "agentic software development"
+    short: "agentic development"
+    class: "emerging-industry"
+  agent_harness:
+    preferred: "agent harness"
+    class: "emerging-industry"
+  agent_loop:
+    preferred: "agent loop"
+    class: "industry-established"
+  autonomy:
+    preferred: "autonomy"
+    class: "industry-established"
+  system_prompt:
+    preferred: "system prompt"
+    class: "industry-established"
+  prompt_engineering:
+    preferred: "prompt engineering"
+    class: "industry-established"
+  context_engineering:
+    preferred: "context engineering"
+    class: "emerging-industry"
+  context_window:
+    preferred: "context window"
+    class: "industry-established"
+  session_context:
+    preferred: "session context"
+    class: "eif-defined"
+  compaction:
+    preferred: "context compaction"
+    class: "industry-established"
+  agent_memory:
+    preferred: "agent memory"
+    class: "emerging-industry"
+  retrieval:
+    preferred: "retrieval"
+    class: "industry-established"
+  retrieval_augmented_generation:
+    preferred: "retrieval-augmented generation (RAG)"
+    short: "RAG"
+    class: "industry-established"
+  tool:
+    preferred: "tool"
+    class: "industry-established"
+  tool_call:
+    preferred: "tool call"
+    class: "industry-established"
+  model_context_protocol:
+    preferred: "Model Context Protocol (MCP)"
+    short: "MCP"
+    class: "open-specification"
+  agents_md:
+    preferred: "AGENTS.md"
+    class: "open-specification"
+  agent_skill:
+    preferred: "agent skill"
+    class: "industry-established"
+  agent_skills_specification:
+    preferred: "Agent Skills"
+    class: "open-specification"
+  hook:
+    preferred: "hook"
+    class: "industry-established"
+  sandbox:
+    preferred: "sandbox"
+    class: "industry-established"
+  workflow:
+    preferred: "workflow"
+    class: "industry-established"
+  orchestration:
+    preferred: "orchestration"
+    class: "industry-established"
+  specification:
+    preferred: "specification"
+    class: "standards-aligned"
+  specification_driven_development:
+    preferred: "Specification-Driven Development (SDD)"
+    short: "SDD"
+    class: "emerging-industry"
+  acceptance_criteria:
+    preferred: "acceptance criteria"
+    class: "industry-established"
+  evaluation:
+    preferred: "evaluation"
+    short: "eval"
+    class: "industry-established"
+  evaluator:
+    preferred: "evaluator"
+    class: "industry-established"
+  checkpoint:
+    preferred: "checkpoint"
+    class: "industry-established"
+  handoff:
+    preferred: "handoff"
+    class: "industry-established"
+  long_horizon_task:
+    preferred: "long-horizon task"
+    class: "emerging-industry"
   governance:
     preferred: "governance"
     class: "standards-aligned"
@@ -59,6 +167,10 @@ terms:
   knowledge_graph:
     preferred: "knowledge graph"
     class: "industry-established"
+  project_knowledge:
+    preferred: "project knowledge"
+    explanatory: "project memory"
+    class: "eif-defined"
   session:
     preferred: "session"
     class: "eif-defined"

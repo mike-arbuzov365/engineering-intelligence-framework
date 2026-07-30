@@ -79,10 +79,56 @@ def main() -> int:
         "terminology packs use the same canonical term keys",
         set(en_terms["terms"]) == set(uk_terms["terms"]),
     ))
+    required_agentic_terms = {
+        "large_language_model",
+        "ai_agent",
+        "agentic_software_development",
+        "agent_harness",
+        "context_engineering",
+        "context_window",
+        "session_context",
+        "compaction",
+        "agent_memory",
+        "retrieval",
+        "model_context_protocol",
+        "agents_md",
+        "agent_skill",
+        "agent_skills_specification",
+        "specification_driven_development",
+        "evaluation",
+        "checkpoint",
+        "project_knowledge",
+    }
+    results.append(check(
+        "terminology packs cover the agentic-development publication contract",
+        required_agentic_terms <= set(en_terms["terms"]),
+        f"missing={required_agentic_terms - set(en_terms['terms'])}",
+    ))
+    allowed_term_classes = {
+        "standards-aligned",
+        "open-specification",
+        "industry-established",
+        "emerging-industry",
+        "eif-defined",
+    }
+    results.append(check(
+        "terminology packs use the same approved class for every concept",
+        all(
+            en_terms["terms"][key].get("class") == uk_terms["terms"][key].get("class")
+            and en_terms["terms"][key].get("class") in allowed_term_classes
+            for key in en_terms["terms"]
+        ),
+    ))
     results.append(check(
         "named EIF artifacts stay canonical in Ukrainian",
         uk_terms["terms"]["knowledge_delta"]["preferred"] == "Knowledge Delta"
         and uk_terms["terms"]["execution_packet"]["preferred"] == "execution packet",
+    ))
+    results.append(check(
+        "Ukrainian agentic terms keep the agent, model, and harness distinct",
+        uk_terms["terms"]["large_language_model"]["preferred"] == "велика мовна модель (LLM)"
+        and uk_terms["terms"]["ai_agent"]["preferred"] == "агент ШІ"
+        and uk_terms["terms"]["agent_harness"]["preferred"] == "агентний харнес",
     ))
 
     uk_pack_text = "\n".join(

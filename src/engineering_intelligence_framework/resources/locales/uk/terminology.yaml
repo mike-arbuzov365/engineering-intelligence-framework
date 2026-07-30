@@ -5,6 +5,13 @@ terms:
   ai_system:
     preferred: "система ШІ"
     class: "standards-aligned"
+  generative_ai:
+    preferred: "генеративний ШІ"
+    class: "industry-established"
+  large_language_model:
+    preferred: "велика мовна модель (LLM)"
+    short: "LLM"
+    class: "industry-established"
   ai_agent:
     preferred: "агент ШІ"
     class: "standards-aligned"
@@ -14,6 +21,120 @@ terms:
   ai_coding_agent:
     preferred: "агент ШІ для розробки"
     class: "industry-established"
+  agentic_ai_system:
+    preferred: "агентна система ШІ"
+    class: "emerging-industry"
+  agentic_software_development:
+    preferred: "агентна розробка програмного забезпечення"
+    short: "агентна розробка"
+    class: "emerging-industry"
+    avoid:
+      - "агентська розробка"
+  agent_harness:
+    preferred: "агентний харнес"
+    explanatory: "інфраструктура виконання агента"
+    class: "emerging-industry"
+  agent_loop:
+    preferred: "цикл роботи агента"
+    class: "industry-established"
+  autonomy:
+    preferred: "автономність"
+    class: "industry-established"
+  system_prompt:
+    preferred: "системний промпт"
+    class: "industry-established"
+  prompt_engineering:
+    preferred: "проєктування промптів"
+    search_synonym: "промпт-інженерія"
+    class: "industry-established"
+  context_engineering:
+    preferred: "контекстна інженерія"
+    class: "emerging-industry"
+  context_window:
+    preferred: "контекстне вікно"
+    class: "industry-established"
+  session_context:
+    preferred: "контекст сесії"
+    class: "eif-defined"
+  compaction:
+    preferred: "стискання контексту"
+    class: "industry-established"
+    avoid:
+      - "компактація"
+  agent_memory:
+    preferred: "пам'ять агента"
+    class: "emerging-industry"
+  retrieval:
+    preferred: "пошук і підвантаження знань"
+    short: "пошук"
+    class: "industry-established"
+  retrieval_augmented_generation:
+    preferred: "генерація з доповненням пошуком (RAG)"
+    short: "RAG"
+    class: "industry-established"
+  tool:
+    preferred: "інструмент"
+    class: "industry-established"
+  tool_call:
+    preferred: "виклик інструмента"
+    class: "industry-established"
+  model_context_protocol:
+    preferred: "Model Context Protocol (MCP)"
+    short: "MCP"
+    class: "open-specification"
+  agents_md:
+    preferred: "AGENTS.md"
+    class: "open-specification"
+  agent_skill:
+    preferred: "навичка агента"
+    class: "industry-established"
+    avoid:
+      - "скіл агента"
+  agent_skills_specification:
+    preferred: "Agent Skills"
+    class: "open-specification"
+  hook:
+    preferred: "програмний хук"
+    short: "хук"
+    class: "industry-established"
+  sandbox:
+    preferred: "ізольоване середовище"
+    preserve_in_identifiers: "sandbox"
+    class: "industry-established"
+  workflow:
+    preferred: "робочий процес"
+    class: "industry-established"
+  orchestration:
+    preferred: "оркестрація"
+    class: "industry-established"
+  specification:
+    preferred: "специфікація"
+    class: "standards-aligned"
+  specification_driven_development:
+    preferred: "розробка, керована специфікаціями (Specification-Driven Development, SDD)"
+    short: "SDD"
+    class: "emerging-industry"
+    avoid:
+      - "spec-driven development"
+  acceptance_criteria:
+    preferred: "критерії приймання"
+    class: "industry-established"
+  evaluation:
+    preferred: "оцінювання"
+    preserve_in_identifiers: "eval"
+    class: "industry-established"
+  evaluator:
+    preferred: "засіб оцінювання"
+    class: "industry-established"
+  checkpoint:
+    preferred: "контрольна точка"
+    class: "industry-established"
+  handoff:
+    preferred: "передавання роботи"
+    class: "industry-established"
+  long_horizon_task:
+    preferred: "довготривале завдання"
+    class: "emerging-industry"
   governance:
     preferred: "керування та нагляд"
     class: "standards-aligned"
@@ -64,6 +185,10 @@ terms:
   knowledge_graph:
     preferred: "граф знань"
     class: "industry-established"
+  project_knowledge:
+    preferred: "знання проєкту"
+    explanatory: "пам'ять проєкту"
+    class: "eif-defined"
   session:
     preferred: "сесія"
     class: "eif-defined"

@@ -325,7 +325,7 @@ def main() -> int:
                 and "profile: default" in doctor_text
                 and "profile skills: planning" in doctor_text
                 and "project memory: managed at knowledge; index knowledge/index.md "
-                "(not created yet)"
+                "(deferred until the first durable knowledge artifact)"
                 in doctor_text
                 and "eifctl doctor: active agent context" in doctor_text,
                 doctor_text,

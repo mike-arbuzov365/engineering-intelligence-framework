@@ -347,8 +347,14 @@ distribution. No starter is active by default, installation never assigns a
 profile to a project, and project connection remains an explicit owner choice.
 A profile must add recurring profession-specific value rather than duplicate
 core EIF. The software-development starter therefore adds repository onboarding
-only; normal engineering work remains in the core workflows. Ratification waits
-for a real cross-machine designer adoption.
+only; normal engineering work remains in the core workflows.
+
+The first sanitized cross-machine designer adoption completed on 2026-08-02:
+the profile, skill activation, registry, materialization and both doctors
+passed, while the run exposed an installed-package provenance defect and two
+setup-message ambiguities now covered by regression tests. The previously
+missing adoption evidence therefore exists; status remains provisional until
+an explicit owner ratification decision.
 
 ## Open (not yet decided)
 

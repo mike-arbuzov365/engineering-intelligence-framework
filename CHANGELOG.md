@@ -15,6 +15,20 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-08-02
+
+### Fixed
+
+- Installed-package initialization no longer asks Git to classify the packaged
+  `resources/` directory. A Python environment nested under an unrelated dirty
+  host checkout therefore remains `installed-package` provenance instead of
+  failing `workspace new` with source-checkout guidance it cannot use.
+- `workspace new` now explains that its target must not exist, including an
+  empty directory, because the verified staging tree is moved into place
+  atomically. Managed project memory now reports its intentional empty state as
+  deferred until the first durable knowledge artifact rather than merely
+  "skipped" or "not created yet".
+
 ## [0.2.6] - 2026-08-02
 
 ### Added
@@ -969,7 +983,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.6...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.7...HEAD
+[0.2.7]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.7
 [0.2.6]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.6
 [0.2.5]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.5
 [0.2.4]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.4

@@ -58,7 +58,10 @@ Clone the public repository only when the owner intends to develop EIF itself.
 The private workspace created below is the designer's own local EIF repository.
 
 1. Install the current EIF release wheel and Codex.
-2. Create a private workspace:
+2. Create a private workspace. Start outside the intended workspace directory
+   and pass a target path that does not exist yet. An already-created empty
+   directory is also refused because EIF verifies a temporary sibling tree and
+   then moves that finished tree into place atomically:
 
    ```bash
    eifctl workspace new ../designer-eif \
@@ -116,7 +119,11 @@ The private workspace created below is the designer's own local EIF repository.
    ```
 
    A healthy Codex project reports `AGENTS.md`, profile `graphic-design`, the
-   profile skills and the project memory location.
+   profile skills and the project memory location. On a project with no durable
+   knowledge yet, a managed index is reported as deferred. This is healthy: the
+   `knowledge-ingest` workflow creates the first knowledge artifact and
+   regenerates the index together instead of creating an empty memory stub at
+   setup time.
 
 Each connected path is a project repository, not a broad asset library. Keep
 images, fonts and editable sources in the project or its approved asset system;
@@ -139,7 +146,8 @@ Follow this guide as the source of truth:
 https://github.com/mike-arbuzov365/engineering-intelligence-framework/blob/v<eifctl-version>/docs/guides/professional-profiles.md#designer-laptop-setup
 
 Use the wheel from the current GitHub release, not PyPI, and use the guide from
-the matching release tag. Create a private workspace at <workspace-path>,
+the matching release tag. Start outside <workspace-path>; that target must not
+exist yet, including as an empty directory. Create a private workspace there,
 install the graphic-design professional profile, and connect only these exact
 project repositories: <project-paths>.
 
@@ -149,7 +157,8 @@ anything. Initialize or adopt each approved project with the Codex adapter,
 register it with profile graphic-design, apply the workspace snapshot, then run
 the workspace doctor and each project's eifctl doctor. Report the active
 instruction, profile, profile skills, project memory and anything that still
-needs an owner decision.
+needs an owner decision. Treat a managed memory index reported as deferred as
+healthy when no durable project knowledge exists yet.
 ```
 
 This prompt is needed only for bootstrap because no project instruction exists

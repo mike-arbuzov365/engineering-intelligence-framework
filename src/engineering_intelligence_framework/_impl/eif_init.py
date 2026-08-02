@@ -1252,7 +1252,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--knowledge-root", default=None, help="Instance-relative path where knowledge artifacts live. Default 'knowledge' for a new instance. Ignored on a routine upgrade; honored on init/--force reconfigure. Rejected if absolute, a Windows drive/UNC path, contains '..', or resolves outside the instance.")
     ap.add_argument("--knowledge-index-path", default=None, help="Instance-relative path to the generated index file, must resolve inside --knowledge-root. Default '<knowledge-root>/index.md'. Ignored on a routine upgrade; honored on init/--force reconfigure. Same path-policy restrictions as --knowledge-root.")
     ap.add_argument("--adoption-mode", default=None, choices=["greenfield", "coexist"], help="Ignored on a routine upgrade (preserved from existing config); honored on init/reconfigure. Required (either value) when the adoption preflight detects pre-existing entrypoint content on init - see scripts/eif_preflight.py.")
-    ap.add_argument("--manage-knowledge-index", action=argparse.BooleanOptionalAction, default=None, help="Whether eif_init.py may generate/regenerate the knowledge index file. Default: on for greenfield, off for coexist (explicit opt-in required there - a coexisting project may already manage its own knowledge). Ignored on a routine upgrade (preserved from existing config); honored on init/--force reconfigure.")
+    ap.add_argument("--manage-knowledge-index", action=argparse.BooleanOptionalAction, default=None, help="Whether eif_init.py may generate/regenerate the knowledge index file. Default: on for greenfield, off for coexist (explicit opt-in required there - a coexisting project may already manage its own knowledge). Opt-in records EIF management immediately but does not create an empty knowledge directory; the first knowledge artifact and index are created together by the knowledge workflow. Ignored on a routine upgrade (preserved from existing config); honored on init/--force reconfigure.")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument(
         "--allow-source-migration",
@@ -1276,8 +1276,20 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
 
-    detected_ref, detected_short, detected_dirty = resolve_framework_state(framework_root)
-    dirty = detected_dirty  # the REAL detected state, always - never forced False by an assertion
+    # An installed package is identified and verified by distribution metadata,
+    # its resource-manifest digest and (when available) the wheel hash. Its
+    # resources/ directory can legitimately live below an unrelated host
+    # application's Git checkout; asking Git about that directory would walk to
+    # the ancestor checkout and falsely treat the host's changes as EIF changes.
+    if args.package_distribution is not None:
+        detected_ref, detected_short, detected_dirty = None, None, False
+    else:
+        detected_ref, detected_short, detected_dirty = resolve_framework_state(
+            framework_root
+        )
+    # A real checkout keeps its detected state. Installed-package provenance has
+    # no framework checkout and therefore no meaningful Git dirty flag.
+    dirty = detected_dirty
 
     package_prov: dict | None = None
     source_bundle_prov: dict | None = None
@@ -2146,6 +2158,8 @@ def main(argv: list[str] | None = None) -> int:
     if index_content is not None:
         print(f"{index_action} knowledge index at {knowledge_index_path} ({index_row_count} row(s))")
         print(msg(framework_root, locale, "index_generated", count=index_row_count))
+    elif knowledge_managed:
+        print(f"defer knowledge index ({index_message})")
     else:
         print(f"skip knowledge index ({index_message})")
 

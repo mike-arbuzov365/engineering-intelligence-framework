@@ -106,7 +106,11 @@ def determine_index_action(
             "to opt in explicitly)"
         )
     if not knowledge_root_path.is_dir():
-        return "skip", f"knowledge root '{knowledge_root_configured}' does not exist yet"
+        return "skip", (
+            f"managed knowledge root '{knowledge_root_configured}' does not exist yet; "
+            "the knowledge workflow will create the first durable artifact and "
+            "regenerate the index together"
+        )
     if not knowledge_index_path.parent.is_dir():
         return "stop", (
             f"parent directory of knowledge.index_path "

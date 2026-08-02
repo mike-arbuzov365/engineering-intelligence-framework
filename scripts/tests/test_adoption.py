@@ -276,6 +276,35 @@ def main() -> int:
                              'eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "docs/knowledge/**/*.md"' not in entry2b, entry2b))
 
         # ---------------------------------------------------------------
+        # 2c. Explicit management with no knowledge artifacts is a clear
+        # deferred state, not a misleading "skip" and not an empty stub.
+        # ---------------------------------------------------------------
+        inst2c = tmp / "scenario-2c-managed-empty-knowledge"
+        init_git_repo(inst2c)
+        (inst2c / "CLAUDE.md").write_text(EXISTING_CLAUDE_MD, encoding="utf-8")
+        (inst2c / "README.md").write_text("# Existing project\n", encoding="utf-8")
+        commit_all(inst2c)
+        r2c = eif_init(
+            inst2c,
+            "--project-name", "managed-empty-knowledge",
+            "--adoption-mode", "coexist",
+            "--manage-knowledge-index",
+        )
+        cfg2c = (inst2c / ".eif" / "config.yaml").read_text(encoding="utf-8")
+        results.append(check(
+            "2c. explicit managed knowledge with no artifacts succeeds",
+            r2c.returncode == 0 and "managed: true" in cfg2c,
+            r2c.stdout + r2c.stderr,
+        ))
+        results.append(check(
+            "2c. output names the deferred first-artifact behavior",
+            "defer knowledge index" in r2c.stdout
+            and "first durable artifact" in r2c.stdout
+            and not (inst2c / "knowledge").exists(),
+            r2c.stdout,
+        ))
+
+        # ---------------------------------------------------------------
         # 3. configured coexistence generates correct (configured) paths -
         # WITH explicit --manage-knowledge-index opt-in (see 2b above for
         # the default-off case).
@@ -299,7 +328,7 @@ def main() -> int:
         results.append(check("3. no root knowledge/ directory silently created", not (inst3 / "knowledge").exists()))
         entry3 = (inst3 / "CLAUDE.md").read_text(encoding="utf-8")
         results.append(check("3. managed knowledge: block DOES instruct reading the (real, generated) managed index",
-                             "Read `docs/knowledge/index.md` for what's already known" in entry3, entry3))
+                             "Read `docs/knowledge/index.md` only far enough to locate relevant knowledge" in entry3, entry3))
         results.append(check("3. managed knowledge: block includes the knowledge-root frontmatter validate command",
                              'eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "docs/knowledge/**/*.md"' in entry3, entry3))
 

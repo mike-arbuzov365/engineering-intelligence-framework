@@ -47,7 +47,7 @@ download the `.whl` file attached to the release, then install the local
 file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.2-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-<version>-py3-none-any.whl
 eifctl version
 ```
 
@@ -82,6 +82,19 @@ workspace as one of its own projects.
 Review and commit the bootstrap in a private repository before connecting
 projects. Keep the generated default profile minimal until a real project
 proves that a shared artifact is needed.
+
+For reusable discipline-specific setup, list or install a public professional
+starter. The installed copy is private-workspace content and is not updated
+silently:
+
+```bash
+eifctl workspace profile list
+eifctl workspace profile install graphic-design \
+  --workspace-path ../eif-control
+```
+
+See [`professional-profiles.md`](professional-profiles.md) for the designer
+laptop path and custom-profile rules.
 
 The workspace is the source of every pinned snapshot, so a snapshot can only
 be resolved against a commit. Every command that touches the registry or the
@@ -162,14 +175,14 @@ cloned onto another machine therefore starts with an empty map, and a fleet
 command stops rather than guessing:
 
 ```text
-active projects have no machine-local location: comms, preo-web
+active projects have no machine-local location: project-a, project-b
 ```
 
 Clone the projects wherever you keep them, then map each one once:
 
 ```bash
 eifctl projects add ../comms --registry ../eif-control/.eif/projects.yaml
-eifctl projects add ../preo-web --registry ../eif-control/.eif/projects.yaml
+eifctl projects add ../project-b --registry ../workspace-control/.eif/projects.yaml
 ```
 
 Re-adding an already-registered project is idempotent. It refreshes the

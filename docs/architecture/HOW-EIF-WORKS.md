@@ -455,7 +455,7 @@ unhosted. See D-15 in
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for why
 that is a boundary rather than a contradiction of D-14. The full runtime
 test suite
-(`scripts/tests/run_all.py`, 28 suites) and the cross-platform package-
+(`scripts/tests/run_all.py`, 38 suites) and the cross-platform package-
 build/license-check matrices run on a manual release gate
 ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml),
 `workflow_dispatch`-only) or locally at no Actions cost - see
@@ -770,7 +770,7 @@ formally ratified (the file is explicit about which is which).
       of treating it as suppression-free; an existing but broken
       `.eif/config.yaml` stops before any write rather than being treated
       as absent. Tested against a realistic sanitized fixture
-      (`scripts/tests/test_adoption.py`, 67 checks) AND re-validated by
+      (`scripts/tests/test_adoption.py`, 72 checks) AND re-validated by
       rerunning the full pilot against fresh disposable copies of one real
       private pilot target each round (private planning packet); the
       live repository is never opened for writing, and this is still only
@@ -814,7 +814,7 @@ formally ratified (the file is explicit about which is which).
       heading check), and the critical-path `scripts/tests/smoke.py`
       suite - see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
       Every script's own full test suite (positive + negative fixtures,
-      28 suites; exact check count is run evidence, not a fixed contract)
+      38 suites; exact check count is run evidence, not a fixed contract)
       runs on the manual release gate
       ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml))
       or locally, not on every routine PR - moved there under D-14 to
@@ -860,7 +860,7 @@ formally ratified (the file is explicit about which is which).
 - [x] Persistent agent-instruction file (`AGENTS.md`) is compact - a
       stated design principle from day one, not retrofitted.
 - [x] Demo workflow has executable evidence:
-      `scripts/tests/test_journey.py` (273 checks) drives a real subprocess
+      `scripts/tests/test_journey.py` (277 checks) drives a real subprocess
       journey against a fresh instance, and
       [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
       has real captured command output, both reproducible from a clean

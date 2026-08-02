@@ -86,6 +86,12 @@ def main() -> int:
             rules.mkdir(parents=True)
             shared_rule = rules / "shared.md"
             shared_rule.write_text("# Shared v1\n", encoding="utf-8")
+            shared_skill = workspace / "workspace" / "skills" / "shared-review"
+            shared_skill.mkdir(parents=True)
+            (shared_skill / "SKILL.md").write_text(
+                "---\nname: shared-review\ndescription: Review shared work.\n---\n",
+                encoding="utf-8",
+            )
             write_profile(
                 workspace,
                 [
@@ -93,6 +99,12 @@ def main() -> int:
                         "kind": "rule",
                         "name": "shared",
                         "path": "rules/shared.md",
+                        "mode": "default",
+                    },
+                    {
+                        "kind": "skill",
+                        "name": "shared-review",
+                        "path": "skills/shared-review",
                         "mode": "default",
                     }
                 ],
@@ -190,6 +202,30 @@ def main() -> int:
                     rc == 0
                     and all(
                         workspace_revision(project) == first_revision
+                        for project in projects
+                    ),
+                    output,
+                )
+            )
+            results.append(
+                check(
+                    "workspace-selected skill reaches every project's active adapter directory",
+                    all(
+                        (
+                            project
+                            / ".agents"
+                            / "skills"
+                            / "shared-review"
+                            / "SKILL.md"
+                        ).is_file()
+                        and ".eif/workspace-runtime/skills/shared-review/SKILL.md"
+                        in (
+                            project
+                            / ".agents"
+                            / "skills"
+                            / "shared-review"
+                            / "SKILL.md"
+                        ).read_text(encoding="utf-8")
                         for project in projects
                     ),
                     output,

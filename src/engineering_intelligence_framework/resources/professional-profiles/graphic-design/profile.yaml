@@ -1,0 +1,27 @@
+# Public starter. The installed private-workspace copy is user-owned.
+schema_version: 1
+name: graphic-design
+description: Brief, direction approval, production review and verified delivery for graphic design projects.
+framework:
+  requires: '>=0.2.5,<0.3.0'
+artifacts:
+- kind: playbook
+  name: graphic-design-project
+  path: playbooks/graphic-design-project.md
+  mode: default
+- kind: skill
+  name: run-graphic-design-project
+  path: skills/run-graphic-design-project
+  mode: default
+- kind: skill
+  name: review-graphic-design-delivery
+  path: skills/review-graphic-design-delivery
+  mode: default
+- kind: template
+  name: design-brief
+  path: templates/design-brief.md
+  mode: default
+- kind: template
+  name: design-delivery
+  path: templates/design-delivery.md
+  mode: default

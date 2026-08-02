@@ -7,6 +7,8 @@
 init_start: "Ініціалізуємо екземпляр EIF у {path}"
 config_created: "Створено .eif/config.yaml. Мова: {locale}"
 instructions_generated: "Інструкції для агента згенеровано у {path}"
+skills_synced: "Навички агента синхронізовано: оновлено {written}, збережено власних {preserved}, вилучено застарілих {removed}"
+agent_restart_required: "Почніть нову сесію агента, щоб він завантажив згенеровані інструкції та навички."
 index_generated: "Індекс знань згенеровано. Артефактів: {count}"
 init_complete: "Екземпляр EIF ініціалізовано у {path}"
 search_no_results: "За запитом не знайдено релевантних знань: {query}"

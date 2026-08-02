@@ -32,6 +32,11 @@ def run(argv: list[str]) -> int:
         help="Do not let EIF generate the knowledge index.",
     )
     ap.add_argument("--registry", default=None, help="Private projects.yaml registry to connect after creation.")
+    ap.add_argument(
+        "--profile",
+        default="default",
+        help="Workspace professional profile to assign. Requires --registry.",
+    )
     ap.add_argument("--no-git", action="store_true", help="Create the EIF instance without `git init`.")
     args = ap.parse_args(argv)
 
@@ -44,9 +49,13 @@ def run(argv: list[str]) -> int:
         return 1
 
     registry_path = Path(args.registry).resolve() if args.registry else None
+    if registry_path is None and args.profile != "default":
+        print("eifctl new: --profile requires --registry", file=sys.stderr)
+        return 1
     if registry_path is not None:
         try:
             projects.load_registry(registry_path, allow_missing=True)
+            projects.validate_profile_selection(registry_path, args.profile)
         except projects.RegistryError as exc:
             print(f"eifctl new: registry preflight failed: {exc}", file=sys.stderr)
             return 1
@@ -91,7 +100,11 @@ def run(argv: list[str]) -> int:
 
     if registry_path is not None:
         try:
-            name, action = projects.register_project(registry_path, target)
+            name, action = projects.register_project(
+                registry_path,
+                target,
+                profile=args.profile,
+            )
             print(f"eifctl new: {action} {name} in {registry_path}")
         except projects.RegistryError as exc:
             print(

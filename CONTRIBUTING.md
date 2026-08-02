@@ -2,12 +2,12 @@
 
 ## Current status
 
-EIF 0.1.x is public and maintained by one owner. Focused bug fixes,
+EIF 0.2.x is public and maintained by one owner. Focused bug fixes,
 documentation corrections, reproducible evidence reports, and small
 well-scoped improvements are welcome. For a new capability or a change to
 the methodology, start a
 [discussion](https://github.com/mike-arbuzov365/engineering-intelligence-framework/discussions)
-before writing a large patch; the adapter scope for 0.1.x is frozen at
+before writing a large patch; the adapter scope is frozen at
 Claude Code, Cursor, Codex, and Hermes.
 
 ## Contribution requirements

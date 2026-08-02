@@ -49,7 +49,7 @@ Validation and CI-gate scripts:
 
 ## Development / testing
 
-28 suites in `scripts/tests/run_all.py`, all self-contained (use
+38 suites in `scripts/tests/run_all.py`, all self-contained (use
 `tempfile`/subprocess, don't touch this repository's own tracked files) -
 18 of them run via [`scripts/tests/run_all.py`](tests/run_all.py) (one
 process each, a single ok/FAIL summary line per suite), which needs only

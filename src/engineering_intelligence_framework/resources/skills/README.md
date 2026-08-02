@@ -29,11 +29,18 @@ where any agent looks for them. Each adapter reads its own location
 (`.claude/skills/`, `.agents/skills/`, and so on, per
 [`adapters/README.md`](../adapters/README.md)).
 
-`scripts/eif_sync_skills.py` generates the loaders that connect the two:
+`scripts/eif_sync_skills.py` generates the loaders that connect the two.
+`eifctl init`/`upgrade` runs it automatically for the selected adapter, and a
+workspace fleet apply runs it again after profile materialization so a
+profile-selected professional skill is visible in the next agent session.
+`eifctl doctor` fails if a selected skill is missing or points at a stale
+source.
+
+The standalone command remains the repair/check surface:
 
 ```bash
-python scripts/eif_sync_skills.py --instance-path . --adapter claude-code
-python scripts/eif_sync_skills.py --instance-path . --adapter claude-code --check
+python .eif/runtime/eif_sync_skills.py --instance-path . --adapter claude-code
+python .eif/runtime/eif_sync_skills.py --instance-path . --adapter claude-code --check
 ```
 
 Before 0.2.5 nothing did this, so an adopting project received every skill
@@ -44,7 +51,10 @@ eleven loaders had been written by hand, and the absence of
 `run-execution-packet`, `run-retro` and `knowledge-ingest` showed up months
 later as "this project never ran retros" rather than as a defect.
 
-A project-owned skill of the same name always wins, and a loader without the
-generated marker is never overwritten, so overrides survive upgrades. Not yet ported: customer-facing skills. Knowledge health is covered
+A project-owned `skills/<name>/SKILL.md` wins over a pinned workspace skill,
+which wins over the public EIF runtime skill. The loader points to the winner;
+it does not copy the body. A loader without the generated marker is never
+overwritten, so adapter-specific hand-authored overrides survive upgrades.
+Not yet ported: customer-facing skills. Knowledge health is covered
 by the curator; community skill discovery remains a separate future
 trust-boundary workflow rather than an automatic installer.

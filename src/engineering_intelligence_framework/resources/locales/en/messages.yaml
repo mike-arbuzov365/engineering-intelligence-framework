@@ -5,6 +5,8 @@
 init_start: "Initializing EIF project instance at {path}"
 config_created: "Created .eif/config.yaml (locale: {locale})"
 instructions_generated: "Generated agent instructions at {path}"
+skills_synced: "Agent skills synchronized: updated {written}, preserved {preserved}, removed {removed}"
+agent_restart_required: "Start a new agent session so it loads the generated instructions and skills."
 index_generated: "Knowledge index generated: {count} artifact(s)"
 init_complete: "EIF instance initialized at {path}"
 search_no_results: "No relevant knowledge found for query: {query}"

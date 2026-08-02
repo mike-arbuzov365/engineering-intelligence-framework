@@ -14,6 +14,11 @@ at import time (exactly what Python does automatically for
 `python scripts/eif_init.py` today), so the copied files behave
 identically without needing rewritten imports.
 
+The destination trees are generated. A normal sync also removes stale files
+that no longer have a canonical source; `--check` reports them without
+writing. The package-only `_impl/__init__.py` bootstrap is the sole support
+file exempt from pruning.
+
 Usage:
     python scripts/sync_package_sources.py [--check]
 
@@ -55,6 +60,7 @@ IMPL_SCRIPTS = [
     "eif_adapters.py",
     "eif_markers.py",
     "eif_locale.py",
+    "eif_sync_skills.py",
 ]
 
 # Standalone verification tools that are part of the published framework
@@ -78,7 +84,14 @@ RESOURCE_TREES = [
     "playbooks",
     "skills",
     "integrations",
+    # Public starters are package-level inputs for `eifctl workspace profile
+    # install`. They are deliberately not in eif_init.BUNDLE_TREES: projects
+    # receive only the profile explicitly selected in their private workspace.
+    "professional-profiles",
 ]
+
+MANAGED_COPY_ROOTS = [PKG_ROOT / "_impl", PKG_ROOT / "resources"]
+PACKAGE_SUPPORT_FILES = {PKG_ROOT / "_impl" / "__init__.py"}
 
 
 def iter_resource_files(tree: str) -> list[Path]:
@@ -119,6 +132,42 @@ def planned_copies() -> list[tuple[Path, Path]]:
     return pairs
 
 
+def stale_copies(pairs: list[tuple[Path, Path]]) -> list[Path]:
+    """Return files in generated package trees with no canonical source."""
+    allowed = {destination.resolve() for _, destination in pairs}
+    allowed.update(path.resolve() for path in PACKAGE_SUPPORT_FILES)
+    return sorted(
+        path
+        for root in MANAGED_COPY_ROOTS
+        if root.exists()
+        for path in root.rglob("*")
+        if path.is_file()
+        and "__pycache__" not in path.parts
+        and path.suffix != ".pyc"
+        and path.resolve() not in allowed
+    )
+
+
+def prune_stale_copies(pairs: list[tuple[Path, Path]]) -> list[Path]:
+    stale = stale_copies(pairs)
+    for path in stale:
+        path.unlink()
+    for root in MANAGED_COPY_ROOTS:
+        if not root.exists():
+            continue
+        directories = sorted(
+            (path for path in root.rglob("*") if path.is_dir()),
+            key=lambda path: len(path.parts),
+            reverse=True,
+        )
+        for directory in directories:
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
+    return stale
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true", help="Verify only, write nothing")
@@ -131,10 +180,17 @@ def main() -> int:
         for src, dest in pairs:
             if not dest.exists() or not filecmp.cmp(src, dest, shallow=False):
                 mismatched.append((src, dest))
-        if mismatched:
-            print(f"sync-package-sources: {len(mismatched)} file(s) out of sync - run without --check to fix:")
+        stale = stale_copies(pairs)
+        if mismatched or stale:
+            print(
+                "sync-package-sources: "
+                f"{len(mismatched)} file(s) out of sync and "
+                f"{len(stale)} stale file(s) - run without --check to fix:"
+            )
             for src, dest in mismatched:
                 print(f"  {src.relative_to(FRAMEWORK_ROOT)} -> {dest.relative_to(FRAMEWORK_ROOT)}")
+            for path in stale:
+                print(f"  stale: {path.relative_to(FRAMEWORK_ROOT)}")
             return 1
         print(f"sync-package-sources: all {len(pairs)} package copies match their sources")
         return 0
@@ -142,7 +198,11 @@ def main() -> int:
     for src, dest in pairs:
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, dest)
-    print(f"sync-package-sources: synced {len(pairs)} file(s) into {PKG_ROOT.relative_to(FRAMEWORK_ROOT)}")
+    stale = prune_stale_copies(pairs)
+    print(
+        f"sync-package-sources: synced {len(pairs)} file(s) into "
+        f"{PKG_ROOT.relative_to(FRAMEWORK_ROOT)}; pruned {len(stale)} stale file(s)"
+    )
     return 0
 
 

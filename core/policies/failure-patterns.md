@@ -11,7 +11,7 @@ scope: framework
 
 # Failure patterns
 
-<!-- Knowledge source: RETRO-001 of the preo-web project instance, 2026-08-02,
+<!-- Knowledge source: RETRO-001 of an anonymized private project instance, 2026-08-02,
 covering 2026-07-22..2026-08-02 across three repositories. Each pattern below
 is listed only because it repeated; single occurrences stayed in that
 instance's retro inbox as notes. -->

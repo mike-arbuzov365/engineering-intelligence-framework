@@ -15,7 +15,7 @@ with real captured command output, see
 this page doesn't duplicate that content, it summarizes it and adds a real
 timing measurement.
 
-For real private repositories, install the v0.2.2 wheel and create a
+For real private repositories, install the current release wheel and create a
 user-owned workspace with `eifctl workspace new`. That workspace is optional
 L2 scope, not a private copy of EIF. The
 [`project lifecycle guide`](project-lifecycle.md) covers registry v2,
@@ -52,6 +52,32 @@ machine-local paths, profiles, the two update axes, and detach.
 See [`examples/demo-workspace/README.md`](../../examples/demo-workspace/README.md)
 for the exact command for each step and real, captured output from an
 actual run.
+
+## How EIF reaches the agent
+
+`eifctl init` writes the compact EIF block into the active instruction file
+for the selected adapter and generates loaders for the selected EIF skills in
+that adapter's real discovery directory. Start a new agent session after init
+or upgrade so the harness reads both surfaces from the beginning.
+
+Do **not** copy the EIF rules into an agent's personal/global memory. That
+memory is not project-scoped, version-pinned, reviewable by collaborators or
+checked by `eifctl doctor`; a stale rule can also leak from one project into
+another. Put project-specific instructions below the managed marker in the
+project entrypoint. Put reusable private-team or professional rules, skills
+and templates in a private workspace profile.
+
+For the four supported adapters, no routine opening prompt is needed. The
+entrypoint is the durable instruction surface. If you are manually testing a
+harness that did not load it, use only this pointer rather than copying the
+whole policy into chat:
+
+> Use the EIF instance in this repository. Read and follow the EIF-managed
+> block in the active project instruction file, run `eifctl doctor
+> --instance-path .`, and use only the pinned artifacts it references.
+
+If that manual pointer is necessary on every session, the harness integration
+is not working and should be repaired; repeated prompting is not the fix.
 
 ## How long this actually takes
 

@@ -164,7 +164,7 @@ def check_package_sources_synced() -> list[Result]:
     """
     proc = run([sys.executable, str(FRAMEWORK_ROOT / "scripts" / "sync_package_sources.py"), "--check"])
     return [check(
-        "package resource copies match their sources",
+        "package resource copies match their sources and contain no stale generated files",
         proc.returncode == 0,
         proc.stdout + proc.stderr,
     )]

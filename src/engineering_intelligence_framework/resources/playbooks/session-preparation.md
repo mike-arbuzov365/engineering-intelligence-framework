@@ -25,10 +25,13 @@ chat history.
 
 ## When to use this
 
-- A small, clearly-bounded task (one fix, one question, one small
-  change): skip preparation, start directly with
-  [`session-execution.md`](session-execution.md) and a
-  [`templates/task-scope.md`](../templates/task-scope.md) filled in as you go.
+- A light task (one bounded action, clear requirements and approval, low risk,
+  obvious result check): skip preparation and persistent planning files. Use
+  the relevant profile skill, retrieve only relevant project knowledge, check
+  the result and perform a learning check.
+- A structured single task: fill
+  [`templates/task-scope.md`](../templates/task-scope.md), then use
+  [`session-execution.md`](session-execution.md).
 - Work that spans multiple sessions, has real architectural decisions to
   make first, has unresolved factual conflicts, or should run
   autonomously without routine questions: this playbook, producing an
@@ -38,14 +41,14 @@ chat history.
 
 Answer before writing anything:
 
-- **Scope**: a single task, or does it need a packet (2+ sessions, an
+- **Scope**: light task, structured single task, or packet (2+ sessions, an
   ADR-worthy decision, cross-project-instance scope, or a request for
   unattended autonomous execution)?
 - **Goal**: 1-3 sentences.
 
-If it's a single task, stop here and fill
-[`templates/task-scope.md`](../templates/task-scope.md) directly - that
-template is this playbook's entire preparation step for small work.
+If it is light, stop here and work directly from the request. If it is a
+structured single task, stop here and fill
+[`templates/task-scope.md`](../templates/task-scope.md) directly.
 
 ## Step 2 - If it needs a packet, build the packet anatomy
 

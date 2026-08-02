@@ -1,7 +1,7 @@
 # Public starter. The installed private-workspace copy is user-owned.
 schema_version: 1
 name: graphic-design
-description: Brief, direction approval, production review and verified delivery for graphic design projects.
+description: Everyday graphic-design work plus brief, direction approval, production review and verified delivery for larger projects.
 framework:
   requires: '>=0.2.5,<0.3.0'
 artifacts:

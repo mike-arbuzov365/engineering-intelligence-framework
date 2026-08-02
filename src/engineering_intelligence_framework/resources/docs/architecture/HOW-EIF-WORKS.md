@@ -453,12 +453,16 @@ built-bundle contract), builds and deploys. The site's full gate - two
 browser engines, axe, Lighthouse and byte budgets - stays local and
 unhosted. See D-15 in
 [`core/policies/decisions.md`](../../core/policies/decisions.md) for why
-that is a boundary rather than a contradiction of D-14. The full runtime
-test suite
-(`scripts/tests/run_all.py`, 38 suites) and the cross-platform package-
-build/license-check matrices run on a manual release gate
+that is a boundary rather than a contradiction of D-14. Package-relevant
+ordinary work can add the bounded local
+`scripts/tests/test_package_smoke.py` path: one wheel, one clean environment,
+one Codex `graphic-design` project and one `doctor`. The full runtime test
+suite (`scripts/tests/run_all.py`, 38 suites) and the exhaustive cross-platform
+package-build/license-check matrices remain release gates. They can run from
+the manual
 ([`.github/workflows/release-check.yml`](../../.github/workflows/release-check.yml),
-`workflow_dispatch`-only) or locally at no Actions cost - see
+`workflow_dispatch`-only) fallback, but owner releases prefer the local
+equivalent so routine and release work consume no extra Actions minutes - see
 [`scripts/README.md`](../../scripts/README.md) for what each gate script
 does. A controlled merge entrypoint
 ([`scripts/eif_merge_pr.py`](../../scripts/eif_merge_pr.py)) re-verifies

@@ -24,6 +24,7 @@ PLAYBOOKS_DIR = FRAMEWORK_ROOT / "playbooks"
 TEMPLATES_DIR = FRAMEWORK_ROOT / "templates"
 SKILLS_DIR = FRAMEWORK_ROOT / "skills"
 PACKAGE_RESOURCES_DIR = FRAMEWORK_ROOT / "src" / "engineering_intelligence_framework" / "resources"
+PROFESSIONAL_PROFILES_DIR = FRAMEWORK_ROOT / "professional-profiles"
 
 Result = tuple[bool, str]
 
@@ -199,6 +200,52 @@ def check_planning_chain_contract() -> list[Result]:
     return results
 
 
+def check_light_task_contract() -> list[Result]:
+    results: list[Result] = []
+    instructions = (TEMPLATES_DIR / "agent-instructions.md").read_text(encoding="utf-8")
+    protocol = (
+        PLAYBOOKS_DIR / "engineering-intelligence-operating-protocol.md"
+    ).read_text(encoding="utf-8")
+    preparation = (PLAYBOOKS_DIR / "session-preparation.md").read_text(encoding="utf-8")
+    execution = (PLAYBOOKS_DIR / "session-execution.md").read_text(encoding="utf-8")
+    design_root = PROFESSIONAL_PROFILES_DIR / "graphic-design"
+    design_playbook = (
+        design_root / "playbooks" / "graphic-design-project.md"
+    ).read_text(encoding="utf-8")
+    design_skill = (
+        design_root / "skills" / "run-graphic-design-project" / "SKILL.md"
+    ).read_text(encoding="utf-8")
+
+    results.append(check(
+        "task routing: generated instruction routes every task",
+        "## Route every task" in instructions
+        and "**Light task**" in instructions
+        and "no task-scope, execution packet or formal closeout is required" in instructions,
+    ))
+    results.append(check(
+        "task routing: light work keeps memory and verification without planning files",
+        "relevant project memory" in protocol
+        and "does not need a planning or closeout file" in protocol
+        and "skip preparation and persistent planning files" in preparation,
+    ))
+    results.append(check(
+        "task routing: session execution is reserved for prepared work",
+        "Light tasks do not use this" in execution,
+    ))
+    results.append(check(
+        "graphic design: process includes a bounded light path",
+        "one bounded edit, resize, export or check" in design_playbook
+        and "Do not force a full brief or delivery form" in design_playbook,
+    ))
+    results.append(check(
+        "graphic design: skill triggers for small work and protects project memory",
+        "small bounded edit, resize or" in design_skill
+        and "unapproved direction" in design_skill
+        and "agent assumption" in design_skill,
+    ))
+    return results
+
+
 def check_private_workspace_layer_contract() -> list[Result]:
     results: list[Result] = []
     architecture = (
@@ -247,6 +294,7 @@ def main() -> int:
         + check_skills()
         + check_bounded_loop_contract()
         + check_planning_chain_contract()
+        + check_light_task_contract()
         + check_private_workspace_layer_contract()
     )
     for _, line in all_results:

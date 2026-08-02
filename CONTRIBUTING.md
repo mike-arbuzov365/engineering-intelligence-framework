@@ -44,8 +44,15 @@ python scripts/eif_privacy_scan.py --repo .
 python scripts/eif_check_links.py --repo .
 ```
 
-Before a release, maintainers also run the exhaustive local inventory and
-the site gate documented in
+If the change affects packaged commands or bundled resources, add the bounded
+installed-wheel path:
+
+```bash
+python scripts/tests/test_package_smoke.py
+```
+
+Before a release, maintainers run the exhaustive package suite once, plus the
+full inventory and site gate when those surfaces changed, as documented in
 [`.github/workflows/release-check.yml`](.github/workflows/release-check.yml)
 and [`site/README.md`](site/README.md).
 

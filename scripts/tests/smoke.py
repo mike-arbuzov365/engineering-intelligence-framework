@@ -27,7 +27,9 @@ Covers:
 Deliberately NOT here: dozens of boundary/depth/platform variations,
 exact historical check counts, or anything whose only purpose was to
 prove PR text. See .github/workflows/release-check.yml for what moved to
-the manual release gate instead of being deleted outright.
+the manual release gate instead of being deleted outright. For an ordinary
+change that affects the installable package, add test_package_smoke.py; do not
+jump straight to the exhaustive release-only test_package_build.py.
 
 Each real check shells out to the actual eif_init.py/eif_verify_runtime.py
 scripts (not a reimplementation), and each of those calls does real,

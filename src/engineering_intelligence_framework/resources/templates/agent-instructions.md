@@ -54,33 +54,69 @@ generated it, whether that checkout was clean, hashes of every bundled file
 - is in `.eif/framework.lock.yaml`, not `.eif/config.yaml` (that file is
 yours; the lock is EIF-managed and rewritten on every upgrade).
 
-## Before non-trivial work
+## First task in a fresh agent session
 
-{knowledge_before_work}
-3. Write a task-scope file from `.eif/runtime/templates/task-scope.md` before
-   changing code, for anything bigger than a one-line fix.
-4. If `.eif/workspace.lock.yaml` exists, use only the pinned artifacts listed
+1. Read this file and the project-specific rules below the EIF-managed block.
+2. Run `eifctl doctor --instance-path .` once. It reports the active agent
+   instruction, professional profile, profile skills and project memory. Do
+   not repeat it before every prompt when the project state is unchanged.
+3. If `.eif/workspace.lock.yaml` exists, use only the pinned artifacts listed
    in its manifest under `.eif/workspace-runtime/`. Never read operating
    policy live from a workspace checkout. `required` artifacts are
    safeguards, `default` artifacts apply unless the lock records an approved
    project override, and `optional` artifacts apply because the selected
-   profile included them. Run `eifctl doctor --instance-path .` before work
-   so a missing snapshot, hash drift or invalid override fails closed.
-5. Before opening a PR, audit the instance itself:
+   profile included them.
+
+## Route every task
+
+1. Choose the lightest safe path before acting:
+   - **Light task** - one bounded action, clear requirements and approval,
+     low risk, and an obvious way to check the result. Work directly from the
+     request; no task-scope, execution packet or formal closeout is required.
+   - **Structured single task** - one session, but scope, decisions or
+     verification need to be written down. Use
+     `.eif/runtime/templates/task-scope.md`.
+   - **Execution packet** - multiple sessions, an architectural or other
+     high-impact decision, unresolved factual conflicts, or unattended
+     autonomous work. Use the packet planning playbook.
+2. Use only the relevant agent-discoverable skill. A professional profile may
+   refine the process, but it does not make every task large.
+3. Retrieve only project knowledge relevant to the task:
+
+{knowledge_before_work}
+
+4. Before changing a project artifact, confirm the requested output, important
+   constraints and the way the result will be checked. For a light task this
+   may remain in the conversation; structured work records it in its task or
+   packet artifact.
+
+{authority_section}
+
+## Before structured delivery
+
+1. Audit the instance before a handoff, delivery or PR:
    `python .eif/runtime/eif_verify_runtime.py --framework-root .eif/runtime`
    - checks config/lock schemas, bundle file hashes, config/adapter/lock/
    entrypoint consistency, and {entrypoint_name}/.gitignore marker integrity
    in one pass.
-6. If `.eif/config.yaml` enables an optional integration, read
+2. If `.eif/config.yaml` enables an optional integration, read
    `.eif/runtime/integrations/README.md` and use the same doctor result as its
    capability gate. Only `healthy` is usable without qualification. Graphify
    output is navigation evidence and must be verified against source; a
    degraded RTK command class falls back to the unfiltered command. Never run
    semantic/deep Graphify without the explicit provider/boundary/cost gate.
 
-{authority_section}
+## After a light task
 
-## After non-trivial work
+1. Run the checks that can actually catch an error in this result.
+2. Perform a learning check. Record only durable, reusable project knowledge;
+   keep one-off preferences, unapproved directions and agent assumptions in
+   task history. When durable learning surfaced, use the `knowledge-ingest`
+   skill and report the memory artifact changed. Otherwise state that no
+   durable learning surfaced. Do not create a Knowledge Delta or closeout
+   merely as ceremony.
+
+## After structured work
 
 1. Run the verification commands from the task-scope file. Record PASS/FAIL,
    not "looks fine."

@@ -856,21 +856,19 @@ def _authority_section(adoption_mode: str) -> str:
 # existing system, not EIF's schema). The two variants below make that
 # conditional on config.yaml's `knowledge.managed`, matching
 # _authority_section()'s established pattern for adoption.mode.
-MANAGED_KNOWLEDGE_BEFORE_WORK = """1. Read `{knowledge_index_path}` for what's already known about this codebase.
-2. Search for relevant prior lessons (only validated/eligible knowledge is
-   returned by default). Always pass `--framework-root` - without it,
-   schema-invalid knowledge is silently treated as valid instead of being
-   flagged:
-   `python .eif/runtime/eif_search_knowledge.py --knowledge-root "{knowledge_root}" --framework-root .eif/runtime "<your task in a few words>"`"""
+MANAGED_KNOWLEDGE_BEFORE_WORK = """- Read `{knowledge_index_path}` only far enough to locate relevant knowledge.
+- Search for relevant prior lessons (only validated/eligible knowledge is
+  returned by default). Always pass `--framework-root` - without it,
+  schema-invalid knowledge is silently treated as valid instead of being
+  flagged:
+  `python .eif/runtime/eif_search_knowledge.py --knowledge-root "{knowledge_root}" --framework-root .eif/runtime "<your task in a few words>"`"""
 
-UNMANAGED_KNOWLEDGE_BEFORE_WORK = """1. This project's knowledge is not managed by EIF (`knowledge.managed: false`
-   in `.eif/config.yaml`) - `{knowledge_root}` is not an EIF-schema
-   knowledge base, and EIF does not generate or keep `{knowledge_index_path}`
-   current.
-2. Before non-trivial work, use this project's own existing index/search
-   convention if it has one. If it does not, say explicitly that retrieval
-   is external rather than inventing an EIF-managed index that does not
-   exist."""
+UNMANAGED_KNOWLEDGE_BEFORE_WORK = """- This project's knowledge is not managed by EIF (`knowledge.managed: false`
+  in `.eif/config.yaml`) - `{knowledge_root}` is not an EIF-schema knowledge
+  base, and EIF does not generate or keep `{knowledge_index_path}` current.
+- Use this project's own existing index/search convention when it has one. If
+  it does not, say explicitly that retrieval is external rather than inventing
+  an EIF-managed index that does not exist."""
 
 MANAGED_KNOWLEDGE_VALIDATE_LINE = (
     '   `python .eif/runtime/eif_validate_frontmatter.py --framework-root .eif/runtime --instance-root . "{knowledge_root}/**/*.md"`\n'

@@ -27,18 +27,15 @@ is a separate, explicit, removable contract, not a mandatory protocol
 step; see the optional-integrations section of
 docs/architecture/HOW-EIF-WORKS.md once that contract lands. -->
 
-The entry point for any non-trivial agent-assisted work under this
-framework: what to read, which playbook to use for the situation at
-hand, and where the hard stop conditions are.
+The entry point for agent-assisted work under this framework: first choose the
+smallest safe path, then read only the process and knowledge that path needs.
 
 ## When this applies
 
-Any task where an agent will change code, decisions, or documentation
-under a project instance that has adopted this framework. For a single
-obvious one-line fix, the full routing/preparation ceremony below is
-unnecessary overhead - use judgment, but still fill
-[`templates/task-scope.md`](../templates/task-scope.md) for anything
-whose scope or verification isn't self-evident from the request itself.
+Any task where an agent will change project artifacts, decisions or durable
+documentation under a project instance that has adopted this framework. A
+light task still uses the active profile, relevant project memory and a real
+result check, but it does not need a planning or closeout file.
 
 ## Read this first
 
@@ -50,14 +47,16 @@ of them.
 
 ## Routing checkpoint
 
-Before starting non-trivial work, classify it explicitly (see
-[`session-preparation.md`](session-preparation.md) Step 1):
+Classify the work before acting; the classification itself does not need a file:
 
 - **Idea** - the problem, user, value or minimum useful scope is not yet a
   durable approved artifact.
 - **PRD** - the idea is approved, but required behavior, quality
   constraints or acceptance evidence still need definition.
-- **Single task** - one fix, one question, one small bounded change.
+- **Light task** - one bounded action with clear requirements and approval,
+  low risk and an obvious result check.
+- **Structured single task** - one session, but scope, decisions or
+  verification need to be recorded in a task-scope file.
 - **Execution packet** - 2+ sessions, an architectural decision, factual
   conflicts to resolve first, or a request for unattended autonomous
   execution.
@@ -70,7 +69,7 @@ Record the classification before implementation starts, not after.
 |---|---|
 | Raw request or opportunity needs definition | [`idea-planning.md`](idea-planning.md) |
 | Approved idea needs requirements | [`product-requirements-planning.md`](product-requirements-planning.md) |
-| Starting any non-trivial task | [`session-preparation.md`](session-preparation.md) |
+| Choosing light, structured or packet work | [`session-preparation.md`](session-preparation.md) |
 | Iterative test/fix/refine work | [`bounded-evidence-loop.md`](bounded-evidence-loop.md) |
 | Work needs a packet | [`execution-packet-planning.md`](execution-packet-planning.md) |
 | Executing a prepared task | [`session-execution.md`](session-execution.md) |
@@ -79,7 +78,7 @@ Record the classification before implementation starts, not after.
 | Auditing a packet claimed done | [`execution-packet-review.md`](execution-packet-review.md) |
 | Finding what repeats across many sessions | [`run-retro.md`](run-retro.md) |
 | Finding what in the knowledge base needs maintenance | [`knowledge-curator.md`](knowledge-curator.md) |
-| Before non-trivial work | [`knowledge-search.md`](knowledge-search.md) |
+| Before acting on a project task | [`knowledge-search.md`](knowledge-search.md) |
 | New durable knowledge surfaced | [`knowledge-ingest.md`](knowledge-ingest.md) |
 | Before proposing shared-knowledge promotion | [`knowledge-lint.md`](knowledge-lint.md) |
 
@@ -89,18 +88,20 @@ skill invocation directly.
 
 ## Agent workflow, in order
 
-1. Routing checkpoint (above).
+1. Routing checkpoint (above). For a light task, use the relevant profile
+   skill, retrieve only relevant project knowledge, verify the result and run
+   a learning check; then stop.
 2. Read the framework layer (this repository, only what's relevant), then
    the project layer (this project instance's persistent
    agent-instruction file and relevant `knowledge/`).
 3. Experience retrieval preflight
    ([`knowledge-search.md`](knowledge-search.md)).
-4. Execute against the task-scope or session-launch file's declared
+4. For structured work, execute against the task-scope or session-launch file's declared
    scope and stop conditions. If the work iterates, use a
    [Bounded Evidence Loop](bounded-evidence-loop.md): observable success,
    a real evaluator, explicit iteration and remote-run budgets, and evidence-
    based stop conditions.
-5. Closeout ([`session-closeout.md`](session-closeout.md)), including
+5. Close out structured work ([`session-closeout.md`](session-closeout.md)), including
    Knowledge Delta.
 
 ## Optional integrations
@@ -129,6 +130,8 @@ boundary, if:
 
 ## Closeout
 
-Every session ends with [`session-closeout.md`](session-closeout.md).
-Every packet's final session additionally fills
+Every structured task or packet session ends with
+[`session-closeout.md`](session-closeout.md). A light task performs the result
+check and learning check without creating a closeout file. Every packet's final
+session additionally fills
 [`templates/packet-closeout.md`](../templates/packet-closeout.md).

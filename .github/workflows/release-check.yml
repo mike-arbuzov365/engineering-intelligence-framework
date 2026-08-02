@@ -9,10 +9,10 @@ name: release-check
 # the cross-platform package-build/license-check matrices. See
 # docs/architecture/HOW-EIF-WORKS.md#ci-and-quality-gates.
 #
-# Local equivalent (no Actions minutes spent):
+# Local equivalent (preferred for owner releases; spends no Actions minutes):
 #   pip install -r scripts/requirements.txt && pip install build hatchling
 #   python scripts/tests/run_all.py --json && python scripts/tests/test_run_all_json.py
-#   python scripts/tests/test_package_build.py
+#   python scripts/tests/test_package_build.py  # exhaustive, once per release
 #   python scripts/eif_privacy_scan.py --repo . && python scripts/eif_check_links.py --repo .
 #   python scripts/eif_check_licenses.py --framework-root . && python scripts/tests/test_check_licenses.py
 # Windows-specific coverage (paths/newlines/case-sensitivity/packaging) only
@@ -54,7 +54,7 @@ jobs:
           done
 
   package-build:
-    name: "Package build and install (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
+    name: "Release package gate (Python ${{ matrix.python-version }}, ${{ matrix.os }})"
     strategy:
       fail-fast: false
       matrix:
@@ -70,7 +70,7 @@ jobs:
         run: |
           pip install -r scripts/requirements.txt
           pip install build hatchling
-      - name: Build and exercise the installed package
+      - name: Run the exhaustive release package gate
         run: python scripts/tests/test_package_build.py
       - name: Run benchmark mode B against the installed package
         run: python scripts/tests/test_benchmark_mode_b.py

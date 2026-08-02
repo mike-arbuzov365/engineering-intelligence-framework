@@ -15,6 +15,42 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-08-02
+
+### Added
+
+- **Bounded package smoke.** Ordinary package-relevant work can now run one
+  wheel build, one clean install and one Codex `graphic-design` project through
+  `doctor`. Each stage announces itself, reports elapsed time and has an
+  explicit command timeout. The exhaustive package suite remains release-only.
+
+- **Everyday graphic-design path.** The `graphic-design` profile now routes a
+  bounded edit, resize, export or check through a light process without forcing
+  a full brief, task-scope, packet or formal closeout. Larger or riskier work
+  keeps the existing brief, approval, production and delivery controls. Every
+  path still retrieves relevant project knowledge, verifies the result and
+  separates durable learning from one-off preferences and assumptions. Durable
+  learning is routed through `knowledge-ingest`; the light path creates no
+  memory artifact when nothing reusable surfaced.
+
+- **Inspectable active agent context.** After its integrity checks pass,
+  `eifctl doctor` reports the generated instruction, selected professional
+  profile, profile skills and project-memory location. The installed-wheel test
+  now proves this for a Codex project using `graphic-design`.
+
+### Changed
+
+- Test guidance now separates routine source smoke, bounded package smoke and
+  exhaustive release gates. GitHub PR validation remains one short hosted job;
+  owner releases prefer local exhaustive checks to preserve Actions quota. A
+  stale claim that `test_package_build.py` ran through `run_all.py` was removed.
+
+- The generated agent instruction routes every task as light, structured single
+  task or execution packet. It runs `doctor` once at the start of a fresh
+  session and no longer describes normal work only in code/PR terms. This is an
+  activation and process contract, not a claim that the instruction improves
+  output quality; D-19 still requires a matched behavioral comparison.
+
 ## [0.2.5] - 2026-08-02
 
 Professional workflows now reach the agent that is expected to use them.
@@ -933,7 +969,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.5...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.6...HEAD
+[0.2.6]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.6
 [0.2.5]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.5
 [0.2.4]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.4
 [0.2.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.3

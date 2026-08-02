@@ -19,7 +19,8 @@ start-state check before the first change, the pause-vs-fail distinction.
 Dropped: worktree/parallel-session-specific steps with no equivalent in a
 single-agent, single-worktree v0.1 project instance. -->
 
-Run a prepared task or packet session. The artifact from preparation
+Run a prepared structured task or packet session. Light tasks do not use this
+playbook. The artifact from preparation
 (a task-scope file or a session launch file) is the source of truth -
 this playbook does not depend on the preparation chat's history.
 

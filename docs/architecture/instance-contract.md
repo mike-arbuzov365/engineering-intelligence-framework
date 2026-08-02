@@ -384,7 +384,18 @@ Not yet a dedicated command - `eif_init.py` has no `--rollback`/`--undo`
 flag (only within-transaction rollback if a single run fails partway, see
 above). To remove an EIF instance by hand:
 
-1. Delete `.eif/` (config, lock, and the runtime bundle all live there).
+1. While `.eif/runtime/` still exists, remove only EIF-generated skill
+   loaders from the active adapter's discovery directory:
+
+   ```bash
+   python .eif/runtime/eif_sync_skills.py \
+     --instance-path . \
+     --adapter <adapter-name-from-.eif/config.yaml> \
+     --remove-generated
+   ```
+
+   A loader without EIF's ownership marker is project-owned and remains.
+   Then delete `.eif/` (config, locks, and runtime bundles live there).
 2. Delete the EIF-managed `.gitattributes` block first, before restoring
    anything from git. While it is in place git materializes text files
    according to it, so a checkout performed with it still present can hand
@@ -406,9 +417,10 @@ above). To remove an EIF instance by hand:
    outside `.eif/` (the common case for an adopted, not greenfield,
    repository) and is therefore NOT removed by step 1. A real gap this
    round's own adoption test caught: "delete `.eif/`, restore the two
-   managed files" looked complete and was not - the generated index was
-   left behind until the test's own byte-for-byte comparison against the
-   pre-install snapshot caught it.
+   managed files" looked complete and was not - first the generated index,
+   and later the agent-visible skill loaders, were left behind until the
+   test's byte-for-byte comparison against the pre-install snapshot caught
+   them.
 4. Verify: `git status`/`git diff` should show the tree back to its
    pre-EIF state exactly, not "looks about right."
 

@@ -15,7 +15,10 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from engineering_intelligence_framework import cli  # noqa: E402
 from engineering_intelligence_framework.commands import init_cmd  # noqa: E402
-from engineering_intelligence_framework.commands.workspace import FAULT_ENV  # noqa: E402
+from engineering_intelligence_framework.commands.workspace import (  # noqa: E402
+    FAULT_ENV,
+    professional_profile_catalog,
+)
 
 
 def check(name: str, condition: bool, detail: str = "") -> tuple[bool, str]:
@@ -156,9 +159,59 @@ def main() -> int:
                 ).read_text(encoding="utf-8"),
             )
         )
+        catalog_names = {item["name"] for item in professional_profile_catalog()}
         results.append(
             check(
-                "workspace doctor passes immediately after creation",
+                "public professional profile catalog contains two focused starters",
+                catalog_names == {"graphic-design", "software-development"},
+                str(sorted(catalog_names)),
+            )
+        )
+        install_argv = [
+            "workspace",
+            "profile",
+            "install",
+            "graphic-design",
+            "--workspace-path",
+            str(workspace),
+        ]
+        results.append(
+            check(
+                "graphic-design starter installs into the private workspace",
+                cli.main(install_argv) == 0
+                and (
+                    workspace / "workspace" / "profiles" / "graphic-design.yaml"
+                ).is_file()
+                and (
+                    workspace
+                    / "workspace"
+                    / "skills"
+                    / "run-graphic-design-project"
+                    / "SKILL.md"
+                ).is_file(),
+            )
+        )
+        installed_tree = tree(workspace)
+        results.append(
+            check(
+                "professional profile install is idempotent",
+                cli.main(install_argv) == 0 and tree(workspace) == installed_tree,
+            )
+        )
+        delivery = workspace / "workspace" / "templates" / "design-delivery.md"
+        delivery_before = delivery.read_bytes()
+        delivery.write_text("# Workspace-owned customization\n", encoding="utf-8")
+        customized_tree = tree(workspace)
+        results.append(
+            check(
+                "professional profile install refuses to overwrite customization",
+                cli.main(install_argv) != 0 and tree(workspace) == customized_tree,
+            )
+        )
+        delivery.write_bytes(delivery_before)
+        results.append(
+            check(
+                "workspace doctor validates every installed profile",
                 cli.main(
                     [
                         "workspace",
@@ -168,6 +221,43 @@ def main() -> int:
                     ]
                 )
                 == 0,
+            )
+        )
+        delivery.unlink()
+        results.append(
+            check(
+                "workspace doctor catches a missing artifact in a non-default profile",
+                cli.main(
+                    [
+                        "workspace",
+                        "doctor",
+                        "--workspace-path",
+                        str(workspace),
+                    ]
+                )
+                != 0,
+            )
+        )
+        delivery.write_bytes(delivery_before)
+
+        rejected_target = root / "unknown-profile-project"
+        registry_before_rejection = registry_path.read_bytes()
+        results.append(
+            check(
+                "new rejects an unknown professional profile before creating files",
+                cli.main(
+                    [
+                        "new",
+                        str(rejected_target),
+                        "--registry",
+                        str(registry_path),
+                        "--profile",
+                        "unknown-profile",
+                    ]
+                )
+                != 0
+                and not rejected_target.exists()
+                and registry_path.read_bytes() == registry_before_rejection,
             )
         )
 
@@ -193,6 +283,11 @@ def main() -> int:
                     adapter,
                     "--registry",
                     str(registry_path),
+                    *(
+                        ["--profile", "graphic-design"]
+                        if project == beta
+                        else []
+                    ),
                 ]
             )
             results.append(
@@ -207,6 +302,15 @@ def main() -> int:
                 len(registry["projects"]) == 2
                 and len(locations["locations"]) == 2
                 and all("path" not in project for project in registry["projects"]),
+            )
+        )
+        results.append(
+            check(
+                "new records the selected professional profile",
+                next(
+                    item for item in registry["projects"] if item["name"] == "beta"
+                )["profile"]
+                == "graphic-design",
             )
         )
         results.append(

@@ -36,6 +36,8 @@ from ..workspace_contract import (
     stable_project_id,
 )
 from ..workspace_materialization import (
+    PROFILE_SCHEMA,
+    WORKSPACE_CONFIG_SCHEMA,
     WorkspaceMaterializationError,
     materialize_workspace,
     verify_workspace_materialization,
@@ -142,6 +144,7 @@ def register_project(
         else default_locations_path(registry_path).resolve()
     )
     project_path = project_path.resolve()
+    validate_profile_selection(registry_path, profile)
     workspace_root = registry_path.parent.parent
     if (
         (workspace_root / ".eif" / "workspace.yaml").exists()
@@ -265,6 +268,36 @@ def _workspace_root(registry_path: Path) -> Path | None:
         if (candidate / ".eif" / "workspace.yaml").is_file()
         else None
     )
+
+
+def validate_profile_selection(registry_path: Path, profile: str) -> None:
+    """Reject a profile typo before changing a workspace-owned registry."""
+    workspace = _workspace_root(registry_path.resolve())
+    if workspace is None:
+        return
+    try:
+        config = read_yaml(
+            workspace / ".eif" / "workspace.yaml",
+            WORKSPACE_CONFIG_SCHEMA,
+            "workspace config",
+        )
+        profile_root = (workspace / config["profiles"]["root"]).resolve()
+        profile_path = (profile_root / f"{profile}.yaml").resolve()
+        profile_root.relative_to(workspace)
+        profile_path.relative_to(profile_root)
+        selected = read_yaml(
+            profile_path,
+            PROFILE_SCHEMA,
+            f"workspace profile {profile}",
+        )
+    except (KeyError, ValueError, WorkspaceContractError) as exc:
+        raise RegistryError(
+            f"profile {profile!r} is not available in workspace {workspace}: {exc}"
+        ) from exc
+    if selected["name"] != profile:
+        raise RegistryError(
+            f"workspace profile filename and name differ: {profile_path.name}"
+        )
 
 
 def _workspace_status(
@@ -663,6 +696,10 @@ def run(argv: list[str]) -> int:
                     remaining = verify_workspace_materialization(path)
                     if remaining:
                         raise WorkspaceMaterializationError("; ".join(remaining))
+                    skill_activation = applied.get("skill_activation", {})
+                    skill_written = skill_activation.get("written", [])
+                    skill_preserved = skill_activation.get("preserved", [])
+                    skill_removed = skill_activation.get("removed", [])
                     print(
                         "  workspace axis: "
                         + (
@@ -671,6 +708,12 @@ def run(argv: list[str]) -> int:
                             if applied.get("changed", True)
                             else "already current, nothing written"
                         )
+                    )
+                    print(
+                        "  agent skills: "
+                        f"updated={len(skill_written)} "
+                        f"preserved={len(skill_preserved)} "
+                        f"removed={len(skill_removed)}"
                     )
                 except (WorkspaceMaterializationError, RuntimeError) as exc:
                     done = ", ".join(completed) if completed else "none"

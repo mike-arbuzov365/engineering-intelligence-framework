@@ -140,7 +140,7 @@ def main() -> int:
         # everything below test the wrong code without saying so.
         sync_check = run([sys.executable, str(FRAMEWORK_ROOT / "scripts" / "sync_package_sources.py"), "--check"])
         results.append(check(
-            "package _impl/resources copies are byte-for-byte in sync with their scripts/ sources",
+            "package copies match their sources and contain no stale generated files",
             sync_check.returncode == 0,
             sync_check.stdout + sync_check.stderr,
         ))
@@ -196,6 +196,21 @@ def main() -> int:
             "eif_init.py's collect_bundle_sources() reads these from <framework_root>/scripts/ - "
             "missing here means `eifctl init` fails with 'mandatory bundle source missing' at runtime "
             "(a real bug this exact assertion caught once while building this suite)",
+        ))
+        results.append(check(
+            "wheel contains installable professional profile starters",
+            any(
+                n.endswith(
+                    "/resources/professional-profiles/graphic-design/profile.yaml"
+                )
+                for n in names
+            )
+            and any(
+                n.endswith(
+                    "/resources/professional-profiles/software-development/profile.yaml"
+                )
+                for n in names
+            ),
         ))
         results.append(check(
             "wheel contains the standalone benchmark C/D contract tool",
@@ -256,6 +271,30 @@ def main() -> int:
             and (control_dir / "planning" / "migration-ledger.md").exists()
             and "no remote" in workspace_new.stdout,
             workspace_new.stdout + workspace_new.stderr,
+        ))
+        profile_list = run([
+            str(eifctl_exe), "workspace", "profile", "list",
+        ], cwd=tmp_root)
+        profile_install = run([
+            str(eifctl_exe), "workspace", "profile", "install", "graphic-design",
+            "--workspace-path", str(control_dir),
+        ], cwd=tmp_root)
+        results.append(check(
+            "wheel-installed professional profile catalog lists and installs graphic-design",
+            profile_list.returncode == 0
+            and "graphic-design" in profile_list.stdout
+            and "software-development" in profile_list.stdout
+            and profile_install.returncode == 0
+            and (control_dir / "workspace" / "profiles" / "graphic-design.yaml").is_file()
+            and (
+                control_dir
+                / "workspace"
+                / "skills"
+                / "run-graphic-design-project"
+                / "SKILL.md"
+            ).is_file(),
+            profile_list.stdout + profile_list.stderr
+            + profile_install.stdout + profile_install.stderr,
         ))
         workspace_doctor = run([
             str(eifctl_exe), "workspace", "doctor",

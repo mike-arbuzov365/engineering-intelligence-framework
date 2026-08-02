@@ -1,0 +1,13 @@
+# Generated package mirrors. Their canonical sources live in scripts/, core/,
+# docs/, locales/, templates/, playbooks/, skills/ and integrations/.
+/src/engineering_intelligence_framework/_impl/
+/src/engineering_intelligence_framework/resources/
+
+# Separate products and demonstrations are outside the framework code graph.
+/site/
+/examples/
+
+# Generated outputs are never graph inputs.
+/graphify-out/
+/dist/
+/build/

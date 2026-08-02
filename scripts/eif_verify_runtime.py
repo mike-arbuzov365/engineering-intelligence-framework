@@ -87,6 +87,7 @@ from eif_integrations import (  # noqa: E402
     validate_health_results,
 )
 from eif_validate_frontmatter import load_schema, validate_one, _normalize_yaml_scalars  # noqa: E402
+from eif_sync_skills import sync as sync_agent_skills  # noqa: E402
 
 try:
     import yaml
@@ -587,6 +588,37 @@ def check_knowledge_index_drift(instance_path: Path, lock: dict | None) -> list[
     return []
 
 
+def check_skill_loader_drift(config: dict | None, instance_path: Path) -> list[str]:
+    """Fail when selected skills are not what the active adapter discovers."""
+    if config is None:
+        return []
+    adapter = (config.get("adapter") or {}).get("name")
+    if not isinstance(adapter, str):
+        return []
+    try:
+        written, _, removed = sync_agent_skills(
+            instance_path,
+            adapter,
+            check_only=True,
+        )
+    except (OSError, ValueError) as exc:
+        return [f"cannot evaluate agent skill loaders: {exc}"]
+
+    repair = (
+        "run `python .eif/runtime/eif_sync_skills.py --instance-path . "
+        f"--adapter {adapter}` and start a new agent session"
+    )
+    problems = [
+        f"selected skill {name!r} is missing or points to a stale source; {repair}"
+        for name in written
+    ]
+    problems.extend(
+        f"generated loader for deselected skill {name!r} is still active; {repair}"
+        for name in removed
+    )
+    return problems
+
+
 def check_integrations(
     config: dict | None,
     framework_root: Path | None = None,
@@ -662,6 +694,7 @@ def main(argv: list[str] | None = None) -> int:
     report.add(f"marker integrity ({entrypoint}, .gitignore, .gitattributes)", check_markers(instance_path, entrypoint))
     report.add("config/generated-block drift (adoption.mode, knowledge paths)", check_config_block_drift(config, instance_path, entrypoint))
     report.add("knowledge index drift (ownership marker, hash)", check_knowledge_index_drift(instance_path, lock))
+    report.add("agent skill discovery (selected source vs generated loader)", check_skill_loader_drift(config, instance_path))
     integration_results = evaluate_integrations(config, framework_root, instance_path)
     for result in integration_results:
         print(

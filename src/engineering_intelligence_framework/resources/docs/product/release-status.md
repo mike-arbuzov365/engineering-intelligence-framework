@@ -61,15 +61,21 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.2.4` in [`pyproject.toml`](../../pyproject.toml) is dated
-  2026-07-29 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
+- **Version.** `0.2.5` in [`pyproject.toml`](../../pyproject.toml) is dated
+  2026-08-02 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
   GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.4)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.5)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
+- **0.2.5 closes the professional-workflow delivery gap.** Public skills are
+  synchronized to the active agent's real discovery directory during init,
+  upgrade and workspace materialization. The package also ships two explicit
+  professional-profile starters: graphic-design and software-project
+  onboarding. Installing one copies it into the private workspace without
+  assigning a project or overwriting workspace-owned content.
 - **0.2.1 through 0.2.4 came from real walkthroughs, not synthetic ones.** The
   0.2.0 path was run end to end on two private repositories on Windows. It
   found that the published `eifctl init <path>` command did not exist, that a
@@ -110,10 +116,12 @@ the page does not make: no timing figure appears anywhere on it.
   to run.
 - **Private-workspace and project lifecycle commands are included.**
   `eifctl workspace new` creates a local user-owned workspace inside L2;
-  `eifctl new` creates a local project repository; `eifctl projects add`
-  connects an existing EIF instance; and the upgrade commands plan before
-  applying separate framework and workspace provenance axes. Detach removes
-  only workspace-managed state. See the
+  `eifctl workspace profile list/install` explicitly installs a professional
+  starter; `eifctl new --profile` creates a local project repository with a
+  validated profile assignment; `eifctl projects add` connects an existing
+  EIF instance; and the upgrade commands plan before applying separate
+  framework and workspace provenance axes. Detach removes only
+  workspace-managed state. See the
   [`project lifecycle guide`](../guides/project-lifecycle.md).
 - **Adapter scope is frozen** at four adapters - Claude Code, Cursor, Codex
   and Hermes - and all four are supported (D-16, 2026-07-27, retiring the
@@ -131,8 +139,10 @@ These are not modest phrasings of positive results. They are gaps.
   is left open, because it is open.
 - **Task quality.** The benchmark reports a contract, not an outcome. No
   baseline, no control group.
-- **Real-repository breadth.** The reproducible slice is one synthetic demo
-  project plus one real private pilot target. It is not a representative
+- **Real-repository breadth.** The reproducible public slice is one synthetic
+  demo project. Owner-operated adoption findings now span three private
+  repositories, but their contents and runs are not public fixtures and no
+  independent operator has reproduced them. This is not a representative
   sample of engineering work.
 
 ## Where the bounded claims live
@@ -151,19 +161,17 @@ Ordered, with the manual steps marked. Nothing here runs itself.
 
 1. `python -m pytest` and the site gate (`npm --prefix site run gate:site`)
    both green on the release commit.
-2. **Done 2026-07-27:** version set to `0.1.0` in
-   [`pyproject.toml`](../../pyproject.toml) and dated in
-   [`CHANGELOG.md`](../../CHANGELOG.md). The two sections that both
-   described 0.1.0 - an `[Unreleased]` one holding the last round and a
-   `[0.1.0] - unreleased` one holding the initial extraction - were merged,
-   because nothing had shipped between them.
+2. Set the release version in [`pyproject.toml`](../../pyproject.toml), move
+   the completed entries from `[Unreleased]` into a dated version in
+   [`CHANGELOG.md`](../../CHANGELOG.md), and update current-version wording in
+   README, the claims register and the site claim manifest.
 3. `python scripts/eif_release.py` clean, including the clean-environment
    install.
-4. **Done 2026-07-27, owner credentials:** annotated tag `v0.1.0` pushed and
-   the [GitHub Release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.1.0)
-   published with the wheel and source distribution produced and validated
-   by `scripts/eif_release.py`. Uploading the same artifacts to a package
-   index is a separate owner decision and is not part of this release.
+4. **Owner credentials:** push the annotated tag matching the version and
+   publish the GitHub Release with the wheel and source distribution produced
+   and validated by `scripts/eif_release.py`. Uploading the same artifacts to
+   a package index is a separate owner decision and is not part of a GitHub
+   release.
 5. **Done 2026-07-27:** the repository is public, and
    [`.github/workflows/pages.yml`](../../.github/workflows/pages.yml)
    publishes `site/` to GitHub Pages on any change under `site/`. The
@@ -216,5 +224,5 @@ is. The release process is this file's job.
 
 **Still open, as a separate owner decision:** no artifact is on a package
 index, so `pip install engineering-intelligence-framework` does not resolve.
-The GitHub release and source installation are the supported 0.1.0
+The GitHub release and source installation are the supported 0.2.5
 distribution paths.

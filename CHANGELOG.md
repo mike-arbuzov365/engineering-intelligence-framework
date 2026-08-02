@@ -15,10 +15,33 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-08-02
+
+Professional workflows now reach the agent that is expected to use them.
+This release adds explicit professional-profile starters, closes the missing
+agent-skill discovery step, and makes the framework repository's structural
+graph reproducible without indexing generated package mirrors.
+
 ### Added
 
+- **Installable professional profile starters.** `eifctl workspace profile
+  list/install` now copies a reviewed starter into a private workspace without
+  overwriting workspace-owned files or assigning any project. The initial
+  catalog contains focused graphic-design and software-project-onboarding
+  profiles, plus a thin agent skill for creating a custom profile.
+
+- **Matched instruction-value rule (D-19).** Claims that an EIF instruction
+  improves an agent now require the same task to be compared with and without
+  the instruction under matched conditions. Compliance alone is not counted
+  as improvement; verified result quality is.
+
+- **Repository Graphify scope.** A tracked `.graphifyignore` excludes generated
+  package mirrors, site output and demonstrations from the framework graph.
+  The documented zero-cost structural build produces a local ignored graph;
+  source files remain authority.
+
 - **`core/policies/failure-patterns.md`** - three failure patterns promoted
-  from the first real adoption's retro (preo-web, 2026-07-22..2026-08-02,
+  from the first real private adoption's retro (2026-07-22..2026-08-02,
   three repositories). Each is listed only because it repeated; single
   occurrences stayed local as notes.
 
@@ -35,7 +58,27 @@ of the entry rather than a footnote.
   Every entry carries the cheapest check that catches it, because a pattern
   only recognisable in hindsight is not yet actionable.
 
+### Changed
+
+- **Professional profile assignment is explicit and fail-fast.** `eifctl new`
+  accepts `--profile` with `--registry`, and both new-project and existing-
+  project registration reject an unknown workspace profile before creating a
+  project or changing the registry. Installed starters become workspace-owned
+  content and are never overwritten automatically.
+
 ### Fixed
+
+- **Package synchronization retained removed files forever.** The generated
+  `_impl/` and `resources/` trees are still required wheel inputs, but their
+  synchronizer now reports stale files in `--check` mode and prunes them during
+  a normal sync. The 159 planned copies are byte-identical to their canonical
+  sources and no unplanned package file is retained.
+
+- **Manual rollback left agent-visible skill loaders behind.** The pinned
+  synchronizer now has an explicit `--remove-generated` mode that deletes only
+  marker-owned loaders before `.eif/` is removed; hand-authored adapter skills
+  remain untouched. The adoption rollback test again restores the exact
+  pre-install tree.
 
 - **Shipped skills never reached the agent.** `eif_init.py` copied
   `skills/` into a project's `.eif/runtime/skills/` and stopped. Every
@@ -47,7 +90,7 @@ of the entry rather than a footnote.
 
   The failure is silent by construction: a missing skill raises nothing, so
   the agent never learns the workflow exists and the project looks like it
-  chose not to use it. Found in a real adoption (preo-web, 2026-08-02) where
+  chose not to use it. Found in a real private adoption (2026-08-02) where
   one of eleven loaders existed. The absent `run-execution-packet` meant
   execution packets were run without the playbook that forbids stopping
   between sessions; absent `run-retro`, `knowledge-ingest` and
@@ -55,16 +98,28 @@ of the entry rather than a footnote.
   never ran a retro" and "the knowledge base stopped being fed" - three
   symptoms, one cause.
 
-  `scripts/eif_sync_skills.py` generates the loaders. A project-owned skill
-  of the same name always wins, and a loader without the generated marker is
-  never overwritten, so an override survives upgrades. Covered by
-  `scripts/tests/test_sync_skills.py` (10 checks), registered in
-  `run_all.py`.
+  `scripts/eif_sync_skills.py` generates the loaders automatically during
+  init/upgrade and again after private-workspace materialization. Selection is
+  project skill over workspace skill over public EIF skill; the loader points
+  to the selected source instead of copying it. A loader without the generated
+  marker is never overwritten. `doctor` reports missing, stale and deselected
+  generated loaders. Covered by the 13-check sync suite plus installation and
+  workspace-fleet journeys.
 
   This is the same shape as the 0.2.1 fix for suites that shipped without
   being registered in the test inventory: something existed, and nothing
   carried it the last step to where it would actually run. Worth treating as
   a class rather than two incidents.
+
+### Known limitations
+
+- Professional profiles remain experimental within 0.x. Installation and
+  project assignment are explicit; EIF does not infer a profession from a
+  repository or silently alter a private workspace.
+- The repository Graphify graph is a local structural navigation index, not
+  semantic evidence and not a release artifact.
+- The package remains distributed through GitHub Releases rather than PyPI,
+  and fleet apply remains preflighted but non-atomic across repositories.
 
 ## [0.2.4] - 2026-07-29
 
@@ -878,7 +933,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.4...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.5...HEAD
+[0.2.5]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.5
 [0.2.4]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.4
 [0.2.3]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.3
 [0.2.2]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.2

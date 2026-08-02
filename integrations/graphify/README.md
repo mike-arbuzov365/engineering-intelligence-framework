@@ -40,6 +40,25 @@ Copy and review
 worktrees; EIF never derives repository identity from a directory name. The
 manifest also declares source, semantic and excluded path prefixes.
 
+### This framework repository
+
+The framework checkout has a tracked `.graphifyignore`. It excludes the
+website, demonstrations and the generated package mirrors under
+`src/engineering_intelligence_framework/{_impl,resources}`. Those mirrors are
+required wheel inputs, but indexing them beside their canonical sources would
+duplicate nodes and distort navigation.
+
+Build the local, zero-cost structural graph with:
+
+```text
+graphify extract . --code-only --no-cluster
+graphify cluster-only . --no-label --no-viz
+graphify export html
+```
+
+The result stays under ignored `graphify-out/`. Source files remain authority;
+the graph is a local navigation index and can be rebuilt from the tracked scope.
+
 ## Artifact metadata
 
 Every accepted graph has a sidecar with:

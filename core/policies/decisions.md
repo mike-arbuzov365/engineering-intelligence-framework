@@ -322,6 +322,34 @@ by integration". Done once, 2026-07-27, with
 `gh api --method POST repos/<owner>/<repo>/pages -f build_type=workflow`,
 and recorded in the workflow so it is not rediscovered from a failing run.
 
+### D-19: Instruction value requires a matched behavioral comparison
+**Status: ratified 2026-08-02 (owner decision).** A claim that an EIF
+instruction improves agent behavior requires the same task to be evaluated
+with and without that instruction while holding the model, settings, input,
+evaluator and budget constant. Mode order is randomized for a real batch.
+
+Instruction compliance is not itself the outcome. "Better" means a better
+verified result: correctness first, then false claims, review findings and
+rework, with cost reported beside quality. A bounded single attempt remains
+an existence proof and must not be generalized into an improvement claim.
+
+## Provisional
+
+### D-20: Public professional starters become private workspace content
+**Status: provisional, in effect 2026-08-02.** Public EIF may ship a small
+catalog of professional profile starters and an explicit installer. Installing
+a starter copies it into an L2 private workspace; that copy becomes
+workspace-owned, may be customized and is never silently replaced by a later
+public release.
+
+This does not create another intelligence layer or a second framework
+distribution. No starter is active by default, installation never assigns a
+profile to a project, and project connection remains an explicit owner choice.
+A profile must add recurring profession-specific value rather than duplicate
+core EIF. The software-development starter therefore adds repository onboarding
+only; normal engineering work remains in the core workflows. Ratification waits
+for a real cross-machine designer adoption.
+
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08

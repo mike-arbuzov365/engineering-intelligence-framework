@@ -187,10 +187,18 @@ def main() -> int:
         # --- 3. Runtime materialization ---
         bundle = inst / ".eif" / "runtime"
         results.append(check("3. runtime bundle materialized", bundle.is_dir() and (bundle / "eif_search_knowledge.py").exists()))
+        results.append(check("3. skill synchronizer is part of the pinned runtime", (bundle / "eif_sync_skills.py").is_file()))
 
         # --- 4. Adapter entrypoint generation ---
         claude_md = inst / "CLAUDE.md"
         results.append(check("4. CLAUDE.md generated (Claude Code's real entrypoint)", claude_md.exists() and "<!-- EIF:BEGIN" in claude_md.read_text(encoding="utf-8")))
+        generated_skill = inst / ".claude" / "skills" / "run-execution-packet" / "SKILL.md"
+        results.append(check(
+            "4. init makes framework skills discoverable without a separate manual step",
+            generated_skill.is_file()
+            and ".eif/runtime/skills/run-execution-packet/SKILL.md"
+            in generated_skill.read_text(encoding="utf-8"),
+        ))
 
         # --- 5. Knowledge index generation ---
         knowledge = inst / "knowledge"
@@ -332,6 +340,26 @@ def main() -> int:
         # --- 24. Runtime integrity verification, clean state ---
         verify_clean = run([str(bundle / "eif_verify_runtime.py"), "--framework-root", str(bundle), "--instance-path", str(inst)])
         results.append(check("24. eif_verify_runtime.py passes on a clean, untouched instance", verify_clean.returncode == 0, verify_clean.stdout + verify_clean.stderr))
+
+        generated_skill.unlink()
+        verify_missing_skill = run([str(bundle / "eif_verify_runtime.py"), "--framework-root", str(bundle), "--instance-path", str(inst)])
+        results.append(check(
+            "24. doctor detects a selected skill that the agent cannot discover",
+            verify_missing_skill.returncode != 0
+            and "run-execution-packet" in verify_missing_skill.stdout
+            and "agent skill discovery" in verify_missing_skill.stdout,
+            verify_missing_skill.stdout + verify_missing_skill.stderr,
+        ))
+        repair_skills = run([
+            str(bundle / "eif_sync_skills.py"),
+            "--instance-path", str(inst),
+            "--adapter", "claude-code",
+        ])
+        results.append(check(
+            "24. the pinned synchronizer repairs agent skill discovery",
+            repair_skills.returncode == 0 and generated_skill.is_file(),
+            repair_skills.stdout + repair_skills.stderr,
+        ))
 
         # --- 25. Corrupt runtime detection ---
         target = bundle / "eif_locale.py"

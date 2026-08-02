@@ -195,6 +195,19 @@ def evaluate(instance: Path, cfg: dict, runner: FakeRunner | None = None, *, ava
 
 def unit_results() -> list[bool]:
     results: list[bool] = []
+    ignore_text = (FRAMEWORK_ROOT / ".graphifyignore").read_text(encoding="utf-8")
+    results.append(check(
+        "framework Graphify scope excludes generated package mirrors",
+        all(
+            path in ignore_text
+            for path in (
+                "/src/engineering_intelligence_framework/_impl/",
+                "/src/engineering_intelligence_framework/resources/",
+                "/site/",
+                "/examples/",
+            )
+        ),
+    ))
     with tempfile.TemporaryDirectory(prefix="eif-graphify-test-") as raw_tmp:
         instance, baseline = make_repo(Path(raw_tmp))
         metadata_path = instance / "graphify-out" / "eif-graph-metadata.json"

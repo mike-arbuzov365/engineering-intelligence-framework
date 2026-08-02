@@ -102,6 +102,7 @@ from eif_validate_frontmatter import (  # noqa: E402
 from eif_generate_index import build_index, render as render_index  # noqa: E402
 from eif_preflight import run_preflight, determine_index_action, MANAGED_INDEX_MARKER  # noqa: E402
 from eif_paths import validate_instance_relative_path, validate_index_inside_root, PathPolicyError  # noqa: E402
+from eif_sync_skills import sync as sync_agent_skills  # noqa: E402
 
 try:
     import yaml
@@ -256,6 +257,7 @@ BUNDLE_SCRIPTS = [
     "eif_rtk_telemetry.py",
     "eif_privacy_scan.py",
     "eif_check_links.py",
+    "eif_sync_skills.py",
     "requirements.txt",
 ]
 # NOT bundled, deliberately: eif_init.py itself (you always run the
@@ -1841,6 +1843,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{prefix}{gi_action if gi_action != 'update-block' else 'update'} .gitignore (EIF-managed block)")
         print(f"{prefix}{ga_action if ga_action != 'update-block' else 'update'} .gitattributes (EIF-managed block)")
         print(f"{prefix}{index_action} knowledge index ({index_message})")
+        print(f"{prefix}sync selected skills into the {adapter} discovery directory")
         print(msg(framework_root, locale, "init_complete", path=instance_path))
         print("[dry-run] no files were written.")
         return 0
@@ -2088,6 +2091,26 @@ def main(argv: list[str] | None = None) -> int:
         print(f"eif-init: transaction failed and was rolled back: {e}", file=sys.stderr)
         return 1
 
+    # Skill loaders are derived pointers outside the hashed runtime bundle.
+    # Generate them only after the canonical runtime transaction commits: the
+    # selected source paths must already exist on disk. The sync is
+    # idempotent, preserves hand-authored adapter skills and removes only its
+    # own stale loaders. A failure is loud because an installed-but-invisible
+    # skill is the exact FP-001 failure this bridge exists to prevent.
+    try:
+        skills_written, skills_skipped, skills_removed = sync_agent_skills(
+            instance_path,
+            adapter,
+        )
+    except (OSError, ValueError) as exc:
+        print(
+            "eif-init: managed runtime committed, but agent skill activation "
+            f"failed: {exc}. Repair with `python .eif/runtime/"
+            f"eif_sync_skills.py --instance-path . --adapter {adapter}`.",
+            file=sys.stderr,
+        )
+        return 1
+
     # Post-commit validation is a sanity check on what's now live, not part
     # of the transaction itself (the transaction already guarantees atomicity).
     rc = validate_config_mode(framework_root, config_path)
@@ -2110,6 +2133,17 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{verb} old entrypoint {old_entry_path.name} (adapter switch {old_adapter!r} -> {adapter!r})")
     print(f"{gi_action} .gitignore (EIF-managed block)")
     print(f"{ga_action} .gitattributes (EIF-managed block)")
+    print(
+        msg(
+            framework_root,
+            locale,
+            "skills_synced",
+            written=len(skills_written),
+            preserved=len(skills_skipped),
+            removed=len(skills_removed),
+        )
+    )
+    print(msg(framework_root, locale, "agent_restart_required"))
 
     if index_content is not None:
         print(f"{index_action} knowledge index at {knowledge_index_path} ({index_row_count} row(s))")

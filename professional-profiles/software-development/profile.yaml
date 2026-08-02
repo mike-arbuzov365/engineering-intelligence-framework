@@ -1,0 +1,19 @@
+# Public starter. The installed private-workspace copy is user-owned.
+schema_version: 1
+name: software-development
+description: Evidence-based onboarding of a software repository without duplicating EIF's core engineering workflow.
+framework:
+  requires: '>=0.2.5,<0.3.0'
+artifacts:
+- kind: playbook
+  name: software-project-onboarding
+  path: playbooks/software-project-onboarding.md
+  mode: default
+- kind: skill
+  name: onboard-software-project
+  path: skills/onboard-software-project
+  mode: default
+- kind: template
+  name: software-project-baseline
+  path: templates/software-project-baseline.md
+  mode: default

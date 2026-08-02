@@ -409,6 +409,18 @@ def main() -> int:
         # ---------------------------------------------------------------
         # 9. install and rollback restore the exact previous state
         # ---------------------------------------------------------------
+        cleanup_loaders = run(
+            [
+                str(inst3 / ".eif" / "runtime" / "eif_sync_skills.py"),
+                "--instance-path",
+                str(inst3),
+                "--adapter",
+                "claude-code",
+                "--remove-generated",
+            ]
+        )
+        if cleanup_loaders.returncode != 0:
+            print(cleanup_loaders.stdout + cleanup_loaders.stderr, file=sys.stderr)
         import shutil as _shutil
         _shutil.rmtree(inst3 / ".eif")
         # Order matters, and this is the second instance of the gap the

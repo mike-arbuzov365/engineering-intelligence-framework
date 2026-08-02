@@ -17,6 +17,7 @@ from ._impl.eif_init import (
     hash_file,
     verify_staged_bundle,
 )
+from ._impl.eif_sync_skills import sync as sync_agent_skills
 from .workspace_contract import (
     WorkspaceContractError,
     dump_yaml,
@@ -33,6 +34,27 @@ FAULT_ENV = "EIF_WORKSPACE_TEST_FAIL_AFTER"
 
 class WorkspaceMaterializationError(WorkspaceContractError):
     pass
+
+
+def _activate_selected_skills(project: Path) -> dict[str, list[str]]:
+    """Refresh the active adapter's loaders after workspace resolution."""
+    try:
+        config = read_yaml(
+            project / ".eif" / "config.yaml",
+            "eif-config.schema.json",
+            "project config",
+        )
+        adapter = config["adapter"]["name"]
+        written, preserved, removed = sync_agent_skills(project, adapter)
+    except (KeyError, OSError, ValueError, WorkspaceContractError) as exc:
+        raise WorkspaceMaterializationError(
+            f"cannot activate selected agent skills: {exc}"
+        ) from exc
+    return {
+        "written": written,
+        "preserved": preserved,
+        "removed": removed,
+    }
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -405,6 +427,8 @@ def materialize_workspace(
     # marked all N already-connected projects stale and forced a
     # re-materialization plus a commit in each, for a byte-identical bundle.
     if not plan["changed"]:
+        if not dry_run:
+            plan["skill_activation"] = _activate_selected_skills(project)
         return plan
 
     if not allow_dirty_project and not _project_is_clean(project):
@@ -463,6 +487,7 @@ def materialize_workspace(
         shutil.rmtree(runtime_next, ignore_errors=True)
         lock_next.unlink(missing_ok=True)
         raise
+    plan["skill_activation"] = _activate_selected_skills(project)
     return plan
 
 

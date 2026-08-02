@@ -20,6 +20,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from eif_sync_skills import (  # noqa: E402
     GENERATED_MARKER,
     discover_runtime_skills,
+    discover_selected_skills,
+    remove_generated_loaders,
     sync,
 )
 
@@ -63,21 +65,58 @@ def main() -> int:  # noqa: PLR0915
             )
         )
 
-    # --- A project-owned skill is never overwritten. Without this nobody can
-    # safely adapt a skill, because the next upgrade would erase it. ---
+    # --- A project-owned skill becomes the selected source. The adapter still
+    # needs a loader: merely skipping the framework loader leaves a canonical
+    # project skill just as invisible as the original runtime-only bug. ---
     with tempfile.TemporaryDirectory() as td:
         instance = Path(td)
         runtime_skill(instance, "plan-execution-packet")
-        canonical = instance / "docs" / "skills" / "plan-execution-packet"
+        canonical = instance / "skills" / "plan-execution-packet"
         canonical.mkdir(parents=True)
-        (canonical / "SKILL.md").write_text("project version", encoding="utf-8")
+        (canonical / "SKILL.md").write_text(
+            "---\nname: plan-execution-packet\ndescription: Project planning.\n---\n",
+            encoding="utf-8",
+        )
 
         written, skipped, _ = sync(instance, "claude-code")
+        loader = instance / ".claude" / "skills" / "plan-execution-packet" / "SKILL.md"
         results.append(
             check(
-                "project-owned skill wins over the generated loader",
-                written == [] and skipped == ["plan-execution-packet"],
-                f"written={written} skipped={skipped}",
+                "project-owned skill wins and remains agent-visible through a loader",
+                written == ["plan-execution-packet"]
+                and skipped == []
+                and "skills/plan-execution-packet/SKILL.md" in loader.read_text(encoding="utf-8"),
+                f"written={written} skipped={skipped} loader={loader.read_text(encoding='utf-8')}",
+            )
+        )
+
+    # --- A workspace profile may specialize the public skill set without
+    # copying it into each project. Project scope still wins over workspace. ---
+    with tempfile.TemporaryDirectory() as td:
+        instance = Path(td)
+        runtime_skill(instance, "design-review", "Framework review.")
+        workspace = instance / ".eif" / "workspace-runtime" / "skills" / "design-review"
+        workspace.mkdir(parents=True)
+        (workspace / "SKILL.md").write_text(
+            "---\nname: design-review\ndescription: Workspace design review.\n---\n",
+            encoding="utf-8",
+        )
+        selected = discover_selected_skills(instance)
+        sync(instance, "codex")
+        loader = instance / ".agents" / "skills" / "design-review" / "SKILL.md"
+        results.append(
+            check(
+                "pinned workspace skill replaces the public skill and is discoverable",
+                selected == [
+                    (
+                        "design-review",
+                        "Workspace design review.",
+                        ".eif/workspace-runtime/skills/design-review/SKILL.md",
+                    )
+                ]
+                and ".eif/workspace-runtime/skills/design-review/SKILL.md"
+                in loader.read_text(encoding="utf-8"),
+                f"selected={selected}",
             )
         )
 
@@ -145,6 +184,47 @@ def main() -> int:  # noqa: PLR0915
                 written == ["knowledge-lint"]
                 and not (instance / ".claude" / "skills" / "knowledge-lint").exists(),
                 f"written={written}",
+            )
+        )
+
+    # --- A deselected generated loader must not stay callable forever. ---
+    with tempfile.TemporaryDirectory() as td:
+        instance = Path(td)
+        runtime_skill(instance, "obsolete")
+        sync(instance, "claude-code")
+        runtime_manifest = instance / ".eif" / "runtime" / "skills" / "obsolete" / "SKILL.md"
+        runtime_manifest.unlink()
+        runtime_manifest.parent.rmdir()
+        written, skipped, removed = sync(instance, "claude-code")
+        results.append(
+            check(
+                "generated loader is removed when its selected source disappears",
+                written == []
+                and skipped == []
+                and removed == ["obsolete"]
+                and not (instance / ".claude" / "skills" / "obsolete").exists(),
+                f"written={written} skipped={skipped} removed={removed}",
+            )
+        )
+
+    # --- Manual uninstall removes only files carrying EIF's marker. ---
+    with tempfile.TemporaryDirectory() as td:
+        instance = Path(td)
+        runtime_skill(instance, "run-retro")
+        sync(instance, "claude-code")
+        custom = instance / ".claude" / "skills" / "custom" / "SKILL.md"
+        custom.parent.mkdir(parents=True)
+        custom.write_text("hand written", encoding="utf-8")
+        removed = remove_generated_loaders(instance, "claude-code")
+        results.append(
+            check(
+                "manual uninstall removes generated loaders only",
+                removed == ["run-retro"]
+                and not (
+                    instance / ".claude" / "skills" / "run-retro"
+                ).exists()
+                and custom.read_text(encoding="utf-8") == "hand written",
+                f"removed={removed}",
             )
         )
 

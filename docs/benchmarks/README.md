@@ -1,5 +1,18 @@
 # Benchmarks
 
+## The question
+
+For the same task, model, settings, evaluator and budget, does the agent
+produce a better verified outcome with an EIF instruction than without it?
+Modes A and B are the matched comparison for that question. "Better" means
+correctness first, then fewer false claims, review findings and rework, with
+cost reported beside quality. Merely following an instruction more literally
+is not an improvement if the result is no better.
+
+A comparison must keep the source input identical, record both attempts and
+randomize mode order for a real batch. One attempt per cell is an existence
+proof only; it cannot support a general improvement claim.
+
 ## Status: one bounded real-agent pilot published (D-010)
 
 The quality-per-token benchmark harness (`scripts/eif_benchmark.py`) is
@@ -41,7 +54,7 @@ deliberately single-shot (one API call per attempt, not a multi-tool
 agentic loop), reading the task prompt, `CLAUDE.md` (mode B only), and
 `src/*.py`/`tests/*.py`, and reporting DeepSeek's own token usage. A prior
 round's harness self-tests against a fake, deterministic agent remain in
-place and unaffected (`scripts/tests/test_benchmark.py`, 60/60 checks;
+place and unaffected (`scripts/tests/test_benchmark.py`, 59/59 checks;
 `scripts/tests/test_benchmark_mode_b.py`, 29/29 checks) - those prove the
 harness mechanics; this real run proves the end-to-end pilot.
 

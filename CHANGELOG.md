@@ -15,6 +15,26 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+### Added
+
+- **`core/policies/failure-patterns.md`** - three failure patterns promoted
+  from the first real adoption's retro (preo-web, 2026-07-22..2026-08-02,
+  three repositories). Each is listed only because it repeated; single
+  occurrences stayed local as notes.
+
+  `FP-001 shipped but never wired` is the one with framework evidence on both
+  sides: it caused the skill-loader bug fixed below, and it had already caused
+  the 0.2.1 fix for test suites that shipped without being registered in the
+  run inventory. The class had happened twice here and was never named, so the
+  second occurrence looked like a fresh accident.
+
+  `FP-002 the specification was met and the result was wrong` and
+  `FP-003 verification that does not reproduce the consumer` each have three
+  occurrences from the same period.
+
+  Every entry carries the cheapest check that catches it, because a pattern
+  only recognisable in hindsight is not yet actionable.
+
 ### Fixed
 
 - **Shipped skills never reached the agent.** `eif_init.py` copied

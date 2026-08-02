@@ -1,8 +1,11 @@
 ---
 type: failure_pattern
 status: validated
+evidence: OBSERVED
+source: retro
 confidence: high
 created: 2026-08-02
+review_after: 2026-11-02
 scope: framework
 ---
 

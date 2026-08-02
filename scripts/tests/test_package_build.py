@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Real, executed packaging tests for the installable eifctl package - not
+"""Release-only exhaustive packaging tests for the installable eifctl package - not
 inspection of source files, but building an actual wheel, installing it
 into a genuinely clean virtualenv (no framework checkout on PATH, a venv
 path AND a project path each containing a space and a non-ASCII
 character), and running every eifctl subcommand as a real subprocess
 against it.
 
-This suite is intentionally slower than the others (building a wheel and
-creating venvs takes real seconds) - see run_all.py, which runs it like
-every other suite, just slower.
+This suite is intentionally slower than the ordinary package smoke: it builds
+wheel + sdist, creates two clean environments, reinstalls, corrupts package
+state deliberately, and exercises every adapter/integration/package boundary.
+It is deliberately excluded from run_all.py and runs once before a release.
+For normal package-relevant work use test_package_smoke.py instead.
 
 Usage:
     python scripts/tests/test_package_build.py
@@ -38,11 +40,16 @@ def check(name: str, condition: bool, detail: str = "") -> bool:
     return condition
 
 
-def run(cmd: list[str], cwd: Path | None = None, env: dict | None = None) -> subprocess.CompletedProcess:
+def run(
+    cmd: list[str],
+    cwd: Path | None = None,
+    env: dict | None = None,
+    timeout_s: float | None = None,
+) -> subprocess.CompletedProcess:
     full_env = {**os.environ, **env} if env else None
     return subprocess.run(
         cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True, encoding="utf-8", errors="replace",
-        env=full_env,
+        env=full_env, timeout=timeout_s,
     )
 
 
@@ -312,6 +319,7 @@ def main() -> int:
             "--project-name", "new-project",
             "--adapter", "codex",
             "--locale", "uk",
+            "--profile", "graphic-design",
             "--registry", str(registry_path),
         ], cwd=tmp_root)
         results.append(check(
@@ -384,6 +392,21 @@ def main() -> int:
             "two-axis project update can be committed cleanly",
             commit_update.returncode == 0,
             commit_update.stdout + commit_update.stderr,
+        ))
+        designer_doctor = run([
+            str(eifctl_exe), "doctor", "--instance-path", str(new_project),
+        ], cwd=tmp_root)
+        results.append(check(
+            "wheel-installed designer project reports its active agent context",
+            designer_doctor.returncode == 0
+            and "instruction: AGENTS.md (codex)" in designer_doctor.stdout
+            and "profile: graphic-design" in designer_doctor.stdout
+            and "review-graphic-design-delivery" in designer_doctor.stdout
+            and "run-graphic-design-project" in designer_doctor.stdout
+            and "project memory: managed at knowledge; index knowledge/index.md "
+            "(not created yet)"
+            in designer_doctor.stdout,
+            designer_doctor.stdout + designer_doctor.stderr,
         ))
         detach_plan = run([
             str(eifctl_exe), "projects", "detach", "new-project",

@@ -70,6 +70,69 @@ def _check_installed_package_consistency(instance_path: Path, resources_root: Pa
 DEFER_WORKSPACE_FLAG = "--defer-workspace-check"
 
 
+def _read_mapping(path: Path) -> dict:
+    try:
+        value = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError):
+        return {}
+    return value if isinstance(value, dict) else {}
+
+
+def _agent_context_summary(instance_path: Path) -> list[str]:
+    """Describe the context an agent will actually receive in this project.
+
+    The shared verifier remains authoritative for validity. This helper is a
+    concise, best-effort explanation after those checks pass, not a second
+    validator and not a new persisted "harness" object.
+    """
+    eif_dir = instance_path / ".eif"
+    config = _read_mapping(eif_dir / "config.yaml")
+    framework_lock = _read_mapping(eif_dir / "framework.lock.yaml")
+    workspace_lock = _read_mapping(eif_dir / "workspace.lock.yaml")
+
+    config_adapter = config.get("adapter") or {}
+    locked_adapter = framework_lock.get("adapter") or {}
+    adapter = locked_adapter.get("name") or config_adapter.get("name") or "unknown"
+    entrypoint = locked_adapter.get("entrypoint") or "unknown"
+
+    workspace = workspace_lock.get("workspace") or {}
+    profile = workspace.get("profile") or "none (core EIF only)"
+    manifest = (workspace_lock.get("bundle") or {}).get("manifest") or []
+    profile_skills = sorted(
+        {
+            str(item.get("name"))
+            for item in manifest
+            if isinstance(item, dict)
+            and item.get("kind") == "skill"
+            and item.get("name")
+        }
+    )
+
+    knowledge = config.get("knowledge") or {}
+    knowledge_root = knowledge.get("root") or "unknown"
+    knowledge_index = knowledge.get("index_path") or "unknown"
+    if knowledge.get("managed", True):
+        index_exists = (
+            knowledge_index != "unknown"
+            and (instance_path / str(knowledge_index)).is_file()
+        )
+        index_status = "ready" if index_exists else "not created yet"
+        memory = (
+            f"managed at {knowledge_root}; index {knowledge_index} "
+            f"({index_status})"
+        )
+    else:
+        memory = f"external/unmanaged at {knowledge_root}"
+
+    return [
+        "eifctl doctor: active agent context",
+        f"  instruction: {entrypoint} ({adapter})",
+        f"  profile: {profile}",
+        f"  profile skills: {', '.join(profile_skills) if profile_skills else 'none'}",
+        f"  project memory: {memory}",
+    ]
+
+
 def run(argv: list[str]) -> int:
     # `eifctl projects upgrade` runs the framework axis first and the
     # workspace axis immediately after, in one coordinated pass. Without this
@@ -95,6 +158,12 @@ def run(argv: list[str]) -> int:
         # the last line a user saw while the command exited non-zero. This
         # line is the authoritative verdict for the command as a whole.
         if rc == 0:
+            # The internal framework-first half of `projects upgrade` may
+            # deliberately defer a stale workspace check until the next axis.
+            # Do not label that not-yet-verified workspace context as active.
+            if not defer_workspace:
+                for line in _agent_context_summary(instance_path):
+                    print(line)
             print(f"eifctl doctor: PASS {instance_path}")
         else:
             print(f"eifctl doctor: FAILED {instance_path} - see the checks above")

@@ -88,7 +88,7 @@ SUITES = [
     "test_check_licenses.py",
     "test_benchmark.py",
 ]
-# test_package_build.py is deliberately NOT in SUITES: it needs `build` +
+# Package tests are deliberately NOT in SUITES: they need `build` +
 # `hatchling`, which are packaging-build tooling, not a runtime dependency
 # of EIF itself - they do not belong in scripts/requirements.txt (that
 # would misrepresent the dependency model this repo's own SBOM/license
@@ -96,9 +96,11 @@ SUITES = [
 # requirements.txt and calls run_all.py, so putting it in SUITES would
 # fail every one of those jobs with "No module named build" - a real
 # mistake made and caught here (the "vertical-slice" job failed exactly
-# this way the first time this suite was added). Run it directly:
-#     pip install build hatchling && python scripts/tests/test_package_build.py
-# - which is exactly what .github/workflows/ci.yml's package-build job does.
+# this way the first time the exhaustive suite was added). Run the single-wheel
+# smoke during ordinary package work and the exhaustive suite once at release:
+#     pip install build hatchling
+#     python scripts/tests/test_package_smoke.py
+#     python scripts/tests/test_package_build.py  # release only
 
 # One standardized line per suite. Anchored so a suite that changes its human
 # summary text cannot be mis-parsed - a missing line becomes UNKNOWN, not 0.

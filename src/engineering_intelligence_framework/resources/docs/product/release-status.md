@@ -61,21 +61,23 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.2.5` in [`pyproject.toml`](../../pyproject.toml) is dated
+- **Version.** `0.2.6` in [`pyproject.toml`](../../pyproject.toml) is dated
   2026-08-02 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
   GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.5)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.6)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
-- **0.2.5 closes the professional-workflow delivery gap.** Public skills are
-  synchronized to the active agent's real discovery directory during init,
-  upgrade and workspace materialization. The package also ships two explicit
-  professional-profile starters: graphic-design and software-project
-  onboarding. Installing one copies it into the private workspace without
-  assigning a project or overwriting workspace-owned content.
+- **0.2.6 makes the graphic-design profile usable for everyday work.** The
+  generated instruction now routes light, structured and packet work; bounded
+  edits and exports no longer require a full brief or closeout. `doctor`
+  reports the active instruction, profile, profile skills and honest project-
+  memory status. A new one-wheel package smoke covers the exact Codex +
+  `graphic-design` installation path without running the exhaustive release
+  package suite during ordinary work. The profile and automatic skill
+  discovery introduced in 0.2.5 remain the base of this path.
 - **0.2.1 through 0.2.4 came from real walkthroughs, not synthetic ones.** The
   0.2.0 path was run end to end on two private repositories on Windows. It
   found that the published `eifctl init <path>` command did not exist, that a
@@ -96,10 +98,11 @@ the page does not make: no timing figure appears anywhere on it.
   `scripts/tests/test_package_build.py` had failed on 0.2.0 through 0.2.3.
   They are fixed in 0.2.4, and the product defect they were masking - a
   version probe that could not start being reported as a configuration error -
-  is fixed with them. That suite still runs only through `run_all.py` and
-  `release-check.yml`, which is `workflow_dispatch` only. Nothing about this
-  release changes that, and it remains the most likely place for the next
-  silent regression.
+  is fixed with them. The exhaustive suite is deliberately excluded from
+  `run_all.py`; it runs directly at the local release gate or from the
+  `workflow_dispatch`-only `release-check.yml` fallback. Ordinary
+  package-relevant changes now have a separate one-wheel smoke path, so the
+  exhaustive suite is no longer the first packaging check an agent reaches.
 - **Not on a package index.** No artifact has been uploaded to PyPI or any
   other index. `pip install engineering-intelligence-framework` does not
   resolve.
@@ -224,5 +227,5 @@ is. The release process is this file's job.
 
 **Still open, as a separate owner decision:** no artifact is on a package
 index, so `pip install engineering-intelligence-framework` does not resolve.
-The GitHub release and source installation are the supported 0.2.5
+The GitHub release and source installation are the supported 0.2.6
 distribution paths.

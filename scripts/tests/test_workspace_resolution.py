@@ -2,6 +2,8 @@
 """Profile resolution, policy mode and override checks."""
 from __future__ import annotations
 
+import contextlib
+import io
 import sys
 import tempfile
 from pathlib import Path
@@ -305,14 +307,28 @@ def main() -> int:
                 and "credential" not in lock_text.casefold(),
             )
         )
+        doctor_output = io.StringIO()
+        with contextlib.redirect_stdout(doctor_output):
+            doctor_rc = cli.main(["doctor", "--instance-path", str(project)])
+        doctor_text = doctor_output.getvalue()
         results.append(
             check(
                 "fresh materialization verifies and project doctor passes",
-                verify_workspace_materialization(project) == []
-                and cli.main(
-                    ["doctor", "--instance-path", str(project)]
-                )
-                == 0,
+                verify_workspace_materialization(project) == [] and doctor_rc == 0,
+                doctor_text,
+            )
+        )
+        results.append(
+            check(
+                "project doctor reports the active agent context",
+                "instruction: AGENTS.md (codex)" in doctor_text
+                and "profile: default" in doctor_text
+                and "profile skills: planning" in doctor_text
+                and "project memory: managed at knowledge; index knowledge/index.md "
+                "(not created yet)"
+                in doctor_text
+                and "eifctl doctor: active agent context" in doctor_text,
+                doctor_text,
             )
         )
 

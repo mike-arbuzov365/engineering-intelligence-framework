@@ -15,7 +15,7 @@
       "id": "CLM-02",
       "summary": "An eleven-command installable wheel, including private-workspace creation and guarded two-axis project updates, passed bounded local package evidence; it is available on GitHub Releases but not on PyPI.",
       "status": "OBSERVED",
-      "allowedWording": "EIF v0.2.5 is available as a GitHub release wheel. It has 11 commands, can install explicit professional-profile starters into a private workspace, connect private project instances, and plan or apply public-framework and private-workspace updates as separate provenance axes after every target passes preflight.",
+      "allowedWording": "EIF v0.2.6 is available as a GitHub release wheel. It has 11 commands, can install explicit professional-profile starters into a private workspace, connect private project instances, and plan or apply public-framework and private-workspace updates as separate provenance axes after every target passes preflight.",
       "limitations": "Not published to PyPI; workspace and project creation are local only; fleet apply is preflighted but not atomic across repositories; workspace profiles remain experimental within 0.x. The v0.2.0 wheel carried the same command count but its documented existing-repository command did not run, and a fresh Windows clone failed doctor on line endings alone; both were found by an owner walkthrough on real repositories and fixed in v0.2.1.",
       "forbiddenWording": ["Published on PyPI.", "Production-ready.", "Atomic fleet migration.", "Creates and pushes a GitHub repository."],
       "source": "docs/product/claims-evidence.md - row \"An installable eifctl package works without a framework git checkout, including project lifecycle operations and a full synthetic-task journey\""

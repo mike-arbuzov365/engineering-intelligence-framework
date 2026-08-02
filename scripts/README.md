@@ -44,16 +44,15 @@ Validation and CI-gate scripts:
 | [`eif_check_knowledge_delta.py`](eif_check_knowledge_delta.py) | Classifies a PR body's Knowledge Delta section as `meaningful` / `mechanical` / `empty` - a bare "does the heading exist" check always passes because the PR template always has the heading | CI |
 | [`eif_merge_pr.py`](eif_merge_pr.py) | Controlled merge entrypoint - genericized port of the private instance's `merge-pr.ps1` pattern. Re-verifies all CI checks are green, Knowledge Delta is meaningful, and review state is clean, then merges pinned to the verified head SHA. Requires the `gh` CLI. | Manual (`python scripts/eif_merge_pr.py --pr N --dry-run` to check without merging); not wired into an agent-side hook guard yet - the one adapter that exists (Claude Code) ships no hook scripts, see [`adapters/README.md`](../adapters/README.md) |
 | [`eif_check_licenses.py`](eif_check_licenses.py) | Checks the SBOM-declared dependency closure's (`sbom.cdx.json`, default) or the live interpreter's (`--environment`, opt-in) licenses against [`core/policies/license-policy.json`](../core/policies/license-policy.json) - blocks GPL/AGPL-family and undeclared licenses, checks `requirements.txt` is fully pinned, and (default mode only) fails if the SBOM's pinned-package versions disagree with `requirements.txt` | CI (Windows + Ubuntu, default mode) |
-| [`sync_package_sources.py`](sync_package_sources.py) | Syncs the canonical `scripts/eif_*.py` implementation + framework resource trees into `src/engineering_intelligence_framework/` byte-for-byte, so the installable package's bundled copies never silently fork from their source of truth. `--check` verifies without writing. | Manual after any change to a synced file; CI (`package-build` job, via `test_package_build.py`) |
+| [`sync_package_sources.py`](sync_package_sources.py) | Syncs the canonical `scripts/eif_*.py` implementation + framework resource trees into `src/engineering_intelligence_framework/` byte-for-byte, so the installable package's bundled copies never silently fork from their source of truth. `--check` verifies without writing. | Manual after any change to a synced file; package smoke and release package gate |
 | [`eif_release.py`](eif_release.py) | Builds the sdist and wheel, validates both against what a package index requires (`twine check --strict`, installed into a throwaway environment rather than required on the host), installs the built wheel into a clean virtualenv and runs `eifctl version` from it. Prints the publish commands and stops: it never uploads, because publication takes owner credentials and is an owner decision. `--require-final-version` refuses a `.dev`/`rc` version; `--skip-index-check` for an offline run. | Manual before a technical preview or release |
 
 ## Development / testing
 
-38 suites in `scripts/tests/run_all.py`, all self-contained (use
-`tempfile`/subprocess, don't touch this repository's own tracked files) -
-18 of them run via [`scripts/tests/run_all.py`](tests/run_all.py) (one
-process each, a single ok/FAIL summary line per suite), which needs only
-`scripts/requirements.txt` installed:
+The canonical inventory contains 38 self-contained suites in
+[`scripts/tests/run_all.py`](tests/run_all.py). They use
+`tempfile`/subprocess, do not touch this repository's tracked files, and need
+only `scripts/requirements.txt`:
 
 ```bash
 python scripts/tests/run_all.py
@@ -67,22 +66,38 @@ fixtures must fail. Run `python scripts/eif_privacy_scan.py --repo .`
 before committing anything that references a real project, path, or
 person.
 
-`test_package_build.py` is deliberately **not** in
-`run_all.py`'s list and needs its own extra tooling
-(`pip install build hatchling`) - it builds a real wheel, installs it into
-a clean venv (path containing a space and non-ASCII text), and runs every
-`eifctl` subcommand end-to-end (also against a project path containing a
-space and non-ASCII text). Putting `build`/`hatchling` in
+Package checks are deliberately **not** in `run_all.py` and need their own
+extra tooling (`pip install build hatchling`). Putting `build`/`hatchling` in
 `scripts/requirements.txt` would misrepresent them as a runtime dependency
-of EIF itself, and would fail every *other* CI job that installs only
-`requirements.txt` and calls `run_all.py` - a mistake made and caught
-while building the package (see `.github/workflows/ci.yml`'s
-`package-build` job, which installs both and runs this suite directly):
+of EIF itself.
+
+Use the smallest gate that answers the current question:
+
+| When | Command | Scope |
+|---|---|---|
+| Routine change | `python scripts/tests/smoke.py` | Source critical path; this is the only automatic GitHub PR test suite. |
+| Package-relevant change | `python scripts/tests/test_package_smoke.py` | One wheel, one clean environment, one Codex `graphic-design` project, one `doctor`; prints each stage and enforces bounded command timeouts. |
+| Release only | `python scripts/tests/test_package_build.py` | Exhaustive wheel + sdist, two clean environments, reinstall, all adapters/integrations, corruption and installed-package journeys. |
+
+Install the build tools once, then use the short package smoke during ordinary
+work:
 
 ```bash
 pip install build hatchling
+python scripts/tests/test_package_smoke.py
+```
+
+Run the exhaustive package suite once, locally, at the release gate:
+
+```bash
 python scripts/tests/test_package_build.py
 ```
+
+Do not run both the full `run_all.py` inventory and the exhaustive package
+suite for an ordinary small change. Select focused suites plus package smoke;
+reserve both exhaustive gates for a release. The manual GitHub release workflow
+remains an owner-triggered fallback, but local execution spends no Actions
+minutes.
 
 ## Dependency update ownership
 

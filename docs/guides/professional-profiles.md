@@ -12,13 +12,23 @@ A professional profile is a reusable private-workspace selection of rules,
 skills, playbooks, templates and shared knowledge for a recurring discipline.
 It is not a new EIF layer and it is not the agent harness.
 
+In this guide, **agent harness** means the active combination already assembled
+for one project: the generated persistent agent instruction, adapter, selected
+professional profile, discoverable skills, project memory and verification.
+It is a useful name for the whole working context, not a new file, schema or
+configuration layer. `eifctl doctor` reports that context after validating it.
+This makes activation inspectable; it is not evidence that the instruction
+improves design quality. D-19 still requires the same task to be compared with
+and without the instruction under matched conditions before making that claim.
+
 Public EIF ships starter profiles. Installation copies a starter into the
 private workspace, where it becomes user-owned and will not be overwritten by
 future releases.
 
 ## Available starters
 
-- `graphic-design`: brief, direction approval, production review and delivery;
+- `graphic-design`: bounded everyday work plus brief, direction approval,
+  production review and delivery for larger projects;
 - `software-development`: repository onboarding only, because core EIF already
   governs normal planning, implementation, verification and learning.
 
@@ -35,7 +45,19 @@ and writes no project. Review and commit the private workspace after install.
 
 ## Designer laptop setup
 
-1. Install the current EIF release wheel and the chosen supported agent.
+The public EIF repository does not need to be cloned for normal use. Download
+the wheel attached to the [current GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases),
+install that local file, and verify the command:
+
+```bash
+python -m pip install ./engineering_intelligence_framework-<version>-py3-none-any.whl
+eifctl version
+```
+
+Clone the public repository only when the owner intends to develop EIF itself.
+The private workspace created below is the designer's own local EIF repository.
+
+1. Install the current EIF release wheel and Codex.
 2. Create a private workspace:
 
    ```bash
@@ -45,8 +67,15 @@ and writes no project. Review and commit the private workspace after install.
      --locale uk
    ```
 
-3. Review and commit the workspace bootstrap. Install `graphic-design`, review
-   the files, then commit that change.
+3. Review and commit the workspace bootstrap. Install `graphic-design`, check
+   the resulting workspace, review the files, then commit that change:
+
+   ```bash
+   eifctl workspace profile install graphic-design \
+     --workspace-path ../designer-eif
+   eifctl workspace doctor --workspace-path ../designer-eif
+   ```
+
 4. Initialize or adopt each exact designer project, then register it with the
    selected profile:
 
@@ -80,10 +109,62 @@ and writes no project. Review and commit the private workspace after install.
    ```
 
 6. Start a new agent session in each project so it loads the selected skills.
+   Run this inside the project once at the start of that session:
+
+   ```bash
+   eifctl doctor --instance-path .
+   ```
+
+   A healthy Codex project reports `AGENTS.md`, profile `graphic-design`, the
+   profile skills and the project memory location.
+
+Each connected path is a project repository, not a broad asset library. Keep
+images, fonts and editable sources in the project or its approved asset system;
+store decisions and reusable lessons in EIF project memory, not binary assets.
+Turn a plain folder into a repository only with its owner's approval.
 
 Machine paths remain in the ignored local locations file. When a private
 workspace is cloned to another laptop, run `eifctl projects add <local-path>`
 for each project to restore that machine's mapping; do not commit those paths.
+
+## One-time Codex setup prompt
+
+Use this prompt in a Codex session outside the projects when setting up a new
+designer laptop. Replace only the paths; the agent should read the guide rather
+than rely on copied framework rules:
+
+```text
+Set up the current released EIF for a graphic designer who uses Codex.
+Follow this guide as the source of truth:
+https://github.com/mike-arbuzov365/engineering-intelligence-framework/blob/v<eifctl-version>/docs/guides/professional-profiles.md#designer-laptop-setup
+
+Use the wheel from the current GitHub release, not PyPI, and use the guide from
+the matching release tag. Create a private workspace at <workspace-path>,
+install the graphic-design professional profile, and connect only these exact
+project repositories: <project-paths>.
+
+Before writing, inspect the paths and existing Git state. Do not connect broad
+asset folders, overwrite existing project instructions, create remotes or push
+anything. Initialize or adopt each approved project with the Codex adapter,
+register it with profile graphic-design, apply the workspace snapshot, then run
+the workspace doctor and each project's eifctl doctor. Report the active
+instruction, profile, profile skills, project memory and anything that still
+needs an owner decision.
+```
+
+This prompt is needed only for bootstrap because no project instruction exists
+yet. After setup, Codex automatically reads the generated `AGENTS.md` whenever
+a session starts inside the project. EIF also exposes the selected skills in
+Codex's discovery directory, so ordinary design prompts do not need to repeat
+the framework process.
+
+Do not copy the full EIF rules into Codex personal memory: that creates a stale
+second source. If a personal reminder is desired, keep only this pointer:
+
+```text
+Inside an EIF project, follow its AGENTS.md and verify the active project
+context with eifctl doctor at the start of a fresh session.
+```
 
 ## Create a custom profile
 

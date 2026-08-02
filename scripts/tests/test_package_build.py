@@ -404,7 +404,7 @@ def main() -> int:
             and "review-graphic-design-delivery" in designer_doctor.stdout
             and "run-graphic-design-project" in designer_doctor.stdout
             and "project memory: managed at knowledge; index knowledge/index.md "
-            "(not created yet)"
+            "(deferred until the first durable knowledge artifact)"
             in designer_doctor.stdout,
             designer_doctor.stdout + designer_doctor.stderr,
         ))

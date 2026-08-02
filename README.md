@@ -6,7 +6,7 @@ EIF gives AI coding agents persistent engineering knowledge, explicit source
 identity, controlled execution workflows, quality gates and token-efficient
 tool integrations.
 
-> **v0.2.6, locally validated and distributed through GitHub Releases.**
+> **v0.2.7, locally validated and distributed through GitHub Releases.**
 > Apache-2.0, installable as a wheel or from a clone, and not published to
 > PyPI. EIF is the public extraction of a private production instance that
 > has run this methodology daily since May 2026. It is a 0.x release: what is
@@ -37,7 +37,7 @@ Download the wheel attached to the latest public release and install that
 local file:
 
 ```bash
-python -m pip install ./engineering_intelligence_framework-0.2.6-py3-none-any.whl
+python -m pip install ./engineering_intelligence_framework-0.2.7-py3-none-any.whl
 ```
 
 To install from a checkout instead:
@@ -49,7 +49,10 @@ python -m pip install .
 ```
 
 Create a private workspace. This is a user-owned EIF project inside L2, not
-a copy or fork of the public framework:
+a copy or fork of the public framework. Run the command from the parent
+directory and pass a target path that does not exist yet; even an empty target
+directory is refused so EIF can move a fully verified staging tree into place
+atomically:
 
 ```bash
 eifctl workspace new ../eif-control --adapter codex --locale uk
@@ -172,7 +175,7 @@ that isn't runnable is worse than not having the row. -->
 | `.eif/config.yaml` schema | **Available** | Validated the same way as frontmatter; `eifctl init` and the standalone `eif_init.py` generate it with real provenance |
 | Vertical-slice plan | **Built (experimental)** | [`docs/guides/vertical-slice.md`](docs/guides/vertical-slice.md) (design) + [`examples/demo-workspace/`](examples/demo-workspace/) (the actual, reproduced slice - see its README) |
 | Controlled merge entrypoint | **Available**, backed by repository branch protection | [`scripts/eif_merge_pr.py`](scripts/eif_merge_pr.py) re-checks policy before merging. GitHub branch protection independently requires the consolidated PR smoke check, an up-to-date branch, linear history, resolved conversations, and admin enforcement. No adapter hook is claimed as a merge guard. |
-| Installable package (`eifctl`) | **0.2.6 released, Ratified distribution (D-05/D-08), GitHub artifact only** | The wheel attached to GitHub Releases, or `pip install .` from a clone, gives 11 tested subcommands (`init`, `new`, `upgrade`, `projects`, `workspace`, `doctor`, `search`, `render`, `privacy-scan`, `validate`, `version`) without requiring a framework checkout. It is not published to PyPI. [`scripts/eif_release.py`](scripts/eif_release.py) builds and validates the sdist and wheel and installs the wheel into a clean virtual environment; package-index upload remains an explicit owner action. See [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md). |
+| Installable package (`eifctl`) | **0.2.7 released, Ratified distribution (D-05/D-08), GitHub artifact only** | The wheel attached to GitHub Releases, or `pip install .` from a clone, gives 11 tested subcommands (`init`, `new`, `upgrade`, `projects`, `workspace`, `doctor`, `search`, `render`, `privacy-scan`, `validate`, `version`) without requiring a framework checkout. It is not published to PyPI. [`scripts/eif_release.py`](scripts/eif_release.py) builds and validates the sdist and wheel and installs the wheel into a clean virtual environment; package-index upload remains an explicit owner action. See [`docs/product/claims-evidence.md`](docs/product/claims-evidence.md). |
 | Bootstrap, private workspace and project updates (`eifctl workspace`, `new`, `init`, `upgrade`, `projects`) | **Available (experimental)** | Creates a local private workspace, creates or adopts project repositories, and safely refreshes connected instances. Registry v2 keeps logical identities separate from ignored machine-local paths. Fleet plans compare public framework and private workspace provenance before any write; apply remains sequential and detach removes only workspace-managed artifacts. GitHub remote creation, arbitrary cross-version config migration and fleet-wide atomic rollback are not claimed. See [`docs/guides/project-lifecycle.md`](docs/guides/project-lifecycle.md) and [`docs/architecture/instance-contract.md`](docs/architecture/instance-contract.md). |
 | Professional profile starters | **Available (experimental)** | `eifctl workspace profile list/install` explicitly copies a public starter into a private workspace without overwriting local content or assigning projects. The initial catalog contains [`graphic-design`](professional-profiles/graphic-design/profile.yaml), with a light path for bounded everyday work and a structured path for larger deliveries, and [`software-development`](professional-profiles/software-development/profile.yaml); custom creation uses [`create-professional-profile`](skills/create-professional-profile/SKILL.md). See [`docs/guides/professional-profiles.md`](docs/guides/professional-profiles.md). |
 | Instance self-verification (`eif_verify_runtime.py`) | **Available (experimental)** | [`scripts/eif_verify_runtime.py`](scripts/eif_verify_runtime.py) - bundled "doctor" command: config/lock schema validity, manifest digest self-consistency, per-file bundle hash verification, missing/unexpected-file classification, config/adapter/lock/entrypoint consistency, provenance (dirty/asserted) notes, `CLAUDE.md`/`.gitignore` marker integrity, and drift between `.eif/config.yaml` and the generated entrypoint block or knowledge index (a hand-edited config or index with no regeneration fails with a specific fix instruction, not a silent pass). After validation, `eifctl doctor` also summarizes the active instruction, professional profile, profile skills and project memory - all from the instance's own bundle, no framework checkout needed. |
@@ -188,7 +191,7 @@ that isn't runnable is worse than not having the row. -->
 
 **Quickstart scope.** Cloning this repository gets you the ontology, schemas,
 governance docs, `eifctl` source package, operating layer, and one reproduced
-vertical slice. Version 0.2.6 is an early 0.x release, not a representative
+vertical slice. Version 0.2.7 is an early 0.x release, not a representative
 sample of real engineering tasks. Follow
 [`examples/demo-workspace/README.md`](examples/demo-workspace/README.md)
 for the exact commands, real captured output, and known limitations. See

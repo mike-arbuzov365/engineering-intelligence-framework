@@ -116,7 +116,11 @@ def _agent_context_summary(instance_path: Path) -> list[str]:
             knowledge_index != "unknown"
             and (instance_path / str(knowledge_index)).is_file()
         )
-        index_status = "ready" if index_exists else "not created yet"
+        index_status = (
+            "ready"
+            if index_exists
+            else "deferred until the first durable knowledge artifact"
+        )
         memory = (
             f"managed at {knowledge_root}; index {knowledge_index} "
             f"({index_status})"

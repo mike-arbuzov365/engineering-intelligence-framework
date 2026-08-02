@@ -308,7 +308,13 @@ def create_workspace(
 ) -> None:
     target = target.resolve()
     if target.exists():
-        raise WorkspaceError(f"target already exists: {target}")
+        raise WorkspaceError(
+            f"target already exists: {target}. `workspace new` requires a path "
+            "that does not exist so it can move a fully verified staging tree "
+            "into place atomically. If this directory is empty, leave it first, "
+            "remove it from its parent, then re-run the command from the parent "
+            "directory"
+        )
     if not target.parent.exists():
         raise WorkspaceError(f"parent directory does not exist: {target.parent}")
 

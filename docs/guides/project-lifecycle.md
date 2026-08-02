@@ -62,7 +62,11 @@ until a release is actually published to PyPI.
 
 ## Create a private workspace
 
-Create the workspace locally:
+Create the workspace locally. Run from its parent and pass a child path that
+does not exist yet. `workspace new` also refuses an existing empty directory:
+it builds and verifies a temporary sibling tree, then moves the finished tree
+into the target atomically. If an agent started inside an empty target, it must
+leave that directory and remove it before retrying from the parent.
 
 ```bash
 eifctl workspace new ../eif-control \
@@ -78,6 +82,11 @@ instance, then adds the minimal workspace configuration, empty registry,
 default profile, ignored local-state directory, and migration ledger. It
 does not create a remote, choose visibility, push, publish, or register the
 workspace as one of its own projects.
+
+An installed wheel uses package metadata and resource hashes as framework
+provenance. EIF does not inspect Git above the Python environment, so an
+unrelated host application's checkout cannot make the installed package appear
+dirty.
 
 Review and commit the bootstrap in a private repository before connecting
 projects. Keep the generated default profile minimal until a real project

@@ -111,6 +111,7 @@ def main() -> int:
 
     with tempfile.TemporaryDirectory(prefix="eif-package-smoke-test-") as raw_tmp:
         tmp = Path(raw_tmp)
+
         source = tmp / "source"
         clean_checkout_export(FRAMEWORK_ROOT, source)
         dist = tmp / "dist"
@@ -143,7 +144,37 @@ def main() -> int:
             print(f"EIF-RESULT: passed={passed} total={len(results)}")
             return 1
 
-        env_dir = tmp / "venv"
+        # Reproduce the real designer-laptop failure from 0.2.6 without
+        # letting the fixture's Git metadata affect the wheel build itself:
+        # the installed environment lives below an unrelated dirty host
+        # checkout, while the built artifact remains outside that checkout.
+        host_root = tmp / "host-application"
+        host_root.mkdir()
+        host_init = timed(
+            "create dirty host checkout fixture",
+            lambda: bounded_run(
+                ["git", "init", "-b", "main"], cwd=host_root, timeout_s=30
+            ),
+        )
+        (host_root / "host-application.txt").write_text(
+            "host-owned state\n", encoding="utf-8"
+        )
+        host_committed = (
+            host_init.returncode == 0
+            and commit(host_root, "Seed unrelated host application")
+        )
+        (host_root / "unrelated-work-in-progress.txt").write_text(
+            "dirty host change\n", encoding="utf-8"
+        )
+        results.append(
+            check(
+                "unrelated dirty host checkout fixture is ready",
+                host_committed,
+                host_init.stdout + host_init.stderr,
+            )
+        )
+
+        env_dir = host_root / "venv"
         venv_create = timed(
             "create virtual environment",
             lambda: bounded_run(
@@ -185,8 +216,8 @@ def main() -> int:
             )
         )
 
-        workspace = tmp / "designer-eif"
-        project = tmp / "design-project"
+        workspace = host_root / "designer-eif"
+        project = host_root / "design-project"
         workspace_new = timed(
             "create designer workspace",
             lambda: bounded_run(
@@ -202,7 +233,7 @@ def main() -> int:
                     "--locale",
                     "uk",
                 ],
-                cwd=tmp,
+                cwd=host_root,
                 timeout_s=90,
             ),
         )
@@ -218,7 +249,7 @@ def main() -> int:
                     "--workspace-path",
                     str(workspace),
                 ],
-                cwd=tmp,
+                cwd=host_root,
                 timeout_s=60,
             ),
         )
@@ -228,16 +259,25 @@ def main() -> int:
                 "commit designer workspace",
                 lambda: commit(workspace, "Bootstrap designer EIF workspace"),
             )
+        workspace_lock = workspace / ".eif" / "framework.lock.yaml"
+        workspace_lock_text = (
+            workspace_lock.read_text(encoding="utf-8")
+            if workspace_lock.is_file()
+            else ""
+        )
         results.append(
             check(
-                "designer workspace and profile initialize",
+                "designer workspace ignores the dirty unrelated host checkout",
                 workspace_new.returncode == 0
                 and profile_install.returncode == 0
-                and workspace_committed,
+                and workspace_committed
+                and "source_type: installed-package" in workspace_lock_text
+                and "dirty:" not in workspace_lock_text,
                 workspace_new.stdout
                 + workspace_new.stderr
                 + profile_install.stdout
-                + profile_install.stderr,
+                + profile_install.stderr
+                + workspace_lock_text,
             )
         )
 
@@ -260,7 +300,7 @@ def main() -> int:
                     "--registry",
                     str(registry),
                 ],
-                cwd=tmp,
+                cwd=host_root,
                 timeout_s=90,
             ),
         )
@@ -306,7 +346,7 @@ def main() -> int:
             "doctor",
             lambda: bounded_run(
                 [str(eifctl), "doctor", "--instance-path", str(project)],
-                cwd=tmp,
+                cwd=host_root,
                 timeout_s=60,
             ),
         )
@@ -318,7 +358,9 @@ def main() -> int:
                 and "profile: graphic-design" in doctor.stdout
                 and "review-graphic-design-delivery" in doctor.stdout
                 and "run-graphic-design-project" in doctor.stdout
-                and "project memory: managed at knowledge" in doctor.stdout,
+                and "project memory: managed at knowledge" in doctor.stdout
+                and "deferred until the first durable knowledge artifact"
+                in doctor.stdout,
                 doctor.stdout + doctor.stderr,
             )
         )

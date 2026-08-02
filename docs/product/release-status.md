@@ -61,15 +61,21 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.2.6` in [`pyproject.toml`](../../pyproject.toml) is dated
+- **Version.** `0.2.7` in [`pyproject.toml`](../../pyproject.toml) is dated
   2026-08-02 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
   GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.6)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.7)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
+- **0.2.7 closes findings from the first cross-machine designer setup.** An
+  installed EIF wheel no longer inherits Git state from an unrelated host
+  checkout above its Python environment. Workspace creation now gives usable
+  recovery guidance for an already-created empty target, and `doctor` names a
+  managed-but-empty knowledge index as deferred until the first durable
+  artifact. The bounded wheel smoke reproduces the dirty ancestor checkout.
 - **0.2.6 makes the graphic-design profile usable for everyday work.** The
   generated instruction now routes light, structured and packet work; bounded
   edits and exports no longer require a full brief or closeout. `doctor`
@@ -227,5 +233,5 @@ is. The release process is this file's job.
 
 **Still open, as a separate owner decision:** no artifact is on a package
 index, so `pip install engineering-intelligence-framework` does not resolve.
-The GitHub release and source installation are the supported 0.2.6
+The GitHub release and source installation are the supported 0.2.7
 distribution paths.

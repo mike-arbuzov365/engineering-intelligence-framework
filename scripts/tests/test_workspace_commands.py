@@ -2,6 +2,8 @@
 """Synthetic lifecycle checks for `eifctl workspace` and registry v2."""
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import subprocess
 import sys
@@ -14,7 +16,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from engineering_intelligence_framework import cli  # noqa: E402
-from engineering_intelligence_framework.commands import init_cmd  # noqa: E402
 from engineering_intelligence_framework.commands.workspace import (  # noqa: E402
     FAULT_ENV,
     professional_profile_catalog,
@@ -51,13 +52,28 @@ def tree(root: Path) -> dict[str, bytes]:
 
 def main() -> int:
     results: list[tuple[bool, str]] = []
-    real_init_run = init_cmd.run
-    init_cmd.run = lambda argv: real_init_run(  # type: ignore[assignment]
-        [*argv, "--allow-dirty"]
-    )
 
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
+
+        empty_target = root / "existing-empty-workspace"
+        empty_target.mkdir()
+        empty_before = tree(root)
+        empty_error = io.StringIO()
+        with contextlib.redirect_stderr(empty_error):
+            empty_rc = cli.main(["workspace", "new", str(empty_target)])
+        empty_message = empty_error.getvalue()
+        results.append(
+            check(
+                "workspace new explains how to recover from an existing empty target",
+                empty_rc != 0
+                and tree(root) == empty_before
+                and "requires a path that does not exist" in empty_message
+                and "re-run the command from the parent directory" in empty_message,
+                empty_message,
+            )
+        )
+        empty_target.rmdir()
 
         import_probe = root / "import-probe"
         import_probe.mkdir()

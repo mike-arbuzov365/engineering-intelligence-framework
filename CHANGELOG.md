@@ -15,6 +15,57 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+### Added
+
+- **`core/policies/failure-patterns.md`** - three failure patterns promoted
+  from the first real adoption's retro (preo-web, 2026-07-22..2026-08-02,
+  three repositories). Each is listed only because it repeated; single
+  occurrences stayed local as notes.
+
+  `FP-001 shipped but never wired` is the one with framework evidence on both
+  sides: it caused the skill-loader bug fixed below, and it had already caused
+  the 0.2.1 fix for test suites that shipped without being registered in the
+  run inventory. The class had happened twice here and was never named, so the
+  second occurrence looked like a fresh accident.
+
+  `FP-002 the specification was met and the result was wrong` and
+  `FP-003 verification that does not reproduce the consumer` each have three
+  occurrences from the same period.
+
+  Every entry carries the cheapest check that catches it, because a pattern
+  only recognisable in hindsight is not yet actionable.
+
+### Fixed
+
+- **Shipped skills never reached the agent.** `eif_init.py` copied
+  `skills/` into a project's `.eif/runtime/skills/` and stopped. Every
+  adapter reads a different location (`.claude/skills/`, `.agents/skills/`,
+  `.cursor/skills/`, `.hermes/skills/`), documented as OBSERVED evidence in
+  each adapter README, and nothing wrote there. An adopting project
+  therefore received eleven skills and could invoke none of them unless
+  someone hand-wrote a loader per skill.
+
+  The failure is silent by construction: a missing skill raises nothing, so
+  the agent never learns the workflow exists and the project looks like it
+  chose not to use it. Found in a real adoption (preo-web, 2026-08-02) where
+  one of eleven loaders existed. The absent `run-execution-packet` meant
+  execution packets were run without the playbook that forbids stopping
+  between sessions; absent `run-retro`, `knowledge-ingest` and
+  `knowledge-curator` had already surfaced, weeks earlier, as "this project
+  never ran a retro" and "the knowledge base stopped being fed" - three
+  symptoms, one cause.
+
+  `scripts/eif_sync_skills.py` generates the loaders. A project-owned skill
+  of the same name always wins, and a loader without the generated marker is
+  never overwritten, so an override survives upgrades. Covered by
+  `scripts/tests/test_sync_skills.py` (10 checks), registered in
+  `run_all.py`.
+
+  This is the same shape as the 0.2.1 fix for suites that shipped without
+  being registered in the test inventory: something existed, and nothing
+  carried it the last step to where it would actually run. Worth treating as
+  a class rather than two incidents.
+
 ## [0.2.4] - 2026-07-29
 
 Four defects, all of them things that told the operator something untrue.

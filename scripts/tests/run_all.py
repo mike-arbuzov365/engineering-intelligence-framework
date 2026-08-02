@@ -75,6 +75,12 @@ SUITES = [
     "test_codex_adapter.py",
     "test_hermes_adapter.py",
     "test_adapter_switch_matrix.py",
+    # Skills shipped in the bundle but never reached the directory each agent
+    # actually reads, so an adopting project got eleven skills and could
+    # invoke none. Same shape as the unregistered-suite bug noted above:
+    # something existed, nothing carried it the last step. Registered in
+    # 0.2.5 together with scripts/eif_sync_skills.py.
+    "test_sync_skills.py",
     "test_demo_fixtures_fresh.py",
     "test_parity_matrix.py",
     "test_merge_gate.py",

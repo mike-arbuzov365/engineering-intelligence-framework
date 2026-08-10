@@ -204,6 +204,14 @@ def main() -> int:
                     / "skills"
                     / "run-graphic-design-project"
                     / "SKILL.md"
+                ).is_file()
+                and (
+                    workspace
+                    / "workspace"
+                    / "skills"
+                    / "run-graphic-design-project"
+                    / "tests"
+                    / "contract.yaml"
                 ).is_file(),
             )
         )

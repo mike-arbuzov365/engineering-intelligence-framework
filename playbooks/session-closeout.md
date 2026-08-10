@@ -34,6 +34,11 @@ and after.
   that packet's own `07-CLOSEOUT` file, which is filled once, in the
   final session, from the accumulated per-session results.
 
+A physical-chat transition does not close the logical session. Keep its
+checkpoint through same-chat continuation, handoff and compaction. Delete it
+only after the logical session's exit criteria and verification are complete
+and its closeout has captured the evidence.
+
 ## How it connects
 
 - **Before this**: [`session-execution.md`](session-execution.md) - do

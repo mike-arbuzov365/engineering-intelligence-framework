@@ -15,11 +15,22 @@
 | Fonts, links and rights | | |
 | Target-medium preview | | |
 
+## QA scope
+
+- Classification: `changed_only` | `full`
+- Changed inputs/outputs:
+- Shared/global inputs changed:
+- Dependency uncertainty:
+- Rationale:
+- Checks run:
+
 ## Approval
 
 - Selected direction:
 - Final delivery accepted by:
 - Decision date/link:
+- Package/final-delivery scope:
+- Guard result and evidence:
 
 ## Known limits and unfinished work
 

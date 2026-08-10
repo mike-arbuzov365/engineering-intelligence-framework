@@ -67,6 +67,7 @@ A workspace is an EIF project instance with four additional contracts:
 | `.eif/workspace.yaml` | yes, private | Opaque workspace identity and roots for registry, profiles, and workspace content |
 | `.eif/projects.yaml` | yes, private | Registry v2 logical identities, profile selection, status, and declared exceptions, with no machine paths |
 | `.eif/local-state/project-locations.yaml` | no | Machine-local path mapping keyed by stable project ID |
+| `.session-context/<logical-session-id>.md` | no | Atomic rolling checkpoint for an interrupted or handed-off logical session |
 | `workspace/profiles/*.yaml` | yes, private | Deterministic required, default, optional, and override artifact selection |
 
 The enforced schemas are
@@ -77,6 +78,14 @@ and
 [`workspace-profile.schema.json`](../../core/schemas/workspace-profile.schema.json).
 Use `eifctl workspace new|doctor` and `eifctl projects` commands rather than
 hand-editing state during creation, migration, fleet update, or detach.
+
+Session checkpoints have a separate public schema,
+[`session-context.schema.json`](../../core/schemas/session-context.schema.json),
+because they are ephemeral L3 records rather than workspace configuration.
+Use `eifctl session checkpoint|validate|resume-audit|handoff` instead of
+inventing hashes or current Git observations manually. The whole
+`.session-context/` directory is gitignored in initialized projects and should
+be deleted only when its logical session actually closes.
 
 Each connected project receives a generated
 `.eif/workspace.lock.yaml`, validated by

@@ -31,6 +31,7 @@ A project instance is any repository initialized (or adopted) by
 | `.eif/runtime/` | **EIF** (fully regenerated every init/upgrade) | **no** (gitignored - see below) | Pinned *source* bundle of the scripts/schemas/ontology/locales/templates the instance's own commands run against. Still needs `pip install -r .eif/runtime/requirements.txt` - not a self-contained interpreter environment. |
 | `.eif/workspace.lock.yaml` | **EIF workspace materializer** | yes, when connected | Separate private-workspace provenance: opaque workspace identity, revision, selected profile, overrides, exceptions, and artifact hashes. Contains no path or credential. |
 | `.eif/workspace-runtime/` | **EIF workspace materializer** | **no** (gitignored) | Pinned, selected workspace artifacts. Agents consume this copy, never the live workspace checkout. Absent when no workspace is connected or after detach. |
+| `.eif/local-state/design-delivery-approval.yaml` | **project owner** | **no** (gitignored) | Optional exact-scope approval state for current-source `graphic-design` EIF-managed package/final-delivery guard. Missing state means `package_allowed: false`; the model cannot create owner approval. |
 | `CLAUDE.md` (EIF-managed block only) | split: EIF owns the marked block, you own everything else | yes | Agent entrypoint - the `EIF:BEGIN`/`EIF:END` block is regenerated on upgrade, content outside it is never touched |
 | `knowledge/` | **you** | yes | The instance's own knowledge artifacts - never modified by init or upgrade |
 | `.gitignore` (EIF-managed block only) | split, same pattern as CLAUDE.md | yes | Ignores `.eif/runtime/`, `.eif/runtime.next/`, `.eif/runtime.previous/`, `*.bak-*` so the regenerable bundle and backups are never committed by accident |
@@ -114,6 +115,7 @@ The workspace separates committed logical state from machine-local state:
 | `.eif/workspace.yaml` | user | yes, private | Workspace identity plus registry, profile, and content roots |
 | `.eif/projects.yaml` | user | yes, private | Registry v2: stable project IDs, names, selected profiles, status, and declared exceptions, with no filesystem paths |
 | `.eif/local-state/project-locations.yaml` | user/machine | no | Local path mapping keyed by stable project ID |
+| `.session-context/<logical-session-id>.md` | user/machine | no | Rolling, schema-validated continuation state for one logical session |
 | `workspace/profiles/*.yaml` | user | yes, private | Required, default, optional, and explicitly overridden artifact selection |
 | `planning/migration-ledger.md` | user | yes, private | Review record for changes that need project migrations |
 
@@ -154,6 +156,49 @@ review and rollback units.
 `.eif/workspace-runtime/` and `.eif/workspace.lock.yaml`. It preserves
 project-owned content and keeps the logical entry as `detached` unless
 registration removal is explicitly requested.
+
+## Session continuation local state
+
+Session checkpoints are machine-local L3 state, not project knowledge and not
+a fourth architecture layer. Initialized projects ignore `.session-context/`
+through the EIF-managed `.gitignore` block. The public
+[`session-context.schema.json`](../../core/schemas/session-context.schema.json)
+defines the YAML frontmatter of each
+`.session-context/<logical-session-id>.md` file; the localized prose body is
+navigation only.
+
+`eifctl session checkpoint` derives project identity from the validated
+`.eif/config.yaml` and `.eif/framework.lock.yaml`, records source-artifact and
+Git observations, renders the configured locale, and atomically replaces one
+rolling checkpoint. `validate` checks schema, location and source containment.
+`resume-audit` fails closed when project identity, config/lock hashes, the
+source artifact or the recorded Git state no longer matches. `handoff` runs the
+same audit before it prints either a same-chat action or a truthful manual
+fallback. Adapter-specific automatic chat creation is not a core-filesystem
+capability and is never inferred by these commands.
+
+`eifctl projects resolve <id-or-name>` is the companion identity preflight. It
+requires exactly one active registry-v2 entry and exactly one machine-local
+location, then validates the target's config and framework lock and checks
+registry/config/lock identity alignment before returning a path. It does not
+guess among name/ID collisions or incomplete instances.
+
+## Graphic-design delivery approval local state
+
+Version 0.2.8 adds a bounded guard only for EIF-managed `package` and
+`final_delivery` actions. The `graphic-design` profile materializes the
+required `rules/design-delivery-approval.md` rule and a default approval
+template. `eifctl delivery check` verifies the active profile, workspace
+lock/runtime integrity, absence of an exception for the required rule,
+schema-valid local state, `package_allowed: true`, owner, exact scope/action,
+timestamps, expiry, and a contained or HTTPS evidence reference. Any missing,
+invalid, or mismatched condition produces a nonzero result.
+
+The approval origin has `owner_gate` authority; deterministic validation has
+`machine` authority only inside `eifctl delivery check`. The command does not
+intercept an arbitrary external archiver, renderer, upload, or shell command.
+Without a separate verified adapter guard, that broader restriction remains
+`instruction_only`, not machine enforcement.
 
 ## Transactional init/upgrade
 

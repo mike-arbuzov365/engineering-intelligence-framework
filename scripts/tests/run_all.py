@@ -59,6 +59,8 @@ SUITES = [
     "test_vendor_docs_integration.py",
     "test_init.py",
     "test_project_commands.py",
+    "test_session_commands.py",
+    "test_adapter_continuity.py",
     # The private-workspace suites shipped with 0.2.0 but were never added
     # here, so no workflow ran them: ci.yml runs smoke.py, release-check.yml
     # runs this inventory, and neither reached them. Registered in 0.2.1.
@@ -66,6 +68,7 @@ SUITES = [
     "test_workspace_resolution.py",
     "test_workspace_transaction.py",
     "test_workspace_commands.py",
+    "test_delivery_guard.py",
     "test_workspace_fleet.py",
     "test_line_endings.py",
     "test_upgrade_guards.py",
@@ -81,12 +84,15 @@ SUITES = [
     # something existed, nothing carried it the last step. Registered in
     # 0.2.5 together with scripts/eif_sync_skills.py.
     "test_sync_skills.py",
+    "test_skill_contracts.py",
     "test_demo_fixtures_fresh.py",
     "test_parity_matrix.py",
     "test_merge_gate.py",
     "test_format_dependencies.py",
     "test_check_licenses.py",
+    "test_release_environment.py",
     "test_benchmark.py",
+    "test_skill_eval.py",
 ]
 # Package tests are deliberately NOT in SUITES: they need `build` +
 # `hatchling`, which are packaging-build tooling, not a runtime dependency

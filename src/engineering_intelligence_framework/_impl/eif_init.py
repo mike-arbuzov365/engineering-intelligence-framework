@@ -128,6 +128,7 @@ GITIGNORE_BLOCK = (
     ".eif/workspace-runtime.next/\n"
     ".eif/workspace-runtime.previous/\n"
     ".eif/local-state/\n"
+    ".session-context/\n"
     "graphify-out/\n"
     "*.next\n"
     "*.previous\n"

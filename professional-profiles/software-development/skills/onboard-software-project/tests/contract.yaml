@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: onboard-software-project
+  profile: software-development
+  canonical_workflow: professional-profiles/software-development/playbooks/software-project-onboarding.md
+triggers:
+  positive:
+  - id: repository-onboarding
+    prompt: Onboard existing software repository і зафіксуй verified build, test та authority boundaries.
+  negative:
+  - id: implement-known-feature
+    prompt: Реалізуй already planned feature у repository з відомими verified commands.
+references:
+  required:
+  - professional-profiles/software-development/playbooks/software-project-onboarding.md
+evidence:
+  required:
+  - verified build/test commands
+commands:
+  required: []
+stop_conditions:
+  required:
+  - do not create a second software-development process
+forbidden_behavior:
+  required:
+  - do not create a second software-development process
+assertions:
+  manifest_contains:
+  - software-project-onboarding.md
+  canonical_contains:
+  - '# Software project onboarding'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: starter_profile
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

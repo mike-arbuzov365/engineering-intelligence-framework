@@ -64,6 +64,9 @@ runtime loop and its connected tools, policies, state, or feedback.
 | context engineering | контекстна інженерія | Emerging industry usage | Curating and maintaining the information available to the model during inference, including instructions, tools, external data, retrieved knowledge, and message history. |
 | context window | контекстне вікно | Industry-established | The bounded input and generated-token capacity available to a model invocation or model-specific interaction. Do not call it durable memory. |
 | session context | контекст сесії | EIF-defined scope | The working state needed to continue one bounded session: current scope, evidence, decisions, dead ends, and next logical steps. |
+| logical session | логічна сесія | EIF-defined scope | One bounded EIF work unit with a goal, scope, verification criteria and closeout. It may span one or more sequential physical chats. |
+| physical chat | фізичний чат | EIF-defined scope | A runtime conversation container. It is not a methodology layer, durable project memory or a logical-session boundary by itself. |
+| continuation mode | режим продовження | EIF-defined scope | The declared `same_chat`, `new_chat` or `auto` strategy for continuing one logical session. Automatic behavior still requires a verified adapter capability. |
 | compaction | стискання контексту | Industry-established mechanism | Reducing accumulated interaction history into a smaller continuation state. Use the full Ukrainian phrase, not `компактація`. |
 | agent memory | пам'ять агента | Emerging industry usage | An umbrella term for mechanisms that retain or retrieve information across steps or sessions. Always name the actual store and lifecycle when making a technical claim. |
 | retrieval | пошук і підвантаження знань | Industry-established | Finding relevant information and bringing it into the working context before a decision or implementation. Use `пошук` when the shorter form is unambiguous. |
@@ -96,6 +99,7 @@ runtime loop and its connected tools, policies, state, or feedback.
 | checkpoint | контрольна точка | Industry-established | A saved continuation state with completed work, evidence, decisions, open risks, and next steps. It is not automatically validated project knowledge. |
 | handoff | передавання роботи | Industry-established | Transfer of work and its continuation state between people, agents, or sessions. `Передача` is acceptable in general prose; prefer `передавання роботи` in contracts. |
 | long-horizon task | довготривале завдання | Emerging industry usage | Work that spans many agent turns, context compactions, or sessions and therefore needs explicit continuation state and verification. |
+| enforcement level | рівень забезпечення виконання | EIF-defined scope | The declared source of a prohibition: `machine`, `adapter`, `owner_gate` or `instruction_only`. The label limits the claim to the mechanism actually verified. |
 
 ### Governance, evidence, and durable knowledge
 

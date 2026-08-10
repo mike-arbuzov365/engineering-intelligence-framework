@@ -64,6 +64,13 @@ Before the first change:
 If something doesn't match - stop and say so. Do not silently "fix" an
 unexpected starting state.
 
+Before a planned physical-chat transition or manual context compaction, update
+and validate the session's `.session-context/<session-id>.md` checkpoint. A new
+physical chat continues the same logical session; it does not reset scope,
+approval, verification state or the no-touch zone. Native compaction is not a
+source of truth. On resume, compare the checkpoint with the current source
+artifact, project identity and Git state before continuing.
+
 ## Step 4 - Execute against scope
 
 If execution needs more than one action/feedback cycle, fill or reuse the
@@ -82,6 +89,8 @@ Rules:
 - The no-touch zone is not negotiable mid-session.
 - Verification commands are exactly what the task-scope/launch file
   states - not a substitute the agent judges "close enough."
+- `same_chat`, `new_chat` and `auto` follow the capability-based contract in
+  [`HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md#logical-sessions-physical-chats-and-continuation).
 
 Anti-patterns:
 

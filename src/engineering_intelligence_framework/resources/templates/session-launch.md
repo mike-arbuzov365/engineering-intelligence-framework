@@ -18,10 +18,12 @@ session - not the packet's other files directly, and not chat history.
 ```yaml
 ---
 id: SESSION-<NNN>
+logical_session: SESSION-<NNN>
 type: session-launch
 status: prepared
 source_artifact: ../04-ROADMAP-<NNN>-<slug>.md
 session_context: .session-context/<session-id>.md
+continuation_mode: same_chat | new_chat | auto
 depends_on: []
 ---
 ```
@@ -36,6 +38,11 @@ depends_on: []
 2. This project instance's persistent agent-instruction file and any
    directly relevant `knowledge/` artifacts.
 3. Anything the prior session's checkpoint flagged as relevant.
+
+The logical session may span multiple sequential physical chats. The selected
+`continuation_mode` does not change scope, approval or dependency state. Before
+handoff or manual compaction, update and validate `session_context`; native chat
+summaries are not authority.
 
 ## Experience retrieval preflight
 

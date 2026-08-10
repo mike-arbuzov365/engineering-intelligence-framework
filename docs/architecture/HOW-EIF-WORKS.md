@@ -244,6 +244,73 @@ See [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md)
 [`session-closeout.md`](../../playbooks/session-closeout.md) for the
 step-by-step workflow.
 
+### Logical sessions, physical chats and continuation
+
+A logical session is the bounded methodological unit with a goal, scope,
+verification criteria and closeout. A physical chat is only a runtime container
+for part or all of that work. One logical session may continue in the same chat
+or across several sequential chats. This does not create a fourth layer: the
+checkpoint remains ephemeral L3 state and the launch or task artifact remains
+the approved contract.
+
+Structured and packet work keeps one gitignored
+`.session-context/<session-id>.md` checkpoint until logical closeout. The
+checkpoint records mutable progress and observable repository state; it points
+to, rather than duplicates, the approved source artifact. Its authority is
+below verified source and ratified artifacts, but above a host-generated chat
+summary or model recollection. A light task remains file-free by default unless
+it must survive an interruption or a planned handoff.
+
+`continuation_mode` has three values:
+
+- `same_chat` validates the checkpoint, audits the current source and continues
+  in the current physical chat.
+- `new_chat` creates or opens a new chat only through a verified adapter
+  capability. A manual-only adapter instead reports the exact user action.
+- `auto` uses verified automatic create/open when available. Otherwise it
+  preserves both honest choices: continue here or start a new chat manually.
+
+Before any planned handoff or manual context compaction, write and validate the
+checkpoint. Native context compaction is an optional optimization, not a source
+of truth, durable memory or permission to change scope. Automatic compaction
+does not close a logical session. A resumed chat audits project identity, goal,
+scope, no-touch constraints, approvals, decisions, Git state, verification and
+the exact next action against current sources before work continues.
+
+The model-free core implementation is `eifctl session` plus
+[`session-context.schema.json`](../../core/schemas/session-context.schema.json).
+`checkpoint` writes the rolling Markdown record atomically, `validate` checks
+its schema and containment, `resume-audit` compares project/config/lock/source
+and Git observations with current state, and `handoff` prints the selected
+strategy only after that audit passes. `eifctl projects resolve` separately
+maps one registry-v2 ID or exact name through the gitignored local locations
+file and refuses ambiguous, incomplete or identity-drifted projects. These
+commands provide `machine` enforcement for their own checks; opening or reusing
+a physical chat remains adapter-specific and must be labeled separately.
+
+Adapter continuity не моделюється спільним tier. Machine-readable
+[`adapters/parity-matrix.json`](../../adapters/parity-matrix.json) зберігає
+окремі records для `same_chat`, `resume`, `create_new_chat`,
+`open_new_chat`, `auto_submit`, `pre_compact` і `post_compact` разом з
+`enforcement` та `evidence_status`. Поточний source candidate не має жодного
+`auto_action: true`: `--open` fail-closed для всіх чотирьох adapters, а
+Codex candidate link лишається manual-only після inconclusive local canary.
+
+### Enforcement levels
+
+Every prohibition claim must identify what actually supplies the constraint:
+
+- `machine`: an EIF command, schema or other core path fails closed.
+- `adapter`: a named, version-bounded adapter or hook has passing behavioral
+  evidence for the block.
+- `owner_gate`: the action requires explicit human approval.
+- `instruction_only`: the agent is instructed not to act, but no technical
+  block has been verified.
+
+An `instruction_only` constraint is not machine enforcement. Optional adapter
+mechanics may strengthen a core path, but EIF must keep a truthful fallback and
+must not claim capability parity that its tests and canaries do not show.
+
 ## The two loops
 
 Knowledge moves through two loops running at different speeds, and

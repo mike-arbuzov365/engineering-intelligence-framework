@@ -18,6 +18,7 @@ Exit code 1 if the build, the index metadata check or the clean install fails.
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -41,8 +42,18 @@ def record(step: str, ok: bool, detail: str = "") -> bool:
 
 
 def run(cmd: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess:
+    child_env = os.environ.copy()
+    for key in list(child_env):
+        if key.upper() in {"PYTHONPATH", "PYTHONHOME"}:
+            child_env.pop(key)
     return subprocess.run(
-        cmd, cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace"
+        cmd,
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+        env=child_env,
     )
 
 

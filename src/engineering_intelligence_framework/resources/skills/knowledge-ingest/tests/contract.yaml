@@ -1,0 +1,53 @@
+schema_version: 1
+skill:
+  name: knowledge-ingest
+  profile: core
+  canonical_workflow: playbooks/knowledge-ingest.md
+triggers:
+  positive:
+  - id: durable-incident-learning
+    prompt: Перетвори verified incident evidence на durable typed knowledge artifact і онови index.
+  negative:
+  - id: search-existing-knowledge
+    prompt: Знайди вже наявний prior lesson перед початком implementation.
+references:
+  required:
+  - playbooks/knowledge-ingest.md
+evidence:
+  required:
+  - OBSERVED
+commands:
+  required:
+  - scripts/eif_generate_index.py
+stop_conditions:
+  required:
+  - ASSUMED
+forbidden_behavior:
+  required:
+  - rather than deleting it
+assertions:
+  manifest_contains:
+  - knowledge-ingest.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/skill-eval-dry-run.schema.json",
+  "title": "EIF bounded skill eval dry-run result",
+  "description": "Integrity-bound dry-run plan: metrics є null, behavioral outcome DEFERRED до passing owner budget gates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "eval_id",
+    "harness_version",
+    "generated_at",
+    "execution_status",
+    "behavioral_model_runs",
+    "planned_attempts",
+    "execution_order",
+    "owner_gate",
+    "model",
+    "integrity",
+    "graders",
+    "attempts",
+    "claims"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "eval_id": { "type": "string", "minLength": 1 },
+    "harness_version": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "execution_status": { "const": "DEFERRED" },
+    "behavioral_model_runs": { "const": 0 },
+    "planned_attempts": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 12
+    },
+    "execution_order": { "const": "sequential" },
+    "owner_gate": { "type": "object" },
+    "model": { "type": "object" },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["combined_sha256", "source_files"],
+      "properties": {
+        "combined_sha256": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "source_files": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": { "type": "string", "minLength": 1 },
+              "sha256": {
+                "type": "string",
+                "pattern": "^sha256:[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "graders": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind", "status", "evidence"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "kind": { "const": "deterministic" },
+          "status": { "const": "pass" },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "skill",
+          "scenario_id",
+          "mode",
+          "expected_trigger",
+          "prompt_sha256",
+          "contract_sha256",
+          "context",
+          "grader_ids",
+          "outcome",
+          "metrics",
+          "artifacts"
+        ],
+        "properties": {
+          "sequence": { "type": "integer", "minimum": 1, "maximum": 12 },
+          "skill": { "type": "string", "minLength": 1 },
+          "scenario_id": { "type": "string", "minLength": 1 },
+          "mode": { "enum": ["baseline", "treatment"] },
+          "expected_trigger": { "type": "boolean" },
+          "prompt_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "contract_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["skill_available", "manifest_path"],
+            "properties": {
+              "skill_available": { "type": "boolean" },
+              "manifest_path": { "type": ["string", "null"] }
+            }
+          },
+          "grader_ids": {
+            "type": "array",
+            "minItems": 4,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "outcome": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "reason"],
+            "properties": {
+              "status": { "const": "planned_deferred" },
+              "reason": { "const": "hard_zero_cost_boundary_not_confirmed" }
+            }
+          },
+          "metrics": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["input_tokens", "output_tokens", "tool_calls", "wall_time_seconds", "measurement"],
+            "properties": {
+              "input_tokens": { "type": "null" },
+              "output_tokens": { "type": "null" },
+              "tool_calls": { "type": "null" },
+              "wall_time_seconds": { "type": "null" },
+              "measurement": { "const": "not_run" }
+            }
+          },
+          "artifacts": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "forbidden"],
+      "properties": {
+        "allowed": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "forbidden": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

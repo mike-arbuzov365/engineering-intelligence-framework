@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: review-graphic-design-delivery
+  profile: graphic-design
+  canonical_workflow: professional-profiles/graphic-design/playbooks/graphic-design-project.md
+triggers:
+  positive:
+  - id: pre-delivery-review
+    prompt: Перевір finished design exports проти brief перед approval, export або handoff.
+  negative:
+  - id: create-first-direction
+    prompt: Створи перший design direction із ще не затвердженого brief.
+references:
+  required:
+  - professional-profiles/graphic-design/playbooks/graphic-design-project.md
+evidence:
+  required:
+  - actual deliverables
+commands:
+  required: []
+stop_conditions:
+  required:
+  - If no brief exists
+forbidden_behavior:
+  required:
+  - instead of inventing criteria
+assertions:
+  manifest_contains:
+  - graphic-design-project.md
+  canonical_contains:
+  - '# Graphic design project'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: starter_profile
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

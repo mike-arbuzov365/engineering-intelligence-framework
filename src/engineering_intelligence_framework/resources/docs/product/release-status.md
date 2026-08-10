@@ -61,12 +61,12 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.2.7` in [`pyproject.toml`](../../pyproject.toml) is dated
-  2026-08-02 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
+- **Version.** `0.2.8` in [`pyproject.toml`](../../pyproject.toml) is dated
+  2026-08-10 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
   GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.7)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.8)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
@@ -132,6 +132,30 @@ the page does not make: no timing figure appears anywhere on it.
   framework and workspace provenance axes. Detach removes only
   workspace-managed state. See the
   [`project lifecycle guide`](../guides/project-lifecycle.md).
+- **0.2.8 adds bounded session continuity.**
+  `eifctl projects resolve` verifies one registry-v2 identity and local path;
+  `eifctl session checkpoint|validate|resume-audit|handoff` manages a local,
+  gitignored, schema-validated rolling checkpoint. The deterministic journey
+  and one-wheel smoke pass. This does not claim automatic physical-chat
+  creation or improved model memory.
+- Adapter continuity in 0.2.8 has schema-checked capability records and a
+  deterministic manual fallback. Codex automatic open and Hermes Desktop
+  control transfer are not verified, so `--open` fails closed and no prompt
+  is submitted automatically.
+- Version 0.2.8 also adds `eifctl skills check` and 15 local skill contracts.
+  The static checker and installed-wheel smoke pass, but behavioral skill
+  quality, trigger precision, and token/time benefit remain unverified.
+  External skills are not imported.
+- The EIF-021 skill evaluation has an integrity-bound 12-attempt dry-run and
+  a model-versus-script audit, but no behavioral provider run was executed:
+  budget `$0`, hard zero-cost boundary unconfirmed, model runs `0`, status
+  `DEFERRED`.
+- Version 0.2.8 includes a bounded `graphic-design` approval guard. The
+  required profile rule materializes, and `eifctl delivery check` fails closed
+  unless owner-gated scope/action/expiry/evidence match before an EIF-managed
+  `package` or `final_delivery`. This is not a shell hook: arbitrary external
+  export, upload, or package actions remain `instruction_only` without a
+  verified adapter guard. Designer-machine acceptance was not performed.
 - **Adapter scope is frozen** at four adapters - Claude Code, Cursor, Codex
   and Hermes - and all four are supported (D-16, 2026-07-27, retiring the
   two-tier split D-09 recorded). See [`ROADMAP.md`](../../ROADMAP.md).
@@ -233,5 +257,5 @@ is. The release process is this file's job.
 
 **Still open, as a separate owner decision:** no artifact is on a package
 index, so `pip install engineering-intelligence-framework` does not resolve.
-The GitHub release and source installation are the supported 0.2.7
+The GitHub release and source installation are the supported 0.2.8
 distribution paths.

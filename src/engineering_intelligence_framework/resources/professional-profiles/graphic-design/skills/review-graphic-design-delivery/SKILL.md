@@ -17,3 +17,6 @@ description: >
    likely consequence.
 5. Record checks and open issues in
    `.eif/workspace-runtime/templates/design-delivery.md`.
+6. Перед package або final delivery перевірте exact QA scope і виконайте
+   `eifctl delivery check`; не називайте arbitrary external export machine-
+   enforced без verified adapter guard.

@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: knowledge-curator
+  profile: core
+  canonical_workflow: playbooks/knowledge-curator.md
+triggers:
+  positive:
+  - id: ranked-maintenance-backlog
+    prompt: Агрегуй existing knowledge signals у ranked maintenance backlog перед promotion batch.
+  negative:
+  - id: every-session-retro
+    prompt: Після однієї звичайної session автоматично створи retro і нові evidence artifacts.
+references:
+  required:
+  - playbooks/knowledge-curator.md
+evidence:
+  required:
+  - previous findings ledger
+commands:
+  required: []
+stop_conditions:
+  required:
+  - Never merge
+forbidden_behavior:
+  required:
+  - Never push to the default branch
+assertions:
+  manifest_contains:
+  - knowledge-curator.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

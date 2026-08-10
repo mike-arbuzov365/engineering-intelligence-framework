@@ -4,6 +4,7 @@ Slash-command-style skills for AI coding agents.
 
 | Skill | Playbook it wraps |
 |---|---|
+| [`create-professional-profile/`](create-professional-profile/SKILL.md) | `playbooks/professional-profile-creation.md` |
 | [`plan-idea/`](plan-idea/SKILL.md) | `playbooks/idea-planning.md` |
 | [`plan-prd/`](plan-prd/SKILL.md) | `playbooks/product-requirements-planning.md` |
 | [`run-bounded-evidence-loop/`](run-bounded-evidence-loop/SKILL.md) | `playbooks/bounded-evidence-loop.md` |
@@ -20,6 +21,39 @@ Each skill is a thin `<skill-name>/SKILL.md` pointer to its playbook (one
 canonical source per D-007, not a second copy of the workflow) with the
 native `name`/`description` skill-manifest frontmatter agent adapters
 expect.
+
+## Local tested contract
+
+Кожен із 12 core skills має compact `tests/contract.yaml` поруч із
+`SKILL.md`. Три skills у bundled starter profiles мають той самий contract.
+Fixture зберігає positive і negative trigger examples, canonical references,
+required evidence/commands, stop conditions, forbidden behavior,
+deterministic assertions, supporting-file declarations і provenance.
+Canonical workflow prose лишається у playbook, а fixture не копіює його.
+
+Model-free check:
+
+```bash
+eifctl skills check
+```
+
+Command validates frontmatter, JSON Schema, path containment, references,
+script digests/declarations, trigger separation, grounded assertions і
+duplicate canonical prose. Він не виконує supporting scripts, не запускає
+model calls і не встановлює external content. Behavioral eval є окремим,
+owner-budgeted surface лише для material semantic change.
+
+EIF-021 representative pilot має complete deterministic dry-run, але
+behavioral result `DEFERRED`: hard zero-cost boundary не підтверджено й model
+runs дорівнюють `0`. Див.
+[`docs/benchmarks/skill-eval/`](../docs/benchmarks/skill-eval/). Static PASS не
+є quality, trigger-precision, token або time improvement evidence.
+
+Supporting `tests/`, `scripts/`, `references/` та `evals/` materialize разом
+із canonical skill directory. Generated adapter loader лишається compact і
+вказує лише на selected `SKILL.md`; fixtures не входять у normal model
+context. Policy для future external candidates описано в
+[`docs/reference/external-skill-admission.md`](../docs/reference/external-skill-admission.md).
 
 ## Reaching the agent
 

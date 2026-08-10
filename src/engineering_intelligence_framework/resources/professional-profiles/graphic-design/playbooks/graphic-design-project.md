@@ -63,7 +63,24 @@ Before delivery, run only checks relevant to the brief:
 - permission to use fonts, images and other third-party material;
 - accessibility with a real checking method when the brief requires it.
 
+Зафіксуйте `QA scope` як `changed_only` або `full`. `changed_only` допустимий
+лише для localized change без зміни shared font, palette, brand rule, layout
+system, export setting, rights або cross-deliverable input. Якщо shared/global
+input змінився, dependency невідома, change охоплює кілька deliverable
+families або може вплинути на final package, виконайте `full` QA. Це explicit
+classification, не automatic dependency engine.
+
 ## 5. Deliver and retain learning
+
+Перед package або final delivery виконайте fail-closed guard:
+
+```text
+eifctl delivery check --action <package|final_delivery> --scope <exact-scope> --instance-path .
+```
+
+Nonzero result блокує EIF-managed action. Approval state є project-local,
+default `package_allowed: false`; arbitrary external shell/export command не
+має machine enforcement без окремого verified adapter guard.
 
 Complete `templates/design-delivery.md` with editable sources, exports, checks,
 known limits and approval state. A preview alone is not a completed delivery.

@@ -58,6 +58,50 @@ place and unaffected (`scripts/tests/test_benchmark.py`, 59/59 checks;
 `scripts/tests/test_benchmark_mode_b.py`, 29/29 checks) - those prove the
 harness mechanics; this real run proves the end-to-end pilot.
 
+## EIF-021 bounded skill eval: deterministic dry-run
+
+Version 0.2.8 extends the same `eif_benchmark.py` harness with a model-free
+skill-evaluation surface. Manifest
+[`skill-eval/eif-021-manifest.yaml`](skill-eval/eif-021-manifest.yaml) selects
+`run-execution-packet` and `knowledge-search`, three local trigger scenarios
+per skill, and matched `baseline`/`treatment` modes. This is 12 planned
+attempts in strict sequential order, not 12 executed model runs.
+
+Owner gate зафіксовано так:
+
+- additional paid budget: `$0`;
+- hard zero-cost boundary: not confirmed;
+- provider/model/version: `not_approved`;
+- rubric judge: `not_approved`;
+- usage telemetry: required, stop if unavailable;
+- behavioral status: `DEFERRED`;
+- executed model runs: `0`.
+
+Dry-run і integrity validation:
+
+```bash
+python scripts/eif_benchmark.py skill-eval-dry-run \
+  docs/benchmarks/skill-eval/eif-021-manifest.yaml \
+  --out docs/benchmarks/skill-eval/eif-021-dry-run.json
+python scripts/eif_benchmark.py validate-skill-eval \
+  docs/benchmarks/skill-eval/eif-021-dry-run.json
+```
+
+Result artifact
+[`skill-eval/eif-021-dry-run.json`](skill-eval/eif-021-dry-run.json) містить
+лише prompt digests, contract digests, paired context flags, deterministic
+graders, null metrics, explicit defer reason та combined source integrity.
+Raw prompts не дублюються в result. `test_skill_eval.py` доводить matched
+prompt digests, deterministic output, containment, source-digest drift
+detection, budget overflow failure і refusal to impersonate an approved
+provider runner.
+
+Цей dry-run дозволяє сказати лише, що harness, fixtures, graders та bounded
+plan complete. Він не вимірює trigger precision/recall, task quality, token
+cost, latency або benefit. Model-versus-script boundary для всіх 15 current
+skills зафіксовано в
+[`skill-eval/model-vs-script-audit.md`](skill-eval/model-vs-script-audit.md).
+
 ## Executable modes
 
 | Mode | Governance | Structural graph | Shell compression | Status |

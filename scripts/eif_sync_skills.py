@@ -3,7 +3,8 @@
 
 The gap this closes
 -------------------
-EIF ships eleven skills. `adapters/claude-code/README.md` records, as
+На момент виявлення gap EIF постачав одинадцять skills.
+`adapters/claude-code/README.md` records, as
 OBSERVED evidence, that Claude Code discovers skills at
 `.claude/skills/<name>/SKILL.md`. `eif_init.py` copies the framework's
 `skills/` directory into `.eif/runtime/skills/` and stops there.

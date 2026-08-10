@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: run-graphic-design-project
+  profile: graphic-design
+  canonical_workflow: professional-profiles/graphic-design/playbooks/graphic-design-project.md
+triggers:
+  positive:
+  - id: design-deliverable-work
+    prompt: Створи campaign graphic і обери light або structured path за реальним scope.
+  negative:
+  - id: software-repository-onboarding
+    prompt: Знайди build commands і architecture landmarks для нового software repository.
+references:
+  required:
+  - professional-profiles/graphic-design/playbooks/graphic-design-project.md
+evidence:
+  required:
+  - explicit direction choice
+commands:
+  required: []
+stop_conditions:
+  required:
+  - Missing approval
+forbidden_behavior:
+  required:
+  - Do not create variations
+assertions:
+  manifest_contains:
+  - graphic-design-project.md
+  canonical_contains:
+  - '# Graphic design project'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: starter_profile
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

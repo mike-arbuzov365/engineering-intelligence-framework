@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/session-context.schema.json",
+  "title": "EIF session continuity checkpoint frontmatter",
+  "description": "Machine-readable frontmatter for a gitignored .session-context/<logical-session-id>.md rolling checkpoint. The checkpoint is canonical continuation state for a logical session, not a replacement for the source artifact or durable project knowledge.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "artifact_type",
+    "status",
+    "updated_at",
+    "project",
+    "source_artifact",
+    "logical_session",
+    "goal",
+    "scope",
+    "approvals",
+    "decisions",
+    "progress",
+    "verification",
+    "blockers",
+    "failed_approaches",
+    "unresolved_risks",
+    "next_action",
+    "git",
+    "physical_chats"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "artifact_type": { "const": "session_context" },
+    "status": {
+      "type": "string",
+      "enum": ["in_progress", "blocked", "completed"]
+    },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "project": {
+      "type": "object",
+      "required": ["id", "name", "root", "config_path", "config_sha256", "lock_path", "lock_sha256", "adapter"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "root": { "type": "string", "minLength": 1 },
+        "config_path": { "const": ".eif/config.yaml" },
+        "config_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "lock_path": { "const": ".eif/framework.lock.yaml" },
+        "lock_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "adapter": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "source_artifact": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?![A-Za-z]:[\\\\/])(?!.*(?:^|[\\\\/])\\.\\.(?:[\\\\/]|$)).+$"
+        },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "logical_session": {
+      "type": "object",
+      "required": ["id", "continuation_mode", "adapter"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$" },
+        "continuation_mode": {
+          "type": "string",
+          "enum": ["same_chat", "new_chat", "auto"]
+        },
+        "adapter": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "goal": { "type": "string", "minLength": 1 },
+    "scope": {
+      "type": "object",
+      "required": ["in_scope", "no_touch"],
+      "properties": {
+        "in_scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "no_touch": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "approvals": {
+      "type": "object",
+      "required": ["state", "evidence"],
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": ["approved", "pending", "not_required"]
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "approved" } } },
+          "then": { "properties": { "evidence": { "minItems": 1 } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "progress": {
+      "type": "object",
+      "required": ["completed", "changed_artifacts"],
+      "properties": {
+        "completed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "changed_artifacts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "object",
+      "required": ["status", "checks"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["pass", "fail", "partial", "not_run"]
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["command", "result"],
+            "properties": {
+              "command": { "type": "string", "minLength": 1 },
+              "result": {
+                "type": "string",
+                "enum": ["pass", "fail", "skipped", "not_run"]
+              },
+              "evidence": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "failed_approaches": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "unresolved_risks": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "next_action": { "type": "string", "minLength": 1 },
+    "git": {
+      "type": "object",
+      "required": ["repository", "root", "branch", "head", "status_fingerprint", "changed_files"],
+      "properties": {
+        "repository": { "type": "boolean" },
+        "root": { "type": ["string", "null"] },
+        "branch": { "type": ["string", "null"] },
+        "head": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "status_fingerprint": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "changed_files": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "physical_chats": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["adapter", "ref", "observed_at"],
+        "properties": {
+          "adapter": { "type": "string", "minLength": 1 },
+          "ref": { "type": "string", "minLength": 1 },
+          "observed_at": { "type": "string", "format": "date-time" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

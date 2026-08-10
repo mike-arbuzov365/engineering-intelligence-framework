@@ -335,6 +335,35 @@ an existence proof and must not be generalized into an improvement claim.
 
 ## Provisional
 
+### D-21: Checkpoint-first session continuity
+**Status: provisional, in effect 2026-08-09.** A logical session is the
+bounded unit of EIF methodology; a physical chat is only the runtime container
+that happens to hold part or all of that session. One logical session may use
+one chat or several sequential chats without creating a fourth intelligence
+layer. Its mutable continuation state lives in a gitignored, validated
+`.session-context/<session-id>.md` checkpoint until logical closeout. Native
+context compaction may optimize a host conversation, but it is not project
+memory, canonical task state or a source of truth.
+
+Continuation has three explicit modes: `same_chat`, `new_chat` and `auto`.
+Automatic create/open is permitted only when a named adapter capability has
+current source evidence and a passing, version-bounded canary. Otherwise EIF
+must expose the exact manual action and preserve same-chat continuation.
+
+Prohibition claims declare one of four enforcement levels: `machine` for a
+fail-closed EIF command or schema, `adapter` for a verified adapter guard,
+`owner_gate` for explicit human approval and `instruction_only` for a model
+contract with no technical block. Documentation must not present
+`instruction_only` as enforcement. D-06 remains unchanged: canonical public
+framework artifacts stay English, while localized project surfaces remain
+governed by D-07.
+
+This decision is provisional because the owner approved implementation of the
+packet and its recommended defaults, but did not explicitly ratify a new
+framework decision. It does not supersede the three-layer model, require every
+light task to create a file, require a new chat after closeout or claim hook
+parity across adapters.
+
 ### D-20: Public professional starters become private workspace content
 **Status: provisional, in effect 2026-08-02.** Public EIF may ship a small
 catalog of professional profile starters and an explicit installer. Installing

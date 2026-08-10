@@ -32,6 +32,23 @@ future releases.
 - `software-development`: repository onboarding only, because core EIF already
   governs normal planning, implementation, verification and learning.
 
+Professional profile лишається canonical grouping unit для its skills,
+playbooks і templates. Кожен bundled starter skill має local
+`tests/contract.yaml`, який materializes у private workspace і далі у pinned
+project runtime разом із skill directory. Adapter loader читає лише selected
+`SKILL.md` і не injects test fixture у normal model context.
+
+Version 0.2.8 checks all 12 core and 3 starter-profile contracts:
+
+```bash
+eifctl skills check
+```
+
+Це model-free structural/grounding check, не evidence, що skill покращує
+design або software outcomes. External skills не встановлюються; admission
+policy описано в
+[`docs/reference/external-skill-admission.md`](../reference/external-skill-admission.md).
+
 List and install them:
 
 ```bash
@@ -124,6 +141,30 @@ The private workspace created below is the designer's own local EIF repository.
    `knowledge-ingest` workflow creates the first knowledge artifact and
    regenerates the index together instead of creating an empty memory stub at
    setup time.
+
+7. Перед EIF-managed package або final delivery owner створює project-local
+   approval state за starter template
+   `.eif/workspace-runtime/templates/design-package-approval.yaml`. Copy
+   зберігається у ignored
+   `.eif/local-state/design-delivery-approval.yaml`; default лишається
+   `package_allowed: false`. Потім exact action і scope перевіряються:
+
+   ```bash
+   eifctl delivery check \
+     --action package \
+     --scope <exact-delivery-scope> \
+     --instance-path .
+   ```
+
+   Nonzero result блокує EIF-managed action. Цей command не intercepts
+   arbitrary external ZIP, export, upload або shell command. Без окремого
+   verified adapter guard така ширша заборона є `instruction_only`.
+
+   Для localized change запишіть `QA scope: changed_only` разом із changed
+   inputs/outputs, rationale та checks. Зміна shared font, palette, brand rule,
+   layout system, export setting, rights, кількох deliverable families або
+   unknown dependency потребує `full` QA. Це explicit classification, не
+   automatic dependency engine.
 
 Each connected path is a project repository, not a broad asset library. Keep
 images, fonts and editable sources in the project or its approved asset system;

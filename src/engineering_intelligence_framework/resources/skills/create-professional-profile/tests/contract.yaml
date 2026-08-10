@@ -1,0 +1,53 @@
+schema_version: 1
+skill:
+  name: create-professional-profile
+  profile: core
+  canonical_workflow: playbooks/professional-profile-creation.md
+triggers:
+  positive:
+  - id: reusable-role-profile
+    prompt: Створи reusable professional profile для кількох пов'язаних project repositories.
+  negative:
+  - id: one-project-note
+    prompt: Додай одну локальну project instruction лише для поточного repository.
+references:
+  required:
+  - playbooks/professional-profile-creation.md
+evidence:
+  required:
+  - eifctl workspace doctor
+commands:
+  required:
+  - eifctl workspace doctor
+stop_conditions:
+  required:
+  - do not connect or update projects
+forbidden_behavior:
+  required:
+  - do not connect or update projects
+assertions:
+  manifest_contains:
+  - professional-profile-creation.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

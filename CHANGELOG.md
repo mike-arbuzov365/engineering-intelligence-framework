@@ -15,6 +15,38 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-08-10
+
+### Added
+
+- **Checkpoint-first session continuity.** Exact registry-v2 project
+  resolution and model-free `eifctl session
+  checkpoint|validate|resume-audit|handoff` maintain an atomic local
+  checkpoint, fail closed on resume drift, and print truthful per-adapter
+  fallbacks.
+- **Tested skill contracts and bounded eval dry-run.** `eifctl skills check`
+  validates 12 core and 3 starter-profile contracts. The EIF-021 evaluation
+  harness has an integrity-bound 12-attempt dry-run for two skills;
+  behavioral model runs remain `0` and `DEFERRED`, so no quality, token, or
+  time improvement is claimed.
+- **Graphic-design delivery approval guard.** A required profile rule and
+  `eifctl delivery check` block EIF-managed `package`/`final_delivery` without
+  a valid owner, exact scope/action, expiry, and evidence. External shell or
+  export coverage is not claimed; changed-only QA routing is not a dependency
+  engine.
+
+### Fixed
+
+- The local release gate now removes ambient `PYTHONPATH` and `PYTHONHOME`
+  from subprocesses. Fresh Twine/install validation no longer imports
+  unrelated packages from the host agent environment.
+- The graphic-design delivery CLI no longer exposes a validation-time
+  override that could check an expired approval against a caller-selected
+  past clock.
+- The release-only wheel audit now treats canonical skill
+  `tests/contract.yaml` fixtures as shipped contract data while still
+  rejecting framework test code and Git metadata.
+
 ## [0.2.7] - 2026-08-02
 
 ### Fixed
@@ -983,7 +1015,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.7...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.8...HEAD
+[0.2.8]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.8
 [0.2.7]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.7
 [0.2.6]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.6
 [0.2.5]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.5

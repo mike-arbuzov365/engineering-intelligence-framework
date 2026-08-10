@@ -185,20 +185,20 @@ guess among name/ID collisions or incomplete instances.
 
 ## Graphic-design delivery approval local state
 
-Current source candidate додає bounded guard лише для EIF-managed actions
-`package` і `final_delivery`. Profile `graphic-design` materializes required
-rule `rules/design-delivery-approval.md` та default approval template.
-`eifctl delivery check` перевіряє active profile, workspace lock/runtime
-integrity, відсутність exception для required rule, schema-valid local state,
-`package_allowed: true`, owner, exact scope/action, timestamps, expiry та
-contained або HTTPS evidence reference. Будь-яка missing/invalid/mismatched
-умова дає nonzero result.
+Version 0.2.8 adds a bounded guard only for EIF-managed `package` and
+`final_delivery` actions. The `graphic-design` profile materializes the
+required `rules/design-delivery-approval.md` rule and a default approval
+template. `eifctl delivery check` verifies the active profile, workspace
+lock/runtime integrity, absence of an exception for the required rule,
+schema-valid local state, `package_allowed: true`, owner, exact scope/action,
+timestamps, expiry, and a contained or HTTPS evidence reference. Any missing,
+invalid, or mismatched condition produces a nonzero result.
 
-Approval origin має рівень `owner_gate`; deterministic validation має рівень
-`machine` лише всередині `eifctl delivery check`. Command не intercepts
-arbitrary external archiver, renderer, upload або shell command. Без окремого
-verified adapter guard ця ширша заборона має рівень `instruction_only`, а не
-machine enforcement.
+The approval origin has `owner_gate` authority; deterministic validation has
+`machine` authority only inside `eifctl delivery check`. The command does not
+intercept an arbitrary external archiver, renderer, upload, or shell command.
+Without a separate verified adapter guard, that broader restriction remains
+`instruction_only`, not machine enforcement.
 
 ## Transactional init/upgrade
 

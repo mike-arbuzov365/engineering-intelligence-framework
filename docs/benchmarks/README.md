@@ -60,12 +60,12 @@ harness mechanics; this real run proves the end-to-end pilot.
 
 ## EIF-021 bounded skill eval: deterministic dry-run
 
-Current source candidate extends the same `eif_benchmark.py` harness із
-model-free skill-eval surface. Manifest
+Version 0.2.8 extends the same `eif_benchmark.py` harness with a model-free
+skill-evaluation surface. Manifest
 [`skill-eval/eif-021-manifest.yaml`](skill-eval/eif-021-manifest.yaml) selects
-`run-execution-packet` і `knowledge-search`, three local trigger scenarios per
-skill та matched `baseline`/`treatment` modes. Це 12 planned attempts у strict
-sequential order, але не 12 executed model runs.
+`run-execution-packet` and `knowledge-search`, three local trigger scenarios
+per skill, and matched `baseline`/`treatment` modes. This is 12 planned
+attempts in strict sequential order, not 12 executed model runs.
 
 Owner gate зафіксовано так:
 

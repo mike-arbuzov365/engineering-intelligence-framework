@@ -229,10 +229,36 @@ def main() -> int:
             not any(n.endswith("/_impl/eif_benchmark.py") for n in names),
             "benchmark execution is an explicit verification workflow, not a runtime dependency of every initialized project",
         ))
+        expected_contract_members = {
+            "engineering_intelligence_framework/resources/" + path.relative_to(clean_src).as_posix()
+            for root in (
+                clean_src / "skills",
+                clean_src / "professional-profiles",
+            )
+            for path in root.rglob("contract.yaml")
+            if path.parent.name == "tests"
+        }
+        actual_contract_members = {
+            name for name in names if name.endswith("/tests/contract.yaml")
+        }
+        results.append(check(
+            "wheel contains the exact canonical set of skill contract fixtures",
+            actual_contract_members == expected_contract_members,
+            f"expected={sorted(expected_contract_members)} actual={sorted(actual_contract_members)}",
+        ))
+        forbidden_test_or_git_members = [
+            name
+            for name in names
+            if name.startswith(".git")
+            or (
+                "/tests/" in name
+                and name not in expected_contract_members
+            )
+        ]
         results.append(check(
             "wheel does NOT contain the framework's own test suite or git metadata",
-            not any("/tests/" in n or n.startswith(".git") for n in names),
-            str([n for n in names if "/tests/" in n or n.startswith(".git")]),
+            not forbidden_test_or_git_members,
+            str(forbidden_test_or_git_members),
         ))
 
         # --- 3. install into a clean venv (space + Unicode in both the venv

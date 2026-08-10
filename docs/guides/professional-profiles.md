@@ -38,7 +38,7 @@ playbooks і templates. Кожен bundled starter skill має local
 project runtime разом із skill directory. Adapter loader читає лише selected
 `SKILL.md` і не injects test fixture у normal model context.
 
-Current source candidate перевіряє всі 12 core і 3 starter-profile contracts:
+Version 0.2.8 checks all 12 core and 3 starter-profile contracts:
 
 ```bash
 eifctl skills check

@@ -132,6 +132,29 @@ the page does not make: no timing figure appears anywhere on it.
   framework and workspace provenance axes. Detach removes only
   workspace-managed state. See the
   [`project lifecycle guide`](../guides/project-lifecycle.md).
+- **The current unreleased source candidate adds bounded session continuity.**
+  `eifctl projects resolve` verifies one registry-v2 identity and local path;
+  `eifctl session checkpoint|validate|resume-audit|handoff` manages a local,
+  gitignored, schema-validated rolling checkpoint. The deterministic journey
+  and one-wheel smoke pass. This is not part of the published 0.2.7 wheel and
+  does not claim automatic physical-chat creation or improved model memory.
+- Adapter continuity у current source candidate має schema-checked capability
+  records і deterministic manual fallback. Codex automatic open та Hermes
+  Desktop control transfer не верифіковані, тому `--open` fail-closed і жоден
+  prompt не надсилається автоматично.
+- Current source candidate також додає `eifctl skills check` і 15 local skill
+  contracts. Static checker та installed-wheel smoke проходять, але behavioral
+  skill quality, trigger precision і token/time benefit ще не верифіковані.
+  External skills не imported.
+- EIF-021 skill eval має integrity-bound 12-attempt dry-run і model-versus-
+  script audit, але behavioral provider runs не виконувалися: budget `$0`,
+  hard zero-cost boundary не підтверджено, model runs `0`, status `DEFERRED`.
+- Current source candidate додає bounded `graphic-design` approval guard.
+  Required profile rule materializes, а `eifctl delivery check` fail-closed
+  перевіряє owner-gated exact scope/action/expiry/evidence перед EIF-managed
+  `package` або `final_delivery`. Це не shell hook: arbitrary external export,
+  upload або package action лишається `instruction_only` без verified adapter
+  guard. Designer-machine acceptance і publication не виконувалися.
 - **Adapter scope is frozen** at four adapters - Claude Code, Cursor, Codex
   and Hermes - and all four are supported (D-16, 2026-07-27, retiring the
   two-tier split D-09 recorded). See [`ROADMAP.md`](../../ROADMAP.md).

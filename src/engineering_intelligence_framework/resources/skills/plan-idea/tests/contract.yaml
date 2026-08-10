@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: plan-idea
+  profile: core
+  canonical_workflow: playbooks/idea-planning.md
+triggers:
+  positive:
+  - id: raw-product-opportunity
+    prompt: Оформи raw request у evidence-based idea artifact до PRD або implementation planning.
+  negative:
+  - id: approved-small-fix
+    prompt: Виконай уже погоджений малий bug fix із чітким task scope і tests.
+references:
+  required:
+  - playbooks/idea-planning.md
+evidence:
+  required:
+  - observations, inference, assumptions and proposals
+commands:
+  required: []
+stop_conditions:
+  required:
+  - Keep the artifact in draft
+forbidden_behavior:
+  required:
+  - Do not invent owner approval
+assertions:
+  manifest_contains:
+  - idea-planning.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

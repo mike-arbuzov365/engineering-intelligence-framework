@@ -280,6 +280,14 @@ def main() -> int:
                 + workspace_lock_text,
             )
         )
+        if not (
+            workspace_new.returncode == 0
+            and profile_install.returncode == 0
+            and workspace_committed
+        ):
+            passed = sum(results)
+            print(f"EIF-RESULT: passed={passed} total={len(results)}")
+            return 1
 
         registry = workspace / ".eif" / "projects.yaml"
         project_new = timed(
@@ -318,6 +326,152 @@ def main() -> int:
                 project_new.stdout + project_new.stderr,
             )
         )
+        if not committed:
+            passed = sum(results)
+            print(f"EIF-RESULT: passed={passed} total={len(results)}")
+            return 1
+
+        session_task = project / "planning" / "package-smoke-session.md"
+        session_task.parent.mkdir(parents=True, exist_ok=True)
+        session_task.write_text(
+            "# Package smoke session\n\nExercise installed session tooling.\n",
+            encoding="utf-8",
+        )
+        session_seeded = timed(
+            "commit session source artifact",
+            lambda: commit(project, "Seed package smoke session"),
+        )
+        resolved = timed(
+            "resolve project identity",
+            lambda: bounded_run(
+                [
+                    str(eifctl),
+                    "projects",
+                    "resolve",
+                    "design-project",
+                    "--registry",
+                    str(registry),
+                ],
+                cwd=workspace,
+                timeout_s=30,
+            ),
+        )
+        checkpointed = timed(
+            "write session checkpoint",
+            lambda: bounded_run(
+                [
+                    str(eifctl),
+                    "session",
+                    "checkpoint",
+                    "--session-id",
+                    "PACKAGE-SMOKE",
+                    "--source-artifact",
+                    "planning/package-smoke-session.md",
+                    "--goal",
+                    "Exercise installed session tooling.",
+                    "--in-scope",
+                    "Installed-wheel continuity",
+                    "--no-touch",
+                    "External systems",
+                    "--approval-state",
+                    "not_required",
+                    "--next-action",
+                    "Run the resume audit.",
+                    "--continuation-mode",
+                    "same_chat",
+                ],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        checkpoint = project / ".session-context" / "PACKAGE-SMOKE.md"
+        validated = timed(
+            "validate session checkpoint",
+            lambda: bounded_run(
+                [str(eifctl), "session", "validate", str(checkpoint)],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        audited = timed(
+            "audit session resume",
+            lambda: bounded_run(
+                [str(eifctl), "session", "resume-audit", str(checkpoint)],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        handoff = timed(
+            "render adapter handoff",
+            lambda: bounded_run(
+                [
+                    str(eifctl),
+                    "session",
+                    "handoff",
+                    str(checkpoint),
+                    "--mode",
+                    "auto",
+                ],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        refused_open = timed(
+            "refuse unverified adapter open",
+            lambda: bounded_run(
+                [
+                    str(eifctl),
+                    "session",
+                    "handoff",
+                    str(checkpoint),
+                    "--mode",
+                    "auto",
+                    "--open",
+                ],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        results.append(
+            check(
+                "installed project resolution and session checkpoint journey pass",
+                session_seeded
+                and resolved.returncode == 0
+                and checkpointed.returncode == 0
+                and validated.returncode == 0
+                and audited.returncode == 0
+                and checkpoint.is_file()
+                and "project_name=design-project" in resolved.stdout
+                and "PASS" in validated.stdout
+                and "PASS" in audited.stdout,
+                resolved.stdout
+                + resolved.stderr
+                + checkpointed.stdout
+                + checkpointed.stderr
+                + validated.stdout
+                + validated.stderr
+                + audited.stdout
+                + audited.stderr,
+            )
+        )
+
+        results.append(
+            check(
+                "installed adapter handoff uses truthful manual fallback",
+                handoff.returncode == 0
+                and "strategy=manual_new_chat" in handoff.stdout
+                and "candidate_link=codex://threads/new?" in handoff.stdout
+                and "candidate_link_status=manual_only_canary_inconclusive"
+                in handoff.stdout
+                and refused_open.returncode != 0
+                and "FAIL automatic open is not verified for adapter codex"
+                in refused_open.stderr,
+                handoff.stdout
+                + handoff.stderr
+                + refused_open.stdout
+                + refused_open.stderr,
+            )
+        )
 
         apply = timed(
             "materialize profile",
@@ -337,8 +491,116 @@ def main() -> int:
         results.append(
             check(
                 "workspace profile materializes",
-                apply.returncode == 0,
+                apply.returncode == 0
+                and (
+                    project
+                    / ".eif"
+                    / "workspace-runtime"
+                    / "skills"
+                    / "run-graphic-design-project"
+                    / "tests"
+                    / "contract.yaml"
+                ).is_file()
+                and "tests/contract.yaml"
+                not in (
+                    project
+                    / ".agents"
+                    / "skills"
+                    / "run-graphic-design-project"
+                    / "SKILL.md"
+                ).read_text(encoding="utf-8"),
                 apply.stdout + apply.stderr,
+            )
+        )
+
+        blocked_delivery = timed(
+            "block package without approval",
+            lambda: bounded_run(
+                [
+                    str(eifctl),
+                    "delivery",
+                    "check",
+                    "--action",
+                    "package",
+                    "--scope",
+                    "package-smoke-final",
+                    "--instance-path",
+                    str(project),
+                ],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        approval_evidence = project / "planning" / "approvals" / "package-smoke.md"
+        approval_evidence.parent.mkdir(parents=True, exist_ok=True)
+        approval_evidence.write_text("# Synthetic owner approval evidence\n", encoding="utf-8")
+        approval_state = (
+            project / ".eif" / "local-state" / "design-delivery-approval.yaml"
+        )
+        approval_state.parent.mkdir(parents=True, exist_ok=True)
+        approval_state.write_text(
+            "schema_version: 1\n"
+            "profile: graphic-design\n"
+            "package_allowed: true\n"
+            "decision:\n"
+            "  owner: package-smoke-owner\n"
+            "  scope: package-smoke-final\n"
+            "  actions:\n"
+            "  - package\n"
+            "  decided_at: '2000-01-01T00:00:00Z'\n"
+            "  valid_until: '2099-01-01T00:00:00Z'\n"
+            "  evidence_ref: planning/approvals/package-smoke.md\n",
+            encoding="utf-8",
+        )
+        approved_delivery = timed(
+            "allow exact-scope package with valid approval",
+            lambda: bounded_run(
+                [
+                    str(eifctl),
+                    "delivery",
+                    "check",
+                    "--action",
+                    "package",
+                    "--scope",
+                    "package-smoke-final",
+                    "--instance-path",
+                    str(project),
+                ],
+                cwd=project,
+                timeout_s=30,
+            ),
+        )
+        results.append(
+            check(
+                "installed delivery guard blocks by default and accepts exact owner evidence",
+                blocked_delivery.returncode != 0
+                and "package_allowed defaults to false" in blocked_delivery.stderr
+                and approved_delivery.returncode == 0
+                and "enforcement=machine" in approved_delivery.stdout
+                and "approval_origin=owner_gate" in approved_delivery.stdout
+                and "external_shell_enforcement=instruction_only"
+                in approved_delivery.stdout,
+                blocked_delivery.stdout
+                + blocked_delivery.stderr
+                + approved_delivery.stdout
+                + approved_delivery.stderr,
+            )
+        )
+
+        skill_check = timed(
+            "check installed skill contracts",
+            lambda: bounded_run(
+                [str(eifctl), "skills", "check"],
+                cwd=host_root,
+                timeout_s=60,
+            ),
+        )
+        results.append(
+            check(
+                "installed skill contracts validate without model calls",
+                skill_check.returncode == 0
+                and "EIF-RESULT: passed=15 total=15" in skill_check.stdout,
+                skill_check.stdout + skill_check.stderr,
             )
         )
 

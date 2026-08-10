@@ -15,6 +15,30 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+### Added
+
+- **Checkpoint-first session continuity.** Current source додає exact
+  registry-v2 project resolution та model-free `eifctl session
+  checkpoint|validate|resume-audit|handoff` з atomic local checkpoint,
+  fail-closed resume audit і truthful per-adapter fallback.
+- **Tested skill contracts і bounded eval dry-run.** `eifctl skills check`
+  validates 12 core і 3 starter-profile contracts. EIF-021 eval harness має
+  integrity-bound 12-attempt dry-run для двох skills; behavioral model runs
+  лишаються `0` і `DEFERRED`, тому quality/token/time improvement не
+  заявляється.
+- **Graphic-design delivery approval guard.** Required profile rule і
+  `eifctl delivery check` блокують EIF-managed `package`/`final_delivery` без
+  valid owner, exact scope/action, expiry та evidence. External shell/export
+  coverage не заявляється; changed-only QA routing не є dependency engine.
+
+### Fixed
+
+- Local release gate тепер removes ambient `PYTHONPATH` і `PYTHONHOME` для
+  subprocesses. Fresh Twine/install validation більше не imports unrelated
+  packages із host agent environment.
+- Graphic-design delivery CLI більше не exposes validation-time override, який
+  міг перевірити expired approval проти caller-selected past clock.
+
 ## [0.2.7] - 2026-08-02
 
 ### Fixed

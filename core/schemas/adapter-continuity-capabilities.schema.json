@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/adapter-continuity-capabilities.schema.json",
+  "title": "EIF adapter continuity capabilities",
+  "description": "Валідує session-continuity dimensions у adapters/parity-matrix.json.",
+  "type": "object",
+  "required": ["dimensions", "adapters"],
+  "properties": {
+    "dimensions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true,
+      "allOf": [
+        { "contains": { "const": "same_chat" } },
+        { "contains": { "const": "resume" } },
+        { "contains": { "const": "create_new_chat" } },
+        { "contains": { "const": "open_new_chat" } },
+        { "contains": { "const": "auto_submit" } },
+        { "contains": { "const": "pre_compact" } },
+        { "contains": { "const": "post_compact" } }
+      ]
+    },
+    "adapters": {
+      "type": "object",
+      "required": ["claude-code", "cursor", "codex", "hermes"],
+      "properties": {
+        "claude-code": { "$ref": "#/$defs/adapter" },
+        "cursor": { "$ref": "#/$defs/adapter" },
+        "codex": { "$ref": "#/$defs/adapter" },
+        "hermes": { "$ref": "#/$defs/adapter" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "adapter": {
+      "type": "object",
+      "required": [
+        "same_chat",
+        "resume",
+        "create_new_chat",
+        "open_new_chat",
+        "auto_submit",
+        "pre_compact",
+        "post_compact"
+      ],
+      "properties": {
+        "same_chat": { "$ref": "#/$defs/capability" },
+        "resume": { "$ref": "#/$defs/capability" },
+        "create_new_chat": { "$ref": "#/$defs/capability" },
+        "open_new_chat": { "$ref": "#/$defs/capability" },
+        "auto_submit": { "$ref": "#/$defs/capability" },
+        "pre_compact": { "$ref": "#/$defs/capability" },
+        "post_compact": { "$ref": "#/$defs/capability" }
+      },
+      "additionalProperties": true
+    },
+    "capability": {
+      "type": "object",
+      "required": [
+        "status",
+        "enforcement",
+        "evidence_status",
+        "evidence",
+        "action",
+        "auto_action"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["verified", "documented", "manual", "unsupported", "not_verified"]
+        },
+        "enforcement": {
+          "type": "string",
+          "enum": ["machine", "adapter", "owner_gate", "instruction_only"]
+        },
+        "evidence_status": {
+          "type": "string",
+          "enum": ["observed", "source_verified", "documentation_only", "inconclusive", "not_tested"]
+        },
+        "evidence": { "type": "string", "minLength": 1 },
+        "action": { "type": "string", "minLength": 1 },
+        "auto_action": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "auto_action": { "const": true } }, "required": ["auto_action"] },
+          "then": {
+            "properties": {
+              "status": { "const": "verified" },
+              "enforcement": { "const": "adapter" },
+              "evidence_status": { "const": "observed" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

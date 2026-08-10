@@ -42,8 +42,10 @@ A locale-rendered version of this template's headings lives at
 - [ ] Iterations and remote runs used are recorded against their budgets.
 - [ ] Success evidence and encountered failure signatures are recorded.
 - [ ] Adaptations explain how the method changed after negative evidence.
-- [ ] The session-layer checkpoint is deleted; only validated learning is routed to
-      Knowledge Delta.
+- [ ] The session-layer checkpoint is deleted only when the logical session is
+      actually closing; only validated learning is routed to Knowledge Delta.
+- [ ] A physical-chat transition or context compaction is not misreported as
+      logical-session closeout.
 
 ## Step 3 - Fill the Knowledge Delta
 

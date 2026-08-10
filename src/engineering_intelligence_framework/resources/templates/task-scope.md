@@ -37,6 +37,17 @@ simple approach can be exactly what a past lesson warns against.
 <Explicit list of files, directories, or systems this task must not
 change.>
 
+## Continuation state
+
+- Logical session: <stable ID for this structured task>
+- Session context: `.session-context/<session-id>.md`
+- Continuation mode: `same_chat | new_chat | auto`
+
+Create the checkpoint only when this structured task starts or must survive an
+interruption. Validate it before any handoff or manual context compaction. A
+new physical chat continues this task; it does not create a new scope or grant
+new approval.
+
 ## Verification
 
 <Concrete, runnable commands - not "run the tests." Example:

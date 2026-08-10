@@ -198,6 +198,65 @@ Re-adding an already-registered project is idempotent. It refreshes the
 local path and leaves the committed registry alone when nothing logical
 changed.
 
+## Resolve the active project before continuation
+
+When a session or handoff names a registry project, resolve it instead of
+guessing from the current directory:
+
+```bash
+eifctl projects resolve project-a \
+  --registry ../eif-control/.eif/projects.yaml
+```
+
+The selector may be the stable registry-v2 ID or the exact project name. The
+command returns one identity and one local path only when the logical registry,
+gitignored locations file, project config and framework lock agree. Unknown or
+ambiguous selectors, inactive entries, missing local locations, incomplete EIF
+instances and config/lock drift stop with no write.
+
+## Preserve a logical session across an interruption
+
+Light tasks remain file-free by default. Before a structured task crosses a
+physical-chat boundary or manual context compaction, create or refresh one
+rolling checkpoint from the project root:
+
+```bash
+eifctl session checkpoint \
+  --session-id SESSION-001 \
+  --source-artifact planning/packets/EXAMPLE/sessions/SESSION-001.md \
+  --goal "Implement the approved bounded session." \
+  --in-scope "Approved session scope" \
+  --no-touch "External publication" \
+  --approval-state approved \
+  --approval-evidence "Owner approval recorded in the source artifact" \
+  --next-action "Run the focused acceptance test." \
+  --continuation-mode same_chat
+
+eifctl session validate .session-context/SESSION-001.md
+eifctl session resume-audit .session-context/SESSION-001.md
+eifctl session handoff .session-context/SESSION-001.md
+```
+
+Repeat `--decision`, `--completed`, `--verification`, `--blocker`,
+`--failed-approach` and `--risk` to record the current bounded state.
+`--verification` uses `RESULT::COMMAND` or
+`RESULT::COMMAND::EVIDENCE`, where `RESULT` is `pass`, `fail`, `skipped` or
+`not_run`. The checkpoint frontmatter, not its localized body or chat history,
+is canonical continuation state. It remains gitignored and is deleted only at
+logical-session closeout.
+
+`handoff` читає adapter capability records з
+[`adapters/parity-matrix.json`](../../adapters/parity-matrix.json). Якщо
+повний canary не довів automatic destination, команда повертає
+`strategy=manual_new_chat`, exact manual action і handoff prompt. Для Codex
+вона також друкує escaped `codex://threads/new` candidate link зі status
+`manual_only_canary_inconclusive`.
+
+`eifctl session handoff ... --open` fail-closed, доки capability не має
+`status=verified`, `enforcement=adapter`, `evidence_status=observed` і
+`auto_action=true`. У поточному source candidate цим gates не відповідає
+жоден adapter. Команда не надсилає prompt і не змінює user configuration.
+
 A freshly cloned project is also missing both regenerable trees:
 `.eif/runtime/` and `.eif/workspace-runtime/` are gitignored, so `doctor`
 reports them until they are rehydrated. `eifctl upgrade --instance-path .`

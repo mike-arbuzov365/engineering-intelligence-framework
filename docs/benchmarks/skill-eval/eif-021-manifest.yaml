@@ -1,0 +1,52 @@
+schema_version: 1
+eval_id: eif-021-two-skill-pilot
+skills:
+- name: run-execution-packet
+  contract_path: skills/run-execution-packet/tests/contract.yaml
+  scenario_ids:
+  - prepared-packet-run
+  - packet-planning-request
+  - bounded-single-task
+- name: knowledge-search
+  contract_path: skills/knowledge-search/tests/contract.yaml
+  scenario_ids:
+  - preflight-prior-lessons
+  - incident-prevention-check
+  - generic-web-research
+modes:
+- baseline
+- treatment
+execution_order: sequential
+max_model_runs: 12
+owner_gate:
+  behavioral_status: deferred
+  hard_zero_cost_confirmed: false
+  additional_paid_budget_usd: 0
+  provider: not_approved
+  model: not_approved
+  version: not_approved
+  rubric_judge: not_approved
+  usage_telemetry: required
+  stop_on_unavailable_telemetry: true
+  reason: hard_zero_cost_boundary_not_confirmed
+model:
+  provider: not_approved
+  name: not_approved
+  version: not_approved
+  settings: {}
+graders:
+- id: contract-schema
+  kind: deterministic
+  assertion: Local skill contract і selected scenario IDs є schema-valid.
+- id: matched-prompt-digest
+  kind: deterministic
+  assertion: Baseline і treatment використовують identical prompt digest.
+- id: trigger-route
+  kind: deterministic
+  assertion: Runner report має selected skill лише коли expected_trigger є true.
+- id: forbidden-behavior
+  kind: deterministic
+  assertion: Runner report не містить contract-declared forbidden behavior.
+- id: metric-provenance
+  kind: deterministic
+  assertion: Token, time і tool-call values мають authoritative measurement або null у dry-run.

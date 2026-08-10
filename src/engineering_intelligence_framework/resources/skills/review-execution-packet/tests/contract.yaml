@@ -1,0 +1,53 @@
+schema_version: 1
+skill:
+  name: review-execution-packet
+  profile: core
+  canonical_workflow: playbooks/execution-packet-review.md
+triggers:
+  positive:
+  - id: independent-closeout-audit
+    prompt: Незалежно перевір packet closeout проти fresh repository і hosted-platform state.
+  negative:
+  - id: execute-current-packet
+    prompt: Продовж виконання current packet як той самий implementation agent.
+references:
+  required:
+  - playbooks/execution-packet-review.md
+evidence:
+  required:
+  - independent plan-vs-done matrix
+commands:
+  required:
+  - git fetch --all --prune
+stop_conditions:
+  required:
+  - Never reason about merge/integration state
+forbidden_behavior:
+  required:
+  - commit-subject grep
+assertions:
+  manifest_contains:
+  - execution-packet-review.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

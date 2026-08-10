@@ -1,0 +1,514 @@
+{
+  "attempts": [
+    {
+      "artifacts": [
+        "skills/run-execution-packet/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": null,
+        "skill_available": false
+      },
+      "contract_sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a",
+      "expected_trigger": true,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "baseline",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:f5119cbee3f2e52f9746913734d83ee1d95770da48c815355513bd42ba69e463",
+      "scenario_id": "prepared-packet-run",
+      "sequence": 1,
+      "skill": "run-execution-packet"
+    },
+    {
+      "artifacts": [
+        "skills/run-execution-packet/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": "skills/run-execution-packet/SKILL.md",
+        "skill_available": true
+      },
+      "contract_sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a",
+      "expected_trigger": true,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "treatment",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:f5119cbee3f2e52f9746913734d83ee1d95770da48c815355513bd42ba69e463",
+      "scenario_id": "prepared-packet-run",
+      "sequence": 2,
+      "skill": "run-execution-packet"
+    },
+    {
+      "artifacts": [
+        "skills/run-execution-packet/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": null,
+        "skill_available": false
+      },
+      "contract_sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a",
+      "expected_trigger": false,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "baseline",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:c1fcc0e11b724e4aa60b086ecd8ccfcee436d76a562413937ee31158110b95bb",
+      "scenario_id": "packet-planning-request",
+      "sequence": 3,
+      "skill": "run-execution-packet"
+    },
+    {
+      "artifacts": [
+        "skills/run-execution-packet/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": "skills/run-execution-packet/SKILL.md",
+        "skill_available": true
+      },
+      "contract_sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a",
+      "expected_trigger": false,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "treatment",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:c1fcc0e11b724e4aa60b086ecd8ccfcee436d76a562413937ee31158110b95bb",
+      "scenario_id": "packet-planning-request",
+      "sequence": 4,
+      "skill": "run-execution-packet"
+    },
+    {
+      "artifacts": [
+        "skills/run-execution-packet/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": null,
+        "skill_available": false
+      },
+      "contract_sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a",
+      "expected_trigger": false,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "baseline",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:c3d43eb16918f51b75ba4162cd7a86db76e98ef8b745d57dea13221e53ffa21d",
+      "scenario_id": "bounded-single-task",
+      "sequence": 5,
+      "skill": "run-execution-packet"
+    },
+    {
+      "artifacts": [
+        "skills/run-execution-packet/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": "skills/run-execution-packet/SKILL.md",
+        "skill_available": true
+      },
+      "contract_sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a",
+      "expected_trigger": false,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "treatment",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:c3d43eb16918f51b75ba4162cd7a86db76e98ef8b745d57dea13221e53ffa21d",
+      "scenario_id": "bounded-single-task",
+      "sequence": 6,
+      "skill": "run-execution-packet"
+    },
+    {
+      "artifacts": [
+        "skills/knowledge-search/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": null,
+        "skill_available": false
+      },
+      "contract_sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce",
+      "expected_trigger": true,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "baseline",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:f2570da4c9c564e1bdf0af64cb3b9ad675ec20f86b0969b154e9343fe890941a",
+      "scenario_id": "preflight-prior-lessons",
+      "sequence": 7,
+      "skill": "knowledge-search"
+    },
+    {
+      "artifacts": [
+        "skills/knowledge-search/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": "skills/knowledge-search/SKILL.md",
+        "skill_available": true
+      },
+      "contract_sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce",
+      "expected_trigger": true,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "treatment",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:f2570da4c9c564e1bdf0af64cb3b9ad675ec20f86b0969b154e9343fe890941a",
+      "scenario_id": "preflight-prior-lessons",
+      "sequence": 8,
+      "skill": "knowledge-search"
+    },
+    {
+      "artifacts": [
+        "skills/knowledge-search/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": null,
+        "skill_available": false
+      },
+      "contract_sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce",
+      "expected_trigger": true,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "baseline",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:18161fbf4d2d41bb5c7cb43c10dde654d44953157d87eb6dcc28d012511f9f63",
+      "scenario_id": "incident-prevention-check",
+      "sequence": 9,
+      "skill": "knowledge-search"
+    },
+    {
+      "artifacts": [
+        "skills/knowledge-search/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": "skills/knowledge-search/SKILL.md",
+        "skill_available": true
+      },
+      "contract_sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce",
+      "expected_trigger": true,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "treatment",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:18161fbf4d2d41bb5c7cb43c10dde654d44953157d87eb6dcc28d012511f9f63",
+      "scenario_id": "incident-prevention-check",
+      "sequence": 10,
+      "skill": "knowledge-search"
+    },
+    {
+      "artifacts": [
+        "skills/knowledge-search/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": null,
+        "skill_available": false
+      },
+      "contract_sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce",
+      "expected_trigger": false,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "baseline",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:aeb07dc44d047f6dc3ec2728354b45e3b4b9ce6052fe0425936bd92a09a5fa65",
+      "scenario_id": "generic-web-research",
+      "sequence": 11,
+      "skill": "knowledge-search"
+    },
+    {
+      "artifacts": [
+        "skills/knowledge-search/tests/contract.yaml"
+      ],
+      "context": {
+        "manifest_path": "skills/knowledge-search/SKILL.md",
+        "skill_available": true
+      },
+      "contract_sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce",
+      "expected_trigger": false,
+      "grader_ids": [
+        "contract-schema",
+        "matched-prompt-digest",
+        "trigger-route",
+        "forbidden-behavior",
+        "metric-provenance"
+      ],
+      "metrics": {
+        "input_tokens": null,
+        "measurement": "not_run",
+        "output_tokens": null,
+        "tool_calls": null,
+        "wall_time_seconds": null
+      },
+      "mode": "treatment",
+      "outcome": {
+        "reason": "hard_zero_cost_boundary_not_confirmed",
+        "status": "planned_deferred"
+      },
+      "prompt_sha256": "sha256:aeb07dc44d047f6dc3ec2728354b45e3b4b9ce6052fe0425936bd92a09a5fa65",
+      "scenario_id": "generic-web-research",
+      "sequence": 12,
+      "skill": "knowledge-search"
+    }
+  ],
+  "behavioral_model_runs": 0,
+  "claims": {
+    "allowed": [
+      "Dry-run harness, fixtures, deterministic graders і sequential plan на 12 attempts complete.",
+      "Behavioral model evidence має status DEFERRED, model runs дорівнюють 0."
+    ],
+    "forbidden": [
+      "Skill quality покращилася.",
+      "Trigger precision або recall виміряно.",
+      "Token або time efficiency покращилася."
+    ]
+  },
+  "eval_id": "eif-021-two-skill-pilot",
+  "execution_order": "sequential",
+  "execution_status": "DEFERRED",
+  "generated_at": "2026-08-09T20:46:30.480363+00:00",
+  "graders": [
+    {
+      "evidence": "Local skill contract і selected scenario IDs є schema-valid.",
+      "id": "contract-schema",
+      "kind": "deterministic",
+      "status": "pass"
+    },
+    {
+      "evidence": "Baseline і treatment використовують identical prompt digest.",
+      "id": "matched-prompt-digest",
+      "kind": "deterministic",
+      "status": "pass"
+    },
+    {
+      "evidence": "Runner report має selected skill лише коли expected_trigger є true.",
+      "id": "trigger-route",
+      "kind": "deterministic",
+      "status": "pass"
+    },
+    {
+      "evidence": "Runner report не містить contract-declared forbidden behavior.",
+      "id": "forbidden-behavior",
+      "kind": "deterministic",
+      "status": "pass"
+    },
+    {
+      "evidence": "Token, time і tool-call values мають authoritative measurement або null у dry-run.",
+      "id": "metric-provenance",
+      "kind": "deterministic",
+      "status": "pass"
+    }
+  ],
+  "harness_version": "0.3.0",
+  "integrity": {
+    "combined_sha256": "sha256:aa11dd4a39d16cdc8b7c8d5a0a35425083d7d59768c3db8932c7ffc0455828c8",
+    "source_files": [
+      {
+        "path": "core/schemas/skill-contract.schema.json",
+        "sha256": "sha256:a8623b9385302a313196db0bfb471b764c65c6bbf64fceb7af74d9211c98b419"
+      },
+      {
+        "path": "core/schemas/skill-eval-dry-run.schema.json",
+        "sha256": "sha256:a3d7e9a4b28e9c75fceca85bf32557adee92022036ca3123420ef49a333d6b58"
+      },
+      {
+        "path": "core/schemas/skill-eval-manifest.schema.json",
+        "sha256": "sha256:c64a4c7263780bf236371b2c82c2ee3e421120b84cbba0feb94f3bd3f5a7c6d8"
+      },
+      {
+        "path": "docs/benchmarks/skill-eval/eif-021-manifest.yaml",
+        "sha256": "sha256:17364fc46c72b35853f01b10f04c2da7dac1c16bc4036aa46eb7b0b0476a6f90"
+      },
+      {
+        "path": "scripts/eif_benchmark.py",
+        "sha256": "sha256:13a1caff8541b914e756c6681bc9aeb807e411aaa1bb8c2a748dd51fea07d480"
+      },
+      {
+        "path": "skills/knowledge-search/tests/contract.yaml",
+        "sha256": "sha256:5d70edf54f755b1fc1c0406f9b866a883c26372a66bf083dc052a8a79abe87ce"
+      },
+      {
+        "path": "skills/run-execution-packet/tests/contract.yaml",
+        "sha256": "sha256:a88827f05558dac71483e99fba27d3db69486490bf4ac9926a5df87ddbf9341a"
+      }
+    ]
+  },
+  "model": {
+    "name": "not_approved",
+    "provider": "not_approved",
+    "settings": {},
+    "version": "not_approved"
+  },
+  "owner_gate": {
+    "additional_paid_budget_usd": 0,
+    "behavioral_status": "deferred",
+    "hard_zero_cost_confirmed": false,
+    "model": "not_approved",
+    "provider": "not_approved",
+    "reason": "hard_zero_cost_boundary_not_confirmed",
+    "rubric_judge": "not_approved",
+    "stop_on_unavailable_telemetry": true,
+    "usage_telemetry": "required",
+    "version": "not_approved"
+  },
+  "planned_attempts": 12,
+  "schema_version": 1
+}

@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: plan-execution-packet
+  profile: core
+  canonical_workflow: playbooks/execution-packet-planning.md
+triggers:
+  positive:
+  - id: large-cross-session-work
+    prompt: Сплануй execution packet для великої cross-session зміни з roadmap і launch files.
+  negative:
+  - id: trivial-task-scope
+    prompt: Виправ одну очевидну typo у одному файлі з bounded local test.
+references:
+  required:
+  - playbooks/execution-packet-planning.md
+evidence:
+  required:
+  - carry-over ledger
+commands:
+  required: []
+stop_conditions:
+  required:
+  - Stop and ask only if
+forbidden_behavior:
+  required:
+  - Does not implement product code
+assertions:
+  manifest_contains:
+  - execution-packet-planning.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

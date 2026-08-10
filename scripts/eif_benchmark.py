@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Executable foundation for the quality-per-token benchmark
-(docs/benchmarks/README.md). Five subcommands:
+"""Executable foundation for quality-per-token та bounded skill eval.
+
+Task benchmark subcommands:
 
     eif_benchmark.py validate-manifest <fixture_dir>
     eif_benchmark.py materialize <fixture_dir> <work_dir> --mode <A|B|C|D>
     eif_benchmark.py run <fixture_dir> <work_dir> --mode {...} --agent-runner python runner.py --out results.jsonl [--attempt-kind ...] [--parent-attempt-id ID]
     eif_benchmark.py validate-result <result_record.json>
     eif_benchmark.py aggregate <results_dir> --out <summary.json>
+
+Bounded skill-eval subcommands:
+
+    eif_benchmark.py skill-eval-dry-run <manifest.yaml> --out <result.json>
+    eif_benchmark.py validate-skill-eval <result.json>
 
 Modes C and D are executable only through an explicit, privacy-safe
 integration interface. C requires a schema-valid healthy/fresh Graphify report,
@@ -41,7 +47,7 @@ FRAMEWORK_ROOT = Path(__file__).resolve().parent.parent
 SCHEMAS_DIR = FRAMEWORK_ROOT / "core" / "schemas"
 INTEGRATION_MODES = {"C_structural_navigation", "D_full_stack"}
 EXECUTABLE_MODES = {"A_baseline", "B_eif_governance", *INTEGRATION_MODES}
-HARNESS_VERSION = "0.2.0"
+HARNESS_VERSION = "0.3.0"
 
 # `run`'s exit codes (adoption-hardening round): distinct from whether a
 # result record was written, which happens on EVERY attempt regardless -
@@ -970,6 +976,357 @@ def cmd_aggregate(args: argparse.Namespace) -> int:
 
 
 # --------------------------------------------------------------------------
+# Bounded skill eval: deterministic dry-run
+# --------------------------------------------------------------------------
+
+REQUIRED_SKILL_GRADERS = {
+    "contract-schema",
+    "matched-prompt-digest",
+    "trigger-route",
+    "forbidden-behavior",
+    "metric-provenance",
+}
+
+
+def _contained_eval_path(relative: str) -> Path:
+    path = Path(relative)
+    if path.is_absolute() or ".." in path.parts:
+        raise ValueError(f"eval source path escapes framework root: {relative}")
+    candidate = (FRAMEWORK_ROOT / path).resolve()
+    if not candidate.is_relative_to(FRAMEWORK_ROOT.resolve()):
+        raise ValueError(f"eval source path escapes framework root: {relative}")
+    return candidate
+
+
+def _skill_eval_manifest(path: Path) -> tuple[dict | None, list[str]]:
+    problems: list[str] = []
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, yaml.YAMLError) as error:
+        return None, [f"cannot parse skill eval manifest: {error}"]
+    if not isinstance(data, dict):
+        return None, ["skill eval manifest must be a mapping"]
+    problems.extend(_schema_errors(data, "skill-eval-manifest.schema.json"))
+    grader_ids = {
+        item.get("id")
+        for item in data.get("graders", [])
+        if isinstance(item, dict)
+    }
+    missing = sorted(REQUIRED_SKILL_GRADERS - grader_ids)
+    if missing:
+        problems.append(f"skill eval manifest lacks required graders: {missing}")
+    names = [
+        item.get("name")
+        for item in data.get("skills", [])
+        if isinstance(item, dict)
+    ]
+    if len(names) != len(set(names)):
+        problems.append("skill eval manifest contains duplicate skill names")
+    return data, problems
+
+
+def _skill_scenarios(contract_data: dict) -> dict[str, tuple[bool, str]]:
+    scenarios: dict[str, tuple[bool, str]] = {}
+    for category, expected in (("positive", True), ("negative", False)):
+        for item in contract_data["triggers"][category]:
+            scenario_id = item["id"]
+            if scenario_id in scenarios:
+                raise ValueError(f"duplicate skill scenario id: {scenario_id}")
+            scenarios[scenario_id] = (expected, item["prompt"])
+    return scenarios
+
+
+def _integrity_entries(paths: set[Path]) -> list[dict[str, str]]:
+    entries: list[dict[str, str]] = []
+    root = FRAMEWORK_ROOT.resolve()
+    for path in sorted(path.resolve() for path in paths):
+        if not path.is_relative_to(root) or not path.is_file():
+            raise ValueError(f"integrity source is missing or outside framework root: {path}")
+        entries.append(
+            {
+                "path": path.relative_to(root).as_posix(),
+                "sha256": _sha256_file(path),
+            }
+        )
+    return entries
+
+
+def _combined_integrity_digest(entries: list[dict[str, str]]) -> str:
+    digest = hashlib.sha256()
+    for item in sorted(entries, key=lambda entry: entry["path"]):
+        digest.update(f"{item['path']}:{item['sha256']}\n".encode("utf-8"))
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _atomic_json(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    staging = path.with_name(f".{path.name}.tmp")
+    staging.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    staging.replace(path)
+
+
+def cmd_skill_eval_dry_run(args: argparse.Namespace) -> int:
+    manifest_path = Path(args.manifest).resolve()
+    if not manifest_path.is_relative_to(FRAMEWORK_ROOT.resolve()):
+        print("skill-eval-dry-run: FAIL - manifest must stay inside framework root")
+        return 1
+    manifest, problems = _skill_eval_manifest(manifest_path)
+    if manifest is None:
+        for problem in problems:
+            print(f"skill-eval-dry-run: FAIL - {problem}")
+        return 1
+    owner_gate = manifest.get("owner_gate") or {}
+    if (
+        owner_gate.get("behavioral_status") != "deferred"
+        or owner_gate.get("hard_zero_cost_confirmed") is not False
+    ):
+        problems.append(
+            "dry-run requires behavioral_status=deferred and "
+            "hard_zero_cost_confirmed=false; this command never calls a provider"
+        )
+
+    contract_sources: set[Path] = set()
+    scenario_plan: list[dict] = []
+    for skill in manifest.get("skills", []):
+        try:
+            contract_path = _contained_eval_path(skill["contract_path"])
+        except ValueError as error:
+            problems.append(str(error))
+            continue
+        if not contract_path.is_file():
+            problems.append(f"skill contract is missing: {skill['contract_path']}")
+            continue
+        try:
+            contract_data = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, yaml.YAMLError) as error:
+            problems.append(f"cannot parse {skill['contract_path']}: {error}")
+            continue
+        if not isinstance(contract_data, dict):
+            problems.append(f"skill contract must be a mapping: {skill['contract_path']}")
+            continue
+        contract_errors = _schema_errors(contract_data, "skill-contract.schema.json")
+        problems.extend(
+            f"{skill['contract_path']}: {error}" for error in contract_errors
+        )
+        if contract_errors:
+            continue
+        if contract_data["skill"]["name"] != skill["name"]:
+            problems.append(
+                f"skill name differs between manifest and contract: {skill['name']}"
+            )
+            continue
+        try:
+            available = _skill_scenarios(contract_data)
+        except ValueError as error:
+            problems.append(f"{skill['contract_path']}: {error}")
+            continue
+        for scenario_id in skill["scenario_ids"]:
+            if scenario_id not in available:
+                problems.append(
+                    f"unknown scenario {scenario_id!r} for skill {skill['name']}"
+                )
+                continue
+            expected_trigger, prompt = available[scenario_id]
+            scenario_plan.append(
+                {
+                    "skill": skill["name"],
+                    "scenario_id": scenario_id,
+                    "expected_trigger": expected_trigger,
+                    "prompt": prompt,
+                    "contract_path": contract_path,
+                    "contract_relative": skill["contract_path"],
+                    "manifest_path": contract_path.parent.parent / "SKILL.md",
+                }
+            )
+        contract_sources.add(contract_path)
+
+    planned_attempts = len(scenario_plan) * len(manifest.get("modes", []))
+    if planned_attempts > manifest.get("max_model_runs", 0):
+        problems.append(
+            f"planned attempts {planned_attempts} exceed max_model_runs "
+            f"{manifest.get('max_model_runs')}"
+        )
+    if planned_attempts > 12:
+        problems.append("planned attempts exceed packet maximum 12")
+    if problems:
+        print(f"skill-eval-dry-run: FAIL - {len(problems)} problem(s)")
+        for problem in problems:
+            print(f"  {problem}")
+        return 1
+
+    source_paths = {
+        manifest_path,
+        *contract_sources,
+        Path(__file__).resolve(),
+        SCHEMAS_DIR / "skill-contract.schema.json",
+        SCHEMAS_DIR / "skill-eval-manifest.schema.json",
+        SCHEMAS_DIR / "skill-eval-dry-run.schema.json",
+    }
+    integrity_entries = _integrity_entries(source_paths)
+    grader_ids = [item["id"] for item in manifest["graders"]]
+    attempts: list[dict] = []
+    sequence = 0
+    for scenario in scenario_plan:
+        prompt_digest = f"sha256:{hashlib.sha256(scenario['prompt'].encode('utf-8')).hexdigest()}"
+        contract_digest = _sha256_file(scenario["contract_path"])
+        manifest_relative = scenario["manifest_path"].relative_to(
+            FRAMEWORK_ROOT
+        ).as_posix()
+        for mode in manifest["modes"]:
+            sequence += 1
+            attempts.append(
+                {
+                    "sequence": sequence,
+                    "skill": scenario["skill"],
+                    "scenario_id": scenario["scenario_id"],
+                    "mode": mode,
+                    "expected_trigger": scenario["expected_trigger"],
+                    "prompt_sha256": prompt_digest,
+                    "contract_sha256": contract_digest,
+                    "context": {
+                        "skill_available": mode == "treatment",
+                        "manifest_path": manifest_relative
+                        if mode == "treatment"
+                        else None,
+                    },
+                    "grader_ids": grader_ids,
+                    "outcome": {
+                        "status": "planned_deferred",
+                        "reason": "hard_zero_cost_boundary_not_confirmed",
+                    },
+                    "metrics": {
+                        "input_tokens": None,
+                        "output_tokens": None,
+                        "tool_calls": None,
+                        "wall_time_seconds": None,
+                        "measurement": "not_run",
+                    },
+                    "artifacts": [scenario["contract_relative"]],
+                }
+            )
+
+    generated_at = args.generated_at or datetime.now(timezone.utc).isoformat()
+    try:
+        datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+    except ValueError:
+        print("skill-eval-dry-run: FAIL - --generated-at must be ISO 8601")
+        return 1
+    result = {
+        "schema_version": 1,
+        "eval_id": manifest["eval_id"],
+        "harness_version": HARNESS_VERSION,
+        "generated_at": generated_at,
+        "execution_status": "DEFERRED",
+        "behavioral_model_runs": 0,
+        "planned_attempts": len(attempts),
+        "execution_order": "sequential",
+        "owner_gate": owner_gate,
+        "model": manifest["model"],
+        "integrity": {
+            "combined_sha256": _combined_integrity_digest(integrity_entries),
+            "source_files": integrity_entries,
+        },
+        "graders": [
+            {
+                "id": item["id"],
+                "kind": "deterministic",
+                "status": "pass",
+                "evidence": item["assertion"],
+            }
+            for item in manifest["graders"]
+        ],
+        "attempts": attempts,
+        "claims": {
+            "allowed": [
+                "Dry-run harness, fixtures, deterministic graders і sequential plan на 12 attempts complete.",
+                "Behavioral model evidence має status DEFERRED, model runs дорівнюють 0.",
+            ],
+            "forbidden": [
+                "Skill quality покращилася.",
+                "Trigger precision або recall виміряно.",
+                "Token або time efficiency покращилася.",
+            ],
+        },
+    }
+    result_errors = _schema_errors(result, "skill-eval-dry-run.schema.json")
+    if result_errors:
+        print(f"skill-eval-dry-run: FAIL - generated result has {len(result_errors)} error(s)")
+        for error in result_errors:
+            print(f"  {error}")
+        return 1
+    out = Path(args.out).resolve()
+    _atomic_json(out, result)
+    print(
+        "skill-eval-dry-run: DEFERRED - "
+        f"planned_attempts={len(attempts)} model_runs=0 out={out}"
+    )
+    return 0
+
+
+def cmd_validate_skill_eval(args: argparse.Namespace) -> int:
+    result_path = Path(args.result_file).resolve()
+    try:
+        result = json.loads(result_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        print(f"validate-skill-eval: FAIL - cannot parse result: {error}")
+        return 1
+    problems = _schema_errors(result, "skill-eval-dry-run.schema.json")
+    attempts = result.get("attempts", []) if isinstance(result, dict) else []
+    if [item.get("sequence") for item in attempts if isinstance(item, dict)] != list(
+        range(1, len(attempts) + 1)
+    ):
+        problems.append("attempt sequence is not contiguous and sequential")
+    if result.get("planned_attempts") != len(attempts):
+        problems.append("planned_attempts differs from attempts length")
+    grouped: dict[tuple[str, str], list[dict]] = {}
+    for attempt in attempts:
+        if isinstance(attempt, dict):
+            grouped.setdefault(
+                (attempt.get("skill"), attempt.get("scenario_id")), []
+            ).append(attempt)
+    for key, pair in grouped.items():
+        if {item.get("mode") for item in pair} != {"baseline", "treatment"}:
+            problems.append(f"{key}: missing matched baseline/treatment pair")
+        if len({item.get("prompt_sha256") for item in pair}) != 1:
+            problems.append(f"{key}: baseline/treatment prompt digests differ")
+        if len({item.get("expected_trigger") for item in pair}) != 1:
+            problems.append(f"{key}: expected trigger differs across modes")
+
+    entries = ((result.get("integrity") or {}).get("source_files") or [])
+    rebuilt_entries: list[dict[str, str]] = []
+    for item in entries:
+        try:
+            path = _contained_eval_path(item["path"])
+        except (KeyError, TypeError, ValueError) as error:
+            problems.append(f"invalid integrity source: {error}")
+            continue
+        if not path.is_file():
+            problems.append(f"integrity source is missing: {item.get('path')}")
+            continue
+        actual = _sha256_file(path)
+        if actual != item.get("sha256"):
+            problems.append(f"integrity digest drift: {item.get('path')}")
+        rebuilt_entries.append({"path": item["path"], "sha256": actual})
+    actual_combined = _combined_integrity_digest(rebuilt_entries)
+    if actual_combined != ((result.get("integrity") or {}).get("combined_sha256")):
+        problems.append("combined integrity digest drift")
+
+    if problems:
+        print(f"validate-skill-eval: FAIL - {len(problems)} problem(s)")
+        for problem in problems:
+            print(f"  {problem}")
+        return 1
+    print(
+        "validate-skill-eval: OK - "
+        f"DEFERRED model_runs=0 planned_attempts={len(attempts)}"
+    )
+    return 0
+
+
+# --------------------------------------------------------------------------
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -1012,6 +1369,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("results_dir")
     p.add_argument("--out", required=True)
     p.set_defaults(func=cmd_aggregate)
+
+    p = sub.add_parser("skill-eval-dry-run")
+    p.add_argument("manifest")
+    p.add_argument("--out", required=True)
+    p.add_argument(
+        "--generated-at",
+        default=None,
+        help="Optional fixed ISO-8601 timestamp for a reproducible fixture.",
+    )
+    p.set_defaults(func=cmd_skill_eval_dry_run)
+
+    p = sub.add_parser("validate-skill-eval")
+    p.add_argument("result_file")
+    p.set_defaults(func=cmd_validate_skill_eval)
 
     args = ap.parse_args(argv)
     return args.func(args)

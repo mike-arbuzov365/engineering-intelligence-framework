@@ -1,0 +1,55 @@
+schema_version: 1
+skill:
+  name: knowledge-search
+  profile: core
+  canonical_workflow: playbooks/knowledge-search.md
+triggers:
+  positive:
+  - id: preflight-prior-lessons
+    prompt: Перед non-trivial implementation знайди prior incidents і rejected approaches у project knowledge.
+  - id: incident-prevention-check
+    prompt: Перед повторною спробою знайди recorded failure pattern із таким самим symptom.
+  negative:
+  - id: generic-web-research
+    prompt: Знайди current vendor API documentation у official web source без project knowledge lookup.
+references:
+  required:
+  - playbooks/knowledge-search.md
+evidence:
+  required:
+  - Record the query and result
+commands:
+  required:
+  - python scripts/eif_search_knowledge.py
+stop_conditions:
+  required:
+  - nothing relevant was found
+forbidden_behavior:
+  required:
+  - read why
+assertions:
+  manifest_contains:
+  - knowledge-search.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

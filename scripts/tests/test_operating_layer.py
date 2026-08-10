@@ -287,6 +287,72 @@ def check_private_workspace_layer_contract() -> list[Result]:
     return results
 
 
+def check_session_continuity_contract() -> list[Result]:
+    results: list[Result] = []
+    architecture = (
+        FRAMEWORK_ROOT / "docs" / "architecture" / "HOW-EIF-WORKS.md"
+    ).read_text(encoding="utf-8")
+    decisions = (
+        FRAMEWORK_ROOT / "core" / "policies" / "decisions.md"
+    ).read_text(encoding="utf-8")
+    preparation = (PLAYBOOKS_DIR / "session-preparation.md").read_text(encoding="utf-8")
+    execution = (PLAYBOOKS_DIR / "session-execution.md").read_text(encoding="utf-8")
+    closeout = (PLAYBOOKS_DIR / "session-closeout.md").read_text(encoding="utf-8")
+    launch_template = (TEMPLATES_DIR / "session-launch.md").read_text(encoding="utf-8")
+    task_template = (TEMPLATES_DIR / "task-scope.md").read_text(encoding="utf-8")
+    closeout_template = (TEMPLATES_DIR / "session-closeout.md").read_text(encoding="utf-8")
+    flat_architecture = " ".join(architecture.split())
+    flat_execution = " ".join(execution.split())
+    flat_closeout = " ".join(closeout.split())
+    flat_closeout_template = " ".join(closeout_template.split())
+
+    results.append(check(
+        "session continuity: logical session is distinct from physical chat",
+        "A logical session is the bounded methodological unit" in architecture
+        and "A physical chat is only a runtime container" in architecture,
+    ))
+    results.append(check(
+        "session continuity: all three continuation modes remain explicit",
+        all(mode in architecture for mode in ("`same_chat`", "`new_chat`", "`auto`"))
+        and "does not create a fourth layer" in architecture,
+    ))
+    results.append(check(
+        "session continuity: checkpoint precedes handoff or compaction",
+        "Before a planned physical-chat transition or manual context compaction"
+        in flat_execution
+        and "not a source of truth" in flat_architecture,
+    ))
+    results.append(check(
+        "session continuity: light tasks remain file-free by default",
+        "A light task does not require a checkpoint by default" in preparation,
+    ))
+    results.append(check(
+        "session continuity: physical chat transition is not closeout",
+        "A physical-chat transition does not close the logical session" in flat_closeout
+        and "logical session is actually closing" in flat_closeout_template,
+    ))
+    results.append(check(
+        "session continuity: launch and task templates expose the contract",
+        "logical_session: SESSION-<NNN>" in launch_template
+        and "continuation_mode: same_chat | new_chat | auto" in launch_template
+        and "## Continuation state" in task_template,
+    ))
+    results.append(check(
+        "session continuity: enforcement claims use the four honest levels",
+        all(
+            f"`{level}`" in architecture
+            for level in ("machine", "adapter", "owner_gate", "instruction_only")
+        ),
+    ))
+    results.append(check(
+        "session continuity: D-21 is provisional and does not supersede D-06",
+        "D-21: Checkpoint-first session continuity" in decisions
+        and "Status: provisional" in decisions
+        and "D-06 remains unchanged" in decisions,
+    ))
+    return results
+
+
 def main() -> int:
     all_results = (
         check_playbooks()
@@ -296,6 +362,7 @@ def main() -> int:
         + check_planning_chain_contract()
         + check_light_task_contract()
         + check_private_workspace_layer_contract()
+        + check_session_continuity_contract()
     )
     for _, line in all_results:
         print(line)

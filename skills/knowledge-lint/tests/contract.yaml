@@ -1,0 +1,53 @@
+schema_version: 1
+skill:
+  name: knowledge-lint
+  profile: core
+  canonical_workflow: playbooks/knowledge-lint.md
+triggers:
+  positive:
+  - id: promotion-quality-review
+    prompt: Перевір knowledge artifact quality і privacy перед promotion поза project instance.
+  negative:
+  - id: create-raw-artifact
+    prompt: Перетвори raw incident evidence на новий durable knowledge artifact.
+references:
+  required:
+  - playbooks/knowledge-lint.md
+evidence:
+  required:
+  - BLOCKER
+commands:
+  required:
+  - scripts/eif_privacy_scan.py
+stop_conditions:
+  required:
+  - 'Status: PASS | PASS_WITH_NOTES | FAIL'
+forbidden_behavior:
+  required:
+  - before proposing promotion
+assertions:
+  manifest_contains:
+  - knowledge-lint.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

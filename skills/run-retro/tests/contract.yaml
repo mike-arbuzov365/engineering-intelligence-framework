@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: run-retro
+  profile: core
+  canonical_workflow: playbooks/run-retro.md
+triggers:
+  positive:
+  - id: packet-pattern-review
+    prompt: Проведи retro після packet closeout і знайди recurring patterns за repository evidence.
+  negative:
+  - id: single-session-closeout
+    prompt: Підсумуй лише щойно завершену одну session без пошуку повторюваних patterns.
+references:
+  required:
+  - playbooks/run-retro.md
+evidence:
+  required:
+  - occurrence count
+commands:
+  required: []
+stop_conditions:
+  required:
+  - A single occurrence
+forbidden_behavior:
+  required:
+  - never a
+assertions:
+  manifest_contains:
+  - run-retro.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

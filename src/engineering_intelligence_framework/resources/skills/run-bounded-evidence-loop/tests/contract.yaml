@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: run-bounded-evidence-loop
+  profile: core
+  canonical_workflow: playbooks/bounded-evidence-loop.md
+triggers:
+  positive:
+  - id: bounded-fix-loop
+    prompt: Виконай test-fix-refine loop із evaluator, max iterations і remote-run budget.
+  negative:
+  - id: unbounded-autonomy
+    prompt: Повторюй зміни без iteration limit, evaluator або stop conditions, доки не набридне.
+references:
+  required:
+  - playbooks/bounded-evidence-loop.md
+evidence:
+  required:
+  - observable success evidence
+commands:
+  required: []
+stop_conditions:
+  required:
+  - BLOCKED
+forbidden_behavior:
+  required:
+  - not for unbounded autonomous repetition
+assertions:
+  manifest_contains:
+  - bounded-evidence-loop.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

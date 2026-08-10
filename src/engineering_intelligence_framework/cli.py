@@ -14,7 +14,10 @@ Usage:
     eifctl init [PATH] [--project-name NAME] [--adapter ADAPTER] ...
     eifctl new PATH [--project-name NAME] [--registry PATH] [--profile NAME] ...
     eifctl upgrade [--instance-path PATH] [--dry-run]
-    eifctl projects {add,remove,detach,status,upgrade,migrate-registry-v1-to-v2} ...
+    eifctl projects {add,remove,detach,status,resolve,upgrade,migrate-registry-v1-to-v2} ...
+    eifctl session {checkpoint,validate,resume-audit,handoff} ...
+    eifctl skills {check} ...
+    eifctl delivery {check} ...
     eifctl workspace {new,doctor,profile} ...
     eifctl doctor [--instance-path PATH]
     eifctl search QUERY [--knowledge-root PATH] ...
@@ -27,13 +30,16 @@ from __future__ import annotations
 
 import sys
 
-from .commands import doctor, init_cmd, new, privacy_scan, projects, render, search, upgrade, validate, version, workspace
+from .commands import delivery, doctor, init_cmd, new, privacy_scan, projects, render, search, session, skills, upgrade, validate, version, workspace
 
 COMMANDS = {
+    "delivery": delivery.run,
     "init": init_cmd.run,
     "new": new.run,
     "upgrade": upgrade.run,
     "projects": projects.run,
+    "session": session.run,
+    "skills": skills.main,
     "workspace": workspace.run,
     "doctor": doctor.run,
     "search": search.run,

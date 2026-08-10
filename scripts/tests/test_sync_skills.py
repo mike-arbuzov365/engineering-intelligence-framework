@@ -277,6 +277,36 @@ def main() -> int:  # noqa: PLR0915
             )
         )
 
+    # Supporting tests materialize разом із canonical skill, але не збільшують
+    # compact adapter loader, який потрапляє до normal model context.
+    with tempfile.TemporaryDirectory() as td:
+        instance = Path(td)
+        runtime_skill(instance, "plan-idea")
+        contract = (
+            instance
+            / ".eif"
+            / "runtime"
+            / "skills"
+            / "plan-idea"
+            / "tests"
+            / "contract.yaml"
+        )
+        contract.parent.mkdir(parents=True)
+        contract.write_text("private-trigger-fixture: true\n", encoding="utf-8")
+        sync(instance, "claude-code")
+        loader = (
+            instance / ".claude" / "skills" / "plan-idea" / "SKILL.md"
+        ).read_text(encoding="utf-8")
+        results.append(
+            check(
+                "supporting tests stay out of normal loader context",
+                contract.is_file()
+                and "tests/contract.yaml" not in loader
+                and "private-trigger-fixture" not in loader
+                and len(loader) < 2_000,
+            )
+        )
+
     # --- A project that has not run init yet must not crash here. ---
     with tempfile.TemporaryDirectory() as td:
         written, skipped, _ = sync(Path(td), "claude-code")

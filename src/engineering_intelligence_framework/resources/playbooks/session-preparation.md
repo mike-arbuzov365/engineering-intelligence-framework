@@ -50,6 +50,12 @@ If it is light, stop here and work directly from the request. If it is a
 structured single task, stop here and fill
 [`templates/task-scope.md`](../templates/task-scope.md) directly.
 
+A light task does not require a checkpoint by default. Create one only if the
+task must survive an interruption or planned handoff. Structured and packet
+work declares its logical session and continuation mode in the prepared
+artifact; the canonical semantics are in
+[`HOW-EIF-WORKS.md`](../docs/architecture/HOW-EIF-WORKS.md#logical-sessions-physical-chats-and-continuation).
+
 ## Step 2 - If it needs a packet, build the packet anatomy
 
 See [`execution-packet-planning.md`](execution-packet-planning.md) for the

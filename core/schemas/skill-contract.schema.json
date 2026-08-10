@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/mike-arbuzov365/engineering-intelligence-framework/core/schemas/skill-contract.schema.json",
+  "title": "EIF local skill contract fixture",
+  "description": "Валідує compact model-free contract поруч із canonical skill.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "skill",
+    "triggers",
+    "references",
+    "evidence",
+    "commands",
+    "stop_conditions",
+    "forbidden_behavior",
+    "assertions",
+    "supporting_files",
+    "provenance",
+    "evaluation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "skill": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "profile", "canonical_workflow"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "profile": {
+          "type": "string",
+          "pattern": "^(core|[a-z0-9][a-z0-9-]{0,62})$"
+        },
+        "canonical_workflow": {
+          "$ref": "#/$defs/repository_path"
+        }
+      }
+    },
+    "triggers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["positive", "negative"],
+      "properties": {
+        "positive": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/scenario" }
+        },
+        "negative": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/scenario" }
+        }
+      }
+    },
+    "references": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/repository_path" }
+        }
+      }
+    },
+    "evidence": { "$ref": "#/$defs/token_assertions" },
+    "commands": { "$ref": "#/$defs/token_assertions_allow_empty" },
+    "stop_conditions": { "$ref": "#/$defs/token_assertions" },
+    "forbidden_behavior": { "$ref": "#/$defs/token_assertions" },
+    "assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["manifest_contains", "canonical_contains", "manifest_not_contains"],
+      "properties": {
+        "manifest_contains": { "$ref": "#/$defs/nonempty_tokens" },
+        "canonical_contains": { "$ref": "#/$defs/nonempty_tokens" },
+        "manifest_not_contains": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "supporting_files": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scripts", "references"],
+      "properties": {
+        "scripts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/script_declaration" }
+        },
+        "references": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/support_reference" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "origin",
+        "source_revision",
+        "license",
+        "external_import",
+        "surfaces_reviewed"
+      ],
+      "properties": {
+        "origin": {
+          "enum": ["repository", "starter_profile"]
+        },
+        "source_revision": {
+          "const": "repository"
+        },
+        "license": {
+          "const": "repository"
+        },
+        "external_import": {
+          "const": false
+        },
+        "surfaces_reviewed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scripts", "references", "secrets", "network", "install", "permissions"],
+          "properties": {
+            "scripts": { "const": true },
+            "references": { "const": true },
+            "secrets": { "const": true },
+            "network": { "const": true },
+            "install": { "const": true },
+            "permissions": { "const": true }
+          }
+        }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deterministic", "behavioral"],
+      "properties": {
+        "deterministic": { "const": "required" },
+        "behavioral": { "const": "required_for_material_semantic_change" }
+      }
+    }
+  },
+  "$defs": {
+    "repository_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "prompt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 12,
+          "maxLength": 500
+        }
+      }
+    },
+    "nonempty_tokens": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "token_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": { "$ref": "#/$defs/nonempty_tokens" }
+      }
+    },
+    "token_assertions_allow_empty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "script_declaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "network", "install", "permissions", "side_effects", "reviewed"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^scripts/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "network": { "type": "boolean" },
+        "install": { "type": "boolean" },
+        "permissions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "side_effects": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "reviewed": { "const": true }
+      }
+    },
+    "support_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "reviewed"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^references/[A-Za-z0-9_.-]+(?:/[A-Za-z0-9_.-]+)*$"
+        },
+        "reviewed": { "const": true }
+      }
+    }
+  }
+}

@@ -24,3 +24,6 @@ description: >
    promote a stakeholder's one-off preference, an unapproved direction or an
    agent assumption into project memory. Use `knowledge-ingest` when durable
    learning surfaced; otherwise do not create a memory artifact.
+6. Перед `package` або `final_delivery` виконайте `eifctl delivery check` з
+   exact scope. Nonzero result блокує EIF-managed action; external shell/export
+   лишається `instruction_only` без verified adapter guard.

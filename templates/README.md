@@ -18,6 +18,8 @@ implementation), [`knowledge-delta.md`](knowledge-delta.md) (required
 PR-description output, locale-rendered per instance),
 [`session-closeout.md`](session-closeout.md) (end-of-session summary,
 locale-rendered per instance), and
+[`session-context.md`](session-context.md) (gitignored rolling continuation
+state for a structured task that must survive an interruption), and
 [`agent-instructions.md`](agent-instructions.md) (the source `eif_init.py`
 renders into a project instance's entrypoint file, e.g. `CLAUDE.md`) -
 built and in active use by the vertical slice.

@@ -1,0 +1,17 @@
+# Скопіюйте цей template у project-local state лише після explicit owner decision:
+# .eif/local-state/design-delivery-approval.yaml
+# Default false є fail-closed і не потребує decision block.
+schema_version: 1
+profile: graphic-design
+package_allowed: false
+
+# Для package_allowed: true додайте exact owner-gated evidence:
+# decision:
+#   owner: owner-reference
+#   scope: exact-delivery-scope
+#   actions:
+#   - package
+#   - final_delivery
+#   decided_at: "2026-08-09T00:00:00Z"
+#   valid_until: "2026-08-10T00:00:00Z"
+#   evidence_ref: planning/approvals/design-delivery.md

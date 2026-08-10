@@ -87,6 +87,9 @@ def main() -> int:
         "context_engineering",
         "context_window",
         "session_context",
+        "logical_session",
+        "physical_chat",
+        "continuation_mode",
         "compaction",
         "agent_memory",
         "retrieval",
@@ -97,6 +100,7 @@ def main() -> int:
         "specification_driven_development",
         "evaluation",
         "checkpoint",
+        "enforcement_level",
         "project_knowledge",
     }
     results.append(check(

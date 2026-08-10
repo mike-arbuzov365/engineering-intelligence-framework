@@ -5,6 +5,10 @@ description: Everyday graphic-design work plus brief, direction approval, produc
 framework:
   requires: '>=0.2.5,<0.3.0'
 artifacts:
+- kind: rule
+  name: design-delivery-approval
+  path: rules/design-delivery-approval.md
+  mode: required
 - kind: playbook
   name: graphic-design-project
   path: playbooks/graphic-design-project.md
@@ -24,4 +28,8 @@ artifacts:
 - kind: template
   name: design-delivery
   path: templates/design-delivery.md
+  mode: default
+- kind: template
+  name: design-package-approval
+  path: templates/design-package-approval.yaml
   mode: default

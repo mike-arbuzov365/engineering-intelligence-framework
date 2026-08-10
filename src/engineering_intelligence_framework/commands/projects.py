@@ -8,12 +8,14 @@ Commands:
     eifctl projects remove NAME [--registry PATH]
     eifctl projects detach NAME [--registry PATH] [--apply]
     eifctl projects status [--registry PATH]
+    eifctl projects resolve ID-OR-NAME [--registry PATH]
     eifctl projects upgrade [--registry PATH] [--apply] [--migrate-source]
     eifctl projects migrate-registry-v1-to-v2 [--registry PATH] [--apply]
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -47,6 +49,10 @@ from . import upgrade as upgrade_cmd
 
 class RegistryError(WorkspaceContractError):
     pass
+
+
+class ProjectResolutionError(RegistryError):
+    """Selector не резолвиться до одного verified active EIF project."""
 
 
 def _registry_path(value: str | None) -> Path:
@@ -94,6 +100,123 @@ def load_locations(path: Path, *, allow_missing: bool = False) -> dict[str, Any]
         return data
     except WorkspaceContractError as exc:
         raise RegistryError(str(exc)) from exc
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def resolve_project(
+    selector: str,
+    registry_path: Path,
+    locations_path: Path | None = None,
+) -> dict[str, Any]:
+    """Resolve one registry-v2 ID or exact name to a verified local project.
+
+    The resolver is observation-only and fails closed on unknown or ambiguous
+    selectors, inactive registrations, missing local state, incomplete EIF
+    metadata, registry/config identity drift, and config/lock adapter drift.
+    """
+    selector = selector.strip()
+    if not selector:
+        raise ProjectResolutionError("project selector must not be empty")
+
+    registry_path = registry_path.resolve()
+    locations_path = (
+        locations_path.resolve()
+        if locations_path is not None
+        else default_locations_path(registry_path).resolve()
+    )
+    registry = load_registry(registry_path)
+    locations = load_locations(locations_path)
+    matches = [
+        entry
+        for entry in registry.get("projects", [])
+        if entry.get("id") == selector
+        or str(entry.get("name", "")).casefold() == selector.casefold()
+    ]
+    if not matches:
+        raise ProjectResolutionError(f"unknown project selector {selector!r}")
+    if len(matches) != 1:
+        identities = ", ".join(
+            sorted(f"{entry.get('id')} ({entry.get('name')})" for entry in matches)
+        )
+        raise ProjectResolutionError(
+            f"ambiguous project selector {selector!r}; matches: {identities}"
+        )
+
+    entry = matches[0]
+    if entry.get("status") != "active":
+        raise ProjectResolutionError(
+            f"project {entry.get('id')!r} is not active ({entry.get('status')!r})"
+        )
+    local_matches = [
+        item
+        for item in locations.get("locations", [])
+        if item.get("project_id") == entry.get("id")
+    ]
+    if not local_matches:
+        raise ProjectResolutionError(
+            f"project {entry.get('id')!r} has no machine-local location"
+        )
+    if len(local_matches) != 1:
+        raise ProjectResolutionError(
+            f"project {entry.get('id')!r} has multiple machine-local locations"
+        )
+
+    project_path = Path(local_matches[0]["path"]).expanduser().resolve()
+    config_path = project_path / ".eif" / "config.yaml"
+    lock_path = project_path / ".eif" / "framework.lock.yaml"
+    if (
+        not project_path.is_dir()
+        or not config_path.is_file()
+        or not lock_path.is_file()
+    ):
+        raise ProjectResolutionError(
+            f"project {entry.get('id')!r} is not a complete EIF instance at {project_path}"
+        )
+
+    config = read_yaml(
+        config_path,
+        "eif-config.schema.json",
+        "project config",
+    )
+    lock = read_yaml(
+        lock_path,
+        "framework-lock.schema.json",
+        "framework lock",
+    )
+    config_name = str((config.get("project") or {}).get("name", ""))
+    config_adapter = str((config.get("adapter") or {}).get("name", ""))
+    lock_adapter = str((lock.get("adapter") or {}).get("name", ""))
+    expected_id = stable_project_id(config_name)
+    if entry.get("name") != config_name or entry.get("id") != expected_id:
+        raise ProjectResolutionError(
+            "registry/config identity mismatch: "
+            f"registry={entry.get('id')!r}/{entry.get('name')!r}, "
+            f"config={expected_id!r}/{config_name!r}"
+        )
+    if config_adapter != lock_adapter:
+        raise ProjectResolutionError(
+            "config-lock adapter mismatch: "
+            f"config={config_adapter!r}, lock={lock_adapter!r}"
+        )
+
+    return {
+        "project_id": entry["id"],
+        "project_name": entry["name"],
+        "path": str(project_path),
+        "adapter": config_adapter,
+        "profile": entry.get("profile", "default"),
+        "registry": str(registry_path),
+        "locations": str(locations_path),
+        "config_sha256": _sha256(config_path),
+        "lock_sha256": _sha256(lock_path),
+    }
 
 
 def _write_state(
@@ -395,6 +518,14 @@ def run(argv: list[str]) -> int:
     upgrade.add_argument("--migrate-source", action="store_true")
     upgrade.add_argument("--allow-dirty-project", action="store_true")
 
+    resolve = sub.add_parser(
+        "resolve",
+        help="Resolve one active registry-v2 ID or exact name to a verified local EIF project.",
+    )
+    resolve.add_argument("selector")
+    resolve.add_argument("--registry", default=None)
+    resolve.add_argument("--locations", default=None)
+
     migrate = sub.add_parser(
         "migrate-registry-v1-to-v2",
         help="Plan the named path-splitting registry migration.",
@@ -415,6 +546,22 @@ def run(argv: list[str]) -> int:
     )
 
     try:
+        if args.command == "resolve":
+            resolved = resolve_project(args.selector, registry_path, locations_path)
+            for key in (
+                "project_id",
+                "project_name",
+                "path",
+                "adapter",
+                "profile",
+                "registry",
+                "locations",
+                "config_sha256",
+                "lock_sha256",
+            ):
+                print(f"{key}={resolved[key]}")
+            return 0
+
         if args.command == "migrate-registry-v1-to-v2":
             registry_v2, locations_v1, resolved_locations = (
                 migrate_registry_v1_to_v2(

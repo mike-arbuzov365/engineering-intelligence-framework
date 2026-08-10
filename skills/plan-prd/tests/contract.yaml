@@ -1,0 +1,52 @@
+schema_version: 1
+skill:
+  name: plan-prd
+  profile: core
+  canonical_workflow: playbooks/product-requirements-planning.md
+triggers:
+  positive:
+  - id: approved-idea-prd
+    prompt: Перетвори approved idea на evidence-based PRD з observable acceptance criteria.
+  negative:
+  - id: raw-unapproved-idea
+    prompt: Негайно реалізуй сире product припущення без approval і durable idea artifact.
+references:
+  required:
+  - playbooks/product-requirements-planning.md
+evidence:
+  required:
+  - observable acceptance criteria
+commands:
+  required: []
+stop_conditions:
+  required:
+  - If idea approval is absent
+forbidden_behavior:
+  required:
+  - Do not route it into execution
+assertions:
+  manifest_contains:
+  - product-requirements-planning.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

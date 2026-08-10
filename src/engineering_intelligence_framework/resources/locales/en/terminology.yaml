@@ -49,6 +49,15 @@ terms:
   session_context:
     preferred: "session context"
     class: "eif-defined"
+  logical_session:
+    preferred: "logical session"
+    class: "eif-defined"
+  physical_chat:
+    preferred: "physical chat"
+    class: "eif-defined"
+  continuation_mode:
+    preferred: "continuation mode"
+    class: "eif-defined"
   compaction:
     preferred: "context compaction"
     class: "industry-established"
@@ -113,6 +122,9 @@ terms:
   checkpoint:
     preferred: "checkpoint"
     class: "industry-established"
+  enforcement_level:
+    preferred: "enforcement level"
+    class: "eif-defined"
   handoff:
     preferred: "handoff"
     class: "industry-established"

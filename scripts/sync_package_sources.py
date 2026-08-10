@@ -73,6 +73,7 @@ PACKAGE_TOOL_SCRIPTS = [
 
 # Resource trees the _impl scripts read at runtime via --framework-root.
 RESOURCE_TREES = [
+    "adapters",
     "core/schemas",
     "core/ontology",
     "docs/architecture",

@@ -1,0 +1,54 @@
+schema_version: 1
+skill:
+  name: run-execution-packet
+  profile: core
+  canonical_workflow: playbooks/execution-packet-execution.md
+triggers:
+  positive:
+  - id: prepared-packet-run
+    prompt: Виконай підготовлений execution packet послідовно від start file до closeout.
+  negative:
+  - id: packet-planning-request
+    prompt: Сплануй новий execution packet для ще не структурованої великої ідеї.
+  - id: bounded-single-task
+    prompt: Виконай один малий approved task у межах однієї session із focused test.
+references:
+  required:
+  - playbooks/execution-packet-execution.md
+evidence:
+  required:
+  - One agent, sequential
+commands:
+  required: []
+stop_conditions:
+  required:
+  - If blocked
+forbidden_behavior:
+  required:
+  - no delegation/spawn/team tools
+assertions:
+  manifest_contains:
+  - execution-packet-execution.md
+  canonical_contains:
+  - 'status: validated'
+  manifest_not_contains:
+  - TODO
+  - '[SKILL_PRUNED]'
+supporting_files:
+  scripts: []
+  references: []
+provenance:
+  origin: repository
+  source_revision: repository
+  license: repository
+  external_import: false
+  surfaces_reviewed: &reviewed
+    scripts: true
+    references: true
+    secrets: true
+    network: true
+    install: true
+    permissions: true
+evaluation:
+  deterministic: required
+  behavioral: required_for_material_semantic_change

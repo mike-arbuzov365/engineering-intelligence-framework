@@ -17,7 +17,7 @@ references:
   - playbooks/execution-packet-execution.md
 evidence:
   required:
-  - One agent, sequential
+  - One accountable agent, sessions sequential
 commands:
   required: []
 stop_conditions:

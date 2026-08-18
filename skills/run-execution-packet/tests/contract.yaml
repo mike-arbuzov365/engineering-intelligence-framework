@@ -25,7 +25,7 @@ stop_conditions:
   - If blocked
 forbidden_behavior:
   required:
-  - no delegation/spawn/team tools
+  - Never delegate a session itself
 assertions:
   manifest_contains:
   - execution-packet-execution.md

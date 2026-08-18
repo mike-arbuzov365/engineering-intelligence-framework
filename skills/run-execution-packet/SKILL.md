@@ -33,7 +33,10 @@ Full workflow: [`playbooks/execution-packet-execution.md`](../../playbooks/execu
 3. Respect any resource/budget guard from the packet's decisions file
    (e.g. avoiding hosted/paid CI) for every session, not just the one
    that states it.
-4. One agent, sequential, no delegation/spawn/team tools.
+4. One accountable agent, sessions sequential. Never delegate a session
+   itself. Bounded work inside a session may be delegated when its output
+   returns for verification, the delegate does not nest or spend budget,
+   and the session record names what was delegated and what verified it.
 5. On the final session: run
    [`playbooks/session-closeout.md`](../../playbooks/session-closeout.md),
    then fill `templates/packet-closeout.md` from the actual accumulated

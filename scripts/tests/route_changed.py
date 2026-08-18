@@ -49,6 +49,7 @@ RULES: list[tuple[str, list[str]]] = [
     ("skills/", [
         "test_skill_contracts.py",
         "test_skill_eval.py",
+        "test_project_skills.py",
         "test_sync_skills.py",
         "test_operating_layer.py",
         "test_check_links.py",
@@ -102,6 +103,7 @@ RULES: list[tuple[str, list[str]]] = [
     ("src/engineering_intelligence_framework/commands/skills.py", [
         "test_skill_contracts.py",
         "test_skill_eval.py",
+        "test_project_skills.py",
     ]),
     ("src/engineering_intelligence_framework/commands/workspace.py", [
         "test_workspace_commands.py",
@@ -127,7 +129,13 @@ RULES: list[tuple[str, list[str]]] = [
     ("scripts/eif_benchmark.py", ["test_benchmark.py"]),
     ("scripts/sync_package_sources.py", ["test_sync_skills.py", "test_parity_matrix.py"]),
     # Prose that ships no behavior.
+    ("scripts/README.md", ["test_check_links.py"]),
     ("docs/", ["test_check_links.py"]),
+    ("adapters/README.md", ["test_check_links.py"]),
+    ("CONTRIBUTING.md", ["test_check_links.py"]),
+    ("GOVERNANCE.md", ["test_check_links.py"]),
+    ("SECURITY.md", ["test_check_links.py"]),
+    ("THIRD_PARTY_NOTICES.md", ["test_check_licenses.py"]),
     ("planning/", []),
     ("site/", []),
     ("examples/", []),

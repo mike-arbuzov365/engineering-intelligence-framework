@@ -70,14 +70,35 @@ The default `remote_run_budget` is 0 when the packet does not authorize a
 number. A failed remote run still consumes one unit. Exhausting a budget is a
 stop condition, not permission to silently raise the cap.
 
-## Step 4 - One active agent, no delegation
+## Step 4 - One accountable agent
 
-Sessions execute sequentially in one agent. Do not spawn subagents,
-delegate sessions to parallel workers, or use team/multi-agent tooling to
-"speed up" a sequential packet - the roadmap's ordering and the
-checkpoint trail are what make the result auditable
-(see [`execution-packet-review.md`](execution-packet-review.md)); parallel,
-undocumented execution breaks that trail.
+Sessions execute sequentially in one agent, and that agent stays
+accountable for everything the packet records. Do not delegate a session
+to a parallel worker or split a packet across agents to "speed it up" -
+the roadmap's ordering and the checkpoint trail are what make the result
+auditable (see [`execution-packet-review.md`](execution-packet-review.md));
+parallel, undocumented execution breaks that trail.
+
+<!-- Revised 2026-08-19: the previous wording banned delegation outright,
+which also ruled out uses that cannot damage the trail - a read-only
+sweep across a large tree, an independent second reading of a diff. The
+ban was aimed at parallel session execution; it is restated here as the
+condition it was actually protecting. -->
+
+Delegating bounded work *within* a session is allowed when the result
+returns to the accountable agent for verification. Five conditions:
+
+- a subagent is never a session, never owns exit criteria and never
+  advances the roadmap;
+- delegate output is evidence to check, not a result to trust: nothing it
+  reports becomes `OBSERVED` until the accountable agent reproduces it
+  against source, command output or a test;
+- checkpoints, closeout, evidence and the Knowledge Delta are written by
+  the accountable agent;
+- a delegate does not spawn further delegates, and does not consume a
+  resource or remote-run budget the packet did not authorize to it;
+- the session record names what was delegated and what verified it. An
+  unnamed delegation is the failure this step exists to prevent.
 
 ## Step 5 - Close out
 

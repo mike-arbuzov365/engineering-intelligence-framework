@@ -75,9 +75,24 @@ Use the smallest gate that answers the current question:
 
 | When | Command | Scope |
 |---|---|---|
-| Routine change | `python scripts/tests/smoke.py` | Source critical path; this is the only automatic GitHub PR test suite. |
+| Routine change | `python scripts/tests/smoke.py` | Source critical path; this is the only automatic GitHub PR test suite. Measured 15.6s. |
+| You changed specific files | `python scripts/tests/route_changed.py` | Smoke plus the suites your changed paths map to. Measured 24.9s on a seven-suite selection. An unclassified path escalates to the full inventory. |
 | Package-relevant change | `python scripts/tests/test_package_smoke.py` | One wheel, one clean environment, one Codex `graphic-design` project, one `doctor`; prints each stage and enforces bounded command timeouts. |
 | Release only | `python scripts/tests/test_package_build.py` | Exhaustive wheel + sdist, two clean environments, reinstall, all adapters/integrations, corruption and installed-package journeys. |
+| Release inventory | `python scripts/tests/run_all.py` | Every suite. Measured about 17 minutes for 1822 checks. Not a routine gate. |
+
+`smoke.py` covers the critical flow and touches no skill, contract, or
+template. A governance-text change therefore passes it and can still be
+broken, which is what happened on 2026-08-19: an edit under
+`skills/run-execution-packet/` passed `eifctl skills check` and four
+hand-picked suites, then failed `test_skill_contracts.py` in the release
+inventory seventeen minutes later. `route_changed.py` exists to close that
+gap; it selects by changed path rather than by memory, and it selected the
+missing suite on the same input.
+
+Prefer `route_changed.py` over re-running the full inventory. Running
+every suite to prove one file is the expensive habit this table is meant
+to prevent.
 
 Install the build tools once, then use the short package smoke during ordinary
 work:

@@ -33,8 +33,9 @@ Goal: <one sentence, from the charter>.
 
 Order:
 1. Read packet files 00 through 05 in numeric order.
-2. Execute sessions in the roadmap's exact order, one agent, no
-   delegation/spawn/team tools.
+2. Execute sessions in the roadmap's exact order, one accountable agent.
+   A session is never delegated; bounded work inside one may be, if its
+   output returns for verification and the record names it.
 3. For each session, read its launch file under `sessions/` and keep a
    checkpoint per that file's own convention.
 4. Do not rely on prior chat history - the packet files and current

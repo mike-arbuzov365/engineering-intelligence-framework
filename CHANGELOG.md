@@ -15,6 +15,23 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+### Changed
+
+- **Packet execution allows delegation inside a session.** Step 4 of
+  `playbooks/execution-packet-execution.md` banned subagents outright,
+  which also ruled out uses that cannot damage the audit trail, such as a
+  read-only sweep across a large tree or an independent second reading of
+  a diff. The ban was aimed at parallel session execution, and it is now
+  restated as the condition it was protecting: one accountable agent,
+  sessions sequential and never delegated, delegate output treated as
+  evidence to verify rather than a result to trust, checkpoints and
+  closeout written by the accountable agent, no nested delegates, no
+  budget spent by a delegate, and the session record naming what was
+  delegated and what verified it. `skills/run-execution-packet`, its
+  contract and `templates/packet-start.md` follow the same wording. This
+  is a governance-text change; no behavioral claim is made about speed,
+  cost or quality, and none was measured.
+
 ## [0.2.8] - 2026-08-10
 
 ### Added

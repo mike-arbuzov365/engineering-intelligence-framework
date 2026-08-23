@@ -85,6 +85,10 @@ SUITES = [
     # 0.2.5 together with scripts/eif_sync_skills.py.
     "test_sync_skills.py",
     "test_skill_contracts.py",
+    # Project-owned skill discovery, added in 0.2.9 together with
+    # `eifctl skills check --project-root`. Without it, admission gate 6
+    # was unreachable for a project's own skills.
+    "test_project_skills.py",
     "test_demo_fixtures_fresh.py",
     "test_parity_matrix.py",
     "test_merge_gate.py",

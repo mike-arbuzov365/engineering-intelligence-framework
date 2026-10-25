@@ -23,7 +23,7 @@
     "gate:site": "node scripts/gate-site.mjs"
   },
   "devDependencies": {
-    "vite": "8.1.5",
+    "vite": "8.1.6",
     "@playwright/test": "1.61.1",
     "@axe-core/playwright": "4.12.1",
     "lighthouse": "13.4.1"

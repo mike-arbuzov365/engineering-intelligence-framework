@@ -66,6 +66,28 @@ def main() -> int:
     results: list[bool] = []
     policy = load_policy(FRAMEWORK_ROOT)
 
+    psf_classifier = "License :: OSI Approved :: Python Software Foundation License"
+    psf_dist = FakeDistribution("windows-dependency", {"License": "PSF", "Classifier": psf_classifier})
+    results.append(check(
+        "exact PSF classifier maps to the policy's existing PSF-2.0 identifier",
+        check_package_licenses(policy, [psf_dist]) == ([], [], ["windows-dependency"]),
+    ))
+    bare_psf = FakeDistribution("ambiguous-psf", {"License": "PSF"})
+    results.append(check(
+        "bare PSF without the known classifier remains unknown",
+        bool(check_package_licenses(policy, [bare_psf])[1]),
+    ))
+    denied_psf = FakeDistribution("denied-psf", {"License": "GPL-3.0", "Classifier": psf_classifier})
+    results.append(check(
+        "known classifier never overrides a denied-family declaration",
+        bool(check_package_licenses(policy, [denied_psf])[0]),
+    ))
+    policy_without_psf = dict(policy, allowed_licenses=["MIT"])
+    results.append(check(
+        "PSF classifier cannot bypass a policy that does not allow PSF-2.0",
+        bool(check_package_licenses(policy_without_psf, [psf_dist])[1]),
+    ))
+
     # --- matches_any: pure function, no environment dependency ---
     results.append(check(
         "matches_any: case-insensitive substring match",

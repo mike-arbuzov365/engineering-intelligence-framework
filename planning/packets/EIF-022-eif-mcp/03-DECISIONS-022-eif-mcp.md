@@ -244,3 +244,26 @@ Ratified рішення не редагується на місці. Нове р
 - Нова залежність потрібна не для extra: не додавати.
 - Команди в артефактах цього пакета: звичайні `python ...` без обгорток маршрутизації виводу; точні стани (git, SHA, JSON) читати без фільтрації.
 - Конфлікт між цим пакетом і ratified рішенням реєстру: пріоритет за реєстром, зупинка лише якщо потрібна окрема пропозиція заміни.
+
+## Execution facts: SESSION-001
+
+SDK pin for D-013: `mcp==2.1.1` (tested lower bound `>=2.1.1,<3`).
+A clean Python 3.11.15 environment resolves the base package and SDK together;
+Python 3.12 is not installed on this machine. The source branch still contains
+`origin/main` at `dda7b0c`; release 0.2.9 has not landed.
+B0 is remeasured with UTF-8 output and temporary instance roots replaced by `.`.
+Compared with the planning measurement, light differs by -78/-72/-73/-73 bytes
+for Claude Code/Codex/Cursor/Hermes respectively; the policy walks are unchanged.
+These are normalization differences, not token savings. SDK probe and test
+commands are recorded in the session closeout.
+
+License-contour sequencing adjustment: the exact standard Python Software
+Foundation Trove classifier is normalized to the already allowed `PSF-2.0`.
+The Windows dependency metadata uses `PSF`; bare `PSF` remains unknown, denied
+licenses still win, and `license-policy.json` is unchanged. This compatibility
+fix was pulled forward from SESSION-004 so dependency viability can be checked
+before implementation. Reproduction before the fix: clean Windows environment
+license check reported only pywin32 as UNKNOWN. Regression tests cover the exact
+classifier, bare alias, denied precedence and a policy without PSF-2.0.
+Probe: both in-memory and stdio roundtrips PASS; tools/list 212 bytes for one
+probe tool. `Context.elicit` is present; no host elicitation was attempted.

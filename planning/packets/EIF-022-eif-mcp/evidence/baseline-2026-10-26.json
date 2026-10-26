@@ -1,0 +1,407 @@
+{
+  "method": {
+    "token_estimate": "ceil(bytes / 4); an approximation, not a tokenizer count",
+    "eifctl_version": "eifctl 0.0.0+unknown (engineering-intelligence-framework), Python 3.13.15",
+    "python": "3.13.15",
+    "source_ref": "origin/main dda7b0c (pyproject 0.2.8), run from the source tree, not an installed wheel",
+    "instances": "synthetic, created by `eifctl new`, project name synthetic-demo",
+    "scenarios": "light = entrypoint + skill frontmatter + one doctor run; the others add the one-hop skill walk; assumes the host loads only skill frontmatter at start",
+    "tier_a": "loaded by the host without an agent decision",
+    "tier_b": "the entrypoint tells the agent to read or run these on the first task",
+    "walk_limits": "one hop of relative .md links from the runtime skill source; deeper reads not counted"
+  },
+  "adapters": [
+    {
+      "adapter": "claude-code",
+      "scenarios": {
+        "light": {
+          "bytes": 12009,
+          "est_tokens": 3003
+        },
+        "knowledge_search": {
+          "bytes": 16396,
+          "est_tokens": 4099
+        },
+        "packet_plan": {
+          "bytes": 27173,
+          "est_tokens": 6794
+        },
+        "packet_run": {
+          "bytes": 27959,
+          "est_tokens": 6990
+        },
+        "light_if_host_loads_full_loaders": {
+          "bytes": 19080,
+          "est_tokens": 4770
+        }
+      },
+      "tier_a_always_loaded": {
+        "entrypoint": {
+          "path": "CLAUDE.md",
+          "bytes": 6704,
+          "lines": 120,
+          "est_tokens": 1676
+        },
+        "skill_loaders": {
+          "count": 12,
+          "frontmatter_only": {
+            "bytes": 3735,
+            "est_tokens": 934
+          },
+          "full_files": {
+            "bytes": 10806,
+            "est_tokens": 2702
+          }
+        }
+      },
+      "tier_b_first_task": {
+        "doctor_stdout": {
+          "exit_code": 0,
+          "bytes": 1570,
+          "est_tokens": 393
+        },
+        "skill_walks_one_hop": {
+          "run-execution-packet": {
+            "files": [
+              "skills/run-execution-packet/SKILL.md",
+              "playbooks/execution-packet-execution.md",
+              "playbooks/session-execution.md",
+              "playbooks/session-closeout.md"
+            ],
+            "total": {
+              "bytes": 15950,
+              "est_tokens": 3988
+            }
+          },
+          "plan-execution-packet": {
+            "files": [
+              "skills/plan-execution-packet/SKILL.md",
+              "playbooks/execution-packet-planning.md",
+              "playbooks/session-preparation.md",
+              "templates/task-scope.md"
+            ],
+            "total": {
+              "bytes": 15164,
+              "est_tokens": 3791
+            }
+          },
+          "knowledge-search": {
+            "files": [
+              "skills/knowledge-search/SKILL.md",
+              "playbooks/knowledge-search.md"
+            ],
+            "total": {
+              "bytes": 4387,
+              "est_tokens": 1097
+            }
+          }
+        }
+      },
+      "runtime_bundle": {
+        "files": 155,
+        "bytes": 887081
+      },
+      "latency_seconds": {
+        "note": "machine-dependent; cold subprocess; median of runs",
+        "runs": 5,
+        "doctor_median": 1.982,
+        "version_median": 1.27,
+        "import_cli_median": 1.237
+      }
+    },
+    {
+      "adapter": "codex",
+      "scenarios": {
+        "light": {
+          "bytes": 11997,
+          "est_tokens": 3000
+        },
+        "knowledge_search": {
+          "bytes": 16384,
+          "est_tokens": 4096
+        },
+        "packet_plan": {
+          "bytes": 27161,
+          "est_tokens": 6791
+        },
+        "packet_run": {
+          "bytes": 27947,
+          "est_tokens": 6987
+        },
+        "light_if_host_loads_full_loaders": {
+          "bytes": 19068,
+          "est_tokens": 4767
+        }
+      },
+      "tier_a_always_loaded": {
+        "entrypoint": {
+          "path": "AGENTS.md",
+          "bytes": 6704,
+          "lines": 120,
+          "est_tokens": 1676
+        },
+        "skill_loaders": {
+          "count": 12,
+          "frontmatter_only": {
+            "bytes": 3735,
+            "est_tokens": 934
+          },
+          "full_files": {
+            "bytes": 10806,
+            "est_tokens": 2702
+          }
+        }
+      },
+      "tier_b_first_task": {
+        "doctor_stdout": {
+          "exit_code": 0,
+          "bytes": 1558,
+          "est_tokens": 390
+        },
+        "skill_walks_one_hop": {
+          "run-execution-packet": {
+            "files": [
+              "skills/run-execution-packet/SKILL.md",
+              "playbooks/execution-packet-execution.md",
+              "playbooks/session-execution.md",
+              "playbooks/session-closeout.md"
+            ],
+            "total": {
+              "bytes": 15950,
+              "est_tokens": 3988
+            }
+          },
+          "plan-execution-packet": {
+            "files": [
+              "skills/plan-execution-packet/SKILL.md",
+              "playbooks/execution-packet-planning.md",
+              "playbooks/session-preparation.md",
+              "templates/task-scope.md"
+            ],
+            "total": {
+              "bytes": 15164,
+              "est_tokens": 3791
+            }
+          },
+          "knowledge-search": {
+            "files": [
+              "skills/knowledge-search/SKILL.md",
+              "playbooks/knowledge-search.md"
+            ],
+            "total": {
+              "bytes": 4387,
+              "est_tokens": 1097
+            }
+          }
+        }
+      },
+      "runtime_bundle": {
+        "files": 155,
+        "bytes": 887081
+      },
+      "latency_seconds": {
+        "note": "machine-dependent; cold subprocess; median of runs",
+        "runs": 5,
+        "doctor_median": 2.178,
+        "version_median": 1.419,
+        "import_cli_median": 1.24
+      }
+    },
+    {
+      "adapter": "cursor",
+      "scenarios": {
+        "light": {
+          "bytes": 12294,
+          "est_tokens": 3074
+        },
+        "knowledge_search": {
+          "bytes": 16681,
+          "est_tokens": 4171
+        },
+        "packet_plan": {
+          "bytes": 27458,
+          "est_tokens": 6865
+        },
+        "packet_run": {
+          "bytes": 28244,
+          "est_tokens": 7061
+        },
+        "light_if_host_loads_full_loaders": {
+          "bytes": 19365,
+          "est_tokens": 4842
+        }
+      },
+      "tier_a_always_loaded": {
+        "entrypoint": {
+          "path": ".cursor/rules/eif/governance.mdc",
+          "bytes": 6953,
+          "lines": 122,
+          "est_tokens": 1739
+        },
+        "skill_loaders": {
+          "count": 12,
+          "frontmatter_only": {
+            "bytes": 3735,
+            "est_tokens": 934
+          },
+          "full_files": {
+            "bytes": 10806,
+            "est_tokens": 2702
+          }
+        }
+      },
+      "tier_b_first_task": {
+        "doctor_stdout": {
+          "exit_code": 0,
+          "bytes": 1606,
+          "est_tokens": 402
+        },
+        "skill_walks_one_hop": {
+          "run-execution-packet": {
+            "files": [
+              "skills/run-execution-packet/SKILL.md",
+              "playbooks/execution-packet-execution.md",
+              "playbooks/session-execution.md",
+              "playbooks/session-closeout.md"
+            ],
+            "total": {
+              "bytes": 15950,
+              "est_tokens": 3988
+            }
+          },
+          "plan-execution-packet": {
+            "files": [
+              "skills/plan-execution-packet/SKILL.md",
+              "playbooks/execution-packet-planning.md",
+              "playbooks/session-preparation.md",
+              "templates/task-scope.md"
+            ],
+            "total": {
+              "bytes": 15164,
+              "est_tokens": 3791
+            }
+          },
+          "knowledge-search": {
+            "files": [
+              "skills/knowledge-search/SKILL.md",
+              "playbooks/knowledge-search.md"
+            ],
+            "total": {
+              "bytes": 4387,
+              "est_tokens": 1097
+            }
+          }
+        }
+      },
+      "runtime_bundle": {
+        "files": 155,
+        "bytes": 887081
+      },
+      "latency_seconds": {
+        "note": "machine-dependent; cold subprocess; median of runs",
+        "runs": 5,
+        "doctor_median": 1.757,
+        "version_median": 1.507,
+        "import_cli_median": 1.381
+      }
+    },
+    {
+      "adapter": "hermes",
+      "scenarios": {
+        "light": {
+          "bytes": 12002,
+          "est_tokens": 3001
+        },
+        "knowledge_search": {
+          "bytes": 16389,
+          "est_tokens": 4098
+        },
+        "packet_plan": {
+          "bytes": 27166,
+          "est_tokens": 6792
+        },
+        "packet_run": {
+          "bytes": 27952,
+          "est_tokens": 6988
+        },
+        "light_if_host_loads_full_loaders": {
+          "bytes": 19073,
+          "est_tokens": 4769
+        }
+      },
+      "tier_a_always_loaded": {
+        "entrypoint": {
+          "path": ".hermes.md",
+          "bytes": 6705,
+          "lines": 120,
+          "est_tokens": 1677
+        },
+        "skill_loaders": {
+          "count": 12,
+          "frontmatter_only": {
+            "bytes": 3735,
+            "est_tokens": 934
+          },
+          "full_files": {
+            "bytes": 10806,
+            "est_tokens": 2702
+          }
+        }
+      },
+      "tier_b_first_task": {
+        "doctor_stdout": {
+          "exit_code": 0,
+          "bytes": 1562,
+          "est_tokens": 391
+        },
+        "skill_walks_one_hop": {
+          "run-execution-packet": {
+            "files": [
+              "skills/run-execution-packet/SKILL.md",
+              "playbooks/execution-packet-execution.md",
+              "playbooks/session-execution.md",
+              "playbooks/session-closeout.md"
+            ],
+            "total": {
+              "bytes": 15950,
+              "est_tokens": 3988
+            }
+          },
+          "plan-execution-packet": {
+            "files": [
+              "skills/plan-execution-packet/SKILL.md",
+              "playbooks/execution-packet-planning.md",
+              "playbooks/session-preparation.md",
+              "templates/task-scope.md"
+            ],
+            "total": {
+              "bytes": 15164,
+              "est_tokens": 3791
+            }
+          },
+          "knowledge-search": {
+            "files": [
+              "skills/knowledge-search/SKILL.md",
+              "playbooks/knowledge-search.md"
+            ],
+            "total": {
+              "bytes": 4387,
+              "est_tokens": 1097
+            }
+          }
+        }
+      },
+      "runtime_bundle": {
+        "files": 155,
+        "bytes": 887081
+      },
+      "latency_seconds": {
+        "note": "machine-dependent; cold subprocess; median of runs",
+        "runs": 5,
+        "doctor_median": 1.785,
+        "version_median": 1.081,
+        "import_cli_median": 1.053
+      }
+    }
+  ]
+}

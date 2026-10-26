@@ -98,7 +98,8 @@ def session_validate(instance: Instance, session_id: str) -> Result:
         raise ServiceError("not_found", "The session identifier is not present.")
     _session_sources(instance, path)
     data, errors = session.validate_checkpoint(path, project_root=instance.root)
-    return {"status": "partial" if errors else "ok", "data": {"verdict": "fail" if errors else "pass", "errors": errors, "session_id": session_id}}
+    safe_errors = [error.split(":", 1)[0][:80] + ": validation failed" for error in errors]
+    return {"status": "partial" if errors else "ok", "data": {"verdict": "fail" if errors else "pass", "errors": safe_errors, "session_id": session_id}}
 
 
 def session_resume_audit(instance: Instance, session_id: str) -> Result:
@@ -111,7 +112,7 @@ def session_resume_audit(instance: Instance, session_id: str) -> Result:
     if not (instance.root / ".git").is_dir() or (instance.root / ".git").is_symlink():
         raise ServiceError("source_unavailable", "A self-contained local Git repository is required for resume audit.")
     data, mismatches = session.audit_checkpoint(path, instance.root, bound_project=True)
-    return {"status": "partial" if mismatches else "ok", "data": {"verdict": "fail" if mismatches else "pass", "mismatches": [{"category": key, "expected": expected, "actual": actual} for key, expected, actual in mismatches], "next_action": (data or {}).get("next_action")}}
+    return {"status": "partial" if mismatches else "ok", "data": {"verdict": "fail" if mismatches else "pass", "mismatches": [{"category": key, "expected": str(expected)[:240], "actual": "checkpoint validation failed" if key == "schema" else str(actual)[:240]} for key, expected, actual in mismatches], "next_action": (data or {}).get("next_action")}}
 
 
 def knowledge_search(instance: Instance, query: str, type_filter: str | None = None, top: int = 5, status: str | None = None) -> Result:

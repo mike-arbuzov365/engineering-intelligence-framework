@@ -1,6 +1,7 @@
 """Section access to pinned, named policy artifacts; cursors stay in memory."""
 from __future__ import annotations
 
+import json
 import re
 import time
 import uuid
@@ -53,6 +54,18 @@ def artifact_get(instance: Instance, kind: str, name: str, section: str | None =
         offset = saved["offset"]
     body = text[match["start"]:match["end"]]
     page = body[offset:offset + max_chars]
+    # JSON text plus structuredContent duplicate this page on the wire.
+    # Bound its escaped bytes as well as its characters, then advance the
+    # cursor by the exact returned character count (including Unicode).
+    if len(json.dumps(page, ensure_ascii=False).encode("utf-8")) > 6000:
+        low, high = 0, len(page)
+        while low < high:
+            middle = (low + high + 1) // 2
+            if len(json.dumps(page[:middle], ensure_ascii=False).encode("utf-8")) <= 6000:
+                low = middle
+            else:
+                high = middle - 1
+        page = page[:low]
     truncated = offset + len(page) < len(body)
     result: Result = {"status": "truncated" if truncated else "ok", "data": {"path": item["relative"], "section": section, "text": page}, "truncated": truncated}
     if truncated:

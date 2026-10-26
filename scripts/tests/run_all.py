@@ -44,6 +44,7 @@ SUITES = [
     "test_context_footprint.py",
     "test_service_golden.py",
     "test_service_core.py",
+    "test_eif_mcp_inmemory.py",
     "test_paths.py",
     "test_validate.py",
     "test_operating_layer.py",

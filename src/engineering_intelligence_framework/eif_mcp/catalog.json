@@ -1,0 +1,261 @@
+[
+  {
+    "name": "eif_capabilities",
+    "description": "Report instance identity, versions, drift, reader catalog and limits.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_brief",
+    "description": "Route an explicit task kind using pinned skill metadata and bounded state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "task_kind": {
+          "enum": [
+            "light",
+            "structured",
+            "idea",
+            "prd",
+            "packet_plan",
+            "packet_run",
+            "packet_review",
+            "knowledge_search",
+            "knowledge_ingest",
+            "retro"
+          ]
+        }
+      },
+      "required": [
+        "task_kind"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_artifact_get",
+    "description": "List heading slugs or page one section of a named, hash-checked pinned artifact.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "skill",
+            "playbook",
+            "template",
+            "rule"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "section": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "max_chars": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12000,
+          "default": 4000
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "required": [
+        "kind",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_knowledge_search",
+    "description": "Search contained knowledge with lifecycle filtering and explicit coverage.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "top": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "default": 5
+        },
+        "status": {
+          "enum": [
+            "validated",
+            "draft",
+            "superseded",
+            "deprecated",
+            "rejected"
+          ]
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_packet_status",
+    "description": "Read explicit packet progress and the first dependency-ready session.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "packet": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_doctor",
+    "description": "Collect bounded core checks; disclose checks requiring full local CLI coverage.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_session_validate",
+    "description": "Validate a named instance checkpoint and its contained source reference.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        }
+      },
+      "required": [
+        "session_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_session_resume_audit",
+    "description": "Audit a named checkpoint against current identity, source and read-only Git state.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "session_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        }
+      },
+      "required": [
+        "session_id"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  },
+  {
+    "name": "eif_delivery_check",
+    "description": "Check the machine guard for an EIF-managed graphic-design delivery action.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "enum": [
+            "package",
+            "final_delivery"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        }
+      },
+      "required": [
+        "action",
+        "scope"
+      ],
+      "additionalProperties": false
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    }
+  }
+]

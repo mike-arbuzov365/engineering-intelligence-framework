@@ -1,8 +1,8 @@
 {
   "adapter": "hermes",
-  "config_format": "json",
-  "config_key": "mcpServers",
-  "config_path": "~/.hermes/config.json",
+  "config_format": "yaml",
+  "config_key": "mcp_servers",
+  "config_path": "~/.hermes/config.yaml",
   "installed": false,
   "integration": "vendor-docs",
   "provider": "context7",

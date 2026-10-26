@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "integration": "eif-mcp",
+  "transport": "stdio",
+  "data_boundary": "local-only",
+  "optional": true,
+  "default_enabled": false,
+  "installed_by_eif": false,
+  "reader_tools": 9,
+  "sdk_tested": "2.1.1",
+  "writer_status": "deferred-to-EIF-022b",
+  "format_evidence": {
+    "claude-code": "documented mcpServers JSON shape; client canary not run",
+    "codex": "documented mcp_servers TOML shape; client canary not run",
+    "cursor": "documented mcpServers JSON shape; client canary not run",
+    "hermes": "observed v0.21.3 mcp add --help and hermes_cli/mcp_config.py _get_mcp_servers/_save_mcp_server: config.yaml, mcp_servers; client canary not run"
+  }
+}

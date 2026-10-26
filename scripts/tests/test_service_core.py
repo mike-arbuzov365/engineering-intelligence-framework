@@ -95,6 +95,10 @@ def main() -> int:
         check("legacy never completion", packet_status(instance, "demo")["status"] == "partial" and packet_status(instance, "demo")["data"]["next_session"] is None)
         first.write_text("---\nid: SESSION-001\nstatus: prepared\ndepends_on: [SESSION-002]\n---\n", encoding="utf-8")
         check("cycle partial", packet_status(instance, "demo")["data"]["reason"] == "invalid_or_cyclic_dependencies")
+        extra = packet / "sessions/SESSION-003-extra.md"
+        extra.write_text("---\nid: SESSION-003\nstatus: prepared\ndepends_on: []\n---\n", encoding="utf-8")
+        check("unmapped sessions never disappear", len(packet_status(instance, "demo")["data"]["sessions"]) == 3)
+        extra.unlink()
         error("packet traversal", lambda: packet_status(instance, "../demo"), "validation_failed")
         outside = base / "outside.md"
         outside.write_text("external sentinel", encoding="utf-8")

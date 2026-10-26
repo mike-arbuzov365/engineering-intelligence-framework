@@ -24,8 +24,8 @@ Implementation status:
   configuration template, and states its authority position: vendor
   documentation is a normative source and does not outrank an empirical
   observation. It is still not behaviorally canaried the way RTK and
-  Graphify are - EIF generates configuration for the agent to load and does
-  not itself speak MCP, so `transport-reachable` is reported by the agent
+  Graphify are - EIF generates vendor-provider configuration for the agent
+  to load; `transport-reachable` is reported by the agent
   and is marked `"verified": false` in its manifest rather than claiming a
   probe that does not happen.
 
@@ -66,3 +66,7 @@ does not yet.
 `eifctl doctor` reports each configured provider independently, and a provider
 must not be marketed as integrated until its capability-specific checks pass.
 Core EIF remains functional with every optional provider disabled or absent.
+
+The [optional EIF MCP reader](eif-mcp/README.md) serves a single local EIF
+instance over stdio. Its SDK dependency is optional and its client templates
+are never installed automatically.

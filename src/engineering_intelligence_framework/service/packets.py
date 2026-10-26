@@ -83,4 +83,7 @@ def packet_status(instance: Instance, packet: str | None = None) -> Result:
             reason = "completed_or_no_ready_session"
     closeouts = sorted(folder.glob("07-CLOSEOUT*.md"))
     closeout = frontmatter(instance, closeouts[0].relative_to(instance.root).as_posix()).get("status", "unknown") if len(closeouts) == 1 else "unknown"
-    return {"status": "partial" if reason and reason != "completed_or_no_ready_session" else "ok", "data": {"packet": packet, "sessions": [by_id[sid] for sid in order if sid in by_id] if order else sessions, "closeout": str(closeout), "next_session": next_session, "reason": reason}}
+    # Preserve every observed launch file even when roadmap coverage is
+    # incomplete or IDs are duplicated. Partial coverage cannot erase rows.
+    ordered = sorted(sessions, key=lambda row: order.index(row["id"]) if row["id"] in order else len(order))
+    return {"status": "partial" if reason and reason != "completed_or_no_ready_session" else "ok", "data": {"packet": packet, "sessions": ordered, "closeout": str(closeout), "next_session": next_session, "reason": reason}}

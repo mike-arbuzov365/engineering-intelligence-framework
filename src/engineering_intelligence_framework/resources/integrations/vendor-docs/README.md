@@ -41,7 +41,7 @@ user level.** EIF then makes sure the agent knows when to reach for it.
    | Claude Code | `~/.claude.json` | `mcpServers` |
    | Codex | `~/.codex/config.toml` | `mcp_servers` |
    | Cursor | `~/.cursor/mcp.json` | `mcpServers` |
-   | Hermes | `~/.hermes/config.json` | `mcpServers` |
+   | Hermes | `~/.hermes/config.yaml` | `mcp_servers` |
 
    [`generated/mcp/<adapter>.json`](generated/mcp/) gives the shape and a
    review checklist. The provider command itself is owner-supplied on
@@ -104,7 +104,7 @@ Honest current state, per this repository's own evidence discipline:
   `usage-policy.json` and the generated artifacts
   (`scripts/tests/test_vendor_docs_integration.py`).
 - **Not verified:** live provider behavior. EIF generates configuration for
-  an agent to load; it does not itself speak MCP, so `transport-reachable`
+  an agent to load; provider MCP calls remain host-owned, so `transport-reachable`
   is reported by the agent, not probed by `eifctl doctor`. No provider
   version has been pinned or behaviorally canaried the way RTK and Graphify
   have been.
@@ -112,3 +112,7 @@ Honest current state, per this repository's own evidence discipline:
 That gap is why `manifest.json` marks `transport-reachable` with
 `"verified": false` rather than claiming a health check this framework does
 not perform.
+
+The separate [optional EIF MCP reader](../eif-mcp/README.md) serves local
+instance data and never contacts this vendor provider. Hermes format metadata
+was corrected from observed v0.21.3 CLI help and command source.

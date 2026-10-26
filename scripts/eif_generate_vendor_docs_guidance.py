@@ -62,9 +62,9 @@ ADAPTER_TARGETS = {
         "config_key": "mcpServers",
     },
     "hermes": {
-        "config_path": "~/.hermes/config.json",
-        "format": "json",
-        "config_key": "mcpServers",
+        "config_path": "~/.hermes/config.yaml",
+        "format": "yaml",
+        "config_key": "mcp_servers",
     },
 }
 

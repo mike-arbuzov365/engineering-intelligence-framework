@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "integration": "eif-mcp",
+  "adapter": "claude-code",
+  "config_path": "~/.claude.json",
+  "config_format": "json",
+  "config_key": "mcpServers",
+  "installed": false,
+  "user_config_mutated_by_generator": false,
+  "template_only": true,
+  "data_boundary": "local-only",
+  "modes": {
+    "reader": {
+      "available": true,
+      "server_entry": {
+        "command": "eifctl",
+        "args": [
+          "mcp",
+          "serve",
+          "--instance-path",
+          "<explicit-instance-root>"
+        ]
+      },
+      "native_snippet": "{\n  \"mcpServers\": {\n    \"eif\": {\n      \"command\": \"eifctl\",\n      \"args\": [\n        \"mcp\",\n        \"serve\",\n        \"--instance-path\",\n        \"<explicit-instance-root>\"\n      ]\n    }\n  }\n}\n"
+    },
+    "writer": {
+      "available": false,
+      "status": "deferred-to-EIF-022b",
+      "server_entry": null
+    }
+  },
+  "review_before_install": [
+    "Back up your client configuration and review the explicit instance root.",
+    "Use the eifctl from the environment containing the pinned package and mcp extra.",
+    "Never auto-allow eif_commit or automatically accept host elicitation when writers become available.",
+    "Remove this server entry to roll back; EIF does not install or edit client configuration."
+  ],
+  "client_canary": "configured-not-verified",
+  "format_evidence": "documented mcpServers JSON shape; client canary not run"
+}

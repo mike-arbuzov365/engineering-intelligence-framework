@@ -12,6 +12,10 @@ strict single-agent sequential execution (this framework's default) does
 not need it. -->
 
 One file per packet session: `<packet-root>/sessions/SESSION-<NNN>-<slug>.md`.
+The canonical progress statuses are `prepared`, `in_progress`, `completed`,
+`blocked`, and `deferred`. Update status when starting and closing a session.
+Other historical values are `legacy` to progress readers and do not prove
+completion. A next session requires every `depends_on` entry to be `completed`.
 An executing agent reads this file as the source of truth for one
 session - not the packet's other files directly, and not chat history.
 

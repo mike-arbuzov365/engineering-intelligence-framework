@@ -12,6 +12,11 @@ related:
 
 # Playbook: Execution Packet Execution
 
+Keep each session launch file's progress explicit: `prepared`, `in_progress`,
+`completed`, `blocked`, or `deferred`. Set `in_progress` at start and the final
+status at closeout. Legacy values never establish completion for a progress
+reader; only `completed` satisfies a `depends_on` dependency.
+
 <!-- Knowledge source: GENERALIZE of the private EI's
 execution-packet-execution.md. Kept: strict sequential single-agent
 execution, per-session checkpointing, the never-silently-narrow-scope

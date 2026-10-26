@@ -267,3 +267,18 @@ license check reported only pywin32 as UNKNOWN. Regression tests cover the exact
 classifier, bare alias, denied precedence and a policy without PSF-2.0.
 Probe: both in-memory and stdio roundtrips PASS; tools/list 212 bytes for one
 probe tool. `Context.elicit` is present; no host elicitation was attempted.
+
+## D-021: Bounded doctor coverage for a reader
+
+**Status: provisional, implementation clarification of D-005 and D-012.**
+The MCP doctor uses the same structured core checks, omitting active source
+resolution, ancestor size budgets, skill discovery and optional provider probes.
+Those operations can inspect outside the selected instance or execute provider
+commands; the reader contract forbids both. The response is `partial`, names
+the skipped checks, and recommends direct CLI verification for full coverage.
+Marker checks also read the fixed adapter entrypoint, `.gitignore` and
+`.gitattributes` inside the selected instance; these are the minimum additional
+local sources needed by the existing doctor. CLI behavior is unchanged.
+
+Execution-record validation is a local required-fields check, not EIF instance
+validation: the framework source is intentionally not initialized as a project.

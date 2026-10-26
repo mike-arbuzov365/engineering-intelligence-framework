@@ -206,12 +206,16 @@ def _load_project(project_root: Path) -> dict[str, Any]:
     }
 
 
-def _run_git(project_root: Path, args: list[str]) -> subprocess.CompletedProcess[bytes]:
+def _run_git(project_root: Path, args: list[str], *, bounded: bool = False) -> subprocess.CompletedProcess[bytes]:
+    prefix = ["--no-optional-locks", "--git-dir", str(project_root / ".git"), "--work-tree", str(project_root), "-c", "core.fsmonitor=false", "-c", "core.untrackedCache=false"] if bounded else []
+    if bounded and args and args[0] == "status":
+        args = [*args, "--ignore-submodules=all"]
     return subprocess.run(
-        ["git", *args],
+        ["git", *prefix, *args],
         cwd=project_root,
         capture_output=True,
         check=False,
+        timeout=15 if bounded else None,
     )
 
 
@@ -219,8 +223,11 @@ def _decode_path(raw: bytes) -> str:
     return raw.decode("utf-8", errors="replace").replace("\\", "/")
 
 
-def _git_snapshot(project_root: Path) -> dict[str, Any]:
-    top = _run_git(project_root, ["rev-parse", "--show-toplevel"])
+def _git_snapshot(project_root: Path, *, bounded: bool = False) -> dict[str, Any]:
+    def git(args: list[str]) -> subprocess.CompletedProcess[bytes]:
+        return _run_git(project_root, args, bounded=bounded)
+
+    top = git(["rev-parse", "--show-toplevel"])
     if top.returncode != 0:
         payload = json.dumps({"repository": False}, sort_keys=True).encode("utf-8")
         return {
@@ -233,12 +240,13 @@ def _git_snapshot(project_root: Path) -> dict[str, Any]:
         }
 
     git_root = Path(_decode_path(top.stdout).strip()).resolve()
-    branch_proc = _run_git(project_root, ["symbolic-ref", "--quiet", "--short", "HEAD"])
+    if bounded and git_root != project_root.resolve():
+        raise SessionError("Git snapshot is outside the selected instance")
+    branch_proc = git(["symbolic-ref", "--quiet", "--short", "HEAD"])
     branch = _decode_path(branch_proc.stdout).strip() if branch_proc.returncode == 0 else None
-    head_proc = _run_git(project_root, ["rev-parse", "--verify", "HEAD"])
+    head_proc = git(["rev-parse", "--verify", "HEAD"])
     head = _decode_path(head_proc.stdout).strip() if head_proc.returncode == 0 else None
-    status_proc = _run_git(
-        project_root,
+    status_proc = git(
         ["status", "--porcelain=v1", "-z", "--untracked-files=all"],
     )
     if status_proc.returncode != 0:
@@ -350,7 +358,7 @@ def _render_checkpoint(data: dict[str, Any], locale: str) -> str:
     return f"---\n{frontmatter}---\n{body}"
 
 
-def _validate_checkpoint(
+def validate_checkpoint(
     path: Path,
     *,
     project_root: Path | None = None,
@@ -382,11 +390,16 @@ def _validate_checkpoint(
     return data, errors
 
 
-def _audit_checkpoint(
+# Compatibility names retained for existing callers.
+_validate_checkpoint = validate_checkpoint
+
+
+def audit_checkpoint(
     path: Path,
     project_root: Path,
+    *, bound_project: bool = False,
 ) -> tuple[dict[str, Any] | None, list[tuple[str, Any, Any]]]:
-    data, validation_errors = _validate_checkpoint(path)
+    data, validation_errors = validate_checkpoint(path, project_root=project_root if bound_project else None)
     if validation_errors or data is None:
         return data, [("schema", "valid checkpoint", error) for error in validation_errors]
 
@@ -422,7 +435,7 @@ def _audit_checkpoint(
                 )
             )
 
-    current_git = _git_snapshot(project_root.resolve())
+    current_git = _git_snapshot(project_root.resolve(), bounded=bound_project)
     for field in ("repository", "root", "branch", "head", "status_fingerprint", "changed_files"):
         if data["git"][field] != current_git[field]:
             mismatches.append(
@@ -431,7 +444,10 @@ def _audit_checkpoint(
     return data, mismatches
 
 
-def _checkpoint(args: argparse.Namespace) -> int:
+_audit_checkpoint = audit_checkpoint
+
+
+def checkpoint_plan(args: argparse.Namespace) -> dict[str, Any]:
     if not SESSION_ID_RE.fullmatch(args.session_id):
         raise SessionError(
             "--session-id must start with an alphanumeric character and contain "
@@ -533,7 +549,18 @@ def _checkpoint(args: argparse.Namespace) -> int:
     errors = _schema_errors(data)
     if errors:
         raise SessionError("generated checkpoint is invalid: " + "; ".join(errors))
-    _atomic_write(checkpoint_path, _render_checkpoint(data, project["locale"]))
+    return {"path": checkpoint_path, "content": _render_checkpoint(data, project["locale"]), "data": data}
+
+
+def checkpoint_apply(plan: dict[str, Any]) -> None:
+    _atomic_write(plan["path"], plan["content"])
+
+
+def _checkpoint(args: argparse.Namespace) -> int:
+    plan = checkpoint_plan(args)
+    checkpoint_apply(plan)
+    checkpoint_path = plan["path"]
+    project = plan["data"]["project"]
     print(f"PASS session checkpoint: {checkpoint_path}")
     print(f"project_id={project['id']}")
     print(f"logical_session={args.session_id}")

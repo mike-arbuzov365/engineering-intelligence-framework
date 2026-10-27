@@ -8,6 +8,7 @@ from mcp import Client
 from .server import compact, create_server, wire_bytes
 
 SCENARIOS = {
+    "knowledge_search": {"name": "knowledge-search", "sections": ["recording-the-result", "how"]},
     "packet_plan": {"name": "execution-packet-planning", "sections": ["workflow", "when-a-packet-is-needed"]},
     "packet_run": {"name": "execution-packet-execution", "sections": ["step-1---enter-via-the-start-file", "step-2---execute-sessions-in-roadmap-order"]},
 }

@@ -180,6 +180,31 @@
     },
     "integrations": {
       "type": "object",
+      "properties": {
+        "eif_mcp": {
+          "type": "object",
+          "description": "Optional compact reader routing. Absent or disabled preserves the legacy entrypoint; does not install SDK/client configuration.",
+          "required": [
+            "enabled"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "data_boundary": {
+              "const": "local-only"
+            },
+            "provider": {
+              "const": "eif-mcp"
+            },
+            "failure_policy": {
+              "const": "degrade"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": {
         "type": "object",
         "required": ["enabled"],

@@ -499,6 +499,14 @@ def check_config_block_drift(config: dict | None, instance_path: Path, entrypoin
     block_text = text[text.index(EIF_BEGIN):text.index(EIF_END) + len(EIF_END)]
 
     problems = []
+    mcp_enabled = bool(((config.get("integrations") or {}).get("eif_mcp") or {}).get("enabled", False))
+    compact = "<!-- EIF:MCP reader -->" in block_text
+    if mcp_enabled != compact:
+        problems.append("integrations.eif_mcp.enabled differs from the generated block mode - run eifctl upgrade --instance-path .")
+    if compact:
+        for token in ("eif_brief(task_kind)", "eifctl doctor --instance-path .", "operating-protocol.md"):
+            if token not in block_text:
+                problems.append("compact MCP block is missing a required route or fallback - run eifctl upgrade --instance-path .")
     adoption_mode = (config.get("adoption") or {}).get("mode", "greenfield")
     has_greenfield_text = GREENFIELD_MARKER_TEXT in block_text
     has_coexist_text = COEXIST_MARKER_TEXT in block_text

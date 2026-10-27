@@ -17,10 +17,16 @@
     "review": "JEV requested manual review; strict schema assertions, independent boundary inspection and negative SDK regressions resolved the review items."
   },
   "G1c": {
-    "verdict": "PASS candidate only",
-    "compact_entrypoint": "INFERRED budget2400 until SESSION-007",
+    "verdict": "PASS",
+    "measurement": "after.json",
+    "entrypoint": "actual generated entrypoint incl adapter wrapper; no budget substitution",
     "required_reduction_percent": 15,
-    "measurement": "precompact.json"
+    "entrypoint_bytes": {
+      "claude-code": 2033,
+      "codex": 2033,
+      "cursor": 2282,
+      "hermes": 2034
+    }
   },
   "G2": {
     "verdict": "NOT PASSED",

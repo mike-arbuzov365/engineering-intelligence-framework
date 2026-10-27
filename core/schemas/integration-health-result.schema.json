@@ -14,7 +14,7 @@
     "provider": { "type": ["string", "null"] },
     "state": {
       "type": "string",
-      "enum": ["disabled", "healthy", "degraded", "stale", "misconfigured", "unavailable"]
+      "enum": ["disabled", "healthy", "degraded", "stale", "misconfigured", "unavailable", "configured"]
     },
     "checked_at": { "type": "string", "format": "date-time" },
     "data_boundary": { "type": "string", "enum": ["local-only", "external-api"] },
@@ -110,6 +110,31 @@
         "properties": {
           "provider": { "type": ["string", "null"] },
           "version": { "properties": { "compatible": { "type": "null" } } }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "configured"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "integration": {
+            "const": "eif_mcp"
+          },
+          "provider": {
+            "const": "eif-mcp"
+          },
+          "data_boundary": {
+            "const": "local-only"
+          }
         }
       }
     }

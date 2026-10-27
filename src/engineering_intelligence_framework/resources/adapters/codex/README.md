@@ -503,3 +503,14 @@ and a non-installing
 The contract is deliberately block-only. It does not claim that
 `updatedInput` mutation works on the tested Codex version and it never edits
 the user's `hooks.json`.
+
+## Optional EIF MCP reader
+
+Client version observed for this packet: `0.144.5`. MCP status
+is **configured-not-verified**: a [reviewable template](../../integrations/eif-mcp/README.md)
+exists, but it was not installed. SDK and installed-wheel verification do not
+prove this client's behavior; O-6=0, so no host tool or human elicitation canary
+ran. Controlled writes and rendering defer to EIF-022b. An optional compact
+entrypoint can be selected in project config and reverted with the normal
+upgrade command; the [reference](../../docs/reference/eif-mcp.md) documents the
+local CLI fallback and limits.

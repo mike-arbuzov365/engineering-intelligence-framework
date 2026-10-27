@@ -2,11 +2,11 @@
 id: SESSION-007
 logical_session: SESSION-007
 type: session-launch
-status: prepared
+status: completed
 source_artifact: ../04-ROADMAP-022-eif-mcp.md
 session_context: .session-context/eif-022-session-007.md
 continuation_mode: same_chat
-depends_on: [SESSION-006]
+depends_on: [SESSION-005]
 ---
 
 # SESSION-007: render, адаптери, компактний блок
@@ -78,14 +78,29 @@ git diff --check
 
 ## Exit criteria
 
-- [ ] Тести адаптерів і мов зелені з вимкненим і з увімкненим слотом.
-- [ ] При вимкненому слоті вивід генерації блоків побайтово незмінний (golden).
-- [ ] Компактний блок (якщо постачається) ≤ 2 400 байт, має працюючий запасний шлях, відкат перевірено.
-- [ ] Виміряне "після" замінило оцінку в таблиці; регрес `light` названо.
-- [ ] Render-інструменти (гілка A) проходять негативні тести.
-- [ ] `mcp_client` записи відповідають доказам SESSION-005; жодне `verified` без збереженого журналу.
-- [ ] Закомічено локально.
+- [x] Тести адаптерів і мов зелені з вимкненим і з увімкненим слотом.
+- [x] При вимкненому слоті вивід генерації блоків побайтово незмінний (golden).
+- [x] Компактний блок (якщо постачається) ≤ 2 400 байт, має працюючий запасний шлях, відкат перевірено.
+- [x] Виміряне "після" замінило оцінку в таблиці; регрес `light` названо.
+- [x] Render-інструменти (гілка A): не виконувались, `deferred-to-EIF-022b` у гілці B.
+- [x] `mcp_client` записи відповідають доказам SESSION-005; жодне `verified` без збереженого журналу.
+- [x] Закомічено локально.
 
 ## Closeout / Knowledge Delta
 
 Записати: фактичний розмір компактного блока, чи довелось залишити запасний шлях довшим за прогноз, вплив на `eifctl upgrade`, і прямо сказати, якщо довговічного уроку немає.
+
+## Execution record
+
+Branch B: render remains `deferred-to-EIF-022b`. Compact opt-in tests83/83,
+required adapter suites8/8 and718/718checks. Actual entrypoints2033/2033/2282/2034
+bytes (Claude Code/Codex/Cursor/Hermes), G1c actual PASS. Enabled/disabled
+upgrades, exact rollback, locale and authority cases are tested. All four
+mcp_client rows remain configured-not-verified with their observed versions;
+the new evidence schema forbids claiming verified without a saved canary.
+The startup knowledge-search scenario grows about10%; no model-token or
+quality improvement claim is made.
+
+Installed-wheel base/extra verification on this final session tree:14/14,
+including compact upgrade and doctor with the SDK absent. Matrix evidence
+schema20/20; final-source footprint check matches the recorded byte counts.

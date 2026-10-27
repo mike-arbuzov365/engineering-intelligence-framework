@@ -49,3 +49,30 @@ token-cost or quality conclusion is established. `--mcp-after --check`
 compares current measurements against the chosen recorded result. Historical
 B0 must be reproduced from its recorded source state; intentional later
 changes are not silently folded back into that baseline.
+
+## Actual compact startup measurement
+
+[after.json](after.json) replaces the candidate block budget with actual
+generated entrypoints (including each adapter wrapper). All four scenarios
+include full tools/list loading and duplicated response content. Reproduce:
+
+```text
+python scripts/eif_context_footprint.py --mcp-after --no-latency --check docs/benchmarks/context-footprint/after.json
+```
+
+| Adapter | Entrypoint bytes | light B0 / after | knowledge_search B0 / after | packet_plan B0 / after | packet_run B0 / after |
+|---|---:|---:|---:|---:|---:|
+| claude-code | 2033 | 11931 / 10961 | 16318 / 17889 | 27095 / 20394 | 27881 / 19100 |
+| codex | 2033 | 11925 / 10961 | 16312 / 17889 | 27089 / 20394 | 27875 / 19100 |
+| cursor | 2282 | 12221 / 11210 | 16608 / 18138 | 27385 / 20643 | 28171 / 19349 |
+| hermes | 2034 | 11929 / 10962 | 16316 / 17890 | 27093 / 20395 | 27879 / 19101 |
+
+G1c passes for both packet scenarios on every adapter. Light is about8%
+smaller in this bounded byte model; knowledge-search startup is about10%
+larger. The reader alone with an unchanged legacy entrypoint can increase
+light bytes by over15%. These are startup **byte** comparisons, not token
+counts, billing, complete-task reads or matched quality results.
+The comparison counts outline discovery and every page of the frozen relevant
+sections; later reads remain outside this scenario. The source-tree digest is
+recorded with each measurement. The original B0 and precompact records remain
+historical inputs, not silently rewritten after implementation.

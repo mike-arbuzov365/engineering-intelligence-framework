@@ -79,12 +79,21 @@ def one_hop_reads(runtime: Path, skill: str) -> list[Path]:
     return reads
 
 
-def measure_instance(eifctl: list[str], root: Path, adapter: str, runs: int) -> dict:
+def measure_instance(eifctl: list[str], root: Path, adapter: str, runs: int, *, compact: bool = False) -> dict:
     spec = ADAPTERS[adapter]
     project = root.resolve() / f"inst-{adapter}"
     rc, out, _ = run([*eifctl, "new", str(project), "--project-name", "synthetic-demo", "--adapter", adapter])
     if rc != 0:
         raise SystemExit(f"eifctl new failed for {adapter}: {out.decode('utf-8', 'replace')[-400:]}")
+    if compact:
+        import yaml
+        config_path = project / ".eif/config.yaml"
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        config.setdefault("integrations", {})["eif_mcp"] = {"enabled": True}
+        config_path.write_text(yaml.safe_dump(config, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
+        rc, out, _ = run([*eifctl, "upgrade", "--instance-path", str(project), "--allow-dirty-project"])
+        if rc != 0:
+            raise SystemExit(f"synthetic compact upgrade failed for {adapter}: {out.decode('utf-8', 'replace')[-400:]}")
 
     runtime = project / ".eif" / "runtime"
     entry = size(project / spec["entrypoint"])
@@ -155,7 +164,7 @@ def byte_counts(value: object, key: str = "") -> object:
     return value
 
 
-def mcp_measurement(eifctl: list[str], root: Path, baseline: dict) -> dict:
+def mcp_measurement(eifctl: list[str], root: Path, baseline: dict, *, compact: bool = True) -> dict:
     source = Path(__file__).resolve().parents[1] / "src"
     if source.is_dir():
         sys.path.insert(0, str(source))
@@ -163,7 +172,7 @@ def mcp_measurement(eifctl: list[str], root: Path, baseline: dict) -> dict:
 
     measurements = []
     for adapter in ADAPTERS:
-        current = measure_instance(eifctl, root, adapter, 0)
+        current = measure_instance(eifctl, root, adapter, 0, compact=compact)
         project = root / f"inst-{adapter}"
         protocol = asyncio.run(measure_responses(project))
         original = next(a for a in baseline["adapters"] if a["adapter"] == adapter)
@@ -175,10 +184,14 @@ def mcp_measurement(eifctl: list[str], root: Path, baseline: dict) -> dict:
             extra = loaders + protocol["tools_list_bytes"] + sample["response_bytes"]
             actual = entry + extra
             candidate = 2400 + extra
-            scenarios[name] = {"before_bytes": before, "actual_reader_bytes": actual, "actual_difference_bytes": actual - before, "candidate_bytes": candidate, "candidate_reduction_percent": round((before - candidate) * 100 / before, 3), **sample}
-        measurements.append({"adapter": adapter, "entrypoint_bytes": entry, "entrypoint_mode": "legacy", "candidate_entrypoint_bytes": 2400, "candidate_entrypoint_evidence": "INFERRED budget; actual generator required in SESSION-007", "skill_frontmatter_bytes": loaders, "tools_list_bytes": protocol["tools_list_bytes"], "scenarios": scenarios})
+            scenarios[name] = {"before_bytes": before, "actual_reader_bytes": actual, "actual_difference_bytes": actual - before, "actual_reduction_percent": round((before - actual) * 100 / before, 3), "candidate_bytes": candidate, "candidate_reduction_percent": round((before - candidate) * 100 / before, 3), **sample}
+        measurements.append({"adapter": adapter, "entrypoint_bytes": entry, "entrypoint_mode": "compact" if compact else "legacy", "candidate_entrypoint_bytes": 2400, "candidate_entrypoint_evidence": "budget; actual generated entrypoint measured separately", "skill_frontmatter_bytes": loaders, "tools_list_bytes": protocol["tools_list_bytes"], "scenarios": scenarios})
     gate = all(a["scenarios"][name]["candidate_bytes"] * 100 <= a["scenarios"][name]["before_bytes"] * 85 for a in measurements for name in ("packet_plan", "packet_run"))
-    return {"method": {"kind": "static-mcp-startup-bytes", "serialization": "compact SDK aliases, exclude_none, UTF-8; entire tools/list; CallToolResult includes text and structured copies; outline discovery and all section pages counted", "section_selection": "frozen relevant startup sections selected before measuring bytes; not all reads of an entire task", "compact_block": "INFERRED 2400-byte budget until generator verification", "quality": "NOT RUN; no model calls or token-savings conclusion"}, "adapters": measurements, "gates": {"G1c_candidate": "PASS" if gate else "FAIL", "threshold_percent": 15, "G2": "NOT PASSED: O-6 = 0", "branch": "B"}}
+    gates = {"G1c_candidate": "PASS" if gate else "FAIL", "threshold_percent": 15, "G2": "NOT PASSED: O-6 = 0", "branch": "B"}
+    if compact:
+        actual_gate = all(a["entrypoint_bytes"] <= 2400 and a["scenarios"][name]["actual_reader_bytes"] * 100 <= a["scenarios"][name]["before_bytes"] * 85 for a in measurements for name in ("packet_plan", "packet_run"))
+        gates["G1c_actual"] = "PASS" if actual_gate else "FAIL"
+    return {"method": {"kind": "static-mcp-startup-bytes", "serialization": "compact SDK aliases, exclude_none, UTF-8; entire tools/list; CallToolResult includes text and structured copies; outline discovery and all section pages counted", "section_selection": "frozen relevant startup sections selected before measuring bytes; not all reads of an entire task", "compact_block": "actual generated entrypoint" if compact else "INFERRED 2400-byte budget until generator verification", "quality": "NOT RUN; no model calls or token-savings conclusion"}, "adapters": measurements, "gates": gates}
 
 
 def main() -> int:
@@ -187,6 +200,7 @@ def main() -> int:
     parser.add_argument("--no-latency", action="store_true", help="Deterministic mode; no timing is collected.")
     parser.add_argument("--check", type=Path, help="Compare byte counts with a recorded measurement.")
     parser.add_argument("--mcp-after", action="store_true", help="Measure a synthetic MCP reader through the real in-memory SDK.")
+    parser.add_argument("--entrypoint-mode", choices=["legacy", "compact"], default="compact", help="MCP measurement uses a real compact upgrade by default; legacy reproduces the reader-only case.")
     parser.add_argument("--out")
     parser.add_argument("--source-ref", default="unspecified", help="Free-text note: where this eifctl came from.")
     args = parser.parse_args()
@@ -197,7 +211,7 @@ def main() -> int:
         if args.mcp_after:
             baseline_path = Path(__file__).resolve().parents[1] / "docs/benchmarks/context-footprint/baseline.json"
             try:
-                result = mcp_measurement(eifctl, Path(tmp), json.loads(baseline_path.read_text(encoding="utf-8")))
+                result = mcp_measurement(eifctl, Path(tmp), json.loads(baseline_path.read_text(encoding="utf-8")), compact=args.entrypoint_mode == "compact")
             except ImportError:
                 print("MCP measurement requires the optional mcp extra", file=sys.stderr)
                 return 2

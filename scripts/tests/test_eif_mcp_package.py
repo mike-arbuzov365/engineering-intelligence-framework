@@ -12,6 +12,7 @@ import sys
 import tempfile
 import venv
 from pathlib import Path
+import yaml
 
 from test_package_build import FRAMEWORK_ROOT, clean_checkout_export, run
 
@@ -58,13 +59,19 @@ def main() -> int:
         missing = run([str(eifctl), "mcp", "serve", "--instance-path", str(root)], cwd=root)
         check("help without SDK", help_result.returncode == 0)
         check("missing extra code 2 without traceback", missing.returncode == 2 and "[mcp]" in missing.stderr and "Traceback" not in missing.stderr, missing.stdout + missing.stderr)
+        project = root / "project space β"
+        created = run([str(eifctl), "new", str(project), "--project-name", "synthetic-wheel", "--adapter", "codex"], cwd=root, timeout_s=60)
+        check("installed base instance creation", created.returncode == 0, created.stdout + created.stderr)
+        check("installed runtime has canonical MCP guide", (project / ".eif/runtime/docs/reference/eif-mcp.md").is_file())
+        config_path = project / ".eif/config.yaml"
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        config.setdefault("integrations", {})["eif_mcp"] = {"enabled": True}
+        config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8", newline="\n")
+        compact = run([str(eifctl), "upgrade", "--instance-path", str(project), "--allow-dirty-project"], cwd=root, timeout_s=60)
+        check("compact upgrade and doctor work without SDK", compact.returncode == 0 and "state=configured" in compact.stdout and "<!-- EIF:MCP reader -->" in (project / "AGENTS.md").read_text(encoding="utf-8"), compact.stdout + compact.stderr)
         extra = run([str(python), "-m", "pip", "install", "-c", str(source / "integrations/eif-mcp/constraints.txt"), str(wheel) + "[mcp]"], cwd=root, timeout_s=240)
         check("extra install using resolved constraints", extra.returncode == 0, extra.stdout + extra.stderr)
         check("extra pip check", run([str(python), "-m", "pip", "check"], cwd=root).returncode == 0)
-        project = root / "project space β"
-        created = run([str(eifctl), "new", str(project), "--project-name", "synthetic-wheel", "--adapter", "codex"], cwd=root, timeout_s=60)
-        check("installed instance creation", created.returncode == 0, created.stdout + created.stderr)
-        check("installed runtime has canonical MCP guide", (project / ".eif/runtime/docs/reference/eif-mcp.md").is_file())
         probe = run([str(eifctl), "mcp", "serve", "--instance-path", str(project), "--self-test"], cwd=root, timeout_s=60)
         value = json.loads(probe.stdout) if probe.returncode == 0 else {}
         check("installed SDK stdio self-test with matching drift", probe.returncode == 0 and value.get("status") == "ok" and value.get("tools") == 9, probe.stdout + probe.stderr)

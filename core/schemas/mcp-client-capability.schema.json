@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EIF MCP client evidence entry",
+  "type": "object",
+  "required": ["status", "client_version", "enforcement", "evidence_status", "evidence", "action", "auto_action"],
+  "properties": {
+    "status": { "enum": ["verified", "configured-not-verified", "not-available"] },
+    "client_version": { "type": ["string", "null"] },
+    "enforcement": { "enum": ["machine", "adapter", "owner_gate", "instruction_only"] },
+    "evidence_status": { "enum": ["observed", "source_verified", "documentation_only", "inconclusive", "not_tested"] },
+    "evidence": { "type": "string", "minLength": 1 },
+    "evidence_path": { "type": "string", "minLength": 1 },
+    "action": { "type": "string", "minLength": 1 },
+    "auto_action": { "const": false }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "verified" } }, "required": ["status"] },
+      "then": {
+        "required": ["evidence_path"],
+        "properties": {
+          "evidence_status": { "const": "observed" },
+          "client_version": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  ]
+}

@@ -122,3 +122,36 @@ The [static byte measurement](https://github.com/mike-arbuzov365/engineering-int
 [ten evaluation questions](https://github.com/mike-arbuzov365/engineering-intelligence-framework/blob/main/docs/benchmarks/mcp-eval/README.md) are separate from
 client canaries. Expected answers are checked by an SDK script without a
 model; model evaluation is `NOT RUN` and behavioral comparison is `DEFERRED`.
+
+## Optional compact instructions
+
+The default remains the legacy instruction block. To opt in, edit the project's
+own `.eif/config.yaml`, preserving other integration settings:
+
+```yaml
+integrations:
+  eif_mcp:
+    enabled: true
+```
+
+Commit that desired configuration through the project's normal workflow, then
+run `eifctl upgrade --instance-path .`. The same transactional generator updates
+the block, while preserving user-owned configuration and content outside the
+markers. `eifctl doctor` reports `configured` for this declaration; that state
+never means a client connection was verified. The generator and doctor do not
+import the optional SDK. With `enabled: false` (or the slot absent), the legacy
+block remains byte-for-byte unchanged. To roll back, set `enabled: false`,
+commit that config and run the same upgrade command.
+
+The compact block asks for `eif_brief(task_kind)` and named policy sections.
+If tools are absent in a chat, its fallback is direct `eifctl doctor`, direct
+`eifctl search` using the configured knowledge root, and the pinned
+`.eif/runtime/playbooks/operating-protocol.md`. Both greenfield authority and
+coexisting project authority remain explicit. Missing routes or a config/block
+mode mismatch fail doctor. The four adapters and English/Ukrainian project
+locales are exercised through actual enable/disable upgrades and rollback;
+the governance block itself remains English-invariant.
+
+This is a startup-byte experiment. The matched behavioral comparison is still
+DEFERRED and client canaries are still unverified. It establishes no claim that
+instructions improve task quality, reduce model tokens or lower usage cost.

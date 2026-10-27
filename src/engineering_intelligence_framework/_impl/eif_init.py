@@ -891,8 +891,10 @@ def _knowledge_validate_line(knowledge_managed: bool) -> str:
 
 
 def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_path: str,
-                   adoption_mode: str, entrypoint_name: str, knowledge_managed: bool) -> str:
-    template = (framework_root / "templates" / "agent-instructions.md").read_text(encoding="utf-8")
+                   adoption_mode: str, entrypoint_name: str, knowledge_managed: bool,
+                   eif_mcp: bool = False) -> str:
+    template_name = "agent-instructions-mcp.md" if eif_mcp else "agent-instructions.md"
+    template = (framework_root / "templates" / template_name).read_text(encoding="utf-8")
     begin = template.index(EIF_BEGIN)
     end = template.index(EIF_END) + len(EIF_END)
     block = template[begin:end]
@@ -914,6 +916,7 @@ def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_pa
         entrypoint_name=entrypoint_name,
         knowledge_before_work=knowledge_before_work,
         knowledge_validate_line=knowledge_validate_line,
+        knowledge_mode_line=(f"Project knowledge index: `{knowledge_index_path}`." if knowledge_managed else "Project knowledge is not managed by EIF; follow its existing retrieval policy."),
     )
 
 
@@ -1698,7 +1701,9 @@ def main(argv: list[str] | None = None) -> int:
     # exclusively EIF-owned file - nothing to merge or preserve, so it is
     # always written fresh, frontmatter included).
     try:
-        managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode, entrypoint, knowledge_managed)
+        effective_config = existing_config if mode == "upgrade" else config_data
+        eif_mcp = bool(((effective_config or {}).get("integrations") or {}).get("eif_mcp", {}).get("enabled", False))
+        managed_block = _managed_block(framework_root, knowledge_root, knowledge_index_path, adoption_mode, entrypoint, knowledge_managed, eif_mcp=eif_mcp)
         if entry_strategy_for(adapter) == "full-regen":
             # This path is exclusively EIF-owned by contract (entry_ownership
             # "exclusive") - there is no legitimate "the project already put

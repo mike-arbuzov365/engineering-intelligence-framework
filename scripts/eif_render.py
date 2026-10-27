@@ -104,6 +104,20 @@ def atomic_write(path: Path, content: str) -> None:
     os.replace(tmp, path)  # atomic on both POSIX and Windows
 
 
+def render_preview(framework_root: Path, instance_root: Path, artifact: str, *, locale: str | None = None, params: dict | None = None, draft: bool = False, resolved_locale: tuple[str, str] | None = None) -> dict:
+    """Render without writing; the same operation backs the CLI."""
+    selected, source = resolved_locale or resolve_locale(locale, instance_root)
+    rendered, used = render_template(framework_root, selected, TEMPLATE_FILES[artifact], draft=draft, **(params or {}))
+    note = f" (requested '{selected}', not found - fell back to '{used}')" if used != selected else ""
+    return {"text": rendered, "locale": used, "source": source, "fallback_note": note}
+
+
+def render_apply(path: Path, content: str, *, force: bool = False) -> None:
+    if path.exists() and not force:
+        raise FileExistsError("render target exists")
+    atomic_write(path, content)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--framework-root", required=True, help="Framework checkout OR an instance's .eif/runtime bundle (where locales/ lives)")
@@ -150,7 +164,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
-        rendered, used_locale = render_template(framework_root, locale, TEMPLATE_FILES[args.artifact], draft=args.draft, **params)
+        preview = render_preview(framework_root, instance_root, args.artifact, params=params, draft=args.draft, resolved_locale=(locale, locale_source))
+        rendered, used_locale = preview["text"], preview["locale"]
     except UnresolvedPlaceholderError as e:
         print(f"eif-render: {e}", file=sys.stderr)
         return 1
@@ -169,7 +184,7 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
         return 1
-    atomic_write(out_path, rendered)
+    render_apply(out_path, rendered, force=args.force)
     print(f"eif-render: wrote {args.artifact} ({used_locale}{fallback_note}, source: {locale_source}) -> {out_path}")
     return 0
 

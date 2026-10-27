@@ -69,12 +69,12 @@ into the target atomically. If an agent started inside an empty target, it must
 leave that directory and remove it before retrying from the parent.
 
 ```bash
-eifctl workspace new ../eif-control \
-  --workspace-name eif-control \
+eifctl workspace new ../workspace-control \
+  --workspace-name workspace-control \
   --adapter codex \
   --locale uk
 
-eifctl workspace doctor --workspace-path ../eif-control
+eifctl workspace doctor --workspace-path ../workspace-control
 ```
 
 The command initializes a local git repository and a base EIF project
@@ -99,7 +99,7 @@ silently:
 ```bash
 eifctl workspace profile list
 eifctl workspace profile install graphic-design \
-  --workspace-path ../eif-control
+  --workspace-path ../workspace-control
 ```
 
 See [`professional-profiles.md`](professional-profiles.md) for the designer
@@ -120,7 +120,7 @@ eifctl new ../my-project \
   --project-name my-project \
   --adapter codex \
   --locale uk \
-  --registry ../eif-control/.eif/projects.yaml
+  --registry ../workspace-control/.eif/projects.yaml
 ```
 
 `eifctl new` builds the project in a temporary sibling directory, initializes
@@ -139,9 +139,9 @@ Initialize or adopt the repository first:
 eifctl init ../existing-project --adapter codex --locale uk
 eifctl doctor --instance-path ../existing-project
 eifctl projects add ../existing-project \
-  --registry ../eif-control/.eif/projects.yaml
-git -C ../eif-control add -A
-git -C ../eif-control commit -m "Register existing-project"
+  --registry ../workspace-control/.eif/projects.yaml
+git -C ../workspace-control add -A
+git -C ../workspace-control commit -m "Register existing-project"
 ```
 
 `eifctl init` takes the project path positionally, or as `--instance-path`,
@@ -161,10 +161,10 @@ it and let the fleet upgrade move it:
 
 ```bash
 eifctl projects add ../older-project \
-  --registry ../eif-control/.eif/projects.yaml
-git -C ../eif-control add -A
-git -C ../eif-control commit -m "Register older-project"
-eifctl projects upgrade --registry ../eif-control/.eif/projects.yaml
+  --registry ../workspace-control/.eif/projects.yaml
+git -C ../workspace-control add -A
+git -C ../workspace-control commit -m "Register older-project"
+eifctl projects upgrade --registry ../workspace-control/.eif/projects.yaml
 ```
 
 Registration requires a valid `.eif/config.yaml` and
@@ -190,7 +190,7 @@ active projects have no machine-local location: project-a, project-b
 Clone the projects wherever you keep them, then map each one once:
 
 ```bash
-eifctl projects add ../comms --registry ../eif-control/.eif/projects.yaml
+eifctl projects add ../comms --registry ../workspace-control/.eif/projects.yaml
 eifctl projects add ../project-b --registry ../workspace-control/.eif/projects.yaml
 ```
 
@@ -205,7 +205,7 @@ guessing from the current directory:
 
 ```bash
 eifctl projects resolve project-a \
-  --registry ../eif-control/.eif/projects.yaml
+  --registry ../workspace-control/.eif/projects.yaml
 ```
 
 The selector may be the stable registry-v2 ID or the exact project name. The
@@ -323,8 +323,8 @@ Upgrade the workspace repository itself first because it is deliberately
 excluded from its own registry:
 
 ```bash
-eifctl upgrade --instance-path ../eif-control --dry-run
-eifctl upgrade --instance-path ../eif-control
+eifctl upgrade --instance-path ../workspace-control --dry-run
+eifctl upgrade --instance-path ../workspace-control
 ```
 
 Review and commit that change. Then update workspace profiles or artifacts,
@@ -336,20 +336,20 @@ project migration in `planning/migration-ledger.md`.
 Inspect the registry first:
 
 ```bash
-eifctl projects status --registry ../eif-control/.eif/projects.yaml
+eifctl projects status --registry ../workspace-control/.eif/projects.yaml
 ```
 
 Plan all updates without writing:
 
 ```bash
-eifctl projects upgrade --registry ../eif-control/.eif/projects.yaml
+eifctl projects upgrade --registry ../workspace-control/.eif/projects.yaml
 ```
 
 Apply only after every registered project passes preflight:
 
 ```bash
 eifctl projects upgrade \
-  --registry ../eif-control/.eif/projects.yaml \
+  --registry ../workspace-control/.eif/projects.yaml \
   --apply
 ```
 
@@ -385,14 +385,14 @@ Preview the operation:
 
 ```bash
 eifctl projects detach my-project \
-  --registry ../eif-control/.eif/projects.yaml
+  --registry ../workspace-control/.eif/projects.yaml
 ```
 
 Apply it:
 
 ```bash
 eifctl projects detach my-project \
-  --registry ../eif-control/.eif/projects.yaml \
+  --registry ../workspace-control/.eif/projects.yaml \
   --apply
 ```
 
@@ -409,7 +409,7 @@ and commit first, or `--allow-dirty-project` to proceed deliberately:
 
 ```bash
 eifctl projects detach my-project \
-  --registry ../eif-control/.eif/projects.yaml \
+  --registry ../workspace-control/.eif/projects.yaml \
   --allow-dirty-project --apply
 ```
 
@@ -423,14 +423,14 @@ named migration first:
 
 ```bash
 eifctl projects migrate-registry-v1-to-v2 \
-  --registry ../eif-control/.eif/projects.yaml
+  --registry ../workspace-control/.eif/projects.yaml
 ```
 
 After reviewing the two-file plan, apply it:
 
 ```bash
 eifctl projects migrate-registry-v1-to-v2 \
-  --registry ../eif-control/.eif/projects.yaml \
+  --registry ../workspace-control/.eif/projects.yaml \
   --apply
 ```
 
@@ -458,11 +458,11 @@ For a registry:
 
 ```bash
 eifctl projects upgrade \
-  --registry ../eif-control/.eif/projects.yaml \
+  --registry ../workspace-control/.eif/projects.yaml \
   --migrate-source
 
 eifctl projects upgrade \
-  --registry ../eif-control/.eif/projects.yaml \
+  --registry ../workspace-control/.eif/projects.yaml \
   --migrate-source \
   --apply
 ```

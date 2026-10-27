@@ -679,6 +679,16 @@ def evaluate_integrations(
             results.append(_base_result(integration, None, "misconfigured", "local-only", timestamp, remediation=["Replace the integration entry with an object."]))
             continue
         boundary = entry.get("data_boundary", "local-only")
+        if integration == "eif_mcp":
+            # Absence and explicit disabled are byte-compatible with the
+            # legacy doctor. A declaration cannot prove host connectivity.
+            if not entry.get("enabled"):
+                continue
+            results.append(_base_result(
+                integration, "eif-mcp", "configured", "local-only", timestamp,
+                capabilities=[_capability("client-transport", False, "skipped", "config", "Client connectivity is unverified; use eifctl mcp serve --instance-path . --self-test for local SDK transport proof.")],
+            ))
+            continue
         if not entry.get("enabled"):
             results.append(_base_result(integration, entry.get("provider"), "disabled", boundary, timestamp))
             continue
@@ -716,7 +726,7 @@ def integration_problems(config: dict | None, results: list[dict]) -> list[str]:
     problems = []
     for result in results:
         state = result["state"]
-        if state == "disabled" or state == "healthy":
+        if state in {"disabled", "healthy", "configured"}:
             continue
         entry = configured.get(result["integration"], {}) if isinstance(configured, dict) else {}
         policy = entry.get("failure_policy", "degrade") if isinstance(entry, dict) else "degrade"

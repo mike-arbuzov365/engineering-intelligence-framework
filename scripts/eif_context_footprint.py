@@ -1,0 +1,258 @@
+#!/usr/bin/env python3
+"""Model-free static context footprint in disposable synthetic EIF instances.
+
+Creates one disposable instance per adapter with `eifctl new` in a temporary
+directory, then measures bytes (and an approximate token count) of what a host
+loads or an agent is told to read. No model, network or private data is used.
+
+Usage:
+    python scripts/eif_context_footprint.py --no-latency [--out baseline.json]
+
+`--eifctl` is the command that starts eifctl. Default: `eifctl`. From a source
+checkout: --eifctl "python -W ignore -m engineering_intelligence_framework.cli"
+with PYTHONPATH pointing at src/.
+"""
+from __future__ import annotations
+
+import argparse
+import asyncio
+import hashlib
+import json
+import math
+import os
+import re
+import shlex
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+ADAPTERS = {
+    "claude-code": {"entrypoint": "CLAUDE.md", "skills": ".claude/skills"},
+    "codex": {"entrypoint": "AGENTS.md", "skills": ".agents/skills"},
+    "cursor": {"entrypoint": ".cursor/rules/eif/governance.mdc", "skills": ".cursor/skills"},
+    "hermes": {"entrypoint": ".hermes.md", "skills": ".hermes/skills"},
+}
+WALK_SKILLS = ("run-execution-packet", "plan-execution-packet", "knowledge-search")
+LINK_RE = re.compile(r"\]\(([^)#\s]+\.md)(?:#[^)]*)?\)")
+FRONTMATTER_RE = re.compile(r"\A---\r?\n.*?\r?\n---\r?\n", re.DOTALL)
+
+
+def size(path: Path) -> dict:
+    data = path.read_bytes()
+    return {
+        "bytes": len(data),
+        "lines": data.count(b"\n") + (0 if data.endswith(b"\n") or not data else 1),
+        "est_tokens": math.ceil(len(data) / 4),
+    }
+
+
+def total(items: list[dict]) -> dict:
+    byte_sum = sum(item["bytes"] for item in items)
+    return {"bytes": byte_sum, "est_tokens": math.ceil(byte_sum / 4)}
+
+
+def frontmatter_bytes(path: Path) -> int:
+    text = path.read_bytes().decode("utf-8")
+    match = FRONTMATTER_RE.match(text)
+    return len(match.group(0).encode("utf-8")) if match else 0
+
+
+def run(cmd: list[str], cwd: Path | None = None) -> tuple[int, bytes, float]:
+    env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUTF8="1")
+    source = Path(__file__).resolve().parents[1] / "src"
+    if source.is_dir():
+        env["PYTHONPATH"] = str(source)
+    proc = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, check=False, timeout=60)
+    return proc.returncode, proc.stdout + proc.stderr, 0.0
+
+
+def one_hop_reads(runtime: Path, skill: str) -> list[Path]:
+    source = runtime / "skills" / skill / "SKILL.md"
+    reads = [source]
+    for target in LINK_RE.findall(source.read_text(encoding="utf-8")):
+        if "://" in target:
+            continue
+        resolved = (source.parent / target).resolve()
+        if resolved.is_file() and runtime.resolve() in resolved.parents and resolved not in reads:
+            reads.append(resolved)
+    return reads
+
+
+def measure_instance(eifctl: list[str], root: Path, adapter: str, runs: int, *, compact: bool = False) -> dict:
+    spec = ADAPTERS[adapter]
+    project = root.resolve() / f"inst-{adapter}"
+    rc, out, _ = run([*eifctl, "new", str(project), "--project-name", "synthetic-demo", "--adapter", adapter])
+    if rc != 0:
+        raise SystemExit(f"eifctl new failed for {adapter}: {out.decode('utf-8', 'replace')[-400:]}")
+    if compact:
+        import yaml
+        config_path = project / ".eif/config.yaml"
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        config.setdefault("integrations", {})["eif_mcp"] = {"enabled": True}
+        config_path.write_text(yaml.safe_dump(config, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
+        rc, out, _ = run([*eifctl, "upgrade", "--instance-path", str(project), "--allow-dirty-project"])
+        if rc != 0:
+            raise SystemExit(f"synthetic compact upgrade failed for {adapter}: {out.decode('utf-8', 'replace')[-400:]}")
+
+    runtime = project / ".eif" / "runtime"
+    entry = size(project / spec["entrypoint"])
+
+    loaders = sorted((project / spec["skills"]).glob("*/SKILL.md"))
+    loader_full = [size(path) for path in loaders]
+    loader_meta = [frontmatter_bytes(path) for path in loaders]
+
+    rc, doctor_out, _ = run([*eifctl, "doctor", "--instance-path", str(project)])
+    doctor_out = doctor_out.replace(str(project).encode("utf-8"), b".").replace(str(project).replace("\\", "/").encode("utf-8"), b".")
+
+    walks = {}
+    for skill in WALK_SKILLS:
+        reads = one_hop_reads(runtime, skill)
+        sizes = [size(path) for path in reads]
+        walks[skill] = {
+            "files": [path.relative_to(runtime).as_posix() for path in reads],
+            "total": total(sizes),
+        }
+
+    fm_bytes = sum(loader_meta)
+    full_loader_bytes = sum(item["bytes"] for item in loader_full)
+    base_bytes = entry["bytes"] + fm_bytes + len(doctor_out)
+
+    def scenario(count: int) -> dict:
+        return {"bytes": count, "est_tokens": math.ceil(count / 4)}
+
+    scenarios = {
+        "light": scenario(base_bytes),
+        "knowledge_search": scenario(base_bytes + walks["knowledge-search"]["total"]["bytes"]),
+        "packet_plan": scenario(base_bytes + walks["plan-execution-packet"]["total"]["bytes"]),
+        "packet_run": scenario(base_bytes + walks["run-execution-packet"]["total"]["bytes"]),
+        "light_if_host_loads_full_loaders": scenario(base_bytes - fm_bytes + full_loader_bytes),
+    }
+
+    return {
+        "adapter": adapter,
+        "scenarios": scenarios,
+        "tier_a_always_loaded": {
+            "entrypoint": {"path": spec["entrypoint"], **entry},
+            "skill_loaders": {
+                "count": len(loaders),
+                "frontmatter_only": {
+                    "bytes": sum(loader_meta),
+                    "est_tokens": math.ceil(sum(loader_meta) / 4),
+                },
+                "full_files": total(loader_full),
+            },
+        },
+        "tier_b_first_task": {
+            "doctor_stdout": {"exit_code": rc, "bytes": len(doctor_out), "est_tokens": math.ceil(len(doctor_out) / 4)},
+            "skill_walks_one_hop": walks,
+        },
+        "runtime_bundle": {
+            "files": sum(1 for p in runtime.rglob("*") if p.is_file()),
+            "bytes": sum(p.stat().st_size for p in runtime.rglob("*") if p.is_file()),
+        },
+
+    }
+
+
+def byte_counts(value: object, key: str = "") -> object:
+    """Compare measured byte/line/count fields, ignoring provenance notes."""
+    if isinstance(value, dict):
+        return {k: byte_counts(v, k) for k, v in value.items() if k not in {"method"}}
+    if isinstance(value, list):
+        return [byte_counts(item) for item in value]
+    return value
+
+
+def mcp_measurement(eifctl: list[str], root: Path, baseline: dict, *, compact: bool = True) -> dict:
+    source = Path(__file__).resolve().parents[1] / "src"
+    if source.is_dir():
+        sys.path.insert(0, str(source))
+    from engineering_intelligence_framework.eif_mcp.measurement import measure_responses
+
+    measurements = []
+    for adapter in ADAPTERS:
+        current = measure_instance(eifctl, root, adapter, 0, compact=compact)
+        project = root / f"inst-{adapter}"
+        protocol = asyncio.run(measure_responses(project))
+        original = next(a for a in baseline["adapters"] if a["adapter"] == adapter)
+        entry = current["tier_a_always_loaded"]["entrypoint"]["bytes"]
+        loaders = current["tier_a_always_loaded"]["skill_loaders"]["frontmatter_only"]["bytes"]
+        scenarios = {}
+        for name, sample in protocol["scenarios"].items():
+            before = original["scenarios"][name]["bytes"]
+            extra = loaders + protocol["tools_list_bytes"] + sample["response_bytes"]
+            actual = entry + extra
+            candidate = 2400 + extra
+            scenarios[name] = {"before_bytes": before, "actual_reader_bytes": actual, "actual_difference_bytes": actual - before, "actual_reduction_percent": round((before - actual) * 100 / before, 3), "candidate_bytes": candidate, "candidate_reduction_percent": round((before - candidate) * 100 / before, 3), **sample}
+        measurements.append({"adapter": adapter, "entrypoint_bytes": entry, "entrypoint_mode": "compact" if compact else "legacy", "candidate_entrypoint_bytes": 2400, "candidate_entrypoint_evidence": "budget; actual generated entrypoint measured separately", "skill_frontmatter_bytes": loaders, "tools_list_bytes": protocol["tools_list_bytes"], "scenarios": scenarios})
+    gate = all(a["scenarios"][name]["candidate_bytes"] * 100 <= a["scenarios"][name]["before_bytes"] * 85 for a in measurements for name in ("packet_plan", "packet_run"))
+    gates = {"G1c_candidate": "PASS" if gate else "FAIL", "threshold_percent": 15, "G2": "NOT PASSED: O-6 = 0", "branch": "B"}
+    if compact:
+        actual_gate = all(a["entrypoint_bytes"] <= 2400 and a["scenarios"][name]["actual_reader_bytes"] * 100 <= a["scenarios"][name]["before_bytes"] * 85 for a in measurements for name in ("packet_plan", "packet_run"))
+        gates["G1c_actual"] = "PASS" if actual_gate else "FAIL"
+    return {"method": {"kind": "static-mcp-startup-bytes", "serialization": "compact SDK aliases, exclude_none, UTF-8; entire tools/list; CallToolResult includes text and structured copies; outline discovery and all section pages counted", "section_selection": "frozen relevant startup sections selected before measuring bytes; not all reads of an entire task", "compact_block": "actual generated entrypoint" if compact else "INFERRED 2400-byte budget until generator verification", "quality": "NOT RUN; no model calls or token-savings conclusion"}, "adapters": measurements, "gates": gates}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--eifctl", default=None)
+    parser.add_argument("--no-latency", action="store_true", help="Deterministic mode; no timing is collected.")
+    parser.add_argument("--check", type=Path, help="Compare byte counts with a recorded measurement.")
+    parser.add_argument("--mcp-after", action="store_true", help="Measure a synthetic MCP reader through the real in-memory SDK.")
+    parser.add_argument("--entrypoint-mode", choices=["legacy", "compact"], default="compact", help="MCP measurement uses a real compact upgrade by default; legacy reproduces the reader-only case.")
+    parser.add_argument("--out")
+    parser.add_argument("--source-ref", default="unspecified", help="Free-text note: where this eifctl came from.")
+    args = parser.parse_args()
+    eifctl = shlex.split(args.eifctl) if args.eifctl else [sys.executable, "-W", "ignore", "-m", "engineering_intelligence_framework.cli"]
+
+    rc, version, _ = run([*eifctl, "version"])
+    with tempfile.TemporaryDirectory(prefix="eif-baseline-") as tmp:
+        if args.mcp_after:
+            baseline_path = Path(__file__).resolve().parents[1] / "docs/benchmarks/context-footprint/baseline.json"
+            try:
+                result = mcp_measurement(eifctl, Path(tmp), json.loads(baseline_path.read_text(encoding="utf-8")), compact=args.entrypoint_mode == "compact")
+            except ImportError:
+                print("MCP measurement requires the optional mcp extra", file=sys.stderr)
+                return 2
+            result["method"]["source_ref"] = args.source_ref
+            source = Path(__file__).resolve().parents[1] / "src/engineering_intelligence_framework"
+            digest = hashlib.sha256()
+            for path in sorted(source.rglob("*")):
+                if path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}:
+                    digest.update(path.relative_to(source).as_posix().encode("utf-8"))
+                    digest.update(b"\0")
+                    digest.update(path.read_bytes())
+            result["method"]["source_tree_sha256"] = digest.hexdigest()
+        else:
+            result = {
+            "method": {
+                "token_estimate": "ceil(bytes / 4); an approximation, not a tokenizer count",
+                "eifctl_version": version.decode("utf-8", "replace").strip().splitlines()[-1],
+                "python": ">=3.11",
+                "path_normalization": "doctor root replaced by dot; all artifact paths relative; UTF-8; no timing",
+                "source_ref": args.source_ref,
+                "instances": "synthetic, created by `eifctl new`, project name synthetic-demo",
+                "scenarios": "light = entrypoint + skill frontmatter + one doctor run; the others add the one-hop skill walk; assumes the host loads only skill frontmatter at start",
+                "tier_a": "loaded by the host without an agent decision",
+                "tier_b": "the entrypoint tells the agent to read or run these on the first task",
+                "walk_limits": "one hop of relative .md links from the runtime skill source; deeper reads not counted",
+            },
+            "adapters": [measure_instance(eifctl, Path(tmp), adapter, 0) for adapter in ADAPTERS],
+            }
+    text = json.dumps(result, indent=2, ensure_ascii=False)
+    if args.out:
+        Path(args.out).write_text(text + "\n", encoding="utf-8", newline="\n")
+    if args.check:
+        expected = json.loads(args.check.read_text(encoding="utf-8"))
+        if byte_counts(expected) != byte_counts(result):
+            print("FAIL: context footprint differs from recorded byte counts", file=sys.stderr)
+            return 1
+        print("PASS: context footprint matches recorded byte counts")
+    else:
+        print(text)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

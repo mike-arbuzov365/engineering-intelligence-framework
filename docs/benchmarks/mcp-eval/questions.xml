@@ -1,0 +1,42 @@
+<evaluation>
+  <qa_pair>
+    <question>A new execution effort is ready to continue in the launch packet. Determine the methodology route and the first dependency-ready session, rather than relying on filename order. Return skill|session.</question>
+    <answer>run-execution-packet|SESSION-002</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The legacy packet looks similar to launch, whose first session is complete. Inspect both progress reports and determine why a next session cannot be asserted for legacy. Return its exact reason code.</question>
+    <answer>legacy_or_missing_status</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>A search for the fixture color finds a usable note, a pending note and one unreadable document. Confirm the bound instance, then report the default result status and the number of malformed records as status|count.</question>
+    <answer>validated|1</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Before trying to record a final artifact, inspect both server mode and its registered operation catalog. Does this build provide a controlled writer? Return the current mode and exact writer disposition as mode|disposition.</question>
+    <answer>reader|deferred-to-EIF-022b</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Route a task that brings a new lesson into project knowledge, then independently resolve the named pinned skill through its artifact outline. Return the shared runtime-relative skill path.</question>
+    <answer>.eif/runtime/skills/knowledge-ingest/SKILL.md</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Continue the named demo checkpoint only after checking its schema and current identity/source/Git state. What exact next action survives both checks? Return the stored next-action text.</question>
+    <answer>Inspect the packet</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>A lightweight task should not read a skill. Compare its brief with bounded doctor coverage and decide whether either establishes a complete doctor pass. Return their doctor verdict fields as doctor|brief.</question>
+    <answer>partial|partial</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Route packet execution and inspect the execution playbook through its outline and small paged sections. Which exact launch status satisfies dependencies, according to the pinned policy? Return the one status word.</question>
+    <answer>completed</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>The same color appears in both pending and validated knowledge while one document is unreadable. Compare an explicitly draft-only search with the default search; return the first result statuses in that order as explicit|default.</question>
+    <answer>draft|validated</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>A user wants an EIF-managed design package from this fixture. Inspect the bound profile and then ask the existing delivery guard about the named scope. Return profile|guard-status, using none for an absent profile.</question>
+    <answer>none|unavailable</answer>
+  </qa_pair>
+</evaluation>

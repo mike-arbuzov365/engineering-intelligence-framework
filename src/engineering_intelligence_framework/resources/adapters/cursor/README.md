@@ -165,3 +165,14 @@ and a non-installing
 [`preToolUse` contract](../../integrations/rtk/generated/hooks/cursor.json).
 This is separate from Cursor Rules. It documents the available rewrite shape
 but does not create or edit `hooks.json`.
+
+## Optional EIF MCP reader
+
+Client version observed for this packet: `3.21.18`. MCP status
+is **configured-not-verified**: a [reviewable template](../../integrations/eif-mcp/README.md)
+exists, but it was not installed. SDK and installed-wheel verification do not
+prove this client's behavior; O-6=0, so no host tool or human elicitation canary
+ran. Controlled writes and rendering defer to EIF-022b. An optional compact
+entrypoint can be selected in project config and reverted with the normal
+upgrade command; the [reference](../../docs/reference/eif-mcp.md) documents the
+local CLI fallback and limits.

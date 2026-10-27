@@ -385,6 +385,50 @@ setup-message ambiguities now covered by regression tests. The previously
 missing adoption evidence therefore exists; status remains provisional until
 an explicit owner ratification decision.
 
+### D-22: Optional instance-bound MCP reader
+**Status: provisional, proposed 2026-10-27 (EIF-022).** `eifctl mcp serve`
+is an optional stdio adapter over structured installed EIF operations. One
+process serves one explicitly selected project instance. Pinned manifests and
+file hashes govern policy text; package/runtime drift is reported without
+repairing lock or runtime. The adapter adds no intelligence layer, authority,
+external memory store or core dependency. Core CLI and adapters work without
+the SDK; absent/disabled compact routing preserves the legacy instruction block.
+
+The reader has nine bounded, strict read-only operations. Its doctor reports
+partial coverage where a full CLI check would inspect ancestors or execute
+optional provider probes. SDK/installed-wheel proof is distinct from a real
+client canary. Client status remains `configured-not-verified`; controlled
+writes and render are `deferred-to-EIF-022b` until human-visible host elicitation
+is verified. Static byte comparisons do not establish model-token savings or
+behavioral quality, and D-12/D-19 remain unchanged.
+
+This is a proposal, not ratification of a new framework decision. Evidence:
+`planning/packets/EIF-022-eif-mcp/07-CLOSEOUT-022-eif-mcp.md`,
+`docs/reference/eif-mcp.md` and the SDK, packaging and compact-routing suites.
+The number uses the first free slot on fetched `origin/main` at proposal time;
+recheck numbering against integration state before merging another pending
+proposal or release.
+
+### D-23: Explicit packet session progress
+**Status: provisional, proposed 2026-10-27 (EIF-022).** A packet session's
+launch frontmatter records one progress status: `prepared`, `in_progress`,
+`completed`, `blocked` or `deferred`. The executing agent updates it at start
+and logical closeout. Only `completed` satisfies `depends_on`; deferred work
+requires an explicit roadmap dependency adjustment for its chosen branch.
+
+Progress readers preserve unknown historical values as `legacy`, report
+incomplete coverage as `partial` and never infer completion from Git, prose or
+the absence of an ephemeral checkpoint. Missing/ambiguous session order,
+missing launch files and invalid/cyclic dependencies yield no inferred next
+session. Every observed launch row remains visible under partial coverage.
+The reader is a progress report, not a structural packet validator.
+
+This is a proposed methodology convention, not a retroactive rewrite of
+historical packets or a new session-enforcement claim. D-21's checkpoint-first
+continuity and enforcement vocabulary remain unchanged. Evidence:
+`templates/session-launch.md`, `playbooks/execution-packet-execution.md`,
+`skills/run-execution-packet/SKILL.md` and the structured-service regressions.
+
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08

@@ -56,3 +56,7 @@ marking the packet complete with an unmet criterion.
 - The filled packet closeout.
 - A final report: what was done, what verification ran and its result,
   what's deferred and why.
+
+Maintain session-launch progress using `prepared`, `in_progress`, `completed`,
+`blocked`, or `deferred`; only `completed` satisfies `depends_on`. Historical
+status values are `legacy` to progress readers.

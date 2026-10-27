@@ -1,0 +1,12 @@
+{
+  "light": null,
+  "structured": "run-bounded-evidence-loop",
+  "idea": "plan-idea",
+  "prd": "plan-prd",
+  "packet_plan": "plan-execution-packet",
+  "packet_run": "run-execution-packet",
+  "packet_review": "review-execution-packet",
+  "knowledge_search": "knowledge-search",
+  "knowledge_ingest": "knowledge-ingest",
+  "retro": "run-retro"
+}

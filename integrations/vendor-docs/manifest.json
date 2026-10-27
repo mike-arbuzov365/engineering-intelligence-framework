@@ -31,7 +31,7 @@
       "required_for_healthy": true,
       "description": "The configured MCP transport answers a resolve/query probe from the calling agent.",
       "verified": false,
-      "verification_gap": "EIF generates configuration for the agent to load; it does not itself speak MCP, so this capability is reported by the agent adapter, not probed by eifctl doctor."
+      "verification_gap": "EIF generates vendor-provider configuration for the agent to load. Provider reachability is reported by the agent adapter, not probed by eifctl doctor; the separate optional eif-mcp reader does not contact this provider."
     },
     {
       "id": "usage-routing",

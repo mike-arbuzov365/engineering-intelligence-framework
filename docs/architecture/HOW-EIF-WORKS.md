@@ -475,7 +475,7 @@ disagreement between a doc page and a reproducible test is a discrepancy to
 record, not a tie to break by rank - see [Authority model](#authority-model).
 
 Not verified: live provider behavior. EIF generates configuration for an
-agent to load and does not itself speak MCP, so `transport-reachable` is
+agent to load; provider reachability (`transport-reachable`) is
 reported by the agent adapter and is marked unverified in the manifest
 rather than claiming a health probe that does not happen. See
 [`integrations/vendor-docs/`](../../integrations/vendor-docs/).
@@ -1089,3 +1089,12 @@ and evidence; the actual verification (tests passing, CI green, a human
 or agent reviewing the diff) still has to happen, the same way it would
 without EIF. A merged PR is explicitly not treated as proof of working
 behavior on its own - see [Knowledge Delta](#knowledge-delta).
+
+## Optional instance MCP reader
+
+The experimental [eif-mcp reader](../reference/eif-mcp.md) is a thin stdio adapter
+over installed structured EIF operations, bound to one explicit instance.
+Policy text comes from that instance's pinned runtime; the server reports
+drift without repairing it. It adds no intelligence layer or authority.
+Core EIF and all adapters work without the optional SDK. Client canaries and
+human-approved writer operations remain deferred.

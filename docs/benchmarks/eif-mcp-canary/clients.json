@@ -1,0 +1,46 @@
+{
+  "checked_date": "2026-10-27",
+  "model_turn_budget": 0,
+  "host_tool_calls": "NOT RUN",
+  "host_elicitation": "NOT RUN",
+  "schema_deferral": "unknown; worst-case full tools/list counted",
+  "live_config_changed": false,
+  "clients": {
+    "claude-code": {
+      "version": "2.1.169",
+      "version_command": "claude --version",
+      "sanitized_version_output": "2.1.169 (Claude Code)",
+      "status": "configured-not-verified",
+      "evidence_status": "not_tested",
+      "configuration": "reviewable template only; not installed",
+      "next_action": "Owner and orchestrator can run an isolated client canary after phase-one acceptance."
+    },
+    "codex": {
+      "version": "0.144.5",
+      "version_command": "codex --version",
+      "sanitized_version_output": "codex-cli 0.144.5",
+      "status": "configured-not-verified",
+      "evidence_status": "not_tested",
+      "configuration": "reviewable template only; not installed",
+      "next_action": "Owner and orchestrator can run an isolated client canary after phase-one acceptance."
+    },
+    "cursor": {
+      "version": "3.21.18",
+      "version_command": "cursor --version",
+      "sanitized_version_output": "3.21.18; c4730f7d93d787d9ab120af715999f0345ee5bc0; x64",
+      "status": "configured-not-verified",
+      "evidence_status": "not_tested",
+      "configuration": "reviewable template only; not installed",
+      "next_action": "Owner and orchestrator can run an isolated client canary after phase-one acceptance."
+    },
+    "hermes": {
+      "version": "0.21.3",
+      "version_command": "hermes --version",
+      "sanitized_version_output": "Hermes Agent v0.21.3 (2026.9.14); upstream 784d5c3f",
+      "status": "configured-not-verified",
+      "evidence_status": "not_tested",
+      "configuration": "reviewable template only; not installed",
+      "next_action": "Owner and orchestrator can run an isolated client canary after phase-one acceptance."
+    }
+  }
+}

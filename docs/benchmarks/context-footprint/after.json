@@ -1,0 +1,460 @@
+{
+  "method": {
+    "kind": "static-mcp-startup-bytes",
+    "serialization": "compact SDK aliases, exclude_none, UTF-8; entire tools/list; CallToolResult includes text and structured copies; outline discovery and all section pages counted",
+    "section_selection": "frozen relevant startup sections selected before measuring bytes; not all reads of an entire task",
+    "compact_block": "actual generated entrypoint",
+    "quality": "NOT RUN; no model calls or token-savings conclusion",
+    "source_ref": "SESSION-007 working tree",
+    "source_tree_sha256": "0bae3df88fdce48f538c39d5f125e16b59135da4f2c76802796e9e9f6544f56d"
+  },
+  "adapters": [
+    {
+      "adapter": "claude-code",
+      "entrypoint_bytes": 2033,
+      "entrypoint_mode": "compact",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "budget; actual generated entrypoint measured separately",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 11931,
+          "actual_reader_bytes": 10961,
+          "actual_difference_bytes": -970,
+          "actual_reduction_percent": 8.13,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 5.054,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "knowledge_search": {
+          "before_bytes": 16318,
+          "actual_reader_bytes": 17889,
+          "actual_difference_bytes": 1571,
+          "actual_reduction_percent": -9.627,
+          "candidate_bytes": 18256,
+          "candidate_reduction_percent": -11.876,
+          "brief_bytes": 1818,
+          "outline_bytes": 1462,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "recording-the-result",
+              "pages": 1,
+              "response_bytes": 1691,
+              "text_chars": 399
+            },
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "how",
+              "pages": 1,
+              "response_bytes": 2983,
+              "text_chars": 1033
+            }
+          ],
+          "response_bytes": 7954
+        },
+        "packet_plan": {
+          "before_bytes": 27095,
+          "actual_reader_bytes": 20394,
+          "actual_difference_bytes": -6701,
+          "actual_reduction_percent": 24.732,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 23.377,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 27881,
+          "actual_reader_bytes": 19100,
+          "actual_difference_bytes": -8781,
+          "actual_reduction_percent": 31.495,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.178,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    },
+    {
+      "adapter": "codex",
+      "entrypoint_bytes": 2033,
+      "entrypoint_mode": "compact",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "budget; actual generated entrypoint measured separately",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 11925,
+          "actual_reader_bytes": 10961,
+          "actual_difference_bytes": -964,
+          "actual_reduction_percent": 8.084,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 5.006,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "knowledge_search": {
+          "before_bytes": 16312,
+          "actual_reader_bytes": 17889,
+          "actual_difference_bytes": 1577,
+          "actual_reduction_percent": -9.668,
+          "candidate_bytes": 18256,
+          "candidate_reduction_percent": -11.918,
+          "brief_bytes": 1818,
+          "outline_bytes": 1462,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "recording-the-result",
+              "pages": 1,
+              "response_bytes": 1691,
+              "text_chars": 399
+            },
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "how",
+              "pages": 1,
+              "response_bytes": 2983,
+              "text_chars": 1033
+            }
+          ],
+          "response_bytes": 7954
+        },
+        "packet_plan": {
+          "before_bytes": 27089,
+          "actual_reader_bytes": 20394,
+          "actual_difference_bytes": -6695,
+          "actual_reduction_percent": 24.715,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 23.36,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 27875,
+          "actual_reader_bytes": 19100,
+          "actual_difference_bytes": -8775,
+          "actual_reduction_percent": 31.48,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.163,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    },
+    {
+      "adapter": "cursor",
+      "entrypoint_bytes": 2282,
+      "entrypoint_mode": "compact",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "budget; actual generated entrypoint measured separately",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 12221,
+          "actual_reader_bytes": 11210,
+          "actual_difference_bytes": -1011,
+          "actual_reduction_percent": 8.273,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 7.307,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "knowledge_search": {
+          "before_bytes": 16608,
+          "actual_reader_bytes": 18138,
+          "actual_difference_bytes": 1530,
+          "actual_reduction_percent": -9.212,
+          "candidate_bytes": 18256,
+          "candidate_reduction_percent": -9.923,
+          "brief_bytes": 1818,
+          "outline_bytes": 1462,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "recording-the-result",
+              "pages": 1,
+              "response_bytes": 1691,
+              "text_chars": 399
+            },
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "how",
+              "pages": 1,
+              "response_bytes": 2983,
+              "text_chars": 1033
+            }
+          ],
+          "response_bytes": 7954
+        },
+        "packet_plan": {
+          "before_bytes": 27385,
+          "actual_reader_bytes": 20643,
+          "actual_difference_bytes": -6742,
+          "actual_reduction_percent": 24.619,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 24.188,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 28171,
+          "actual_reader_bytes": 19349,
+          "actual_difference_bytes": -8822,
+          "actual_reduction_percent": 31.316,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.897,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    },
+    {
+      "adapter": "hermes",
+      "entrypoint_bytes": 2034,
+      "entrypoint_mode": "compact",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "budget; actual generated entrypoint measured separately",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 11929,
+          "actual_reader_bytes": 10962,
+          "actual_difference_bytes": -967,
+          "actual_reduction_percent": 8.106,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 5.038,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "knowledge_search": {
+          "before_bytes": 16316,
+          "actual_reader_bytes": 17890,
+          "actual_difference_bytes": 1574,
+          "actual_reduction_percent": -9.647,
+          "candidate_bytes": 18256,
+          "candidate_reduction_percent": -11.89,
+          "brief_bytes": 1818,
+          "outline_bytes": 1462,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "recording-the-result",
+              "pages": 1,
+              "response_bytes": 1691,
+              "text_chars": 399
+            },
+            {
+              "kind": "playbook",
+              "name": "knowledge-search",
+              "section": "how",
+              "pages": 1,
+              "response_bytes": 2983,
+              "text_chars": 1033
+            }
+          ],
+          "response_bytes": 7954
+        },
+        "packet_plan": {
+          "before_bytes": 27093,
+          "actual_reader_bytes": 20395,
+          "actual_difference_bytes": -6698,
+          "actual_reduction_percent": 24.722,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 23.371,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 27879,
+          "actual_reader_bytes": 19101,
+          "actual_difference_bytes": -8778,
+          "actual_reduction_percent": 31.486,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.173,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    }
+  ],
+  "gates": {
+    "G1c_candidate": "PASS",
+    "threshold_percent": 15,
+    "G2": "NOT PASSED: O-6 = 0",
+    "branch": "B",
+    "G1c_actual": "PASS"
+  }
+}

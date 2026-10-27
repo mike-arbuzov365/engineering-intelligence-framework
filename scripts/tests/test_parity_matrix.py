@@ -15,7 +15,9 @@ from __future__ import annotations
 
 import json
 import sys
+import copy
 from pathlib import Path
+from jsonschema import Draft202012Validator
 
 FRAMEWORK_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(FRAMEWORK_ROOT / "scripts"))
@@ -59,6 +61,17 @@ def main() -> int:
 
     for adapter_name in sorted(registered & in_matrix):
         entry = adapters_in_matrix[adapter_name]
+        mcp = entry.get("mcp_client")
+        schema = json.loads((FRAMEWORK_ROOT / "core/schemas/mcp-client-capability.schema.json").read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema)
+        check(f"'{adapter_name}' MCP evidence contract", validator.is_valid(mcp), mcp)
+        if mcp and mcp.get("status") == "verified":
+            evidence = (FRAMEWORK_ROOT / mcp["evidence_path"]).resolve()
+            check(f"'{adapter_name}' observed canary evidence exists", evidence.is_relative_to(FRAMEWORK_ROOT) and evidence.is_file())
+        candidate = copy.deepcopy(mcp or {})
+        candidate.update(status="verified", evidence_status="not_tested")
+        candidate.pop("evidence_path", None)
+        check(f"'{adapter_name}' cannot claim verified without a canary", not validator.is_valid(candidate))
         missing_dims = [d for d in dimensions if d not in entry or not str(entry[d]).strip()]
         check(
             f"'{adapter_name}' matrix entry covers every declared dimension",

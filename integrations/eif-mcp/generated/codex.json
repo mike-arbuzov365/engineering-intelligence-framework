@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "integration": "eif-mcp",
+  "adapter": "codex",
+  "config_path": "~/.codex/config.toml",
+  "config_format": "toml",
+  "config_key": "mcp_servers",
+  "installed": false,
+  "user_config_mutated_by_generator": false,
+  "template_only": true,
+  "data_boundary": "local-only",
+  "modes": {
+    "reader": {
+      "available": true,
+      "server_entry": {
+        "command": "eifctl",
+        "args": [
+          "mcp",
+          "serve",
+          "--instance-path",
+          "<explicit-instance-root>"
+        ]
+      },
+      "native_snippet": "[mcp_servers.eif]\ncommand = \"eifctl\"\nargs = [\"mcp\", \"serve\", \"--instance-path\", \"<explicit-instance-root>\"]\n"
+    },
+    "writer": {
+      "available": false,
+      "status": "deferred-to-EIF-022b",
+      "server_entry": null
+    }
+  },
+  "review_before_install": [
+    "Back up your client configuration and review the explicit instance root.",
+    "Use the eifctl from the environment containing the pinned package and mcp extra.",
+    "Never auto-allow eif_commit or automatically accept host elicitation when writers become available.",
+    "Remove this server entry to roll back; EIF does not install or edit client configuration."
+  ],
+  "client_canary": "configured-not-verified",
+  "format_evidence": "documented mcp_servers TOML shape; client canary not run"
+}

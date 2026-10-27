@@ -118,6 +118,12 @@ def classify_licenses(
     source, so a policy semantics change never needs updating twice."""
     denied, unknown, ok = [], [], []
     for name, ids in named_identifiers:
+        # The standard Trove classifier is an alternate spelling of the
+        # already-policy-controlled SPDX identifier. Keep raw identifiers so
+        # denied-family checks still take precedence. Bare "PSF" alone is
+        # deliberately insufficient (no guessed license or policy exception).
+        if "License :: OSI Approved :: Python Software Foundation License" in ids:
+            ids = [*ids, "PSF-2.0"]
         if not ids:
             unknown.append(name)
             continue

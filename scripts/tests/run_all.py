@@ -41,6 +41,17 @@ from pathlib import Path
 
 TESTS_DIR = Path(__file__).resolve().parent
 SUITES = [
+    "test_context_footprint.py",
+    "test_service_golden.py",
+    "test_service_core.py",
+    "test_service_delivery.py",
+    "test_eif_mcp_inmemory.py",
+    "test_eif_mcp_stdio.py",
+    "test_eif_mcp_git.py",
+    "test_checkout_export.py",
+    "test_eif_mcp_compact.py",
+    "test_eif_mcp_contracts.py",
+    "test_eif_mcp_eval.py",
     "test_paths.py",
     "test_validate.py",
     "test_operating_layer.py",
@@ -98,6 +109,8 @@ SUITES = [
     "test_benchmark.py",
     "test_skill_eval.py",
 ]
+# Optional installed-wheel coverage also runs separately:
+#     python scripts/tests/test_eif_mcp_package.py
 # Package tests are deliberately NOT in SUITES: they need `build` +
 # `hatchling`, which are packaging-build tooling, not a runtime dependency
 # of EIF itself - they do not belong in scripts/requirements.txt (that

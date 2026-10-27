@@ -92,7 +92,7 @@ def _is_stale(review_after: str) -> bool:
 
 
 def search(knowledge_root: Path, query: str, type_filter: str | None, top: int,
-           eligible: set[str] | None, framework_root: Path | None = None) -> dict:
+           eligible: set[str] | None, framework_root: Path | None = None, *, include_coverage: bool = False) -> dict:
     """Return a structured result: matched artifacts, plus what was skipped
     and why (status-ineligible, schema-invalid, unparseable) so callers can
     tell 'nothing matched' from 'the match was filtered out or invalid'."""
@@ -116,6 +116,7 @@ def search(knowledge_root: Path, query: str, type_filter: str | None, top: int,
     results.sort(key=lambda r: r["score"], reverse=True)
     skipped_by_status.sort(key=lambda r: r["score"], reverse=True)
     return {
+        **({"indexed": len(rows)} if include_coverage else {}),
         "query": query,
         "terms": terms,
         "results": results[:top],

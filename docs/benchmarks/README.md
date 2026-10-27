@@ -322,3 +322,9 @@ Running them, running additional models/providers, or running repeated
 trials per cell (needed for a real confidence interval) are all open,
 tracked as part of the v0.1 public-readiness backlog - not done here to
 avoid an unbounded real-agent matrix in one round.
+
+## Static context footprint
+
+A model-free, synthetic byte measurement is documented in
+[context-footprint/README.md](context-footprint/README.md). It does not measure
+behavioral quality or actual model token usage.

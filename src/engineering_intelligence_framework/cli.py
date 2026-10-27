@@ -24,15 +24,17 @@ Usage:
     eifctl render {knowledge-delta,session-closeout,message} ...
     eifctl privacy-scan [--repo PATH] ...
     eifctl validate [PATTERNS ...]
+    eifctl mcp serve --instance-path PATH [--self-test]
     eifctl version
 """
 from __future__ import annotations
 
 import sys
 
-from .commands import delivery, doctor, init_cmd, new, privacy_scan, projects, render, search, session, skills, upgrade, validate, version, workspace
+from .commands import mcp_cmd, delivery, doctor, init_cmd, new, privacy_scan, projects, render, search, session, skills, upgrade, validate, version, workspace
 
 COMMANDS = {
+    "mcp": mcp_cmd.run,
     "delivery": delivery.run,
     "init": init_cmd.run,
     "new": new.run,

@@ -96,3 +96,12 @@ popularity - it should be revisited if a newer agent version changes the
 picture, and the evidence behind it should be re-verified against this
 framework's own adapters once they're actually ported, not assumed to
 transfer unchanged from the private instance's numbers.
+
+## Optional instance MCP reader
+
+All four `mcp_client` entries in [parity-matrix.json](parity-matrix.json) are
+`configured-not-verified`, with observed CLI versions and explicit NOT RUN
+client canaries. This records evidence strength, not an adapter support tier.
+[Reader templates](../integrations/eif-mcp/README.md) are never installed
+automatically. The project can opt into compact instructions with a tested
+direct-CLI fallback; no SDK is required by the adapter itself.

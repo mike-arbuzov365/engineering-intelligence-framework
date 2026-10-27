@@ -127,3 +127,14 @@ and a non-installing
 The contract records carried rewrite evidence but does not install a script or
 modify Claude Code settings. Active use still requires owner review and a
 version-specific behavioral canary.
+
+## Optional EIF MCP reader
+
+Client version observed for this packet: `2.1.169`. MCP status
+is **configured-not-verified**: a [reviewable template](../../integrations/eif-mcp/README.md)
+exists, but it was not installed. SDK and installed-wheel verification do not
+prove this client's behavior; O-6=0, so no host tool or human elicitation canary
+ran. Controlled writes and rendering defer to EIF-022b. An optional compact
+entrypoint can be selected in project config and reverted with the normal
+upgrade command; the [reference](../../docs/reference/eif-mcp.md) documents the
+local CLI fallback and limits.

@@ -46,7 +46,14 @@ def run(
     env: dict | None = None,
     timeout_s: float | None = None,
 ) -> subprocess.CompletedProcess:
-    full_env = {**os.environ, **env} if env else None
+    # Installed-package checks must not resolve the source checkout through
+    # a caller's PYTHONPATH/PYTHONHOME. Explicit per-test overrides remain
+    # possible, but an ambient development path is never inherited.
+    full_env = dict(os.environ)
+    full_env.pop("PYTHONPATH", None)
+    full_env.pop("PYTHONHOME", None)
+    if env:
+        full_env.update(env)
     return subprocess.run(
         cmd, cwd=str(cwd) if cwd else None, capture_output=True, text=True, encoding="utf-8", errors="replace",
         env=full_env, timeout=timeout_s,
@@ -100,26 +107,19 @@ def snapshot_paths(root: Path, paths: list[Path]) -> dict[str, bytes]:
 
 
 def clean_checkout_export(framework_root: Path, dest_dir: Path) -> None:
-    """Exports exactly the currently TRACKED file state (including any
-    staged/unstaged modifications to tracked files, but excluding untracked/
-    ignored files - a stray local __pycache__/ or similar) into dest_dir, so
-    building from it proves the package is never accidentally contaminated
-    by local-only cruft a real CI checkout would never have (exactly the
-    class of bug that broke the benchmark harness's fixture digests: local
-    testing regenerates files git never tracked). `git stash create` makes
-    a commit object capturing the current index+worktree diff vs HEAD
-    without touching the working directory or requiring anything to
-    already be committed; if the tree is already clean (nothing to stash),
-    HEAD itself is used directly."""
-    stash = subprocess.run(
-        ["git", "-C", str(framework_root), "stash", "create"],
-        capture_output=True, text=True, check=True,
-    ).stdout.strip()
-    tree_ish = stash or "HEAD"
+    """Export HEAD plus the normalized tracked diff without stashes or refs.
+
+    Untracked/ignored files are excluded. Newly added files must be staged
+    before the packaging gate, just as they must exist in a real checkout.
+    """
+    patch = subprocess.run(
+        ["git", "-C", str(framework_root), "diff", "--binary", "--no-ext-diff", "--full-index", "HEAD", "--"],
+        capture_output=True, check=True,
+    ).stdout
     dest_dir.mkdir(parents=True, exist_ok=True)
     tar_path = dest_dir.parent / "clean-checkout.tar"
     archive = subprocess.run(
-        ["git", "-C", str(framework_root), "archive", "--format=tar", f"--output={tar_path}", tree_ish],
+        ["git", "-C", str(framework_root), "archive", "--format=tar", f"--output={tar_path}", "HEAD"],
         capture_output=True, text=True,
     )
     if archive.returncode != 0:
@@ -127,6 +127,13 @@ def clean_checkout_export(framework_root: Path, dest_dir: Path) -> None:
     with tarfile.open(tar_path) as tf:
         tf.extractall(dest_dir)  # noqa: S202 - own git archive output, not untrusted input
     tar_path.unlink()
+    if patch:
+        applied = subprocess.run(
+            ["git", "-C", str(dest_dir), "-c", "core.autocrlf=false", "-c", "core.eol=lf", "apply", "--binary", "--whitespace=nowarn", "-"],
+            input=patch, capture_output=True,
+        )
+        if applied.returncode:
+            raise RuntimeError("cannot apply the tracked source diff to the isolated export: " + applied.stderr.decode("utf-8", "replace"))
 
 
 def main() -> int:

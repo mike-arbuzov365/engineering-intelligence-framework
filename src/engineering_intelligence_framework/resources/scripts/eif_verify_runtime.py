@@ -499,6 +499,14 @@ def check_config_block_drift(config: dict | None, instance_path: Path, entrypoin
     block_text = text[text.index(EIF_BEGIN):text.index(EIF_END) + len(EIF_END)]
 
     problems = []
+    mcp_enabled = bool(((config.get("integrations") or {}).get("eif_mcp") or {}).get("enabled", False))
+    compact = "<!-- EIF:MCP reader -->" in block_text
+    if mcp_enabled != compact:
+        problems.append("integrations.eif_mcp.enabled differs from the generated block mode - run eifctl upgrade --instance-path .")
+    if compact:
+        for token in ("eif_brief(task_kind)", "eifctl doctor --instance-path .", "operating-protocol.md"):
+            if token not in block_text:
+                problems.append("compact MCP block is missing a required route or fallback - run eifctl upgrade --instance-path .")
     adoption_mode = (config.get("adoption") or {}).get("mode", "greenfield")
     has_greenfield_text = GREENFIELD_MARKER_TEXT in block_text
     has_coexist_text = COEXIST_MARKER_TEXT in block_text
@@ -634,26 +642,13 @@ def check_integrations(
     return integration_problems(config, evaluate_integrations(config, root, instance))
 
 
-def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--framework-root", required=True, help="Where core/schemas/ lives (the framework checkout, or this instance's own .eif/runtime bundle)")
-    ap.add_argument("--instance-path", default=".", help="Instance root to verify. Default: current directory.")
-    ap.add_argument("--integration-report", default=None, help="Optional path for a machine-readable integration health report.")
-    ap.add_argument(
-        "--pre-upgrade",
-        action="store_true",
-        help=(
-            "Report drift that the managed-state refresh regenerates as a note "
-            "instead of a failure. For the pre-flight run inside `eifctl "
-            "upgrade` only - the post-upgrade run checks everything."
-        ),
-    )
-    args = ap.parse_args(argv)
+def collect_report(framework_root: Path, instance_path: Path, *, pre_upgrade: bool = False, probes: bool = True, contained: bool = False) -> dict:
+    """Collect checks without printing, probing integrations only when requested.
 
-    framework_root = Path(args.framework_root).resolve()
-    instance_path = Path(args.instance_path).resolve()
-
-    report = Report(DEFERRABLE_BEFORE_UPGRADE if args.pre_upgrade else frozenset())
+    A contained reader omits the ancestor-chain size check; its caller must
+    report that gap rather than implying complete CLI doctor coverage.
+    """
+    report = Report(DEFERRABLE_BEFORE_UPGRADE if pre_upgrade else frozenset())
 
     config_path = instance_path / ".eif" / "config.yaml"
     lock_path = instance_path / ".eif" / "framework.lock.yaml"
@@ -680,22 +675,53 @@ def main(argv: list[str] | None = None) -> int:
         report.add("missing managed files", [f"manifested but missing on disk: {p}{missing_hint}" for p in missing[:1]] + [f"manifested but missing on disk: {p}" for p in missing[1:]])
         report.add("unexpected managed files (outside manifest, not README.md/__pycache__)", unexpected)
 
-    report.add("config/adapter/lock/entrypoint consistency", check_consistency(config, lock, instance_path))
+    if not contained:
+        report.add("config/adapter/lock/entrypoint consistency", check_consistency(config, lock, instance_path))
     report.add("migration provenance consistency (adoption.mode vs migration_status)", check_migration_provenance_consistency(config, lock))
-    report.add("size budget (current content vs configured limit)", check_size_budget_drift(config, lock, instance_path))
+    if not contained:
+        report.add("size budget (current content vs configured limit)", check_size_budget_drift(config, lock, instance_path))
 
     provenance_notes = check_provenance(lock)
-    if provenance_notes:
-        print("note: provenance")
-        for n in provenance_notes:
-            print(f"  - {n}")
 
     entrypoint = (lock.get("adapter") or {}).get("entrypoint", "CLAUDE.md") if lock else "CLAUDE.md"
     report.add(f"marker integrity ({entrypoint}, .gitignore, .gitattributes)", check_markers(instance_path, entrypoint))
     report.add("config/generated-block drift (adoption.mode, knowledge paths)", check_config_block_drift(config, instance_path, entrypoint))
     report.add("knowledge index drift (ownership marker, hash)", check_knowledge_index_drift(instance_path, lock))
-    report.add("agent skill discovery (selected source vs generated loader)", check_skill_loader_drift(config, instance_path))
-    integration_results = evaluate_integrations(config, framework_root, instance_path)
+    if not contained:
+        report.add("agent skill discovery (selected source vs generated loader)", check_skill_loader_drift(config, instance_path))
+    integration_results = evaluate_integrations(config, framework_root, instance_path) if probes else []
+    report.add("optional integration result schema", validate_health_results(integration_results, framework_root))
+    report.add("optional integrations (behavioral health and failure policy)", integration_problems(config, integration_results))
+    return {"report": report, "provenance_notes": provenance_notes, "integration_results": integration_results}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--framework-root", required=True, help="Where core/schemas/ lives (the framework checkout, or this instance's own .eif/runtime bundle)")
+    ap.add_argument("--instance-path", default=".", help="Instance root to verify. Default: current directory.")
+    ap.add_argument("--integration-report", default=None, help="Optional path for a machine-readable integration health report.")
+    ap.add_argument(
+        "--pre-upgrade",
+        action="store_true",
+        help=(
+            "Report drift that the managed-state refresh regenerates as a note "
+            "instead of a failure. For the pre-flight run inside `eifctl "
+            "upgrade` only - the post-upgrade run checks everything."
+        ),
+    )
+    args = ap.parse_args(argv)
+
+    framework_root = Path(args.framework_root).resolve()
+    instance_path = Path(args.instance_path).resolve()
+
+    collected = collect_report(framework_root, instance_path, pre_upgrade=args.pre_upgrade)
+    report = collected["report"]
+    provenance_notes = collected["provenance_notes"]
+    integration_results = collected["integration_results"]
+    if provenance_notes:
+        print("note: provenance")
+        for n in provenance_notes:
+            print(f"  - {n}")
     for result in integration_results:
         print(
             f"note: integration {result['integration']} provider={result['provider']!r} "
@@ -704,8 +730,6 @@ def main(argv: list[str] | None = None) -> int:
         for capability in result["capabilities"]:
             if capability["status"] != "pass":
                 print(f"  - {capability['id']}: {capability['status']} ({capability['evidence']['summary']})")
-    report.add("optional integration result schema", validate_health_results(integration_results, framework_root))
-    report.add("optional integrations (behavioral health and failure policy)", integration_problems(config, integration_results))
     if args.integration_report:
         report_path = Path(args.integration_report).resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)

@@ -47,6 +47,8 @@ SUITES = [
     "test_service_delivery.py",
     "test_eif_mcp_inmemory.py",
     "test_eif_mcp_stdio.py",
+    "test_eif_mcp_git.py",
+    "test_checkout_export.py",
     "test_eif_mcp_compact.py",
     "test_eif_mcp_contracts.py",
     "test_eif_mcp_eval.py",

@@ -109,7 +109,15 @@ argument values. Logs go only to stderr and contain time, request ID, tool,
 status, duration and response bytes. They do not contain argument values or
 document text. No network listener, arbitrary command, SQL, generic file read
 or file write is exposed. Resume audit uses only fixed Git commands with
-optional locks and fsmonitor disabled, and refuses inherited/worktree Git roots.
+optional locks, fsmonitor, hooks, paging and lazy object fetching disabled.
+Before its first Git command it walks at most 20,000 Git metadata entries
+without following links, refusing linked or shared metadata, worktree/common
+directories and alternate object stores. It then queries local configuration
+without expanding includes and refuses includes, clean/smudge/process filters,
+partial-clone settings and configured worktree/attribute/exclusion paths.
+Unsupported repositories return `source_unavailable` with a direct
+`eifctl session resume-audit` fallback; the direct CLI keeps its full local
+behavior. Ordinary self-contained repositories remain supported.
 
 ## Deferred writes and evaluation
 

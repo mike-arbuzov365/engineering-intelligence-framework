@@ -12,6 +12,7 @@ from ..commands import delivery, doctor, init_cmd, session
 from ..resources import framework_root
 from ..workspace_materialization import verify_workspace_materialization
 from .artifacts import artifact_get
+from .git_safety import preflight as git_preflight
 from .instance import Instance, Result, ServiceError, identifier
 from .packets import packet_status
 
@@ -110,19 +111,7 @@ def session_resume_audit(instance: Instance, session_id: str) -> Result:
     if not path.is_file():
         raise ServiceError("not_found", "The session identifier is not present.")
     _session_sources(instance, path)
-    # Reject an inherited parent repository and any external Git indirection
-    # before the legacy fixed-command snapshot can inspect its metadata.
-    git_dir = instance.root / ".git"
-    if not git_dir.is_dir() or git_dir.resolve() != git_dir or git_dir.is_symlink():
-        raise ServiceError("source_unavailable", "A self-contained local Git repository is required for resume audit.")
-    # Containment of Git's own config is checked by path metadata only; its
-    # contents are accessed through a fixed Git command, never a file reader.
-    config = git_dir / "config"
-    if not config.resolve().is_relative_to(git_dir):
-        raise ServiceError("source_unavailable", "Git configuration leaves the selected instance.")
-    included = session._run_git(instance.root, ["config", "--no-includes", "--local", "--get-regexp", r"^include(if\..*)?\.path$"], bounded=True)
-    if included.returncode != 1:
-        raise ServiceError("source_unavailable", "Git includes or unreadable Git configuration require a direct local audit.")
+    git_preflight(instance.root)
     data, mismatches = session.audit_checkpoint(path, instance.root, bound_project=True)
     return {"status": "partial" if mismatches else "ok", "data": {"verdict": "fail" if mismatches else "pass", "mismatches": [{"category": key, "expected": str(expected)[:240], "actual": "checkpoint validation failed" if key == "schema" else str(actual)[:240]} for key, expected, actual in mismatches], "next_action": (data or {}).get("next_action")}}
 

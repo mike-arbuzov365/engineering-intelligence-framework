@@ -55,15 +55,15 @@ directory is refused so EIF can move a fully verified staging tree into place
 atomically:
 
 ```bash
-eifctl workspace new ../eif-control --adapter codex --locale uk
-eifctl workspace doctor --workspace-path ../eif-control
+eifctl workspace new ../workspace-control --adapter codex --locale uk
+eifctl workspace doctor --workspace-path ../workspace-control
 ```
 
 Create a new local project repository and connect it to that workspace:
 
 ```bash
 eifctl new ../my-project --adapter codex --locale uk \
-  --registry ../eif-control/.eif/projects.yaml
+  --registry ../workspace-control/.eif/projects.yaml
 eifctl doctor --instance-path ../my-project
 ```
 
@@ -75,8 +75,8 @@ first fleet run:
 eifctl init ../existing-project --adapter codex
 eifctl doctor --instance-path ../existing-project
 eifctl projects add ../existing-project \
-  --registry ../eif-control/.eif/projects.yaml
-git -C ../eif-control add -A && git -C ../eif-control commit -m "Register existing-project"
+  --registry ../workspace-control/.eif/projects.yaml
+git -C ../workspace-control add -A && git -C ../workspace-control commit -m "Register existing-project"
 ```
 
 Use `claude-code`, `cursor`, `codex`, or `hermes` for `--adapter`. The

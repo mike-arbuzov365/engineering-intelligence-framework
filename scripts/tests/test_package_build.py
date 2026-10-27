@@ -129,7 +129,7 @@ def clean_checkout_export(framework_root: Path, dest_dir: Path) -> None:
     tar_path.unlink()
     if patch:
         applied = subprocess.run(
-            ["git", "-C", str(dest_dir), "apply", "--binary", "--whitespace=nowarn", "-"],
+            ["git", "-C", str(dest_dir), "-c", "core.autocrlf=false", "-c", "core.eol=lf", "apply", "--binary", "--whitespace=nowarn", "-"],
             input=patch, capture_output=True,
         )
         if applied.returncode:

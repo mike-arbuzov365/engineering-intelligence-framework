@@ -1,0 +1,35 @@
+{
+  "G1": {
+    "verdict": "PASS",
+    "inventory": {
+      "suites_passed": 52,
+      "suites_total": 52,
+      "checks_passed": 2031,
+      "checks_total": 2031,
+      "checks_total_status": "exact",
+      "unknown_suites": [],
+      "mismatched_suites": []
+    },
+    "additional_suite": "test_service_delivery.py 4/4; added to canonical inventory for final closeout",
+    "reader_tools_list_bytes": 4167,
+    "reader_catalog_budget_bytes": 6144,
+    "open_P0_P1": 0,
+    "review": "JEV requested manual review; strict schema assertions, independent boundary inspection and negative SDK regressions resolved the review items."
+  },
+  "G1c": {
+    "verdict": "PASS candidate only",
+    "compact_entrypoint": "INFERRED budget2400 until SESSION-007",
+    "required_reduction_percent": 15,
+    "measurement": "precompact.json"
+  },
+  "G2": {
+    "verdict": "NOT PASSED",
+    "reason": "O-6 = 0; no human-visible host elicitation canary",
+    "deferred": "deferred-to-EIF-022b"
+  },
+  "branch": "B",
+  "expected_final_status": "implementation-complete-integration-deferred",
+  "eval": "Expected answers10/10 by deterministic SDK program; model evaluation NOT RUN",
+  "behavioral_comparison": "DEFERRED",
+  "model_canary_turns": 0
+}

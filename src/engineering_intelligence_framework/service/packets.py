@@ -46,7 +46,7 @@ def packet_status(instance: Instance, packet: str | None = None) -> Result:
             dependencies = ["invalid-dependency"]
         checkpoint = data.get("session_context")
         has_checkpoint = bool(checkpoint and instance.safe(str(checkpoint)).is_file())
-        sessions.append({"id": sid, "status": raw_status if raw_status in STATUSES else "legacy", "raw_status": raw_status, "depends_on": dependencies, "checkpoint": has_checkpoint})
+        sessions.append({"id": sid, "status": raw_status if isinstance(raw_status, str) and raw_status in STATUSES else "legacy", "raw_status": raw_status, "depends_on": dependencies, "checkpoint": has_checkpoint})
     roadmaps = sorted(folder.glob("04-ROADMAP*.md"))
     order = []
     if len(roadmaps) == 1:

@@ -33,6 +33,7 @@ Usage:
 from __future__ import annotations
 
 import os
+import datetime as dt
 import subprocess
 import sys
 import tempfile
@@ -392,8 +393,8 @@ def main() -> int:
             "      rationale: >-\n"
             "        TypeScript interface method signature for an OS-keychain\n"
             "        module - a type declaration, not an assigned secret value.\n"
-            "      reviewed: \"2026-07-15\"\n"
-            "      expires: \"2026-10-15\"\n",
+            f"      reviewed: \"{dt.date.today().isoformat()}\"\n"
+            f"      expires: \"{(dt.date.today() + dt.timedelta(days=90)).isoformat()}\"\n",
             encoding="utf-8",
         )
         priv = run([str(SCRIPTS / "eif_privacy_scan.py"), "--repo", str(inst3), "--json"])

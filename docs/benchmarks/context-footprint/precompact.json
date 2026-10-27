@@ -1,0 +1,331 @@
+{
+  "method": {
+    "kind": "static-mcp-startup-bytes",
+    "serialization": "compact SDK aliases, exclude_none, UTF-8; entire tools/list; CallToolResult includes text and structured copies; outline discovery and all section pages counted",
+    "section_selection": "frozen relevant startup sections selected before measuring bytes; not all reads of an entire task",
+    "compact_block": "INFERRED 2400-byte budget until generator verification",
+    "quality": "NOT RUN; no model calls or token-savings conclusion",
+    "source_ref": "SESSION-005 working tree based on 066e219",
+    "source_tree_sha256": "bafbc0989819c156d4064ab93a5fc69a583b74077e313d2315303aa226e2e501"
+  },
+  "adapters": [
+    {
+      "adapter": "claude-code",
+      "entrypoint_bytes": 6704,
+      "entrypoint_mode": "legacy",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "INFERRED budget; actual generator required in SESSION-007",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 11931,
+          "actual_reader_bytes": 15632,
+          "actual_difference_bytes": 3701,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 5.054,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "packet_plan": {
+          "before_bytes": 27095,
+          "actual_reader_bytes": 25065,
+          "actual_difference_bytes": -2030,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 23.377,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 27881,
+          "actual_reader_bytes": 23771,
+          "actual_difference_bytes": -4110,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.178,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    },
+    {
+      "adapter": "codex",
+      "entrypoint_bytes": 6704,
+      "entrypoint_mode": "legacy",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "INFERRED budget; actual generator required in SESSION-007",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 11925,
+          "actual_reader_bytes": 15632,
+          "actual_difference_bytes": 3707,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 5.006,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "packet_plan": {
+          "before_bytes": 27089,
+          "actual_reader_bytes": 25065,
+          "actual_difference_bytes": -2024,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 23.36,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 27875,
+          "actual_reader_bytes": 23771,
+          "actual_difference_bytes": -4104,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.163,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    },
+    {
+      "adapter": "cursor",
+      "entrypoint_bytes": 6953,
+      "entrypoint_mode": "legacy",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "INFERRED budget; actual generator required in SESSION-007",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 12221,
+          "actual_reader_bytes": 15881,
+          "actual_difference_bytes": 3660,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 7.307,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "packet_plan": {
+          "before_bytes": 27385,
+          "actual_reader_bytes": 25314,
+          "actual_difference_bytes": -2071,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 24.188,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 28171,
+          "actual_reader_bytes": 24020,
+          "actual_difference_bytes": -4151,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.897,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    },
+    {
+      "adapter": "hermes",
+      "entrypoint_bytes": 6705,
+      "entrypoint_mode": "legacy",
+      "candidate_entrypoint_bytes": 2400,
+      "candidate_entrypoint_evidence": "INFERRED budget; actual generator required in SESSION-007",
+      "skill_frontmatter_bytes": 3735,
+      "tools_list_bytes": 4167,
+      "scenarios": {
+        "light": {
+          "before_bytes": 11929,
+          "actual_reader_bytes": 15633,
+          "actual_difference_bytes": 3704,
+          "candidate_bytes": 11328,
+          "candidate_reduction_percent": 5.038,
+          "brief_bytes": 1026,
+          "outline_bytes": 0,
+          "section_reads": [],
+          "response_bytes": 1026
+        },
+        "packet_plan": {
+          "before_bytes": 27093,
+          "actual_reader_bytes": 25066,
+          "actual_difference_bytes": -2027,
+          "candidate_bytes": 20761,
+          "candidate_reduction_percent": 23.371,
+          "brief_bytes": 2266,
+          "outline_bytes": 1862,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "workflow",
+              "pages": 1,
+              "response_bytes": 3795,
+              "text_chars": 1429
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-planning",
+              "section": "when-a-packet-is-needed",
+              "pages": 1,
+              "response_bytes": 2536,
+              "text_chars": 805
+            }
+          ],
+          "response_bytes": 10459
+        },
+        "packet_run": {
+          "before_bytes": 27879,
+          "actual_reader_bytes": 23772,
+          "actual_difference_bytes": -4107,
+          "candidate_bytes": 19467,
+          "candidate_reduction_percent": 30.173,
+          "brief_bytes": 2268,
+          "outline_bytes": 2576,
+          "section_reads": [
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-1---enter-via-the-start-file",
+              "pages": 1,
+              "response_bytes": 1386,
+              "text_chars": 234
+            },
+            {
+              "kind": "playbook",
+              "name": "execution-packet-execution",
+              "section": "step-2---execute-sessions-in-roadmap-order",
+              "pages": 1,
+              "response_bytes": 2935,
+              "text_chars": 973
+            }
+          ],
+          "response_bytes": 9165
+        }
+      }
+    }
+  ],
+  "gates": {
+    "G1c_candidate": "PASS",
+    "threshold_percent": 15,
+    "G2": "NOT PASSED: O-6 = 0",
+    "branch": "B"
+  }
+}

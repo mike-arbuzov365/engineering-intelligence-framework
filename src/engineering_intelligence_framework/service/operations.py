@@ -68,7 +68,10 @@ def doctor_report(instance: Instance, detail: bool = False) -> Result:
         sections = collected["report"].sections
         sections.append(("installed package consistency", doctor._check_installed_package_consistency(instance.root, root)))
     sections.append(("workspace materialization", verify_workspace_materialization(instance.root)))
-    checks = [{"name": name, "problems": [str(p)[:240] for p in problems[:5]], "problem_count": len(problems)} for name, problems in sections]
+    # Legacy validator diagnostics may quote values from invalid files. The
+    # transport exposes check names and counts; exact local diagnostics stay
+    # in the direct CLI, where the owner selected that output deliberately.
+    checks = [{"name": name, "problems": ["Check failed; inspect the direct CLI diagnostic." for _ in problems[:5]], "problem_count": len(problems)} for name, problems in sections]
     failed = [row["name"] for row in checks if row["problem_count"]]
     # These checks may inspect ancestors, user-level agent files or execute
     # provider commands. An MCP reader must disclose their omission.
@@ -109,8 +112,17 @@ def session_resume_audit(instance: Instance, session_id: str) -> Result:
     _session_sources(instance, path)
     # Reject an inherited parent repository and any external Git indirection
     # before the legacy fixed-command snapshot can inspect its metadata.
-    if not (instance.root / ".git").is_dir() or (instance.root / ".git").is_symlink():
+    git_dir = instance.root / ".git"
+    if not git_dir.is_dir() or git_dir.resolve() != git_dir or git_dir.is_symlink():
         raise ServiceError("source_unavailable", "A self-contained local Git repository is required for resume audit.")
+    # Containment of Git's own config is checked by path metadata only; its
+    # contents are accessed through a fixed Git command, never a file reader.
+    config = git_dir / "config"
+    if not config.resolve().is_relative_to(git_dir):
+        raise ServiceError("source_unavailable", "Git configuration leaves the selected instance.")
+    included = session._run_git(instance.root, ["config", "--no-includes", "--local", "--get-regexp", r"^include(if\..*)?\.path$"], bounded=True)
+    if included.returncode != 1:
+        raise ServiceError("source_unavailable", "Git includes or unreadable Git configuration require a direct local audit.")
     data, mismatches = session.audit_checkpoint(path, instance.root, bound_project=True)
     return {"status": "partial" if mismatches else "ok", "data": {"verdict": "fail" if mismatches else "pass", "mismatches": [{"category": key, "expected": str(expected)[:240], "actual": "checkpoint validation failed" if key == "schema" else str(actual)[:240]} for key, expected, actual in mismatches], "next_action": (data or {}).get("next_action")}}
 
@@ -146,8 +158,8 @@ def delivery_check(instance: Instance, action: str, scope: str) -> Result:
             instance.safe(ref)
     try:
         delivery.check_delivery(instance.root, action=action, scope=scope)
-    except (delivery.DeliveryGuardError, ValueError) as error:
-        return {"status": "partial", "data": {"verdict": "blocked", "reason": str(error), "enforcement": "machine", "external_shell_enforcement": "instruction_only"}}
+    except (delivery.DeliveryGuardError, ValueError):
+        return {"status": "partial", "data": {"verdict": "blocked", "reason": "Approval or workspace validation blocked the delivery; inspect eifctl delivery check locally.", "enforcement": "machine", "external_shell_enforcement": "instruction_only"}}
     return {"status": "ok", "data": {"verdict": "pass", "enforcement": "machine", "external_shell_enforcement": "instruction_only"}}
 
 

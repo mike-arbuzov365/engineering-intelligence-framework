@@ -93,6 +93,12 @@ class Instance:
         self.config = self.mapping(".eif/config.yaml")
         self.lock = self.mapping(".eif/framework.lock.yaml")
         self.workspace = self.mapping(".eif/workspace.lock.yaml") if self.safe(".eif/workspace.lock.yaml").exists() else {}
+        if self.workspace:
+            from ..workspace_contract import validate_data
+            try:
+                validate_data(self.workspace, "workspace-lock.schema.json", "workspace lock")
+            except ValueError:
+                raise ServiceError("validation_failed", "Workspace lock must pass its EIF schema.") from None
 
     def guard_tree(self, relative: str, *, max_files: int = 5000) -> list[Path]:
         """Preflight existing legacy tree readers without following unsafe links."""

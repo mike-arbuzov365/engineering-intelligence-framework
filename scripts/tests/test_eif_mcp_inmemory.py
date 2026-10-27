@@ -71,6 +71,35 @@ def main() -> int:
                 check("resume audit pass", results["eif_session_resume_audit"]["data"]["verdict"] == "pass")
                 check("doctor partial coverage", results["eif_doctor"]["status"] == "partial")
                 check("design guard unavailable for core", results["eif_delivery_check"]["status"] == "unavailable")
+                from test_service_golden import capture
+                other = root.parent / "other-instance"
+                assert capture(["new", str(other), "--project-name", "synthetic-other", "--adapter", "claude-code"], root.parent)["rc"] == 0
+                knowledge = other / "knowledge"
+                knowledge.mkdir(exist_ok=True)
+                (knowledge / "sentinel.md").write_text("external-only-sentinel", encoding="utf-8")
+                foreign = await client.call_tool("eif_knowledge_search", {"query": "external-only-sentinel"})
+                check("another EIF instance is not searched", not foreign.structured_content["data"]["results"])
+                switched = await client.call_tool("eif_capabilities", {"instance_path": str(other)})
+                check("root cannot be switched by a tool", switched.structured_content["error"]["code"] == "validation_failed")
+                import os
+                old_git_dir = os.environ.get("GIT_DIR")
+                os.environ["GIT_DIR"] = str(other / ".git")
+                try:
+                    bounded = await client.call_tool("eif_session_resume_audit", {"session_id": "demo"})
+                    check("inherited Git root cannot redirect audit", not bounded.is_error and bounded.structured_content["data"]["verdict"] == "pass")
+                finally:
+                    if old_git_dir is None:
+                        os.environ.pop("GIT_DIR", None)
+                    else:
+                        os.environ["GIT_DIR"] = old_git_dir
+                git_config = root / ".git/config"
+                original_config = git_config.read_bytes()
+                git_config.write_bytes(original_config + b'\n[include]\n\tpath = ../../external-config\n')
+                try:
+                    included = await client.call_tool("eif_session_resume_audit", {"session_id": "demo"})
+                    check("Git include refused before snapshot", included.is_error and included.structured_content["error"]["code"] == "source_unavailable" and "external-config" not in included.content[0].text)
+                finally:
+                    git_config.write_bytes(original_config)
                 outline = results["eif_artifact_get"]["data"]["sections"]
                 page = await client.call_tool("eif_artifact_get", {"kind": "skill", "name": "run-execution-packet", "section": outline[0]["slug"], "max_chars": 8})
                 check("explicit pagination", page.structured_content["status"] == "truncated" and bool(page.structured_content.get("next_cursor")))
@@ -97,6 +126,17 @@ def main() -> int:
                     operations.knowledge_search = saved_search
         finally:
             server.close()
+        advertised = create_server(root)
+
+        async def unused_elicitation(*args):
+            raise AssertionError("Reader must never request approval")
+
+        try:
+            async with Client(advertised, mode="legacy", elicitation_callback=unused_elicitation) as client:
+                capability = await client.call_tool("eif_capabilities", {})
+                check("client-advertised elicitation is reported", capability.structured_content["data"]["elicitation"] is True)
+        finally:
+            advertised.close()
         after = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest() for p in root.rglob("*") if p.is_file()}
         check("reader writes no instance files", before == after)
         slow = create_server(root, deadline=0.03)

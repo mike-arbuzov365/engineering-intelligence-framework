@@ -1092,7 +1092,7 @@ behavior on its own - see [Knowledge Delta](#knowledge-delta).
 
 ## Optional instance MCP reader
 
-The experimental [eif-mcp reader](../guides/eif-mcp.md) is a thin stdio adapter
+The experimental [eif-mcp reader](../reference/eif-mcp.md) is a thin stdio adapter
 over installed structured EIF operations, bound to one explicit instance.
 Policy text comes from that instance's pinned runtime; the server reports
 drift without repairing it. It adds no intelligence layer or authority.

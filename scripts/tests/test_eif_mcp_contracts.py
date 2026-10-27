@@ -32,7 +32,7 @@ def main() -> int:
         schema = tool["inputSchema"]
         Draft202012Validator.check_schema(schema)
         check(tool["name"] + " declared safe input", schema["additionalProperties"] is False and not ({"path", "command", "sql", "approved", "confirm", "explicit_user_intent"} & schema["properties"].keys()) and len(tool["description"]) <= 280)
-    guide = (ROOT / "docs/guides/eif-mcp.md").read_text(encoding="utf-8")
+    guide = (ROOT / "docs/reference/eif-mcp.md").read_text(encoding="utf-8")
     check("guide catalog parity", all(tool["name"] in guide for tool in catalog))
     for path, expected in outputs().items():
         actual = path.read_text(encoding="utf-8")

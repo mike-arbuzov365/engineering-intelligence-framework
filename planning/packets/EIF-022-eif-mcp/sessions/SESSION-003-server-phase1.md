@@ -70,13 +70,17 @@ git diff --check
 
 ## Exit criteria
 
-- [ ] Усі 9 інструментів проходять позитивні й негативні in-memory тести (статуси `ok`, `partial`, `unavailable`, `stale`, `unknown`, `truncated`; `not_found`; `validation_failed` на зайвих полях).
-- [ ] Жоден інструмент не приймає шлях; каталог проходить тест проти заборонених імен і полів.
-- [ ] `tools/list` reader ≤ 6 144 байти або порушення записане рішенням.
-- [ ] Старт без кореня, зі зламаним lock і без SDK поводиться за D-002 і D-013; база без extra працює як раніше.
-- [ ] Обробники нічого не пишуть у stdout (перевіряє тест).
-- [ ] Закомічено локально; основна копія репозиторію не змінена.
+- [x] Усі 9 інструментів проходять позитивні й негативні in-memory тести (статуси `ok`, `partial`, `unavailable`, `stale`, `unknown`, `truncated`; `not_found`; `validation_failed` на зайвих полях).
+- [x] Жоден інструмент не приймає шлях; каталог проходить тест проти заборонених імен і полів.
+- [x] `tools/list` reader ≤ 6 144 байти або порушення записане рішенням.
+- [x] Старт без кореня, зі зламаним lock і без SDK поводиться за D-002 і D-013; база без extra працює як раніше.
+- [x] Обробники нічого не пишуть у stdout (перевіряє тест).
+- [x] Закомічено локально; основна копія репозиторію не змінена.
 
 ## Closeout / Knowledge Delta
 
 Записати: виміряний `tools/list` у байтах і на інструмент, будь-яку несподіванку API SDK, відмінність дедлайну від фактичного блокування, і прямо сказати, якщо довговічного уроку немає.
+
+## Execution record
+
+SDK in-memory50/50 at session close, tools/list4167bytes, nine strict read-only operations. Package smoke13/13 was later superseded by S4 isolated package checks after PYTHONPATH leakage was discovered. Timeout keeps one physical worker serialized; it does not terminate an in-flight synchronous read.

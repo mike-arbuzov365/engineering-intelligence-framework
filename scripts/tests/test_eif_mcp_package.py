@@ -64,6 +64,7 @@ def main() -> int:
         project = root / "project space β"
         created = run([str(eifctl), "new", str(project), "--project-name", "synthetic-wheel", "--adapter", "codex"], cwd=root, timeout_s=60)
         check("installed instance creation", created.returncode == 0, created.stdout + created.stderr)
+        check("installed runtime has canonical MCP guide", (project / ".eif/runtime/docs/reference/eif-mcp.md").is_file())
         probe = run([str(eifctl), "mcp", "serve", "--instance-path", str(project), "--self-test"], cwd=root, timeout_s=60)
         value = json.loads(probe.stdout) if probe.returncode == 0 else {}
         check("installed SDK stdio self-test with matching drift", probe.returncode == 0 and value.get("status") == "ok" and value.get("tools") == 9, probe.stdout + probe.stderr)

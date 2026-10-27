@@ -69,12 +69,16 @@ git diff --check
 
 ## Exit criteria
 
-- [ ] Скрипт у `scripts/` детермінований, тест проходить, запис у `run_all.py`.
-- [ ] B0 закомічено зі SHA джерела; різниця до 2026-10-26 записана (або "немає різниці").
-- [ ] `pip check` чистий; версія SDK закріплена; поверхня API (annotations, structured output, stdio, elicitation) підтверджена пробою або відхилення записане рішенням.
-- [ ] Бюджети D-006 і D-017 підтверджені або замінені новим рішенням із доказом.
-- [ ] Privacy, links, sync, `git diff --check` чисті; закомічено локально; основну копію репозиторію не змінено.
+- [x] Скрипт у `scripts/` детермінований, тест проходить, запис у `run_all.py`.
+- [x] B0 закомічено зі SHA джерела; різниця до 2026-10-26 записана (або "немає різниці").
+- [x] `pip check` чистий; версія SDK закріплена; поверхня API (annotations, structured output, stdio, elicitation) підтверджена пробою або відхилення записане рішенням.
+- [x] Бюджети D-006 і D-017 підтверджені або замінені новим рішенням із доказом.
+- [x] Privacy, links, sync, `git diff --check` чисті; закомічено локально; основну копію репозиторію не змінено.
 
 ## Closeout / Knowledge Delta
 
 Записати: фактичну версію SDK і її API-поверхню, виміряний розмір `tools/list` на інструмент у пробі, чи реліз 0.2.9 змінив B0, і прямо сказати, якщо довговічного уроку немає.
+
+## Execution record
+
+Footprint test 6/6; SDK 2.1.1 in a clean Python 3.11.15 environment; pip check and memory/stdio roundtrips PASS (212 bytes for the single probe tool). No Python 3.12 installation. The B0 root normalization changes light by -78/-72/-73/-73 bytes against planning. Exact PSF classifier compatibility was pulled forward from S4; license policy unchanged.

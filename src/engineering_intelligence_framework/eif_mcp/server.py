@@ -81,9 +81,10 @@ class ReaderServer(MCPServer):
             result = operations.delivery_check(self.instance, **arguments)
         state = operations.drift(self.instance)
         result["data"].setdefault("drift", state)
-        if state != "match" and result["status"] in {"ok", "partial"}:
-            result["status"] = "stale" if state == "mismatch" else ("unknown" if result["status"] == "ok" else "partial")
-            result["next_action"] = "Install the package version pinned by the instance or run eifctl upgrade --instance-path ."
+        if state != "match":
+            if result["status"] in {"ok", "partial"}:
+                result["status"] = "stale" if state == "mismatch" else ("unknown" if result["status"] == "ok" else "partial")
+            result.setdefault("next_action", "Install the package version pinned by the instance or run eifctl upgrade --instance-path .")
         return result
 
     def _sanitize(self, value: Any) -> Any:
@@ -111,7 +112,7 @@ class ReaderServer(MCPServer):
             elicitation = False
             if context is not None:
                 try:
-                    caps = context.request_context.session.client_params.capabilities
+                    caps = context.request_context.session.client_capabilities
                     elicitation = caps.elicitation is not None
                 except (AttributeError, RuntimeError, ValueError):
                     pass

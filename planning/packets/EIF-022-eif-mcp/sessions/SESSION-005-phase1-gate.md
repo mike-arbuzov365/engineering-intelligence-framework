@@ -2,7 +2,7 @@
 id: SESSION-005
 logical_session: SESSION-005
 type: session-launch
-status: prepared
+status: completed
 source_artifact: ../04-ROADMAP-022-eif-mcp.md
 session_context: .session-context/eif-022-session-005.md
 continuation_mode: same_chat
@@ -64,13 +64,24 @@ git diff --check
 
 ## Exit criteria
 
-- [ ] Вердикт G1 записаний (команди, числа). Якщо не пройдено після трьох ітерацій, обрано гілку C і повернено звіт з відкритими питаннями.
-- [ ] Вердикт G1c записаний із числами "до" (B0) і "після" та обліком найгіршого випадку; регрес `light` названо.
-- [ ] Вердикт G2 записаний (доказ elicitation або `NOT RUN`/не пройдено з причиною).
-- [ ] Статус кожного клієнта один із `verified`, `configured-not-verified`, `not-available` з версією клієнта.
-- [ ] Гілку (A, B, C) обрано й записано; інструкція наступної сесії відповідає гілці.
-- [ ] Санітовані журнали не містять шляхів машини, секретів, приватних даних; privacy-скан чистий; закомічено локально.
+- [x] Вердикт G1 записаний (команди, числа). Якщо не пройдено після трьох ітерацій, обрано гілку C і повернено звіт з відкритими питаннями.
+- [x] Вердикт G1c записаний із числами "до" (B0) і "після" та обліком найгіршого випадку; регрес `light` названо.
+- [x] Вердикт G2 записаний (доказ elicitation або `NOT RUN`/не пройдено з причиною).
+- [x] Статус кожного клієнта один із `verified`, `configured-not-verified`, `not-available` з версією клієнта.
+- [x] Гілку (A, B, C) обрано й записано; інструкція наступної сесії відповідає гілці.
+- [x] Санітовані журнали не містять шляхів машини, секретів, приватних даних; privacy-скан чистий; закомічено локально.
 
 ## Closeout / Knowledge Delta
 
 Записати: чи хост відкладає схеми інструментів (O-3) і як це спостережено, реальну підтримку elicitation по клієнтах, виміряну різницю "до і після", і чесний висновок, чи підтверджена гіпотеза про секційні читання. Якщо ні, сказати прямо.
+
+## Execution record
+
+G1 PASS: 52/52 suites, 2031/2031 checks; the newly registered structured
+design-guard suite passes 4/4 independently. Core41/41, in-memory55/55,
+stdio27/27, original CLI goldens26/26. Before/after reproduction3/3 confirms
+Git-include rejection, non-string status handling and diagnostic redaction.
+G1c candidate PASS with the 2400-byte entrypoint budget; protocol measurements
+including outline discovery repeat byte-for-byte. G2 NOT PASSED: O-6=0.
+Branch B; SESSION-006 and render work defer to EIF-022b. Client versions and
+NOT RUN statuses are in docs/benchmarks/eif-mcp-canary/clients.json.

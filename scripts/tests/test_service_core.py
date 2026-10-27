@@ -43,10 +43,18 @@ def main() -> int:
         instance = Instance(root)
         check("identity", capabilities(instance)["data"]["instance"]["id"].startswith("synthetic-service-"))
         check("bounded doctor discloses omitted checks", doctor_report(instance)["status"] == "partial" and bool(doctor_report(instance)["data"]["skipped_checks"]))
+        config_path = root / ".eif/config.yaml"
+        valid_config = config_path.read_bytes()
+        config_path.write_text(valid_config.decode("utf-8").replace("schema_version: 1", "schema_version: synthetic-invalid-scalar"), encoding="utf-8")
+        try:
+            check("doctor errors never echo invalid config values", "synthetic-invalid-scalar" not in json.dumps(doctor_report(instance, True)))
+        finally:
+            config_path.write_bytes(valid_config)
         check("no applicable design guard", delivery_check(instance, "package", "demo")["status"] == "unavailable")
         kinds = json.loads((ROOT / "src/engineering_intelligence_framework/service/task_kinds.json").read_text(encoding="utf-8"))
         check("ten explicit task kinds", len(kinds) == 10)
         check("task routes exist in package", all(name is None or (ROOT / f"skills/{name}/SKILL.md").is_file() for name in kinds.values()))
+        check("canonical MCP guide is pinned locally", (root / ".eif/runtime/docs/reference/eif-mcp.md").is_file())
         check("light has no skill", brief(instance, "light")["data"]["route"] is None)
         check("packet route uses manifest", brief(instance, "packet_run")["data"]["route"]["skill"] == "run-execution-packet")
         error("unknown kind", lambda: brief(instance, "invented"), "validation_failed")
@@ -93,6 +101,8 @@ def main() -> int:
         check("next session follows roadmap", packet_status(instance, "demo")["data"]["next_session"] == "SESSION-002")
         first.write_text(first.read_text(encoding="utf-8").replace("completed", "prepared-awaiting-owner-approval"), encoding="utf-8")
         check("legacy never completion", packet_status(instance, "demo")["status"] == "partial" and packet_status(instance, "demo")["data"]["next_session"] is None)
+        first.write_text("---\nid: SESSION-001\nstatus: [prepared]\ndepends_on: []\n---\n", encoding="utf-8")
+        check("malformed status remains legacy", packet_status(instance, "demo")["data"]["reason"] == "legacy_or_missing_status")
         first.write_text("---\nid: SESSION-001\nstatus: prepared\ndepends_on: [SESSION-002]\n---\n", encoding="utf-8")
         check("cycle partial", packet_status(instance, "demo")["data"]["reason"] == "invalid_or_cyclic_dependencies")
         extra = packet / "sessions/SESSION-003-extra.md"
@@ -129,6 +139,11 @@ def main() -> int:
         with contextlib.redirect_stdout(io.StringIO()) as out:
             artifact_get(instance, "skill", "run-execution-packet")
         check("structured functions are silent", out.getvalue() == "")
+        workspace_lock = root / ".eif/workspace.lock.yaml"
+        workspace_lock.write_text("workspace: wrong\n", encoding="utf-8")
+        error("invalid optional workspace lock rejected", lambda: instance.refresh(), "validation_failed")
+        workspace_lock.unlink()
+        instance.refresh()
     print(f"EIF-RESULT: passed={sum(checks)} total={len(checks)}")
     return 0 if all(checks) else 1
 

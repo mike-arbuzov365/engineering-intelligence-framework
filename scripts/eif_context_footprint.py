@@ -15,6 +15,8 @@ with PYTHONPATH pointing at src/.
 from __future__ import annotations
 
 import argparse
+import asyncio
+import hashlib
 import json
 import math
 import os
@@ -153,11 +155,38 @@ def byte_counts(value: object, key: str = "") -> object:
     return value
 
 
+def mcp_measurement(eifctl: list[str], root: Path, baseline: dict) -> dict:
+    source = Path(__file__).resolve().parents[1] / "src"
+    if source.is_dir():
+        sys.path.insert(0, str(source))
+    from engineering_intelligence_framework.eif_mcp.measurement import measure_responses
+
+    measurements = []
+    for adapter in ADAPTERS:
+        current = measure_instance(eifctl, root, adapter, 0)
+        project = root / f"inst-{adapter}"
+        protocol = asyncio.run(measure_responses(project))
+        original = next(a for a in baseline["adapters"] if a["adapter"] == adapter)
+        entry = current["tier_a_always_loaded"]["entrypoint"]["bytes"]
+        loaders = current["tier_a_always_loaded"]["skill_loaders"]["frontmatter_only"]["bytes"]
+        scenarios = {}
+        for name, sample in protocol["scenarios"].items():
+            before = original["scenarios"][name]["bytes"]
+            extra = loaders + protocol["tools_list_bytes"] + sample["response_bytes"]
+            actual = entry + extra
+            candidate = 2400 + extra
+            scenarios[name] = {"before_bytes": before, "actual_reader_bytes": actual, "actual_difference_bytes": actual - before, "candidate_bytes": candidate, "candidate_reduction_percent": round((before - candidate) * 100 / before, 3), **sample}
+        measurements.append({"adapter": adapter, "entrypoint_bytes": entry, "entrypoint_mode": "legacy", "candidate_entrypoint_bytes": 2400, "candidate_entrypoint_evidence": "INFERRED budget; actual generator required in SESSION-007", "skill_frontmatter_bytes": loaders, "tools_list_bytes": protocol["tools_list_bytes"], "scenarios": scenarios})
+    gate = all(a["scenarios"][name]["candidate_bytes"] * 100 <= a["scenarios"][name]["before_bytes"] * 85 for a in measurements for name in ("packet_plan", "packet_run"))
+    return {"method": {"kind": "static-mcp-startup-bytes", "serialization": "compact SDK aliases, exclude_none, UTF-8; entire tools/list; CallToolResult includes text and structured copies; outline discovery and all section pages counted", "section_selection": "frozen relevant startup sections selected before measuring bytes; not all reads of an entire task", "compact_block": "INFERRED 2400-byte budget until generator verification", "quality": "NOT RUN; no model calls or token-savings conclusion"}, "adapters": measurements, "gates": {"G1c_candidate": "PASS" if gate else "FAIL", "threshold_percent": 15, "G2": "NOT PASSED: O-6 = 0", "branch": "B"}}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--eifctl", default=None)
     parser.add_argument("--no-latency", action="store_true", help="Deterministic mode; no timing is collected.")
     parser.add_argument("--check", type=Path, help="Compare byte counts with a recorded measurement.")
+    parser.add_argument("--mcp-after", action="store_true", help="Measure a synthetic MCP reader through the real in-memory SDK.")
     parser.add_argument("--out")
     parser.add_argument("--source-ref", default="unspecified", help="Free-text note: where this eifctl came from.")
     args = parser.parse_args()
@@ -165,7 +194,24 @@ def main() -> int:
 
     rc, version, _ = run([*eifctl, "version"])
     with tempfile.TemporaryDirectory(prefix="eif-baseline-") as tmp:
-        result = {
+        if args.mcp_after:
+            baseline_path = Path(__file__).resolve().parents[1] / "docs/benchmarks/context-footprint/baseline.json"
+            try:
+                result = mcp_measurement(eifctl, Path(tmp), json.loads(baseline_path.read_text(encoding="utf-8")))
+            except ImportError:
+                print("MCP measurement requires the optional mcp extra", file=sys.stderr)
+                return 2
+            result["method"]["source_ref"] = args.source_ref
+            source = Path(__file__).resolve().parents[1] / "src/engineering_intelligence_framework"
+            digest = hashlib.sha256()
+            for path in sorted(source.rglob("*")):
+                if path.is_file() and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"}:
+                    digest.update(path.relative_to(source).as_posix().encode("utf-8"))
+                    digest.update(b"\0")
+                    digest.update(path.read_bytes())
+            result["method"]["source_tree_sha256"] = digest.hexdigest()
+        else:
+            result = {
             "method": {
                 "token_estimate": "ceil(bytes / 4); an approximation, not a tokenizer count",
                 "eifctl_version": version.decode("utf-8", "replace").strip().splitlines()[-1],
@@ -179,10 +225,10 @@ def main() -> int:
                 "walk_limits": "one hop of relative .md links from the runtime skill source; deeper reads not counted",
             },
             "adapters": [measure_instance(eifctl, Path(tmp), adapter, 0) for adapter in ADAPTERS],
-        }
+            }
     text = json.dumps(result, indent=2, ensure_ascii=False)
     if args.out:
-        Path(args.out).write_text(text + "\n", encoding="utf-8")
+        Path(args.out).write_text(text + "\n", encoding="utf-8", newline="\n")
     if args.check:
         expected = json.loads(args.check.read_text(encoding="utf-8"))
         if byte_counts(expected) != byte_counts(result):

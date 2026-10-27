@@ -71,14 +71,18 @@ git diff --check
 
 ## Exit criteria
 
-- [ ] Stdio-харнес зелений, включно з усією негативною матрицею.
-- [ ] Wheel з extra експонує `eifctl mcp serve`; wheel без extra працює як раніше, `mcp serve` дає код 2 і підказку.
-- [ ] Ліцензійний контур extra чистий; `sync --check`, links, frontmatter, privacy чисті.
-- [ ] Шаблони конфігурації проходять тест дрейфу й мають `installed: false`.
-- [ ] 10 eval-питань мають перевірені відповіді та явний статус `NOT RUN`.
-- [ ] Документація не містить тверджень про економію токенів чи enforcement без доказу.
-- [ ] Закомічено локально.
+- [x] Stdio-харнес зелений, включно з усією негативною матрицею.
+- [x] Wheel з extra експонує `eifctl mcp serve`; wheel без extra працює як раніше, `mcp serve` дає код 2 і підказку.
+- [x] Ліцензійний контур extra чистий; `sync --check`, links, frontmatter, privacy чисті.
+- [x] Шаблони конфігурації проходять тест дрейфу й мають `installed: false`.
+- [x] 10 eval-питань мають перевірені відповіді та явний статус `NOT RUN`.
+- [x] Документація не містить тверджень про економію токенів чи enforcement без доказу.
+- [x] Закомічено локально.
 
 ## Closeout / Knowledge Delta
 
 Записати: що стояло на шляху пакування extra, формат конфігурації Hermes (або що він не підтверджений), які формулювання "EIF не говорить MCP" довелось уточнити, і прямо сказати, якщо довговічного уроку немає.
+
+## Execution record
+
+Stdio27/27; isolated extra/base wheel12/12; exhaustive package79/79; isolated package smoke13/13; contracts29/29; expected answers10/10 without a model. License contour41runtime components, Python3.11 clean environment PASS. Hermes0.21.3 format is YAML/mcp_servers. Client canaries NOT RUN. No writer config entry is executable.

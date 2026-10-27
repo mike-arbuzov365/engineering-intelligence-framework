@@ -210,12 +210,17 @@ def _run_git(project_root: Path, args: list[str], *, bounded: bool = False) -> s
     prefix = ["--no-optional-locks", "--git-dir", str(project_root / ".git"), "--work-tree", str(project_root), "-c", "core.fsmonitor=false", "-c", "core.untrackedCache=false"] if bounded else []
     if bounded and args and args[0] == "status":
         args = [*args, "--ignore-submodules=all"]
+    env = None
+    if bounded:
+        env = {key: value for key, value in os.environ.items() if not key.upper().startswith("GIT_")}
+        env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT="0")
     return subprocess.run(
         ["git", *prefix, *args],
         cwd=project_root,
         capture_output=True,
         check=False,
         timeout=15 if bounded else None,
+        env=env,
     )
 
 

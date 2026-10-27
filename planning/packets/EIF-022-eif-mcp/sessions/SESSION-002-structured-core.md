@@ -73,13 +73,17 @@ python scripts/eif_check_links.py
 
 ## Exit criteria
 
-- [ ] Вивід наявних CLI-команд побайтово незмінний (golden зелений).
-- [ ] Усі service-функції D-005/D-009 повертають типізовані dict; нова логіка не друкує в stdout.
-- [ ] `capabilities`, `brief`, `artifact_get`, `packet_status` мають позитивні й негативні тести (невідомий артефакт, невідповідність хеша, шляхові атаки, symlink, відсутній runtime, `legacy`-статуси, цикл `depends_on`, обрізання).
-- [ ] Тест дрейфу `task_kinds.json` проти skills установленого пакета проходить.
-- [ ] Словник D-008 застосовано в трьох артефактах, мовні дзеркала та sync чисті.
-- [ ] У коді немає імпорту `mcp`; `sync_package_sources.py --check` чистий; закомічено локально.
+- [x] Вивід наявних CLI-команд побайтово незмінний (golden зелений).
+- [x] Усі service-функції D-005/D-009 повертають типізовані dict; нова логіка не друкує в stdout.
+- [x] `capabilities`, `brief`, `artifact_get`, `packet_status` мають позитивні й негативні тести (невідомий артефакт, невідповідність хеша, шляхові атаки, symlink, відсутній runtime, `legacy`-статуси, цикл `depends_on`, обрізання).
+- [x] Тест дрейфу `task_kinds.json` проти skills установленого пакета проходить.
+- [x] Словник D-008 застосовано в трьох артефактах, мовні дзеркала та sync чисті.
+- [x] У коді немає імпорту `mcp`; `sync_package_sources.py --check` чистий; закомічено локально.
 
 ## Closeout / Knowledge Delta
 
 Записати: список витягнутих функцій із їхніми сигнатурами (вхід для SESSION-003), будь-яку розбіжність між CLI-виводом і структурою, що знайшлась під час рефакторингу, та чи словник D-008 вимагає пропозиції `provisional` рішення.
+
+## Execution record
+
+Original a31a461 CLI implementations captured 26 normalized stdout/stderr/exit-code cases; all 26 match after extraction. Service core initially36/36, existing8suites374/374. Public service operations are in service/operations.py; checkpoint_plan/checkpoint_apply and validate_checkpoint/audit_checkpoint are in commands/session.py. D-021 records bounded doctor coverage.

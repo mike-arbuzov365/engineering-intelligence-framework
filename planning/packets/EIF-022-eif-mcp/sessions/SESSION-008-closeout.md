@@ -2,7 +2,7 @@
 id: SESSION-008
 logical_session: SESSION-008
 type: session-launch
-status: prepared
+status: completed
 source_artifact: ../04-ROADMAP-022-eif-mcp.md
 session_context: .session-context/eif-022-session-008.md
 continuation_mode: same_chat
@@ -65,13 +65,23 @@ not needed - завершальна перевірка без ітеративн
 
 ## Exit criteria
 
-- [ ] `07-CLOSEOUT-022-eif-mcp.md` заповнено: план проти факту по сесіях, таблиця команд PASS/FAIL, `deferred` із причинами, дії власника.
-- [ ] Фінальний статус чесний: `completed-local`, або `implementation-complete-integration-deferred` (гілка B), або `blocked` (гілка C).
-- [ ] Кожне твердження в документації має доказ; токенових тверджень про економію немає.
-- [ ] Knowledge Delta заповнено; довговічний урок про MCP-адаптери або записано, або прямо сказано, що його немає.
-- [ ] `provisional` пропозиції додано без редагування ratified записів.
-- [ ] Жодного push, PR, merge, release; `git status` чистий після commit; основну копію репозиторію не змінено.
+- [x] `07-CLOSEOUT-022-eif-mcp.md` заповнено: план проти факту по сесіях, таблиця команд PASS/FAIL, `deferred` із причинами, дії власника.
+- [x] Фінальний статус чесний: `completed-local`, або `implementation-complete-integration-deferred` (гілка B), або `blocked` (гілка C).
+- [x] Кожне твердження в документації має доказ; токенових тверджень про економію немає.
+- [x] Knowledge Delta заповнено; довговічний урок про MCP-адаптери або записано, або прямо сказано, що його немає.
+- [x] `provisional` пропозиції додано без редагування ratified записів.
+- [x] Жодного push, PR, merge, release; `git status` чистий після commit; основну копію репозиторію не змінено.
 
 ## Closeout / Knowledge Delta
 
 Це і є closeout. Окремо в Next action вказати власнику: рішення про публікацію гілки, бюджет на поведінкове порівняння D-19 і на canary-ходи (O-6), ратифікацію `provisional` записів.
+
+## Execution record
+
+Final canonical inventory54/54 and2130/2130, no unknown/mismatched suites.
+Installed base/extra wheel14/14, exhaustive packaging79/79, package smoke13/13,
+main smoke49/49. License contours,203synced sources, links, frontmatter and
+final byte-identical footprint PASS. New prose/proposal claims were checked
+through JEV before acceptance (3auto); broad earlier patch review was resolved
+manually with boundary regressions. Final status is implementation-complete-
+integration-deferred, branchB. No host model canary or evaluation ran.

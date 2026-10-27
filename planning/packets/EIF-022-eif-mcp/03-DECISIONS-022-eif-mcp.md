@@ -1,7 +1,7 @@
 ---
 packet: EIF-022-eif-mcp
 type: decisions
-status: recommended-awaiting-owner-approval
+status: execution-approved
 created: 2026-10-26
 ---
 

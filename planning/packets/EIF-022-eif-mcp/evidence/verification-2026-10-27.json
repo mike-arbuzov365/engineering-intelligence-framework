@@ -1,0 +1,398 @@
+{
+  "verified_date": "2026-10-27",
+  "implementation_commit": "7c0a7053896232852adf406dacfeae2f276483a5",
+  "source_tree_sha256": "0bae3df88fdce48f538c39d5f125e16b59135da4f2c76802796e9e9f6544f56d",
+  "canonical_inventory_sha256": "ab8a6ff835dd1e42ca08bb8be11a13f8e855a90623556e36a95b4ee874fc41d7",
+  "verification_mode": "all canonical suites exactly once, four bounded independent subprocess groups; no parallel agents or sessions",
+  "commands": [
+    [
+      "python",
+      "scripts/tests/run_all.py",
+      "--only",
+      "test_journey.py,test_context_footprint.py,test_project_commands.py,test_workspace_commands.py,test_privacy_scan.py,test_skill_eval.py,test_graphify_integration.py,test_skill_contracts.py,test_search_knowledge.py,test_demo_fixtures_fresh.py,test_format_dependencies.py,test_paths.py,test_markers.py",
+      "--json"
+    ],
+    [
+      "python",
+      "scripts/tests/run_all.py",
+      "--only",
+      "test_codex_adapter.py,test_cursor_adapter.py,test_adoption.py,test_line_endings.py,test_validate.py,test_workspace_transaction.py,test_render.py,test_rtk_integration.py,test_init.py,test_eif_mcp_contracts.py,test_adapter_continuity.py,test_check_licenses.py,test_operating_layer.py,test_release_environment.py",
+      "--json"
+    ],
+    [
+      "python",
+      "scripts/tests/run_all.py",
+      "--only",
+      "test_hermes_adapter.py,test_eif_mcp_compact.py,test_benchmark.py,test_upgrade_guards.py,test_verify_runtime.py,test_eif_mcp_inmemory.py,test_session_commands.py,test_workspace_resolution.py,test_generate_index.py,test_project_skills.py,test_sync_skills.py,test_locale.py,test_vendor_docs_integration.py",
+      "--json"
+    ],
+    [
+      "python",
+      "scripts/tests/run_all.py",
+      "--only",
+      "test_adapter_switch_matrix.py,test_service_delivery.py,test_workspace_fleet.py,test_eif_mcp_stdio.py,test_service_golden.py,test_eif_mcp_eval.py,test_delivery_guard.py,test_service_core.py,test_merge_gate.py,test_integration_contracts.py,test_workspace_schemas.py,test_check_links.py,test_parity_matrix.py,test_knowledge_delta.py",
+      "--json"
+    ]
+  ],
+  "aggregate": {
+    "suites_passed": 54,
+    "suites_total": 54,
+    "checks_passed": 2130,
+    "checks_total": 2130,
+    "checks_total_status": "exact",
+    "unknown_suites": [],
+    "mismatched_suites": []
+  },
+  "suites": [
+    {
+      "suite": "test_journey.py",
+      "exit_code": 0,
+      "passed": 277,
+      "total": 277
+    },
+    {
+      "suite": "test_context_footprint.py",
+      "exit_code": 0,
+      "passed": 6,
+      "total": 6
+    },
+    {
+      "suite": "test_project_commands.py",
+      "exit_code": 0,
+      "passed": 31,
+      "total": 31
+    },
+    {
+      "suite": "test_workspace_commands.py",
+      "exit_code": 0,
+      "passed": 26,
+      "total": 26
+    },
+    {
+      "suite": "test_privacy_scan.py",
+      "exit_code": 0,
+      "passed": 68,
+      "total": 68
+    },
+    {
+      "suite": "test_skill_eval.py",
+      "exit_code": 0,
+      "passed": 11,
+      "total": 11
+    },
+    {
+      "suite": "test_graphify_integration.py",
+      "exit_code": 0,
+      "passed": 31,
+      "total": 31
+    },
+    {
+      "suite": "test_skill_contracts.py",
+      "exit_code": 0,
+      "passed": 13,
+      "total": 13
+    },
+    {
+      "suite": "test_search_knowledge.py",
+      "exit_code": 0,
+      "passed": 11,
+      "total": 11
+    },
+    {
+      "suite": "test_demo_fixtures_fresh.py",
+      "exit_code": 0,
+      "passed": 3,
+      "total": 3
+    },
+    {
+      "suite": "test_format_dependencies.py",
+      "exit_code": 0,
+      "passed": 10,
+      "total": 10
+    },
+    {
+      "suite": "test_paths.py",
+      "exit_code": 0,
+      "passed": 32,
+      "total": 32
+    },
+    {
+      "suite": "test_markers.py",
+      "exit_code": 0,
+      "passed": 15,
+      "total": 15
+    },
+    {
+      "suite": "test_codex_adapter.py",
+      "exit_code": 0,
+      "passed": 123,
+      "total": 123
+    },
+    {
+      "suite": "test_cursor_adapter.py",
+      "exit_code": 0,
+      "passed": 74,
+      "total": 74
+    },
+    {
+      "suite": "test_adoption.py",
+      "exit_code": 0,
+      "passed": 74,
+      "total": 74
+    },
+    {
+      "suite": "test_line_endings.py",
+      "exit_code": 0,
+      "passed": 31,
+      "total": 31
+    },
+    {
+      "suite": "test_validate.py",
+      "exit_code": 0,
+      "passed": 17,
+      "total": 17
+    },
+    {
+      "suite": "test_workspace_transaction.py",
+      "exit_code": 0,
+      "passed": 17,
+      "total": 17
+    },
+    {
+      "suite": "test_render.py",
+      "exit_code": 0,
+      "passed": 22,
+      "total": 22
+    },
+    {
+      "suite": "test_rtk_integration.py",
+      "exit_code": 0,
+      "passed": 26,
+      "total": 26
+    },
+    {
+      "suite": "test_init.py",
+      "exit_code": 0,
+      "passed": 86,
+      "total": 86
+    },
+    {
+      "suite": "test_eif_mcp_contracts.py",
+      "exit_code": 0,
+      "passed": 29,
+      "total": 29
+    },
+    {
+      "suite": "test_adapter_continuity.py",
+      "exit_code": 0,
+      "passed": 25,
+      "total": 25
+    },
+    {
+      "suite": "test_check_licenses.py",
+      "exit_code": 0,
+      "passed": 34,
+      "total": 34
+    },
+    {
+      "suite": "test_operating_layer.py",
+      "exit_code": 0,
+      "passed": 232,
+      "total": 232
+    },
+    {
+      "suite": "test_release_environment.py",
+      "exit_code": 0,
+      "passed": 3,
+      "total": 3
+    },
+    {
+      "suite": "test_hermes_adapter.py",
+      "exit_code": 0,
+      "passed": 77,
+      "total": 77
+    },
+    {
+      "suite": "test_eif_mcp_compact.py",
+      "exit_code": 0,
+      "passed": 83,
+      "total": 83
+    },
+    {
+      "suite": "test_benchmark.py",
+      "exit_code": 0,
+      "passed": 59,
+      "total": 59
+    },
+    {
+      "suite": "test_upgrade_guards.py",
+      "exit_code": 0,
+      "passed": 13,
+      "total": 13
+    },
+    {
+      "suite": "test_verify_runtime.py",
+      "exit_code": 0,
+      "passed": 48,
+      "total": 48
+    },
+    {
+      "suite": "test_eif_mcp_inmemory.py",
+      "exit_code": 0,
+      "passed": 55,
+      "total": 55
+    },
+    {
+      "suite": "test_session_commands.py",
+      "exit_code": 0,
+      "passed": 18,
+      "total": 18
+    },
+    {
+      "suite": "test_workspace_resolution.py",
+      "exit_code": 0,
+      "passed": 18,
+      "total": 18
+    },
+    {
+      "suite": "test_generate_index.py",
+      "exit_code": 0,
+      "passed": 12,
+      "total": 12
+    },
+    {
+      "suite": "test_project_skills.py",
+      "exit_code": 0,
+      "passed": 11,
+      "total": 11
+    },
+    {
+      "suite": "test_sync_skills.py",
+      "exit_code": 0,
+      "passed": 14,
+      "total": 14
+    },
+    {
+      "suite": "test_locale.py",
+      "exit_code": 0,
+      "passed": 13,
+      "total": 13
+    },
+    {
+      "suite": "test_vendor_docs_integration.py",
+      "exit_code": 0,
+      "passed": 63,
+      "total": 63
+    },
+    {
+      "suite": "test_adapter_switch_matrix.py",
+      "exit_code": 0,
+      "passed": 81,
+      "total": 81
+    },
+    {
+      "suite": "test_service_delivery.py",
+      "exit_code": 0,
+      "passed": 4,
+      "total": 4
+    },
+    {
+      "suite": "test_workspace_fleet.py",
+      "exit_code": 0,
+      "passed": 17,
+      "total": 17
+    },
+    {
+      "suite": "test_eif_mcp_stdio.py",
+      "exit_code": 0,
+      "passed": 27,
+      "total": 27
+    },
+    {
+      "suite": "test_service_golden.py",
+      "exit_code": 0,
+      "passed": 26,
+      "total": 26
+    },
+    {
+      "suite": "test_eif_mcp_eval.py",
+      "exit_code": 0,
+      "passed": 10,
+      "total": 10
+    },
+    {
+      "suite": "test_delivery_guard.py",
+      "exit_code": 0,
+      "passed": 18,
+      "total": 18
+    },
+    {
+      "suite": "test_service_core.py",
+      "exit_code": 0,
+      "passed": 41,
+      "total": 41
+    },
+    {
+      "suite": "test_merge_gate.py",
+      "exit_code": 0,
+      "passed": 37,
+      "total": 37
+    },
+    {
+      "suite": "test_integration_contracts.py",
+      "exit_code": 0,
+      "passed": 5,
+      "total": 5
+    },
+    {
+      "suite": "test_workspace_schemas.py",
+      "exit_code": 0,
+      "passed": 24,
+      "total": 24
+    },
+    {
+      "suite": "test_check_links.py",
+      "exit_code": 0,
+      "passed": 3,
+      "total": 3
+    },
+    {
+      "suite": "test_parity_matrix.py",
+      "exit_code": 0,
+      "passed": 20,
+      "total": 20
+    },
+    {
+      "suite": "test_knowledge_delta.py",
+      "exit_code": 0,
+      "passed": 6,
+      "total": 6
+    }
+  ],
+  "packaging": {
+    "s8-package-extra-final": {
+      "passed": 14,
+      "total": 14
+    },
+    "s8-package-smoke-final": {
+      "passed": 13,
+      "total": 13
+    },
+    "s8-package-exhaustive-final": {
+      "passed": 79,
+      "total": 79
+    },
+    "s8-smoke-final": {
+      "passed": 49,
+      "total": 49
+    }
+  },
+  "mcp_extra_runtime_components": 41,
+  "G1": "PASS",
+  "G1c": "PASS",
+  "G2": "NOT PASSED; O-6 = 0",
+  "model_canary_turns": 0,
+  "model_evaluation": "NOT RUN",
+  "behavioral_comparison": "DEFERRED",
+  "client_status": "configured-not-verified (all4; template only)"
+}

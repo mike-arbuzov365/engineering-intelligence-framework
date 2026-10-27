@@ -21,6 +21,10 @@ of the entry rather than a footnote.
   instance, pinned artifact sections, structured operations, bounded protocol
   responses, real SDK/stdin-out tests and a separate optional dependency
   inventory. Client canaries remain unverified; writes are deferred to EIF-022b.
+- Optional compact routing for all four adapters, with direct CLI fallback,
+  unchanged default blocks, enable/disable upgrade and exact rollback tests.
+  Actual startup bytes are recorded per scenario; knowledge-search startup
+  grows in the measured scenario. Behavioral quality remains unmeasured.
 - Reproducible synthetic static context byte measurement and ten model-free
   checked evaluation answers. Model evaluation and behavioral comparison were
   not run. Session launch progress now uses an explicit five-state vocabulary.

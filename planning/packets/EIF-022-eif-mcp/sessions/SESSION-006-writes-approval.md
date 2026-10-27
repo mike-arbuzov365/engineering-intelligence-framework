@@ -2,7 +2,7 @@
 id: SESSION-006
 logical_session: SESSION-006
 type: session-launch
-status: prepared
+status: deferred
 source_artifact: ../04-ROADMAP-022-eif-mcp.md
 session_context: .session-context/eif-022-session-006.md
 continuation_mode: same_chat
@@ -86,3 +86,10 @@ git diff --check
 ## Closeout / Knowledge Delta
 
 Записати: фактичні відмінності поведінки elicitation від очікуваних, довгі виклики або таймаути, які спостерігались, виявлені слабкі місця протоколу, і прямо сказати, якщо довговічного уроку немає.
+
+## Execution disposition
+
+`deferred-to-EIF-022b`. G1 passed, but G2 did not: O-6=0 and there is no
+human-visible client elicitation cycle. No writer implementation or writer
+verification ran. This is branch B, not rejection of the design. SESSION-007
+continues from SESSION-005 without render work.

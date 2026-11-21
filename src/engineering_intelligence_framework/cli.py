@@ -16,6 +16,7 @@ Usage:
     eifctl upgrade [--instance-path PATH] [--dry-run]
     eifctl projects {add,remove,detach,status,resolve,upgrade,migrate-registry-v1-to-v2} ...
     eifctl session {checkpoint,validate,resume-audit,handoff} ...
+    eifctl packet {status,record-review} ...
     eifctl skills {check} ...
     eifctl delivery {check} ...
     eifctl workspace {new,doctor,profile} ...
@@ -31,7 +32,7 @@ from __future__ import annotations
 
 import sys
 
-from .commands import mcp_cmd, delivery, doctor, init_cmd, new, privacy_scan, projects, render, search, session, skills, upgrade, validate, version, workspace
+from .commands import mcp_cmd, delivery, doctor, init_cmd, new, packet, privacy_scan, projects, render, search, session, skills, upgrade, validate, version, workspace
 
 COMMANDS = {
     "mcp": mcp_cmd.run,
@@ -41,6 +42,7 @@ COMMANDS = {
     "upgrade": upgrade.run,
     "projects": projects.run,
     "session": session.run,
+    "packet": packet.run,
     "skills": skills.main,
     "workspace": workspace.run,
     "doctor": doctor.run,

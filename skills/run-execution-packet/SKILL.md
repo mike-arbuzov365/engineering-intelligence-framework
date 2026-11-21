@@ -1,8 +1,8 @@
 ---
 name: run-execution-packet
 description: >
-  Execute an already-planned execution packet's sessions in strict
-  sequential order, as one agent, from its start file through closeout.
+  Execute an already-planned packet's sessions in strict sequential order
+  from its start file through closeout, including an explicit orchestrated mode.
   Use when handed a prepared packet to run - not for planning one.
 ---
 
@@ -33,11 +33,10 @@ Full workflow: [`playbooks/execution-packet-execution.md`](../../playbooks/execu
 3. Respect any resource/budget guard from the packet's decisions file
    (e.g. avoiding hosted/paid CI) for every session, not just the one
    that states it.
-4. One accountable agent, sessions sequential.
-   Never delegate a session itself. Bounded work inside a session may be
-   delegated when its output returns for verification, the delegate does
-   not nest or spend budget, and the session record names what was
-   delegated and what verified it.
+4. One accountable agent, sessions sequential. In orchestrated mode, use
+   the launch and revision-bound review before acting on admission. Bounded
+   delegates return their output and evidence to the accountable agent.
+   Never start a later session while an earlier one awaits acceptance.
 5. On the final session: run
    [`playbooks/session-closeout.md`](../../playbooks/session-closeout.md),
    then fill `templates/packet-closeout.md` from the actual accumulated

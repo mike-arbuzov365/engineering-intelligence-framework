@@ -1,10 +1,11 @@
 ---
 name: review-execution-packet
 description: >
-  Independently audit a packet claimed as executed or closed - verify
+  Review a submitted orchestrated session or independently audit a packet
+  claimed as executed or closed. Verify
   the claimed integration, evidence, and closeout against fresh
   repository/tool state rather than trusting the closeout narrative.
-  Use for a post-hoc audit, not while executing the packet yourself.
+  Use when the work needs acceptance by an accountable reviewer.
 ---
 
 # Skill: Review Execution Packet
@@ -16,6 +17,11 @@ playbooks/execution-packet-review.md - one canonical source per D-007. -->
 Full workflow: [`playbooks/execution-packet-review.md`](../../playbooks/execution-packet-review.md).
 
 ## Process
+
+For a submitted orchestrated session, read the named handoff. Check the
+current attempt, its exact revision and each criterion's evidence. Record
+the decision through the local review workflow linked from the playbook.
+The steps below apply to a whole-packet audit.
 
 1. **Fetch fresh state first, always** (`git fetch --all --prune`).
    Never reason about merge/integration state from a local ref alone.

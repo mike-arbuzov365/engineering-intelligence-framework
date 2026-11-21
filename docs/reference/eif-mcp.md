@@ -57,7 +57,7 @@ it does not call a model or prove any row in this canary table.
 | `eif_brief` | Metadata route for an explicit task kind, read-list and state |
 | `eif_artifact_get` | Heading list or paged section of a pinned named artifact |
 | `eif_knowledge_search` | Lifecycle-aware search with explicit coverage |
-| `eif_packet_status` | Explicit progress, dependencies and next ready session |
+| `eif_packet_status` | Packet progress, optional sequential admission and a named session handoff |
 | `eif_doctor` | Bounded core checks with omitted checks disclosed |
 | `eif_session_validate` | Named checkpoint validation |
 | `eif_session_resume_audit` | Identity, source and read-only Git comparison |
@@ -79,6 +79,62 @@ task calls for iterative feedback.
 `blocked`, `deferred`); legacy/missing status, incomplete roadmap coverage or a
 dependency cycle means `partial` and no inferred next session. Only `completed`
 satisfies a dependency. Every observed session remains visible in the report.
+
+## Orchestrated session admission
+
+For sequential execution with a separate reviewer, set
+`orchestration_mode: orchestrated_sequential` in the roadmap's YAML
+frontmatter. Each session keeps its progress and an `orchestration` mapping
+in the launch frontmatter. Use the [launch and review schema](../../core/schemas/packet-orchestration.schema.json).
+
+```yaml
+orchestration:
+  goal: Restore retry after a failed request
+  scope: [src/retry]
+  no_touch: [service-contract]
+  criteria:
+    AC-04: The keyboard retry reaches the success view after a failure
+```
+
+The orchestrator records the assigned model and reason when relevant. At
+assignment record `attempt` and `base_revision`. At submission update
+`current_revision` and set progress `completed` for the completed work.
+Revisions are full Git SHA-1 commit IDs or `sha256:` digests of a specified
+work artifact. The local reviewer verifies the actual version and evidence,
+then records the submitted version. Point the launch at a new revision
+whenever the submitted work changes. Admission compares the declared version
+with the durable review. A new branch HEAD alone does not supersede a prior
+session's recorded submission.
+
+Read progress and admission with `eif_packet_status(packet)` or
+`eifctl packet status <packet> --instance-path .`. Add `session` to the MCP
+call or `--session <session>` to the CLI to receive the goal, scope, criteria,
+submitted revision, review and recent return reasons. `data.next_session`
+still reports dependency progress. For starting work in this mode, use
+`data.admission.next_session` with its `reason` and `next_action`. A returned,
+blocked, stale or unreviewed earlier session prevents starting a later one.
+
+To append a review through the local CLI, prepare a JSON record at a
+project-relative path, then run:
+
+```text
+eifctl packet record-review <packet> --instance-path . --record .session-context/review.json
+```
+
+Provide `instance`, `packet`, `session`, `attempt`, `base_revision`,
+`reviewed_revision`, `decision` (`accepted` or `changes_requested`), `reason`
+and `criteria`. Map each criterion ID to a `result` and an `evidence` reference.
+Acceptance requires a passing result and evidence for every declared criterion.
+The CLI creates the versioned JSON in the packet's `reviews/` directory.
+Commit the launch and review records with the packet. An exact retry
+reports `already_recorded`; a conflicting decision for that version requires
+reconciliation. After `changes_requested`, submit a new attempt and retain
+the earlier review.
+
+Admission is machine-calculated from the packet files. Only the designated
+orchestrator should record reviews. That role and the verification of cited
+evidence are process rules. CLI filesystem permissions control local writes.
+MCP reads the same records and provides no review-writing tool.
 
 ## Coverage, limits and errors
 

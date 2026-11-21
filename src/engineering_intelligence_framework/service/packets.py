@@ -9,11 +9,13 @@ from typing import Iterator
 
 import yaml
 
+from .admission import MODE, invalid_mode, read_admission
 from .instance import Instance, Result, ServiceError, identifier
 
 STATUSES = {"prepared", "in_progress", "completed", "blocked", "deferred"}
 MAX_PACKET_ENTRIES = 5000
 MAX_PACKET_SOURCE_BYTES = 20_971_520
+FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|$)", re.S)
 
 
 def _entries(directory: Path, budget: list[int]) -> Iterator[Path]:
@@ -71,15 +73,29 @@ def _status_sources(instance: Instance, folder: Path) -> dict[str, list[Path]]:
 
 def frontmatter(instance: Instance, path: str) -> dict:
     try:
-        text = instance.read(path).decode("utf-8")
-        match = re.match(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|$)", text, re.S)
+        match = FRONTMATTER.match(instance.read(path).decode("utf-8"))
         data = yaml.safe_load(match.group(1)) if match else {}
         return data if isinstance(data, dict) else {}
     except (UnicodeError, yaml.YAMLError):
         raise ServiceError("validation_failed", "Artifact frontmatter is invalid.") from None
 
 
-def packet_status(instance: Instance, packet: str | None = None) -> Result:
+def _orchestration_mode(text: str) -> str | None:
+    header = FRONTMATTER.match(text)
+    if header is None or "orchestration_mode" not in header.group(1):
+        return "single_agent"
+    try:
+        data = yaml.safe_load(header.group(1))
+    except yaml.YAMLError:
+        return None
+    return data.get("orchestration_mode", "single_agent") if isinstance(data, dict) else None
+
+
+def packet_status(instance: Instance, packet: str | None = None, session: str | None = None) -> Result:
+    if session is not None:
+        identifier(session)
+        if packet is None:
+            raise ServiceError("validation_failed", "Select a packet when requesting a session handoff.")
     root = instance.safe(instance.packets_root)
     if not root.is_dir():
         raise ServiceError("source_unavailable", "The packet directory is unavailable.")
@@ -96,8 +112,10 @@ def packet_status(instance: Instance, packet: str | None = None) -> Result:
         raise ServiceError("not_found", "The packet identifier is not present.")
     sources = _status_sources(instance, folder)
     sessions = []
+    launches = {}
     for file in sources["sessions"]:
-        data = frontmatter(instance, file.relative_to(instance.root).as_posix())
+        relative = file.relative_to(instance.root).as_posix()
+        data = frontmatter(instance, relative)
         raw_status = data.get("status")
         sid = str(data.get("id") or file.stem.split("-", 2)[0] + "-" + file.stem.split("-", 2)[1])
         dependencies = data.get("depends_on", [])
@@ -106,10 +124,13 @@ def packet_status(instance: Instance, packet: str | None = None) -> Result:
         checkpoint = data.get("session_context")
         has_checkpoint = bool(checkpoint and instance.safe(str(checkpoint)).is_file())
         sessions.append({"id": sid, "status": raw_status if isinstance(raw_status, str) and raw_status in STATUSES else "legacy", "raw_status": raw_status, "depends_on": dependencies, "checkpoint": has_checkpoint})
+        launches[sid] = {"path": relative, "orchestration": data.get("orchestration")}
     roadmaps = sources["roadmaps"]
     order = []
+    mode = "single_agent"
     if len(roadmaps) == 1:
         text = instance.read(roadmaps[0].relative_to(instance.root)).decode("utf-8")
+        mode = _orchestration_mode(text)
         order = list(dict.fromkeys(f"SESSION-{int(n):03d}" for n in re.findall(r"(?im)^##\s+Session\s+(\d+)\b", text)))
         if not order:
             order = list(dict.fromkeys(re.findall(r"sessions/(SESSION-\d+)-", text)))
@@ -145,4 +166,14 @@ def packet_status(instance: Instance, packet: str | None = None) -> Result:
     # Preserve every observed launch file even when roadmap coverage is
     # incomplete or IDs are duplicated. Partial coverage cannot erase rows.
     ordered = sorted(sessions, key=lambda row: order.index(row["id"]) if row["id"] in order else len(order))
-    return {"status": "partial" if reason and reason != "completed_or_no_ready_session" else "ok", "data": {"packet": packet, "sessions": ordered, "closeout": str(closeout), "next_session": next_session, "reason": reason}}
+    data = {"packet": packet, "sessions": ordered, "closeout": str(closeout), "next_session": next_session, "reason": reason}
+    if mode == MODE:
+        decision, handoff = read_admission(instance, packet, ordered, launches, reason, session)
+        data["admission"] = decision
+        if handoff is not None:
+            data["handoff"] = handoff
+    elif mode != "single_agent":
+        data["admission"] = invalid_mode()
+    elif session is not None:
+        raise ServiceError("source_unavailable", "This packet has no orchestrated session handoff.")
+    return {"status": "partial" if reason and reason != "completed_or_no_ready_session" else "ok", "data": data}

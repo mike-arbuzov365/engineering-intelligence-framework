@@ -142,15 +142,20 @@
   },
   {
     "name": "eif_packet_status",
-    "description": "Read explicit packet progress and the first dependency-ready session.",
+    "description": "Read packet progress, optional orchestration admission and a named session handoff.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "packet": {
           "type": "string",
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "session": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
         }
       },
+      "dependentRequired": {"session": ["packet"]},
       "required": [],
       "additionalProperties": false
     },

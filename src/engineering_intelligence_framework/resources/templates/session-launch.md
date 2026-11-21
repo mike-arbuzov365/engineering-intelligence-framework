@@ -18,6 +18,8 @@ Other historical values are `legacy` to progress readers and do not prove
 completion. A next session requires every `depends_on` entry to be `completed`.
 An executing agent reads this file as the source of truth for one
 session - not the packet's other files directly, and not chat history.
+An [orchestrated launch](../docs/reference/eif-mcp.md#orchestrated-session-admission)
+also carries its goal, scope, criteria and submitted revision in frontmatter.
 
 ```yaml
 ---

@@ -7,6 +7,8 @@ triggers:
   positive:
   - id: prepared-packet-run
     prompt: Виконай підготовлений execution packet послідовно від start file до closeout.
+  - id: orchestrated-handoff
+    prompt: Продовж послідовний пакет з окремим виконавцем і зафіксованим прийманням попередньої ревізії.
   negative:
   - id: packet-planning-request
     prompt: Сплануй новий execution packet для ще не структурованої великої ідеї.
@@ -25,7 +27,7 @@ stop_conditions:
   - If blocked
 forbidden_behavior:
   required:
-  - Never delegate a session itself
+  - Never start a later session while an earlier one awaits acceptance
 assertions:
   manifest_contains:
   - execution-packet-execution.md

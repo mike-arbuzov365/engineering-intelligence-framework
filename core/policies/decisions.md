@@ -429,6 +429,20 @@ continuity and enforcement vocabulary remain unchanged. Evidence:
 `templates/session-launch.md`, `playbooks/execution-packet-execution.md`,
 `skills/run-execution-packet/SKILL.md` and the structured-service regressions.
 
+### D-24: Revision-bound sequential packet admission
+
+**Status: provisional, implemented for EIF-023 (2026-11-21).** A packet may
+select `orchestrated_sequential`. One accountable orchestrator assigns
+one executor at a time. The packet's launch records the current attempt and
+revision, and the orchestrator's durable review records the version and
+criterion evidence. A subsequent session requires current acceptance.
+
+The shared reader calculates admission independently of D-23 progress.
+The local CLI can append reviews without replacing a recorded decision.
+MCP reads those records under the existing D-22 boundary. Reviewer identity
+and verification of cited evidence remain process rules. A host can open a
+chat only within the capability limits of D-21.
+
 ## Open (not yet decided)
 
 *(none currently - D-09 through D-12 ratified 2026-07-16; D-05/D-08

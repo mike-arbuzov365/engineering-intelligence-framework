@@ -75,6 +75,10 @@ def main() -> int:
         probe = run([str(eifctl), "mcp", "serve", "--instance-path", str(project), "--self-test"], cwd=root, timeout_s=60)
         value = json.loads(probe.stdout) if probe.returncode == 0 else {}
         check("installed SDK stdio self-test with matching drift", probe.returncode == 0 and value.get("status") == "ok" and value.get("tools") == 9, probe.stdout + probe.stderr)
+        check("installed stdio self-test exits without pipe shutdown errors",
+              probe.returncode == 0 and not any(phrase in probe.stderr for phrase in (
+                  "I/O operation on closed pipe", "Exception ignored in:", "Traceback (most recent call last)",
+              )), probe.stderr)
         license_result = run([str(python), str(source / "scripts/eif_check_licenses.py"), "--framework-root", str(source), "--environment"], cwd=root, timeout_s=30)
         check("clean extra environment licenses", license_result.returncode == 0, license_result.stdout + license_result.stderr)
         sdk_origin = run([str(python), "-c", "import mcp,engineering_intelligence_framework as e; print(mcp.__file__); print(e.__file__)"], cwd=root)

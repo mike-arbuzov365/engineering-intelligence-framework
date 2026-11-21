@@ -81,6 +81,7 @@ def main():
     from engineering_intelligence_framework.service import Instance, ServiceError
     from engineering_intelligence_framework.service.operations import session_resume_audit
     from seed import seed
+    from test_service_golden import capture
 
     checks = []
 
@@ -91,6 +92,7 @@ def main():
     async def run(base):
         root = seed(base / "project")
         commit(root, ".gitignore")
+        commit(root, ".eif/config.yaml", ".eif/framework.lock.yaml", "planning/packets/demo")
         foreign = base / "foreign"
         foreign.mkdir()
         branch = git(root, "symbolic-ref", "--short", "HEAD").decode().strip()
@@ -104,6 +106,24 @@ def main():
         env.pop("EIF_INSTANCE_PATH", None)
         params = StdioServerParameters(command=sys.executable,
             args=["-W", "ignore", "-m", "engineering_intelligence_framework.cli", "mcp", "serve", "--instance-path", str(root)], env=env)
+
+        linked = base / "linked"
+        git(root, "worktree", "add", "--detach", str(linked), "HEAD")
+        checkpoint = capture([
+            "session", "checkpoint", "--project-root", str(linked), "--session-id", "linked",
+            "--source-artifact", "planning/packets/demo/sessions/SESSION-001-demo.md",
+            "--goal", "Resume from linked Git metadata", "--in-scope", "planning",
+            "--no-touch", "product", "--next-action", "Inspect the packet", "--approval-state", "not_required",
+        ], linked)
+        direct = capture(["session", "resume-audit", ".session-context/linked.md", "--project-root", str(linked)], linked)
+        check("direct CLI resumes a real linked worktree", checkpoint["rc"] == direct["rc"] == 0)
+        linked_params = StdioServerParameters(command=sys.executable,
+            args=[*params.args[:-1], str(linked)], env=env)
+        async with Client(linked_params, read_timeout_seconds=25) as client:
+            value = await client.call_tool("eif_session_resume_audit", {"session_id": "linked"})
+            check("MCP recommends the direct CLI for linked worktrees", value.is_error
+                  and value.structured_content["error"]["code"] == "source_unavailable"
+                  and "eifctl session resume-audit" in value.structured_content["error"]["message"])
 
         async def refusal(label, *, before_git=False):
             if before_git:

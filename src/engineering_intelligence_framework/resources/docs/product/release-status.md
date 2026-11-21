@@ -201,14 +201,18 @@ a nearby claim reference. That gate is unchanged by anything in this file.
 
 Ordered, with the manual steps marked. Nothing here runs itself.
 
-1. `python -m pytest` and the site gate (`npm --prefix site run gate:site`)
-   both green on the release commit.
-2. Set the release version in [`pyproject.toml`](../../pyproject.toml), move
+1. Set the release version in [`pyproject.toml`](../../pyproject.toml), move
    the completed entries from `[Unreleased]` into a dated version in
    [`CHANGELOG.md`](../../CHANGELOG.md), and update current-version wording in
    README, the claims register and the site claim manifest.
-3. `python scripts/eif_release.py` clean, including the clean-environment
-   install.
+2. Run the local equivalent of [the release workflow](../../.github/workflows/release-check.yml)
+   on the release tree. This includes `python scripts/tests/run_all.py --json`
+   and the exhaustive wheel and sdist suite. Run `npm --prefix site run gate:site`
+   when the site changes.
+3. Run `python scripts/eif_release.py --require-final-version` to build and
+   validate the release files. Check the optional MCP install with
+   `python scripts/tests/test_eif_mcp_package.py`. On Windows, set
+   `PYTHONUTF8=1` for the non-ASCII path checks.
 4. **Owner credentials:** push the annotated tag matching the version and
    publish the GitHub Release with the wheel and source distribution produced
    and validated by `scripts/eif_release.py`. Uploading the same artifacts to

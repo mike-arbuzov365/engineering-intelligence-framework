@@ -1,0 +1,94 @@
+{
+  "version": "eif-023-admission-v1",
+  "input": {
+    "instance": "synthetic-instance",
+    "packet": "synthetic-admission",
+    "mode": "orchestrated_sequential",
+    "sessions": [
+      {"id": "SESSION-001", "status": "completed", "depends_on": [], "attempt": 1, "current_revision": "work-v1"},
+      {"id": "SESSION-002", "status": "prepared", "depends_on": ["SESSION-001"]}
+    ],
+    "reviews": [
+      {
+        "instance": "synthetic-instance", "packet": "synthetic-admission", "session": "SESSION-001",
+        "attempt": 1, "base_revision": "work-base", "reviewed_revision": "work-v1", "decision": "accepted",
+        "criteria": ["A5"], "evidence": ["synthetic-result"], "reason": "The check passed."
+      }
+    ]
+  },
+  "legacy": {"status": "ok", "next_session": "SESSION-002", "reason": null},
+  "cases": [
+    {
+      "id": "accepted_current",
+      "admission": {"next_session": "SESSION-002", "blocker": null, "reason": "ready", "next_action": "start_next_session"}
+    },
+    {
+      "id": "completed_unreviewed",
+      "review": null,
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "review_missing", "next_action": "review_current_attempt"}
+    },
+    {
+      "id": "returned_attempt",
+      "review": {"decision": "changes_requested", "reason": "The required check failed."},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "changes_requested", "next_action": "revise_and_resubmit"}
+    },
+    {
+      "id": "stale_revision",
+      "first": {"current_revision": "work-v2"},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "stale_revision", "next_action": "review_current_revision"}
+    },
+    {
+      "id": "blocked_without_dependency",
+      "first": {"status": "blocked"},
+      "second": {"depends_on": []},
+      "review": null,
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "session_blocked", "next_action": "resolve_blocker"}
+    },
+    {
+      "id": "blocked_with_dependency",
+      "first": {"status": "blocked"},
+      "review": null,
+      "legacy": {"status": "ok", "next_session": null, "reason": "completed_or_no_ready_session"},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "session_blocked", "next_action": "resolve_blocker"}
+    },
+    {
+      "id": "historical_status",
+      "first": {"status": "gated"},
+      "review": null,
+      "legacy": {"status": "partial", "next_session": null, "reason": "legacy_or_missing_status"},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "unsupported_status", "next_action": "inspect_source_status"}
+    },
+    {
+      "id": "repeat_same_read",
+      "reads": 2,
+      "review": {"decision": "changes_requested", "reason": "The required check failed."},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "changes_requested", "next_action": "revise_and_resubmit"}
+    },
+    {
+      "id": "all_sessions_accepted",
+      "session_count": 1,
+      "legacy": {"status": "ok", "next_session": null, "reason": "completed_or_no_ready_session"},
+      "admission": {"next_session": null, "blocker": null, "reason": "packet_complete", "next_action": "close_packet"}
+    },
+    {
+      "id": "prior_attempt_review",
+      "first": {"attempt": 2},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "review_missing", "next_action": "review_current_attempt"}
+    },
+    {
+      "id": "foreign_instance_review",
+      "review": {"instance": "other-synthetic-instance"},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "review_missing", "next_action": "review_current_attempt"}
+    },
+    {
+      "id": "foreign_packet_review",
+      "review": {"packet": "other-synthetic-packet"},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "review_missing", "next_action": "review_current_attempt"}
+    },
+    {
+      "id": "foreign_session_review",
+      "review": {"session": "SESSION-002"},
+      "admission": {"next_session": null, "blocker": "SESSION-001", "reason": "review_missing", "next_action": "review_current_attempt"}
+    }
+  ]
+}

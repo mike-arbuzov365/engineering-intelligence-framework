@@ -158,7 +158,11 @@ def brief(instance: Instance, task_kind: str) -> Result:
         raise ServiceError("validation_failed", "Use a declared task kind.")
     name = kinds[task_kind]
     route, reads = None, []
-    if name:
+    if task_kind == "structured":
+        for kind, artifact in (("playbook", "session-preparation"), ("template", "task-scope")):
+            item, text = instance.artifact(kind, artifact)
+            reads.append({"path": item["relative"], "bytes": len(text.encode("utf-8"))})
+    elif name:
         item, text = instance.artifact("skill", name)
         match = re.match(r"\A---\r?\n(.*?)\r?\n---", text, re.S)
         description = ""

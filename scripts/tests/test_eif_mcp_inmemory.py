@@ -65,6 +65,16 @@ def main() -> int:
                     check(name + " structured roundtrip", isinstance(data, dict) and json.loads(value.content[0].text) == data and len(data["request_id"]) == 32 and not value.is_error)
                     check(name + " byte limit", wire_bytes(value) <= (4096 if name == "eif_brief" else 24576))
                 check("pinned packet route", results["eif_brief"]["data"].get("route", {}).get("skill") == "run-execution-packet")
+                light = await client.call_tool("eif_brief", {"task_kind": "light"})
+                light_data = light.structured_content["data"]
+                check("light route requires no plan or skill", not light.is_error and light_data["route"] is None and light_data["read_list"] == [])
+                structured = await client.call_tool("eif_brief", {"task_kind": "structured"})
+                structured_data = structured.structured_content["data"]
+                check("structured route uses pinned preparation and one task-scope template",
+                      not structured.is_error and wire_bytes(structured) <= 4096 and structured_data["route"] is None
+                      and [row["path"] for row in structured_data["read_list"]] == [
+                          ".eif/runtime/playbooks/session-preparation.md", ".eif/runtime/templates/task-scope.md",
+                      ])
                 check("search result grounded", len(results["eif_knowledge_search"]["data"]["results"]) == 1)
                 check("dependency-ready session", results["eif_packet_status"]["data"]["next_session"] == "SESSION-001")
                 check("session validation pass", results["eif_session_validate"]["data"]["verdict"] == "pass")

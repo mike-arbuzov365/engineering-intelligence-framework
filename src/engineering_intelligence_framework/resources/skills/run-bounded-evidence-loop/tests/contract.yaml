@@ -10,6 +10,8 @@ triggers:
   negative:
   - id: unbounded-autonomy
     prompt: Повторюй зміни без iteration limit, evaluator або stop conditions, доки не набридне.
+  - id: one-pass-structured-task
+    prompt: Запиши обсяг, межі й команди перевірки для задачі на один прохід.
 references:
   required:
   - playbooks/bounded-evidence-loop.md

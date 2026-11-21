@@ -71,8 +71,10 @@ with `next_cursor`; cursors are opaque, section-bound and expire after 600 s.
 The server reads policy only from the instance's pinned runtime manifests and
 checks both manifest consistency and file hashes.
 
-`brief` uses the installed package's ten explicit task-kind routes and pinned
-skill metadata. It does not classify tasks. `light` has no skill read-list.
+`brief` uses ten caller-selected task kinds and pinned artifacts. `light`
+has an empty read-list. `structured` points to the session-preparation
+playbook and task-scope template. Use the bounded evidence loop when the
+task calls for iterative feedback.
 `packet_status` reads launch statuses (`prepared`, `in_progress`, `completed`,
 `blocked`, `deferred`); legacy/missing status, incomplete roadmap coverage or a
 dependency cycle means `partial` and no inferred next session. Only `completed`
@@ -154,7 +156,7 @@ commit that config and run the same upgrade command.
 The compact block asks for `eif_brief(task_kind)` and named policy sections.
 If tools are absent in a chat, its fallback is direct `eifctl doctor`, direct
 `eifctl search` using the configured knowledge root, and the pinned
-`.eif/runtime/playbooks/operating-protocol.md`. Both greenfield authority and
+`.eif/runtime/playbooks/engineering-intelligence-operating-protocol.md`. Both greenfield authority and
 coexisting project authority remain explicit. Missing routes or a config/block
 mode mismatch fail doctor. The four adapters and English/Ukrainian project
 locales are exercised through actual enable/disable upgrades and rollback;

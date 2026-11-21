@@ -61,6 +61,9 @@ def main() -> int:
                 check(label + " real opt-in upgrade", enabled["rc"] == 0 and "<!-- EIF:MCP reader -->" in compact, enabled["stdout"] + enabled["stderr"])
                 check(label + " config preserved by upgrade", config_path.read_bytes() == chosen_config)
                 check(label + " fallback and markers", compact.count("<!-- EIF:BEGIN") == compact.count("<!-- EIF:END -->") == 1 and all(token in compact for token in ("eif_brief(task_kind)", "eifctl doctor --instance-path .", 'eifctl search "<query>" --knowledge-root "knowledge"', "operating-protocol.md")))
+                fallback_policy = ".eif/runtime/playbooks/engineering-intelligence-operating-protocol.md"
+                check(label + " compact fallback points to installed routing policy",
+                      fallback_policy in compact and (project / fallback_policy).is_file())
                 health = capture(["doctor", "--instance-path", str(project)], base)
                 check(label + " configured never healthy", health["rc"] == 0 and "integration eif_mcp" in health["stdout"] and "state=configured" in health["stdout"], health["stdout"] + health["stderr"])
                 path.write_text(compact.replace("eif_brief(task_kind)", "missing-route"), encoding="utf-8", newline="\n")

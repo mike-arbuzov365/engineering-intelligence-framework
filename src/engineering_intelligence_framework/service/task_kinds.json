@@ -1,6 +1,6 @@
 {
   "light": null,
-  "structured": "run-bounded-evidence-loop",
+  "structured": null,
   "idea": "plan-idea",
   "prd": "plan-prd",
   "packet_plan": "plan-execution-packet",

@@ -29,8 +29,9 @@ future releases.
 
 - `graphic-design`: bounded everyday work plus brief, direction approval,
   production review and delivery for larger projects;
-- `software-development`: repository onboarding only, because core EIF already
-  governs normal planning, implementation, verification and learning.
+- `software-development`: repository onboarding and
+  [web change acceptance](../../professional-profiles/software-development/playbooks/web-change-acceptance.md)
+  for changes that affect an interface. Core EIF governs the engineering cycle.
 
 Professional profile лишається canonical grouping unit для its skills,
 playbooks і templates. Кожен bundled starter skill має local

@@ -7,9 +7,13 @@ triggers:
   positive:
   - id: repository-onboarding
     prompt: Onboard existing software repository і зафіксуй verified build, test та authority boundaries.
+  - id: web-project-onboarding
+    prompt: Підключи новий вебпроєкт і вкажи наявні токени та компоненти у вихідному описі проєкту.
   negative:
   - id: implement-known-feature
     prompt: Реалізуй already planned feature у repository з відомими verified commands.
+  - id: established-backend-change
+    prompt: Зміни внутрішню повторну спробу в налаштованому серверному проєкті без змін інтерфейсу.
 references:
   required:
   - professional-profiles/software-development/playbooks/software-project-onboarding.md
@@ -29,6 +33,7 @@ assertions:
   - software-project-onboarding.md
   canonical_contains:
   - '# Software project onboarding'
+  - web-change-acceptance.md
   manifest_not_contains:
   - TODO
   - '[SKILL_PRUNED]'

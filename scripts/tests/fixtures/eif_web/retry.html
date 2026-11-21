@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8">
+  <title>Request retry fixture</title>
+  <style>
+    :root { --action-focus: #1746a2; }
+    .action:focus-visible { outline: 3px solid var(--action-focus); outline-offset: 2px; }
+  </style>
+  <main>
+    <h1>Request status</h1>
+    <p role="status"></p>
+    <div id="actions"></div>
+  </main>
+  <script type="module">
+    import { actionButton } from "/action.mjs";
+
+    const status = document.querySelector('[role="status"]');
+    const retry = actionButton("Retry", load);
+    document.querySelector("#actions").append(retry);
+
+    async function load() {
+      retry.hidden = true;
+      status.textContent = "Loading";
+      const response = await fetch("/api/result");
+      status.textContent = response.ok ? "Request succeeded" : "Request failed";
+      retry.hidden = response.ok;
+    }
+
+    load();
+  </script>
+</html>

@@ -119,8 +119,26 @@ def session_resume_audit(instance: Instance, session_id: str) -> Result:
 def knowledge_search(instance: Instance, query: str, type_filter: str | None = None, top: int = 5, status: str | None = None) -> Result:
     if not isinstance(query, str) or not 1 <= len(query) <= 2000 or type(top) is not int or not 1 <= top <= 20:
         raise ServiceError("validation_failed", "Provide a query and a result count from 1 to 20.")
-    relative = str((instance.config.get("knowledge") or {}).get("root", "knowledge"))
-    folder = instance.safe(relative)
+    knowledge = instance.config.get("knowledge") or {}
+    folder = instance.safe(knowledge.get("root", "knowledge"))
+    relative = folder.relative_to(instance.root).as_posix()
+    if not knowledge.get("managed", True):
+        source = {"mode": "external", "root": relative, "index_path": None}
+        available = folder.is_dir()
+        if available:
+            index = instance.safe(knowledge.get("index_path", f"{relative}/index.md"))
+            if index.is_file() and index.resolve().is_relative_to(folder.resolve()):
+                source["index_path"] = index.relative_to(instance.root).as_posix()
+        return {
+            "status": "unavailable",
+            "data": {
+                "source": source,
+                "reason": "external_source" if available else "source_unavailable",
+                "results": [],
+                "coverage": None,
+            },
+            "next_action": "Use the project's documented retrieval policy and its index if available. This reader did not search the external source.",
+        }
     if not folder.is_dir():
         raise ServiceError("source_unavailable", "The configured knowledge source is unavailable.")
     instance.guard_tree(relative)
@@ -131,7 +149,10 @@ def knowledge_search(instance: Instance, query: str, type_filter: str | None = N
     for row in rows:
         row["path"] = (Path(relative) / row["path"]).as_posix()
     coverage = {"indexed": found["indexed"], "malformed": len(malformed), "schema_invalid": len(invalid), "skipped_by_status": len(skipped), "malformed_paths": malformed[:20], "schema_invalid_paths": [row["path"] for row in invalid[:20]], "skipped_paths": [row["path"] for row in skipped[:20]]}
-    return {"status": "partial" if malformed or invalid else "ok", "data": {"results": rows, "coverage": coverage}}
+    return {
+        "status": "partial" if malformed or invalid else "ok",
+        "data": {"source": {"mode": "managed", "root": relative}, "results": rows, "coverage": coverage},
+    }
 
 
 def delivery_check(instance: Instance, action: str, scope: str) -> Result:
@@ -158,7 +179,11 @@ def brief(instance: Instance, task_kind: str) -> Result:
         raise ServiceError("validation_failed", "Use a declared task kind.")
     name = kinds[task_kind]
     route, reads = None, []
-    if name:
+    if task_kind == "structured":
+        for kind, artifact in (("playbook", "session-preparation"), ("template", "task-scope")):
+            item, text = instance.artifact(kind, artifact)
+            reads.append({"path": item["relative"], "bytes": len(text.encode("utf-8"))})
+    elif name:
         item, text = instance.artifact("skill", name)
         match = re.match(r"\A---\r?\n(.*?)\r?\n---", text, re.S)
         description = ""

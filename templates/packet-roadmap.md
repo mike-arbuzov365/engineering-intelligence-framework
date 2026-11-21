@@ -1,5 +1,9 @@
 # Template: Execution Packet Roadmap
 
+For a separate executor and reviewer, set
+`orchestration_mode: orchestrated_sequential` in the roadmap frontmatter
+and use the [admission contract](../docs/reference/eif-mcp.md#orchestrated-session-admission).
+
 <!-- Knowledge source: GENERALIZE of the private EI's
 execution-packet-planning.md roadmap section. Kept: one session = one
 file with its own goal/scope/verification/exit-criteria, strict

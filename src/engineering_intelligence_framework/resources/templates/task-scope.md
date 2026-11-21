@@ -18,15 +18,11 @@ duplicated, by the Knowledge Delta and closeout.
 
 ## Experience retrieval preflight
 
-Before implementing, search existing knowledge for anything relevant
-(`scripts/eif_search_knowledge.py "<query>"`). Record what was found - or
-explicitly record that nothing relevant was found. Do not skip this step
-because the task looks simple; the whole point is that a plausible-looking
-simple approach can be exactly what a past lesson warns against.
+Follow the knowledge-search playbook before implementing.
 
-- Searched for: <query>
-- Found: <artifact path, or "nothing relevant found">
-- How it changes the plan: <concrete effect on the approach below, or "n/a">
+- Searched for: <query or topic and configured retrieval route>
+- Result and coverage: <artifact path or identifier, revision/date if available, or the observed limit>
+- Effect on the plan: <concrete effect on the approach below, or "n/a">
 
 ## In scope
 

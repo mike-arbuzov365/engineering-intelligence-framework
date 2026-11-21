@@ -39,16 +39,50 @@ chat history.
 
 ## Step 1 - Classify the work
 
-Answer before writing anything:
+State the intended result and its check before changing anything. Choose
+the smallest path that covers the consequences and dependencies.
 
-- **Scope**: light task, structured single task, or packet (2+ sessions, an
-  ADR-worthy decision, cross-project-instance scope, or a request for
-  unattended autonomous execution)?
-- **Goal**: 1-3 sentences.
+| Route | Choose when | Work to prepare | Example |
+|---|---|---|---|
+| `light` | One authorized, low-risk action with a clear result and an obvious check | Work from the request. Retrieve relevant knowledge and verify the result | Correct one label and check that it appears |
+| `structured` | One session needs written scope, decisions or several checks | Fill one [task scope](../templates/task-scope.md). Include iterative feedback only when the [Bounded Evidence Loop](bounded-evidence-loop.md) applies | Reproduce and fix a form regression, then check save and retry |
+| `packet`, compact | Two or more dependent sessions with settled behavior and ordinary integration risk | Use the packet files. Keep each decision and its evidence short. Name what each session hands to the next | Update a validated data export, then apply it to a dependent report |
+| `packet`, expanded | Architectural or cross-project decisions, unresolved factual conflicts, unattended work needing more controls, or material compatibility, migration or irreversible risk | Use the same packet files. Detail affected consumers, verification, recovery and owner decisions as applicable | Remove a public API field even if the code change is short |
 
-If it is light, stop here and work directly from the request. If it is a
-structured single task, stop here and fill
-[`templates/task-scope.md`](../templates/task-scope.md) directly.
+An unattended request still uses a packet. Use the compact depth when the
+sources, permissions and failure handling are already clear. Choose the
+expanded depth when a consequential unknown needs resolving first.
+
+Reuse approved requirements as the source for expected behavior. Add a data or
+migration plan only when stored data or its contract changes. Put test commands
+beside the relevant acceptance criteria when those commands describe enough.
+Define affected clients and compatibility checks whenever a public contract
+changes. Put clarification, implementation and verification in the same
+session when one executor can deliver a result that can be accepted together.
+
+When a defect is reported, reproduce it and find the source for the expected
+behavior. For a clear regression, capture a failing check, fix the cause and
+rerun the check. When a criterion is ambiguous or a product behavior is
+missing, look for an approved source that settles it. Ask the owner for the
+specific behavior only if the sources leave a consequential decision open.
+
+### Choose who writes and checks tests
+
+- Keep tests with implementation for routine checks and ordinary regressions.
+- Use a short independent check when the implementation and its tests are
+  ready but a consequential criterion benefits from a second reader.
+- Give a separate author the acceptance tests before implementation when
+  expected results can be derived from approved sources and a false pass
+  would be costly. Require a failing case that reaches the intended assertion
+  and a positive control that proves the evaluator works. Accept the
+  expectations before implementation and review any later changes to them.
+
+Keep reversible implementation choices with the executor. The owner decides
+changes to the approved goal, ambiguous product behavior and external
+commitments. Use the stronger available model where unclear requirements or
+costly mistaken acceptance call for more judgment. Use a lighter available
+model for bounded work with objective checks. Keep a separate session only
+when its result changes a later decision or is needed by the next executor.
 
 A light task does not require a checkpoint by default. Create one only if the
 task must survive an interruption or planned handoff. Structured and packet
@@ -59,8 +93,8 @@ artifact; the canonical semantics are in
 ## Step 2 - If it needs a packet, build the packet anatomy
 
 See [`execution-packet-planning.md`](execution-packet-planning.md) for the
-full workflow. Summary: charter, facts, decisions, roadmap, self-review,
-then a start file, using the templates under `templates/packet-*.md`.
+full workflow. Use the chosen depth in the existing charter, facts, decisions,
+roadmap, self-review and start files.
 
 ## Step 3 - Determine session order
 

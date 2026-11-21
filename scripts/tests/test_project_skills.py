@@ -16,6 +16,9 @@ from __future__ import annotations
 import sys
 import tempfile
 from pathlib import Path
+from hashlib import sha256
+
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "src"))
@@ -197,6 +200,36 @@ def main() -> int:
             "a project skill without a contract fixture fails",
             any("missing local contract fixture" in error for error in missing_errors),
         )
+
+        skill_root = project / "docs" / "skills" / name
+        contract_path = skill_root / "tests" / "contract.yaml"
+        contract = yaml.safe_load(contract_path.read_text(encoding="utf-8"))
+        script = skill_root / "scripts" / "example.py"
+        script.parent.mkdir()
+        expected = b"print('example')\n"
+        contract["supporting_files"]["scripts"] = [{
+            "path": "scripts/example.py",
+            "sha256": sha256(expected).hexdigest(),
+            "network": False,
+            "install": False,
+            "permissions": [],
+            "side_effects": [],
+            "reviewed": True,
+        }]
+        write(contract_path, yaml.safe_dump(contract, sort_keys=False))
+        for label, content in (
+            ("pinned LF checkout", expected),
+            ("CRLF checkout with the same text", expected.replace(b"\n", b"\r\n")),
+            ("changed script content", b"print('changed')\n"),
+        ):
+            script.write_bytes(content)
+            _, script_errors = skills.check_project(project)
+            check(
+                label + " has the expected raw-byte digest verdict",
+                script_errors == [] if content == expected else (
+                    len(script_errors) == 1 and "script digest mismatch" in script_errors[0]
+                ),
+            )
 
     print(f"EIF-RESULT: passed={PASSED} total={TOTAL}")
     print(f"\ntest_project_skills: {PASSED}/{TOTAL} passed")

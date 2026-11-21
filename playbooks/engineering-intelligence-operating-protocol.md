@@ -47,7 +47,10 @@ of them.
 
 ## Routing checkpoint
 
-Classify the work before acting; the classification itself does not need a file:
+Classify the work before acting. Use the
+[`session-preparation.md`](session-preparation.md#step-1---classify-the-work)
+matrix to choose the path, packet depth and test arrangement. The classification
+can stay in the conversation for a light task.
 
 - **Idea** - the problem, user, value or minimum useful scope is not yet a
   durable approved artifact.
@@ -57,9 +60,8 @@ Classify the work before acting; the classification itself does not need a file:
   low risk and an obvious result check.
 - **Structured single task** - one session, but scope, decisions or
   verification need to be recorded in a task-scope file.
-- **Execution packet** - 2+ sessions, an architectural decision, factual
-  conflicts to resolve first, or a request for unattended autonomous
-  execution.
+- **Execution packet** - 2+ sessions, a consequential decision or impact,
+  factual conflicts to resolve first, or a request for unattended execution.
 
 Record the classification before implementation starts, not after.
 

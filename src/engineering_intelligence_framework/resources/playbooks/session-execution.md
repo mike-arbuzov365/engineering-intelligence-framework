@@ -38,18 +38,15 @@ Per the framework's three-layer model
 1. **L1 - framework layer** - this framework: only the playbooks/templates/ontology
    actually relevant to the task at hand, not everything.
 2. **L2 - project layer** - this project instance: its persistent agent-instruction
-   file, relevant `knowledge/` artifacts, the task-scope or launch file
-   itself.
+   file, relevant artifacts from its configured knowledge source, and the
+   task-scope or launch file.
 3. **L3 - session layer** - nothing yet; this step creates it next.
 
 ## Step 2 - Experience retrieval preflight
 
-Before implementing, search `knowledge/` for anything relevant
-(`scripts/eif_search_knowledge.py "<query>"`). Record what was found in
-the task-scope file's preflight section, or record explicitly that
-nothing relevant was found. Do not skip this because the task looks
-simple - a plausible-looking simple approach is exactly what a past
-lesson is most likely to warn against.
+Before implementing, follow [the project knowledge preflight](knowledge-search.md).
+Record the actual source, its coverage and the effect on your approach in
+the task-scope or launch file.
 
 ## Step 3 - Verify the starting state
 
@@ -69,7 +66,10 @@ and validate the session's `.session-context/<session-id>.md` checkpoint. A new
 physical chat continues the same logical session; it does not reset scope,
 approval, verification state or the no-touch zone. Native compaction is not a
 source of truth. On resume, compare the checkpoint with the current source
-artifact, project identity and Git state before continuing.
+artifact, project identity and Git state before continuing. Recheck knowledge
+sources under the preflight rule. Keep new failed approaches and decisions in
+the checkpoint until closeout can identify lessons suitable for the knowledge
+source.
 
 ## Step 4 - Execute against scope
 

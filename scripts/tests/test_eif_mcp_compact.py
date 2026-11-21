@@ -61,6 +61,9 @@ def main() -> int:
                 check(label + " real opt-in upgrade", enabled["rc"] == 0 and "<!-- EIF:MCP reader -->" in compact, enabled["stdout"] + enabled["stderr"])
                 check(label + " config preserved by upgrade", config_path.read_bytes() == chosen_config)
                 check(label + " fallback and markers", compact.count("<!-- EIF:BEGIN") == compact.count("<!-- EIF:END -->") == 1 and all(token in compact for token in ("eif_brief(task_kind)", "eifctl doctor --instance-path .", 'eifctl search "<query>" --knowledge-root "knowledge"', "operating-protocol.md")))
+                fallback_policy = ".eif/runtime/playbooks/engineering-intelligence-operating-protocol.md"
+                check(label + " compact fallback points to installed routing policy",
+                      fallback_policy in compact and (project / fallback_policy).is_file())
                 health = capture(["doctor", "--instance-path", str(project)], base)
                 check(label + " configured never healthy", health["rc"] == 0 and "integration eif_mcp" in health["stdout"] and "state=configured" in health["stdout"], health["stdout"] + health["stderr"])
                 path.write_text(compact.replace("eif_brief(task_kind)", "missing-route"), encoding="utf-8", newline="\n")
@@ -75,6 +78,8 @@ def main() -> int:
         with framework_root() as resources:
             text = _managed_block(resources, "external-notes", "external-notes/index.md", "coexist", "AGENTS.md", False, eif_mcp=True)
         check("unmanaged/coexist authority preserved", "knowledge is not managed by EIF" in text and "EIF is NOT this project's sole or" in text)
+        check("unmanaged compact fallback uses the project's retrieval policy",
+              "existing retrieval policy" in text and "eifctl search" not in text and "--knowledge-root" not in text)
     schema = json.loads((ROOT / "core/schemas/integration-health-result.schema.json").read_text(encoding="utf-8"))
     fixture = json.loads((ROOT / "scripts/tests/fixtures/integrations/health-disabled.valid.json").read_text(encoding="utf-8"))
     fixture.update(integration="eif_mcp", provider="eif-mcp", state="configured")

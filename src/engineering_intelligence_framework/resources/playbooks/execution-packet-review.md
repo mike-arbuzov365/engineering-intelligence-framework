@@ -52,6 +52,13 @@ Any conclusion drawn before this fetch is invalid and must be redone.
 
 ## Review steps
 
+For a submitted session in an
+[orchestrated packet](../docs/reference/eif-mcp.md#orchestrated-session-admission),
+read the named handoff. Compare the current attempt and revision with each
+criterion's evidence. Record missing evidence or request a new attempt through
+the local review command. Apply the repository and closeout checks below when
+reviewing the whole packet.
+
 1. **Ground truth.** Fetch, then record the exact tip of the integration
    branch you're auditing against - name the ref explicitly.
 2. **Plan vs. done.** Read the roadmap and each session's launch file.

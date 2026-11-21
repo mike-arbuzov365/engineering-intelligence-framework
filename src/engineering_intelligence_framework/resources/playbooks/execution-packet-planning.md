@@ -30,11 +30,11 @@ for routine questions mid-execution.
 
 ## When a packet is needed
 
-Per [`session-preparation.md`](session-preparation.md) Step 1: 2+
-sessions, an architectural decision worth an ADR, factual conflicts
-between current state and existing docs, or a request for unattended
-autonomous execution. Otherwise use
-[`templates/task-scope.md`](../templates/task-scope.md) directly instead.
+Use the [session-preparation matrix](session-preparation.md#step-1---classify-the-work)
+to confirm the route before writing files. A light task can start from the
+request. A structured single task uses one task-scope file. For a packet, use
+the same anatomy at both depths and expand only the decisions and verification
+that the risk or dependencies require.
 
 An idea or PRD is an input, not a substitute for this packet. If the
 problem itself is not yet an approved durable artifact, start with
@@ -71,8 +71,9 @@ Templates for every file above: `templates/packet-*.md` and
 
 1. **Charter** - problem, goal, explicit in/out of scope, boolean
    definition of done. Write this first; it bounds everything after it.
-2. **Facts** - verify current state against fresh source/tool state, not
-   memory or stale docs. Distinguish `OBSERVED` from `INFERRED`/`ASSUMED`.
+2. **Facts** - verify current state against fresh sources and tools. Use
+   [the project's knowledge preflight](knowledge-search.md) for prior work.
+   Distinguish `OBSERVED` from `INFERRED`/`ASSUMED`.
    Build the carry-over ledger: every relevant unresolved item from prior
    planning gets an explicit disposition.
 3. **Decisions** - for every point in the roadmap-to-be where an

@@ -375,8 +375,9 @@ This does not create another intelligence layer or a second framework
 distribution. No starter is active by default, installation never assigns a
 profile to a project, and project connection remains an explicit owner choice.
 A profile must add recurring profession-specific value rather than duplicate
-core EIF. The software-development starter therefore adds repository onboarding
-only; normal engineering work remains in the core workflows.
+core EIF. The software-development starter supplies repository onboarding.
+EIF-023 adds an optional web-change playbook for a user-facing criterion.
+Core workflows govern normal engineering work.
 
 The first sanitized cross-machine designer adoption completed on 2026-08-02:
 the profile, skill activation, registry, materialization and both doctors
@@ -428,6 +429,22 @@ historical packets or a new session-enforcement claim. D-21's checkpoint-first
 continuity and enforcement vocabulary remain unchanged. Evidence:
 `templates/session-launch.md`, `playbooks/execution-packet-execution.md`,
 `skills/run-execution-packet/SKILL.md` and the structured-service regressions.
+
+### D-24: Revision-bound sequential packet admission
+
+**Status: provisional, implemented for EIF-023 (2026-11-21).** A packet may
+select `orchestrated_sequential`. One accountable orchestrator assigns
+one executor at a time. The packet's launch records the current attempt and
+revision. The orchestrator's durable review records the version, the
+fingerprint of the reviewed goal, scope, exclusions and criterion definitions,
+and the evidence for each criterion. A subsequent session requires current
+acceptance of that contract and revision.
+
+The shared reader calculates admission independently of D-23 progress.
+The local CLI can append reviews without replacing a recorded decision.
+MCP reads those records under the existing D-22 boundary. Reviewer identity
+and verification of cited evidence remain process rules. A host can open a
+chat only within the capability limits of D-21.
 
 ## Open (not yet decided)
 

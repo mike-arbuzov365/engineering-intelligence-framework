@@ -24,12 +24,13 @@ Templates: `templates/packet-*.md` and `templates/session-launch.md`.
 
 ## Process
 
-1. Classify the work and confirm it actually needs a packet (see
-   [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md)
-   Step 1) - otherwise use
-   [`templates/task-scope.md`](../../templates/task-scope.md) instead.
-2. Search `knowledge/` for prior related work, incidents, or rejected
-   approaches (`scripts/eif_search_knowledge.py`). Record what was found.
+1. Use [`playbooks/session-preparation.md`](../../playbooks/session-preparation.md)
+   Step 1. For a light task, exit planning and work from the request without
+   a plan file. For a structured single task, use
+   [`templates/task-scope.md`](../../templates/task-scope.md). For a packet,
+   choose its depth and continue.
+2. Follow [the project's knowledge-search route](../../playbooks/knowledge-search.md)
+   for prior work, incidents or rejected approaches. Record the source and result.
 3. Write the charter (problem, goal, explicit in/out of scope, boolean
    DoD) before anything else.
 4. Write the facts file: verify current state against fresh source/tool

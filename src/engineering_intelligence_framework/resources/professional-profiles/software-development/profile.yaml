@@ -1,7 +1,7 @@
 # Public starter. The installed private-workspace copy is user-owned.
 schema_version: 1
 name: software-development
-description: Evidence-based onboarding of a software repository without duplicating EIF's core engineering workflow.
+description: Evidence-based software project onboarding and optional web interface acceptance.
 framework:
   requires: '>=0.2.5,<0.3.0'
 artifacts:
@@ -9,6 +9,10 @@ artifacts:
   name: software-project-onboarding
   path: playbooks/software-project-onboarding.md
   mode: default
+- kind: playbook
+  name: web-change-acceptance
+  path: playbooks/web-change-acceptance.md
+  mode: optional
 - kind: skill
   name: onboard-software-project
   path: skills/onboard-software-project

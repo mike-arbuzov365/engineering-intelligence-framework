@@ -23,17 +23,17 @@ Full workflow: [`playbooks/knowledge-ingest.md`](../../playbooks/knowledge-inges
    [`core/ontology/knowledge-types.md`](../../core/ontology/knowledge-types.md)
    (`fact`, `rule`, `decision`, `risk`, `edge_case`, `failure_pattern`,
    `incident`, `assumption`, ...).
-3. Place it: this project instance's `knowledge/` if local, or flag as a
-   candidate for the shared knowledge base if validated beyond this one
-   project instance.
+3. Place it in the configured project source using its ownership rules.
+   Flag candidates for shared scope or pending write access in the Delta.
 4. Create or update the artifact with correct `type`/`status`/
    `confidence`. If it contradicts previously accepted guidance, mark
    that guidance `deprecated`/`superseded` rather than deleting it.
-5. Regenerate the knowledge index (`scripts/eif_generate_index.py`).
-6. Close the Knowledge Delta - state what was added, or that nothing was.
+5. Regenerate the EIF-managed index (`scripts/eif_generate_index.py`) for
+   managed knowledge. Follow the project's procedure for external knowledge.
+6. Close the Knowledge Delta with the source and result or a reason to defer.
 
 ## Output
 
 - The created/updated knowledge artifact.
-- Updated index.
+- Retrieval verification or the documented access limit.
 - The Knowledge Delta entry.

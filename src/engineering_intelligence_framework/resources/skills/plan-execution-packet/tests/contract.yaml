@@ -7,12 +7,18 @@ triggers:
   positive:
   - id: large-cross-session-work
     prompt: Сплануй execution packet для великої cross-session зміни з roadmap і launch files.
+  - id: compact-two-session-packet
+    prompt: Сплануй дві залежні сесії з погодженими вимогами й коротким результатом передачі.
   negative:
   - id: trivial-task-scope
     prompt: Виправ одну очевидну typo у одному файлі з bounded local test.
+  - id: one-session-plan
+    prompt: Підготуй обсяг і три перевірки для одного виправлення в одній сесії.
 references:
   required:
   - playbooks/execution-packet-planning.md
+  - playbooks/session-preparation.md
+  - templates/task-scope.md
 evidence:
   required:
   - carry-over ledger
@@ -27,6 +33,8 @@ forbidden_behavior:
 assertions:
   manifest_contains:
   - execution-packet-planning.md
+  - without
+  - a plan file
   canonical_contains:
   - 'status: validated'
   manifest_not_contains:

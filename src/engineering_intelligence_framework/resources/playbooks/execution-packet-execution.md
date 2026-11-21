@@ -26,8 +26,8 @@ this framework's default is one agent executing one packet's sessions in
 strict order; re-add coordination machinery only if a project instance
 actually needs concurrent sessions on the same packet. -->
 
-Execute an already-planned packet's sessions in order, as one agent, from
-its start file through to closeout.
+Execute an already-planned packet in roadmap order. Its accountable agent
+follows the start file through closeout.
 
 ## Preconditions
 
@@ -75,14 +75,18 @@ The default `remote_run_budget` is 0 when the packet does not authorize a
 number. A failed remote run still consumes one unit. Exhausting a budget is a
 stop condition, not permission to silently raise the cap.
 
-## Step 4 - One accountable agent
+## Step 4 - Assign one active executor
 
-Sessions execute sequentially in one agent, and that agent stays
-accountable for everything the packet records. Do not delegate a session
-to a parallel worker or split a packet across agents to "speed it up" -
-the roadmap's ordering and the checkpoint trail are what make the result
-auditable (see [`execution-packet-review.md`](execution-packet-review.md));
-parallel, undocumented execution breaks that trail.
+By default, one agent executes the sessions and owns the packet through
+closeout. In an explicitly
+[orchestrated packet](../docs/reference/eif-mcp.md#orchestrated-session-admission)
+the orchestrator may assign an entire session to one executor at a time.
+Provide that session's launch file, allowed scope, criteria, base revision
+and the reason for choosing the model. The executor returns the exact
+submitted revision, checks and missing evidence. The orchestrator checks the
+revision against the criteria and records acceptance or requested changes
+before assigning later work. Use the named handoff to recover after a chat
+closes. The host controls how a physical chat is opened.
 
 <!-- Revised 2026-08-19: the previous wording banned delegation outright,
 which also ruled out uses that cannot damage the trail - a read-only
@@ -93,8 +97,8 @@ condition it was actually protecting. -->
 Delegating bounded work *within* a session is allowed when the result
 returns to the accountable agent for verification. Five conditions:
 
-- a subagent is never a session, never owns exit criteria and never
-  advances the roadmap;
+- a bounded delegate returns its task to the executor. The accountable
+  agent owns the exit criteria and advances the roadmap;
 - delegate output is evidence to check, not a result to trust: nothing it
   reports becomes `OBSERVED` until the accountable agent reproduces it
   against source, command output or a test;

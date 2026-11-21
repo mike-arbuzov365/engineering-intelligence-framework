@@ -35,49 +35,43 @@ recorded.
 
 ## How
 
-```text
-python scripts/eif_search_knowledge.py "<query>"
-```
+Resolve `knowledge.root`, `knowledge.index_path` and `knowledge.managed` from the
+selected project's `.eif/config.yaml`. A missing `managed` flag is treated as
+managed for older instances.
 
-An offline, Unicode-aware keyword/substring search over the index built
-by `scripts/eif_generate_index.py` from every artifact under
-`knowledge.root`. Excludes `rejected`/`superseded` artifacts by default -
-pass the relevant flag if you specifically need to see why something was
-rejected. This is deliberately not semantic/embedding search; see
-[`docs/architecture/HOW-EIF-WORKS.md#limitations`](../docs/architecture/HOW-EIF-WORKS.md#limitations)
-for the tradeoff and when it stops holding (very large knowledge bases,
-queries where the relevant term isn't in the text).
+- For EIF-managed knowledge, use `eif_knowledge_search` or
+  `eifctl search "<query>" --knowledge-root "<configured root>"`. From a
+  framework checkout the equivalent command is
+  `python scripts/eif_search_knowledge.py --framework-root . --knowledge-root "<configured root>" "<query>"`.
+  The tool scans the configured directory and applies eligible statuses.
+  Read the source of a relevant result, including the reason for a rejected
+  or superseded approach if it could recur.
+- For project-owned knowledge (`knowledge.managed: false`), follow the
+  project's existing retrieval policy and use its index or search if
+  available. EIF's reader may identify a contained index, and leaves the
+  search to the project's tool. Record when that tool or source is unavailable.
 
-If the index is stale or missing, rebuild it first:
-
-```text
-python scripts/eif_generate_index.py
-```
-
-Malformed-YAML and schema-invalid artifacts are reported as distinct,
-honest categories by the generator - never silently treated as "no
-results." If your search comes back empty, check whether the generator
-reported skipped/invalid artifacts before concluding nothing relevant
-exists.
+Distinguish a query with zero eligible matches from unavailable or partial
+coverage. Check malformed, schema-invalid and skipped-status counts before
+claiming what was searched. The managed index helps navigation, while keyword
+search reads the files directly.
 
 ## Recording the result
 
-Whatever preflight step triggered the search, record it there, not just
-in scratch reasoning:
+Record the query, route and coverage in the task-scope or session-launch file
+before editing. Include the source path or identifier, its revision or date
+when available, and the effect on the plan. For a light task the learning
+check can stay in the conversation.
 
-- Query used.
-- What was found (artifact path), or that nothing relevant was found.
-- How it changes the plan - or `n/a` if it doesn't.
-
-A search that finds nothing relevant is still worth recording as
-evidence that the check happened - it is not the same as skipping the
-step.
+On resume, compare the recorded source with the current version or repeat
+the scoped lookup if the earlier version was unrecorded. Read the source again
+if it changed and update the impact. Record if you can no longer reach it.
 
 ## Anti-patterns
 
 - Skipping the search because the task "looks simple" - simple-looking
   tasks are exactly where a past lesson is most likely to apply.
 - Treating an empty result as proof nothing relevant exists without
-  checking whether the index itself is current.
+  checking coverage and eligible statuses.
 - Searching, finding a relevant `rejected` or `superseded` artifact, and
   not reading why before repeating the same approach.

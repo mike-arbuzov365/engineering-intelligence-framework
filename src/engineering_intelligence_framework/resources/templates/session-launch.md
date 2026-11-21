@@ -18,6 +18,8 @@ Other historical values are `legacy` to progress readers and do not prove
 completion. A next session requires every `depends_on` entry to be `completed`.
 An executing agent reads this file as the source of truth for one
 session - not the packet's other files directly, and not chat history.
+An [orchestrated launch](../docs/reference/eif-mcp.md#orchestrated-session-admission)
+also carries its goal, scope, criteria and submitted revision in frontmatter.
 
 ```yaml
 ---
@@ -39,8 +41,8 @@ depends_on: []
 ## Required reading order
 
 1. Packet files, in numeric order, up through the roadmap.
-2. This project instance's persistent agent-instruction file and any
-   directly relevant `knowledge/` artifacts.
+2. The project's persistent agent instructions and any directly relevant
+   artifacts from its configured knowledge source.
 3. Anything the prior session's checkpoint flagged as relevant.
 
 The logical session may span multiple sequential physical chats. The selected
@@ -50,10 +52,10 @@ summaries are not authority.
 
 ## Experience retrieval preflight
 
-<Search `knowledge/` (`scripts/eif_search_knowledge.py "<query>"`) for
-anything relevant before implementing. Record what was found, or that
-nothing relevant was found - do not skip this because the session looks
-routine.>
+<Use the knowledge-search playbook and the project's configured source for
+anything relevant before implementing. Record the query, source path or
+identifier, revision or date when available, coverage and effect on the plan.
+Record the observed limit if the source cannot be searched.>
 
 ## Scope
 

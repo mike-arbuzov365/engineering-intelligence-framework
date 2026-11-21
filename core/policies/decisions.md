@@ -375,8 +375,9 @@ This does not create another intelligence layer or a second framework
 distribution. No starter is active by default, installation never assigns a
 profile to a project, and project connection remains an explicit owner choice.
 A profile must add recurring profession-specific value rather than duplicate
-core EIF. The software-development starter therefore adds repository onboarding
-only; normal engineering work remains in the core workflows.
+core EIF. The software-development starter supplies repository onboarding.
+EIF-023 adds an optional web-change playbook for a user-facing criterion.
+Core workflows govern normal engineering work.
 
 The first sanitized cross-machine designer adoption completed on 2026-08-02:
 the profile, skill activation, registry, materialization and both doctors

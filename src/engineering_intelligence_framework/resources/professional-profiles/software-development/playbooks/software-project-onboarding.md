@@ -1,7 +1,7 @@
 # Software project onboarding
 
-This profile adds repository onboarding only. Planning, implementation,
-verification, review and learning continue to use the core EIF workflows.
+This playbook covers repository onboarding. Planning, implementation,
+verification, review and learning use the core EIF workflows.
 
 ## 1. Establish authority and scope
 
@@ -31,6 +31,10 @@ Complete `templates/software-project-baseline.md`. Put compact, stable agent
 instructions below the EIF-managed marker in the project's active instruction
 file. Put verified, reusable project facts in project knowledge. Do not record
 secrets, credentials or machine-specific paths.
+
+For a project with a web interface, capture links to its existing design
+sources. The [web change playbook](web-change-acceptance.md) applies when a
+change affects a user-facing surface.
 
 ## 5. Verify onboarding
 

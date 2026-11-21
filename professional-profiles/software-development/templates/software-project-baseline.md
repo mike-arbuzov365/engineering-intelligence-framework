@@ -21,6 +21,12 @@
 | Full tests | | | |
 | Formatting/static checks | | | |
 
+## Web interface sources (when applicable)
+
+- Routes, component catalog or approved mockup:
+- Design tokens and shared components:
+- Source revision and native interface check:
+
 ## Durable project instructions
 
 Compact facts suitable for the project-owned section of the active agent file:

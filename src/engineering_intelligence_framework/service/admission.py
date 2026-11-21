@@ -83,6 +83,13 @@ def _matches_revision(launch: dict, review: dict) -> bool:
     return _same_submission(launch, review) and review["base_revision"] == launch.get("base_revision")
 
 
+def contract_revision(launch: dict) -> str:
+    """Identify the scope and expectations the reviewer actually inspected."""
+    contract = {key: launch[key] for key in ("goal", "scope", "no_touch", "criteria")}
+    canonical = json.dumps(contract, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + digest(canonical.encode("utf-8"))
+
+
 def _covers_criteria(launch: dict, review: dict) -> bool:
     return (
         set(review["criteria"]) == set(launch["criteria"])
@@ -148,6 +155,8 @@ def _evaluate(rows: list[dict], launches: dict[str, dict], reviews: dict[str, li
             return _decision("stale_revision", "review_current_revision", blocker=session_id)
         if record["decision"] == "changes_requested":
             return _decision("changes_requested", "revise_and_resubmit", blocker=session_id)
+        if record.get("reviewed_contract") != contract_revision(launch):
+            return _decision("stale_contract", "submit_new_attempt", blocker=session_id)
         if not _covers_criteria(launch, record):
             return _decision("criteria_unverified", "review_current_attempt", blocker=session_id)
         accepted.add(session_id)
@@ -175,9 +184,13 @@ def read_admission(
     current = [record for record in related if _same_submission(launch, record)]
     prior = [record for record in related if record["decision"] == "changes_requested" and record not in current]
     conflict = bool(current and any(row != current[0] for row in current))
+    contract = contract_revision(launch)
+    review = current[0] if current and not conflict and _matches_revision(launch, current[0]) else None
+    if review and review["decision"] == "accepted" and review.get("reviewed_contract") != contract:
+        review = None
     return decision, {
         "session": session, "launch_path": entry["path"], **launch,
-        "review": current[0] if current and not conflict and _matches_revision(launch, current[0]) else None,
+        "contract_revision": contract, "review": review,
         "review_conflict": conflict,
         "prior_feedback": [
             {field: row[field] for field in ("attempt", "reviewed_revision", "reason")}
@@ -195,6 +208,8 @@ def store_review(instance: Instance, packet: str, progress: dict, record: dict) 
         raise ServiceError("validation_failed", "The review must target the current instance, packet and session.")
     if not _matches_revision(handoff, record):
         raise ServiceError("version_conflict", "The submitted attempt or revision changed.", status="stale")
+    if not record.get("reviewed_contract") or record["reviewed_contract"] != handoff.get("contract_revision"):
+        raise ServiceError("version_conflict", "Read the current handoff and review its contract before recording.", status="stale")
     if handoff["review_conflict"]:
         raise ServiceError("review_conflict", "Reconcile the conflicting review records before appending.")
     if handoff["review"] == record:

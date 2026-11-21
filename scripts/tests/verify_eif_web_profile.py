@@ -86,6 +86,7 @@ def main():
             write_launch(launch)
             review = {"instance": instance.project["id"], "packet": PACKET, "session": launch["id"],
                       "attempt": attempt, "base_revision": api["revision"], "reviewed_revision": proof["revision"],
+                      "reviewed_contract": cli("status", "--session", launch["id"])["handoff"]["contract_revision"],
                       "decision": decision, "reason": evidence,
                       "criteria": {"AC-04": {"result": result, "evidence": evidence}}}
             (root / "fixture-review.json").write_text(json.dumps(review), encoding="utf-8")

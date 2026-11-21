@@ -17,7 +17,7 @@ sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts/tests/fixtures/eif_mcp")]
 
 from eif023_admission_contract import FIXTURE, run_contract  # noqa: E402
 from engineering_intelligence_framework.service import Instance, ServiceError  # noqa: E402
-from engineering_intelligence_framework.service.admission import store_review  # noqa: E402
+from engineering_intelligence_framework.service.admission import contract_revision, store_review  # noqa: E402
 from engineering_intelligence_framework.service.packets import packet_status  # noqa: E402
 from seed import seed  # noqa: E402
 from test_service_golden import capture  # noqa: E402
@@ -27,12 +27,18 @@ def revision(label):
     return "sha256:" + sha256(label.encode("utf-8")).hexdigest()
 
 
+def synthetic_launch():
+    return {"goal": "Prove the synthetic handoff", "scope": ["src"], "no_touch": ["tests"],
+            "criteria": {"A5": "Use only a current accepted review"}}
+
+
 def native_review(record, instance, data):
     return {
         **{key: value for key, value in record.items() if key != "evidence"},
         "instance": instance.project["id"] if record["instance"] == data["instance"] else record["instance"],
         "base_revision": revision(record["base_revision"]),
         "reviewed_revision": revision(record["reviewed_revision"]),
+        "reviewed_contract": contract_revision(synthetic_launch()),
         "criteria": {
             criterion: {
                 "result": "pass" if record["decision"] == "accepted" else "fail",
@@ -52,8 +58,7 @@ def materialize(instance, data):
     (folder / "04-ROADMAP-synthetic.md").write_text(roadmap, encoding="utf-8")
     for row in data["sessions"]:
         entry = {key: row[key] for key in ("id", "status", "depends_on")}
-        launch = {"goal": "Prove the synthetic handoff", "scope": ["src"], "no_touch": ["tests"],
-                  "criteria": {"A5": "Use only a current accepted review"}}
+        launch = synthetic_launch()
         if "attempt" in row:
             launch.update(attempt=row["attempt"], base_revision=revision("work-base"),
                           current_revision=revision(row["current_revision"]))
@@ -196,8 +201,59 @@ def main():
         root = seed(Path(work) / "project")
         check("versioned independent cases", run_contract(fixture, adapter(root)) == 0)
         check_interfaces(root, fixture, check)
+        check_contract_changes(root, fixture, check)
     print(f"EIF-RESULT: passed={sum(results)} total={len(results)}")
     return 0 if all(results) else 1
+
+
+def check_contract_changes(root, fixture, check):
+    data = {**fixture["input"], "packet": "contract-edits", "reviews": []}
+    instance = Instance(root)
+    folder = materialize(instance, data)
+    session_id = data["sessions"][0]["id"]
+
+    def status():
+        return packet_status(instance, data["packet"], session_id)["data"]
+
+    original = status()
+    record = native_review(fixture["input"]["reviews"][0], instance, data)
+    record.update(packet=data["packet"], reviewed_contract=original["handoff"]["contract_revision"])
+    candidate = root / "contract-review.json"
+    candidate.write_text(json.dumps(record), encoding="utf-8")
+    args = ["packet", "record-review", data["packet"], "--record", candidate.name, "--instance-path", str(root)]
+    check("local CLI accepts the observed contract", capture(args, root)["rc"] == 0
+          and status()["admission"]["reason"] == "ready")
+
+    path = folder / "sessions" / f"{session_id}-synthetic.md"
+    initial = path.read_text(encoding="utf-8")
+    for field, replacement in (("criteria", {"A5": "Check an additional visible outcome"}),
+                               ("no_touch", ["private-scope"])):
+        launch = json.loads(initial.splitlines()[1])
+        launch["orchestration"][field] = replacement
+        path.write_text(f"---\n{json.dumps(launch)}\n---\n", encoding="utf-8")
+        changed = status()
+        check(f"changing {field} invalidates the prior acceptance", changed["admission"]["reason"] == "stale_contract"
+              and changed["admission"]["next_session"] is None and changed["handoff"]["review"] is None)
+        replay = capture(args, root)
+        check(f"stale {field} review cannot be replayed", replay["rc"] == 2
+              and json.loads(replay["stdout"])["error"]["code"] == "version_conflict")
+    path.write_text(initial, encoding="utf-8")
+    history = next((folder / "reviews").glob("*.json"))
+    legacy = json.loads(history.read_text(encoding="utf-8"))
+    del legacy["reviewed_contract"]
+    history.write_text(json.dumps(legacy), encoding="utf-8")
+    check("historical acceptance without the reviewed contract needs a new attempt",
+          status()["admission"]["reason"] == "stale_contract")
+    launch = json.loads(initial.splitlines()[1])
+    launch["orchestration"]["attempt"] += 1
+    launch["orchestration"]["criteria"]["A5"] = "Check the corrected behavior"
+    path.write_text(f"---\n{json.dumps(launch)}\n---\n", encoding="utf-8")
+    handoff = status()["handoff"]
+    record.update(attempt=handoff["attempt"], reviewed_contract=handoff["contract_revision"])
+    candidate.write_text(json.dumps(record), encoding="utf-8")
+    check("a new review of the changed contract restores admission",
+          capture(args, root)["rc"] == 0 and status()["admission"]["reason"] == "ready"
+          and json.loads(history.read_text(encoding="utf-8")) == legacy)
 
 
 if __name__ == "__main__":

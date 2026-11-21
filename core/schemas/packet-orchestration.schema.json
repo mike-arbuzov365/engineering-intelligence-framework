@@ -42,6 +42,7 @@
         "attempt": {"type": "integer", "minimum": 1, "maximum": 999999},
         "base_revision": {"$ref": "#/$defs/revision"},
         "reviewed_revision": {"$ref": "#/$defs/revision"},
+        "reviewed_contract": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
         "decision": {"enum": ["accepted", "changes_requested"]},
         "reason": {"$ref": "#/$defs/short_text"},
         "criteria": {

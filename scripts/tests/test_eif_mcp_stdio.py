@@ -146,8 +146,9 @@ def main() -> int:
                     line = await asyncio.wait_for(proc.stderr.readline(), 15)
                     if b"call_started" in line:
                         break
+                proc.stdin.close()
                 proc.kill()
-                await asyncio.wait_for(proc.wait(), 10)
+                await asyncio.wait_for(proc.communicate(), 10)
                 check("kill during active call exits", proc.returncode != 0)
             else:
                 reply = await response(2)
@@ -160,8 +161,9 @@ def main() -> int:
                 check("logs contain metadata only", rows and all(set(row) == {"time", "request_id", "tool", "status", "duration_ms", "response_bytes"} for row in rows))
         finally:
             if proc.returncode is None:
+                proc.stdin.close()
                 proc.kill()
-                await proc.wait()
+                await asyncio.wait_for(proc.communicate(), 10)
 
     with tempfile.TemporaryDirectory(prefix="eif-mcp-stdio-") as tmp:
         root = seed(Path(tmp) / "project")

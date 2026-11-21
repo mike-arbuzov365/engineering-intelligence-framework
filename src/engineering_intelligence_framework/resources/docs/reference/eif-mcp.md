@@ -4,7 +4,9 @@
 EIF operations. One process serves one explicitly selected EIF instance.
 The SDK harness and installed-wheel checks do not establish that a particular
 agent client loads or uses these tools correctly. All four real-client canaries
-remain `configured-not-verified`; no model-assisted evaluation was run.
+remain `configured-not-verified`. EIF-023 records a synthetic model-assisted
+pilot in its [packet closeout](https://github.com/mike-arbuzov365/engineering-intelligence-framework/blob/4c006bf78552d1cf9b84ed9becee9ff464550c69/planning/packets/EIF-023-solo-agent-delivery/07-CLOSEOUT-023-solo-agent-delivery.md).
+The matched model evaluation remains deferred.
 
 ## Install and select an instance
 
@@ -123,7 +125,13 @@ eifctl packet record-review <packet> --instance-path . --record .session-context
 
 Provide `instance`, `packet`, `session`, `attempt`, `base_revision`,
 `reviewed_revision`, `decision` (`accepted` or `changes_requested`), `reason`
-and `criteria`. Map each criterion ID to a `result` and an `evidence` reference.
+and `criteria`. Copy the named handoff's `contract_revision` into
+`reviewed_contract` when reviewing the submission. It covers the goal,
+scope, excluded scope and criterion definitions. A changed definition under
+the same criterion ID invalidates the acceptance even for the same work revision.
+An older acceptance without this field reports `stale_contract`. Submit a new
+attempt and review its handoff to resume. Prior return decisions still block.
+Map each criterion ID to a `result` and an `evidence` reference.
 Acceptance requires a passing result and evidence for every declared criterion.
 The CLI creates the versioned JSON in the packet's `reviews/` directory.
 Commit the launch and review records with the packet. An exact retry

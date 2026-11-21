@@ -435,8 +435,10 @@ continuity and enforcement vocabulary remain unchanged. Evidence:
 **Status: provisional, implemented for EIF-023 (2026-11-21).** A packet may
 select `orchestrated_sequential`. One accountable orchestrator assigns
 one executor at a time. The packet's launch records the current attempt and
-revision, and the orchestrator's durable review records the version and
-criterion evidence. A subsequent session requires current acceptance.
+revision. The orchestrator's durable review records the version, the
+fingerprint of the reviewed goal, scope, exclusions and criterion definitions,
+and the evidence for each criterion. A subsequent session requires current
+acceptance of that contract and revision.
 
 The shared reader calculates admission independently of D-23 progress.
 The local CLI can append reviews without replacing a recorded decision.

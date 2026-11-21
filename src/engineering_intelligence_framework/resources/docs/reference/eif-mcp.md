@@ -10,18 +10,20 @@ The matched model evaluation remains deferred.
 
 ## Install and select an instance
 
-Use a local environment containing the intended EIF package version:
+Download the wheel and the SDK constraints from the same release tag.
+In a virtual environment, install the wheel with the MCP extra:
 
 ```text
-python -m pip install "engineering-intelligence-framework[mcp]"
+python -m pip install -c constraints.txt "./engineering_intelligence_framework-0.2.9-py3-none-any.whl[mcp]"
 eifctl mcp --help
 eifctl mcp serve --instance-path <explicit-instance-root>
 eifctl mcp serve --instance-path <explicit-instance-root> --self-test
 ```
 
-This repository's optional dependency constraints record the tested SDK,
-`mcp==2.1.1`; use `pip install -c integrations/eif-mcp/constraints.txt` with the
-wheel or package extra for the reproduced resolution. The extra admits
+The [v0.2.9 release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.9)
+provides the wheel. Its [constraints file](https://github.com/mike-arbuzov365/engineering-intelligence-framework/blob/v0.2.9/integrations/eif-mcp/constraints.txt)
+records the tested SDK, `mcp==2.1.1`. When installing from a checkout of the
+tag, the constraints file is under `integrations/eif-mcp/`. The extra admits
 `>=2.1.1,<3`, while other SDK versions require separate verification. Core EIF,
 normal CLI help, bootstrap and adapters do not require the SDK. Without it,
 `mcp serve` exits 2 with an installation hint.

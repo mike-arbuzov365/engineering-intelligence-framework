@@ -61,15 +61,24 @@ the page does not make: no timing figure appears anywhere on it.
 
 ## Where the release actually stands
 
-- **Version.** `0.2.8` in [`pyproject.toml`](../../pyproject.toml) is dated
-  2026-08-10 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
+- **Version.** `0.2.9` in [`pyproject.toml`](../../pyproject.toml) is dated
+  2026-11-21 in [`CHANGELOG.md`](../../CHANGELOG.md) and distributed through
   GitHub Releases.
 - **Installable from a clone or GitHub release artifact.** `pip install .`
   builds and installs a real wheel. The
-  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.8)
+  [GitHub release](https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.9)
   also carries the validated wheel and source distribution. The
   installed-wheel synthetic journey runs `eifctl` from that build in a
   clean virtual environment.
+- **0.2.9 ships the optional MCP reader and accepted EIF-023 changes.**
+  The wheel supports clean installation with the optional MCP SDK pinned to
+  2.1.1. The structured brief includes the task-scope template. Knowledge
+  lookup reports a fallback for project-owned sources. Opt-in packet
+  admission uses the review of the submitted attempt, revision and contract.
+  The software-development profile includes optional web acceptance guidance.
+  The evidence includes local checks and a synthetic pilot. Live client
+  canaries and matched behavioral evaluation are tracked separately.
+  [MCP installation and limits](../reference/eif-mcp.md).
 - **0.2.7 closes findings from the first cross-machine designer setup.** An
   installed EIF wheel no longer inherits Git state from an unrelated host
   checkout above its Python environment. Workspace creation now gives usable
@@ -192,14 +201,18 @@ a nearby claim reference. That gate is unchanged by anything in this file.
 
 Ordered, with the manual steps marked. Nothing here runs itself.
 
-1. `python -m pytest` and the site gate (`npm --prefix site run gate:site`)
-   both green on the release commit.
-2. Set the release version in [`pyproject.toml`](../../pyproject.toml), move
+1. Set the release version in [`pyproject.toml`](../../pyproject.toml), move
    the completed entries from `[Unreleased]` into a dated version in
    [`CHANGELOG.md`](../../CHANGELOG.md), and update current-version wording in
    README, the claims register and the site claim manifest.
-3. `python scripts/eif_release.py` clean, including the clean-environment
-   install.
+2. Run the local equivalent of [the release workflow](../../.github/workflows/release-check.yml)
+   on the release tree. This includes `python scripts/tests/run_all.py --json`
+   and the exhaustive wheel and sdist suite. Run `npm --prefix site run gate:site`
+   when the site changes.
+3. Run `python scripts/eif_release.py --require-final-version` to build and
+   validate the release files. Check the optional MCP install with
+   `python scripts/tests/test_eif_mcp_package.py`. On Windows, set
+   `PYTHONUTF8=1` for the non-ASCII path checks.
 4. **Owner credentials:** push the annotated tag matching the version and
    publish the GitHub Release with the wheel and source distribution produced
    and validated by `scripts/eif_release.py`. Uploading the same artifacts to
@@ -257,5 +270,5 @@ is. The release process is this file's job.
 
 **Still open, as a separate owner decision:** no artifact is on a package
 index, so `pip install engineering-intelligence-framework` does not resolve.
-The GitHub release and source installation are the supported 0.2.8
+The GitHub release and source installation are the supported 0.2.9
 distribution paths.

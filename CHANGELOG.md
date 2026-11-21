@@ -15,6 +15,8 @@ of the entry rather than a footnote.
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-11-21
+
 ### Added
 
 - Optional `eifctl mcp serve` reader with nine strict tools, one explicit EIF
@@ -28,7 +30,18 @@ of the entry rather than a footnote.
 - Reproducible synthetic static context byte measurement and ten model-free
   checked evaluation answers. Model evaluation and behavioral comparison were
   not run. Session launch progress now uses an explicit five-state vocabulary.
-
+- **Solo task routing.** The structured route points to the task-scope
+  template, alongside the light and packet routes. Project-owned knowledge
+  sources return an explicit fallback and coverage status. Session
+  preparation records the source consulted and its effect on the work.
+- **Sequential packet admission.** Opt-in orchestration checks acceptance
+  against the submitted attempt, revision and review contract. The local
+  CLI records durable review decisions. The CLI and MCP reader expose
+  admission and named-session handoff alongside dependency progress.
+- **Web acceptance guidance.** The software-development starter includes an
+  optional guide for verifying visible interaction in the appropriate
+  browser state. The synthetic pilot exercised a keyboard criterion across
+  a returned attempt and its accepted revision.
 
 ### Changed
 
@@ -46,6 +59,19 @@ of the entry rather than a footnote.
   contract and `templates/packet-start.md` follow the same wording. This
   is a governance-text change; no behavioral claim is made about speed,
   cost or quality, and none was measured.
+
+### Fixed
+
+- Packet progress reads are bounded to the relevant status sources. The
+  Windows stdio harness closes the child process and its pipes after tests.
+
+### Known limitations
+
+- The optional MCP reader serves one explicitly selected instance.
+  Write operations are deferred to EIF-022b.
+- EIF-023 acceptance covers deterministic checks and a bounded synthetic
+  model-assisted pilot. A private-project pilot and a matched behavioral
+  comparison remain deferred.
 
 ## [0.2.8] - 2026-08-10
 
@@ -1047,7 +1073,8 @@ Hosted SaaS, an autonomous multi-agent runtime, a proprietary cloud memory
 service, a mandatory code-graph or shell-compression dependency, and any
 universal token-savings claim.
 
-[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.8...HEAD
+[Unreleased]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/compare/v0.2.9...HEAD
+[0.2.9]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.9
 [0.2.8]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.8
 [0.2.7]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.7
 [0.2.6]: https://github.com/mike-arbuzov365/engineering-intelligence-framework/releases/tag/v0.2.6

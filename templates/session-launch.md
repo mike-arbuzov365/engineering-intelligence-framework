@@ -39,8 +39,8 @@ depends_on: []
 ## Required reading order
 
 1. Packet files, in numeric order, up through the roadmap.
-2. This project instance's persistent agent-instruction file and any
-   directly relevant `knowledge/` artifacts.
+2. The project's persistent agent instructions and any directly relevant
+   artifacts from its configured knowledge source.
 3. Anything the prior session's checkpoint flagged as relevant.
 
 The logical session may span multiple sequential physical chats. The selected
@@ -50,10 +50,10 @@ summaries are not authority.
 
 ## Experience retrieval preflight
 
-<Search `knowledge/` (`scripts/eif_search_knowledge.py "<query>"`) for
-anything relevant before implementing. Record what was found, or that
-nothing relevant was found - do not skip this because the session looks
-routine.>
+<Use the knowledge-search playbook and the project's configured source for
+anything relevant before implementing. Record the query, source path or
+identifier, revision or date when available, coverage and effect on the plan.
+Record the observed limit if the source cannot be searched.>
 
 ## Scope
 

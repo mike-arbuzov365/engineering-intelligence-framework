@@ -50,8 +50,10 @@ memory and raw inference. If the only source is chat memory, record an
    (`fact`, `rule`, `decision`, `risk`, `edge_case`, `failure_pattern`,
    `incident`, `assumption`, `open_question`, ...) - do not invent a new
    type or blend two.
-3. **Place it.** Project-instance-specific knowledge goes under this
-   project instance's `knowledge/`. Knowledge validated as useful beyond
+3. **Place it.** Use the configured project knowledge source and its
+   ownership rules. Record a candidate in the Knowledge Delta if the
+   external source is unavailable or the current session lacks write access.
+   Knowledge validated as useful beyond
    this one project instance is a candidate for the shared knowledge base
    - see the "Promote to shared knowledge base?" question in
    [`templates/knowledge-delta.md`](../templates/knowledge-delta.md).
@@ -63,11 +65,13 @@ memory and raw inference. If the only source is chat memory, record an
    the old artifact - mark it `deprecated`/`superseded` with the reason,
    date, source, and a replacement link if one exists. A hypothesis that
    didn't hold up gets recorded as `rejected`, not quietly removed.
-5. **Update indexes.** Rebuild the knowledge index
-   (`scripts/eif_generate_index.py`) so the new/updated artifact is
-   findable via [`knowledge-search.md`](knowledge-search.md).
-6. **Close the Knowledge Delta.** Record what was added. If ingest added
-   nothing, say so explicitly rather than leaving the section blank.
+5. **Update retrieval.** Rebuild the EIF-managed index
+   (`scripts/eif_generate_index.py`) for managed knowledge. Use the project's
+   own procedure for an external source, then verify that the artifact can
+   be found using [`knowledge-search.md`](knowledge-search.md).
+6. **Close the Knowledge Delta.** Record the source, the durable artifact and
+   its verification, or why the candidate remained in the session or awaits
+   a decision. Keep one-time progress and unconfirmed attempts in the session.
 
 ## Decision matrix
 

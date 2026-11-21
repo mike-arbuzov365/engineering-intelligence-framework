@@ -17,17 +17,16 @@ Full workflow: [`playbooks/knowledge-search.md`](../../playbooks/knowledge-searc
 
 ## Process
 
-1. Run `python scripts/eif_search_knowledge.py "<query>"`.
-2. If the index looks stale or missing, rebuild it first:
-   `python scripts/eif_generate_index.py` (reports malformed/invalid
-   artifacts as distinct categories, never silently as "no results").
-3. Record the query and result - what was found (artifact path), or that
-   nothing relevant was found - in whatever preflight section triggered
-   the search.
+1. Resolve the project's retrieval route in the playbook. For managed
+   knowledge use the EIF reader or CLI. For external knowledge use the
+   project's own retrieval policy.
+2. Check coverage before concluding that nothing relevant was found.
+3. Record the query and result, including source, coverage and effect on
+   the plan, in the existing preflight. On resume, recheck changed sources.
 4. If a relevant `rejected` or `superseded` artifact turns up, read why
    before proceeding with a similar approach.
 
 ## Output
 
-- The search result (found artifact(s), or confirmed nothing relevant).
+- The search result, with the coverage actually available.
 - How it changes the current plan, or `n/a`.

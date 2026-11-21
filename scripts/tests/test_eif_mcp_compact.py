@@ -78,6 +78,8 @@ def main() -> int:
         with framework_root() as resources:
             text = _managed_block(resources, "external-notes", "external-notes/index.md", "coexist", "AGENTS.md", False, eif_mcp=True)
         check("unmanaged/coexist authority preserved", "knowledge is not managed by EIF" in text and "EIF is NOT this project's sole or" in text)
+        check("unmanaged compact fallback uses the project's retrieval policy",
+              "existing retrieval policy" in text and "eifctl search" not in text and "--knowledge-root" not in text)
     schema = json.loads((ROOT / "core/schemas/integration-health-result.schema.json").read_text(encoding="utf-8"))
     fixture = json.loads((ROOT / "scripts/tests/fixtures/integrations/health-disabled.valid.json").read_text(encoding="utf-8"))
     fixture.update(integration="eif_mcp", provider="eif-mcp", state="configured")

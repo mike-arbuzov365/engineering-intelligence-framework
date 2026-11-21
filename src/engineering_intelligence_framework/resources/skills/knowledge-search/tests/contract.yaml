@@ -9,6 +9,8 @@ triggers:
     prompt: Перед non-trivial implementation знайди prior incidents і rejected approaches у project knowledge.
   - id: incident-prevention-check
     prompt: Перед повторною спробою знайди recorded failure pattern із таким самим symptom.
+  - id: project-owned-source
+    prompt: Перед зміною знайди попереднє рішення в проєкті з knowledge.managed false за його власним покажчиком.
   negative:
   - id: generic-web-research
     prompt: Знайди current vendor API documentation у official web source без project knowledge lookup.
@@ -20,13 +22,13 @@ evidence:
   - Record the query and result
 commands:
   required:
-  - python scripts/eif_search_knowledge.py
+  - eifctl search
 stop_conditions:
   required:
   - nothing relevant was found
 forbidden_behavior:
   required:
-  - read why
+  - checking coverage and eligible statuses
 assertions:
   manifest_contains:
   - knowledge-search.md

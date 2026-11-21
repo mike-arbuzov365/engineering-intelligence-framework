@@ -15,6 +15,8 @@ import threading
 import time
 from pathlib import Path
 
+import yaml
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts/tests"), str(ROOT / "scripts/tests/fixtures/eif_mcp")]
 
@@ -76,6 +78,36 @@ def main() -> int:
                           ".eif/runtime/playbooks/session-preparation.md", ".eif/runtime/templates/task-scope.md",
                       ])
                 check("search result grounded", len(results["eif_knowledge_search"]["data"]["results"]) == 1)
+                empty = await client.call_tool("eif_knowledge_search", {"query": "unmatched-phrase"})
+                empty_data = empty.structured_content["data"]
+                check("managed no-match retains coverage", not empty.is_error
+                      and empty_data["source"]["mode"] == "managed" and empty_data["coverage"]["indexed"] > 0
+                      and empty_data["coverage"]["malformed"] == empty_data["coverage"]["schema_invalid"] == 0
+                      and empty_data["results"] == [])
+                malformed = root / "knowledge/malformed.md"
+                malformed.write_text("---\n[unfinished: list\n---\n", encoding="utf-8")
+                try:
+                    partial = await client.call_tool("eif_knowledge_search", {"query": "unmatched-phrase"})
+                    check("managed no-match discloses partial coverage", not partial.is_error
+                          and partial.structured_content["status"] in {"partial", "stale"}
+                          and partial.structured_content["data"]["coverage"]["malformed"] == 1)
+                finally:
+                    malformed.unlink()
+                lesson = root / "knowledge/username-lesson.md"
+                original_note = (ROOT / "scripts/tests/fixtures/eif_mcp/username-lesson.md").read_text(encoding="utf-8")
+                lesson.write_text(original_note, encoding="utf-8")
+                try:
+                    args = {"query": "username normalization"}
+                    initial = await client.call_tool("eif_knowledge_search", args)
+                    initial_match = initial.structured_content["data"]["results"][0]
+                    lesson.write_text(original_note.replace("K17", "K18"), encoding="utf-8")
+                    reopened = await client.call_tool("eif_knowledge_search", args)
+                    reopened_match = reopened.structured_content["data"]["results"][0]
+                    check("repeating the scoped lookup observes a changed source",
+                          initial_match["path"] == reopened_match["path"] == "knowledge/username-lesson.md"
+                          and "K17" in initial_match["excerpt"] and "K18" in reopened_match["excerpt"])
+                finally:
+                    lesson.unlink()
                 check("dependency-ready session", results["eif_packet_status"]["data"]["next_session"] == "SESSION-001")
                 check("session validation pass", results["eif_session_validate"]["data"]["verdict"] == "pass")
                 check("resume audit pass", results["eif_session_resume_audit"]["data"]["verdict"] == "pass")
@@ -89,6 +121,38 @@ def main() -> int:
                 (knowledge / "sentinel.md").write_text("external-only-sentinel", encoding="utf-8")
                 foreign = await client.call_tool("eif_knowledge_search", {"query": "external-only-sentinel"})
                 check("another EIF instance is not searched", not foreign.structured_content["data"]["results"])
+                external_notes = other / "external-notes"
+                external_notes.mkdir()
+                index = external_notes / "project-index.md"
+                index.write_text("[Private convention](note.md)\n", encoding="utf-8")
+                (external_notes / "note.md").write_text("---\nproject_format: own\n---\nexternal-only-sentinel\n", encoding="utf-8")
+                config_path = other / ".eif/config.yaml"
+                config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+                config["knowledge"] = {"root": "external-notes", "index_path": "external-notes/project-index.md", "managed": False}
+                config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+                external = create_server(other)
+                try:
+                    async with Client(external) as external_client:
+                        external_search = await external_client.call_tool("eif_knowledge_search", {"query": "external-only-sentinel"})
+                        external_data = external_search.structured_content["data"]
+                        check("external source returns a contained pointer and no scan coverage",
+                              not external_search.is_error and external_search.structured_content["status"] == "unavailable"
+                              and external_data["source"] == {"mode": "external", "root": "external-notes",
+                                                               "index_path": "external-notes/project-index.md"}
+                              and external_data["coverage"] is None and external_data["results"] == []
+                              and "external-only-sentinel" not in external_search.content[0].text)
+                        config["knowledge"].update(root="unavailable", index_path="unavailable/index.md")
+                        config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+                        absent = await external_client.call_tool("eif_knowledge_search", {"query": "lesson"})
+                        check("unavailable external folder is distinguished",
+                              absent.structured_content["data"]["reason"] == "source_unavailable")
+                        config["knowledge"].pop("managed")
+                        config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+                        missing_managed = await external_client.call_tool("eif_knowledge_search", {"query": "lesson"})
+                        check("old managed config with missing folder has a typed error",
+                              missing_managed.is_error and missing_managed.structured_content["error"]["code"] == "source_unavailable")
+                finally:
+                    external.close()
                 switched = await client.call_tool("eif_capabilities", {"instance_path": str(other)})
                 check("root cannot be switched by a tool", switched.structured_content["error"]["code"] == "validation_failed")
                 import os

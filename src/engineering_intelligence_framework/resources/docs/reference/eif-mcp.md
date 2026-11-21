@@ -85,8 +85,11 @@ satisfies a dependency. Every observed session remains visible in the report.
 Every response carries `status`, `request_id` and `data`, with the same compact
 JSON in text content and structured content. `partial`, `unavailable`, `stale`,
 `unknown` and `truncated` are not success or proof of absence. Search coverage
-counts indexed, malformed, schema-invalid and status-skipped artifacts. A
-non-design profile reports the delivery guard as unavailable.
+counts indexed, malformed, schema-invalid and status-skipped artifacts for
+EIF-managed sources. A project-owned source returns `unavailable` with the
+configured root and any contained existing index path. Its `coverage` is
+`null` because EIF did not search it. Follow the project's retrieval policy.
+A non-design profile reports the delivery guard as unavailable.
 
 The bounded doctor omits ancestor size budgets, active source resolution,
 skill-discovery consumption and optional integration probes. These can inspect

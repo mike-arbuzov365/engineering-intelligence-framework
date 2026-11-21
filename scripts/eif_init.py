@@ -909,6 +909,13 @@ def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_pa
     knowledge_validate_line = _knowledge_validate_line(knowledge_managed).format(
         knowledge_root=knowledge_root,
     )
+    if knowledge_managed:
+        knowledge_mode_line = (
+            f'Search with `eifctl search "<query>" --knowledge-root "{knowledge_root}"`.\n'
+            f"Project knowledge index: `{knowledge_index_path}`."
+        )
+    else:
+        knowledge_mode_line = "Project knowledge is not managed by EIF; follow its existing retrieval policy."
     return block.format(
         knowledge_root=knowledge_root,
         knowledge_index_path=knowledge_index_path,
@@ -916,7 +923,7 @@ def _managed_block(framework_root: Path, knowledge_root: str, knowledge_index_pa
         entrypoint_name=entrypoint_name,
         knowledge_before_work=knowledge_before_work,
         knowledge_validate_line=knowledge_validate_line,
-        knowledge_mode_line=(f"Project knowledge index: `{knowledge_index_path}`." if knowledge_managed else "Project knowledge is not managed by EIF; follow its existing retrieval policy."),
+        knowledge_mode_line=knowledge_mode_line,
     )
 
 

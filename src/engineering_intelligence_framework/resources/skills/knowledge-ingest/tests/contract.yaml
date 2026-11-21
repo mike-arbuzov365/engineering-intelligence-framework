@@ -10,6 +10,8 @@ triggers:
   negative:
   - id: search-existing-knowledge
     prompt: Знайди вже наявний prior lesson перед початком implementation.
+  - id: temporary-session-progress
+    prompt: Збережи проміжний стан процедури та непідтверджену гіпотезу до продовження тієї самої сесії.
 references:
   required:
   - playbooks/knowledge-ingest.md

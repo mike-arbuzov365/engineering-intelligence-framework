@@ -71,8 +71,9 @@ Templates for every file above: `templates/packet-*.md` and
 
 1. **Charter** - problem, goal, explicit in/out of scope, boolean
    definition of done. Write this first; it bounds everything after it.
-2. **Facts** - verify current state against fresh source/tool state, not
-   memory or stale docs. Distinguish `OBSERVED` from `INFERRED`/`ASSUMED`.
+2. **Facts** - verify current state against fresh sources and tools. Use
+   [the project's knowledge preflight](knowledge-search.md) for prior work.
+   Distinguish `OBSERVED` from `INFERRED`/`ASSUMED`.
    Build the carry-over ledger: every relevant unresolved item from prior
    planning gets an explicit disposition.
 3. **Decisions** - for every point in the roadmap-to-be where an
